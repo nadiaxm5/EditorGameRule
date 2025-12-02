@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Editor/UI/SceneJsonWindow.uss?fileID=7433441132597879392&amp;guid=5b0d2f906a7957c47b3d402ab98be67a&amp;type=3#SceneJsonWindow" />
+    <ui:Label text="Hello World! From UXML" />
+    <ui:Label text="Hello World! With Style" class="custom-label" />
+    <ui:TextField picking-mode="Ignore" label="Game Name:" value="filler text" name="GameNameField" />
+    <ui:Button text="Add Actor" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddActorButton" />
+    <ui:Button text="Export JSON" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ExportJsonButton" />
+</ui:UXML>

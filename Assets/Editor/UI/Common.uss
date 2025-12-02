@@ -1,0 +1,20 @@
+.container {
+    padding: 10px;
+    flex-direction: column;
+}
+
+.header {
+    font-size: 18px;
+    unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+.section {
+    padding: 8px;
+    margin-top: 10px;
+    border-top: 1px solid #444;
+}
+
+.button {
+    margin-top: 6px;
+}
