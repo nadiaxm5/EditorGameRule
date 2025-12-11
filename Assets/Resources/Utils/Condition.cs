@@ -1,7 +1,9 @@
 ﻿using B83.LogicExpressionParser;
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public static class Condition
 {
@@ -39,50 +41,52 @@ public static class Condition
 
     public static bool Keyboard(string key, string keyMode)
     {
-        KeyCode k = (KeyCode)Enum.Parse(typeof(KeyCode), key);
+        var k = (Key)Enum.Parse(typeof(Key), key);
+
         switch (keyMode)
         {
-            case "press": return Input.GetKey(k);
-            case "down": return Input.GetKeyDown(k);
-            case "up": return Input.GetKeyUp(k);
-            default: break;
+            case "press": return UnityEngine.InputSystem.Keyboard.current[k].isPressed;
+            case "down": return UnityEngine.InputSystem.Keyboard.current[k].wasPressedThisFrame;
+            case "up": return UnityEngine.InputSystem.Keyboard.current[k].wasReleasedThisFrame;
         }
         return false;
     }
 
     public static bool Touch(string type, string onActor, GameObject obj)
     {
-        // If on actor is false
+        var mouse = Mouse.current;
+        if (mouse == null) return false;
+        ButtonControl btn = mouse.leftButton;
+
         if (onActor.Contains("false"))
         {
             switch (type)
             {
-                case "press": return Input.GetMouseButton(0);
-                case "down": return Input.GetMouseButtonDown(0);
-                case "up": return Input.GetMouseButtonUp(0);
-                case "tap":
-                    return Input.GetMouseButtonUp(0) && !Input.GetMouseButton(0);
-
+                case "press": return btn.isPressed;
+                case "down": return btn.wasPressedThisFrame;
+                case "up": return btn.wasReleasedThisFrame;
+                case "tap": return btn.wasReleasedThisFrame && !btn.isPressed;
                 case "isOver": return false;
             }
-            return false;
         }
 
-        // If on actor is true
-        bool isOverActor =
-            Physics.Raycast(
-                Camera.main.ScreenPointToRay(Input.mousePosition),
-                out RaycastHit hit
-            ) && hit.collider.gameObject == obj;
-
-        switch (type)
+        if (onActor.Contains("true"))
         {
-            case "isOver": return isOverActor;
-            case "press": return isOverActor && Input.GetMouseButton(0);
-            case "down": return isOverActor && Input.GetMouseButtonDown(0);
-            case "up": return isOverActor && Input.GetMouseButtonUp(0);
-            case "tap": return isOverActor && Input.GetMouseButtonUp(0) && !Input.GetMouseButton(0);
+            bool isOverActor = false;
+            Ray ray = Camera.main.ScreenPointToRay(mouse.position.ReadValue());
+            if (Physics.Raycast(ray, out RaycastHit hit))
+                isOverActor = hit.collider.gameObject == obj;
+
+            switch (type)
+            {
+                case "press": return isOverActor && btn.isPressed;
+                case "down": return isOverActor && btn.wasPressedThisFrame;
+                case "up": return isOverActor && btn.wasReleasedThisFrame;
+                case "tap": return isOverActor && btn.wasReleasedThisFrame && !btn.isPressed;
+                case "isOver": return isOverActor;
+            }
         }
+
         return false;
     }
 

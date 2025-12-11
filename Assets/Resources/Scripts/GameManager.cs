@@ -35,7 +35,6 @@ public class GameManager : MonoBehaviour
     // Custom Global Variables
     public int WaveNumber = 1;
     public int TotalEnemies = 10;
-    public string GameDifficulty = "Hard";
     public int PlayerLives = 3;
     public bool BonusActive = true;
     public Vector3 RespawnPosition = new Vector3(5f, 0f, 5f);
@@ -82,10 +81,18 @@ public class GameManager : MonoBehaviour
     {
         if (mainCamera != null)
         {
-            Mouse = Input.mousePosition;
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float enter))
-                MouseWorld = ray.GetPoint(enter);
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (mouse != null)
+            {
+                Vector2 m = mouse.position.ReadValue();
+                Mouse = new Vector3(m.x, m.y, 0);
+
+                Ray ray = mainCamera.ScreenPointToRay(Mouse);
+                Plane plane = new Plane(Vector3.up, Vector3.zero);
+
+                if (plane.Raycast(ray, out float enter))
+                    MouseWorld = ray.GetPoint(enter);
+            }
         }
     }
 
