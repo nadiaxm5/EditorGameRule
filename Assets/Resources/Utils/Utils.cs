@@ -296,7 +296,7 @@ public static class Utils
         if (scope.Contains("#"))
         {
             // Buscar el GameManager en la escena
-            GameManager gameManager = GameObject.FindObjectOfType<GameManager>();
+            GameManager gameManager = GameObject.FindFirstObjectByType<GameManager>();
             if (gameManager != null)
             {
                 // Obtener todas las propiedades públicas del GameManager

@@ -89,14 +89,14 @@ public static class Loader
             if (actor.Scale != null) obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
             if (rb != null)
             {
-                if (actor.Velocity != null) rb.velocity = new Vector3(actor.Velocity[0], actor.Velocity[1], actor.Velocity[2]);
+                if (actor.Velocity != null) rb.linearVelocity = new Vector3(actor.Velocity[0], actor.Velocity[1], actor.Velocity[2]);
                 if (actor.AngularVelocity != null) rb.angularVelocity = new Vector3(actor.AngularVelocity[0], actor.AngularVelocity[1], actor.AngularVelocity[2]);
-                if (actor.Density != 0) rb.SetDensity(actor.Density);
-                if (actor.Drag != 0) rb.drag = actor.Drag;
+                if (actor.Density != 0) rb.mass = actor.Density;
+                if (actor.Drag != 0) rb.linearDamping = actor.Drag;
             }
             if (col != null)
             {
-                if (col.material == null) col.material = new PhysicMaterial();
+                if (col.material == null) col.material = new PhysicsMaterial();
                 if (actor.Friction != 0)
                 {
                     col.material.dynamicFriction = actor.Friction;
