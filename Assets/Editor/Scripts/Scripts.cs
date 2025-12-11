@@ -475,8 +475,6 @@ public static class Scripts
                 return $"public int {name} = {customVar.intValue};";
             case "float":
                 return $"public float {name} = {customVar.floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}f;";
-            case "string":
-                return $"public string {name} = \"{customVar.stringValue}\";";
             case "bool":
                 return $"public bool {name} = {customVar.boolValue.ToString().ToLower()};";
             case "vector2":

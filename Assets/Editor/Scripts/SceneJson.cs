@@ -54,7 +54,6 @@ public class CustomVariable
 {
     public string name;
     public string type;
-    public string stringValue;
     public int intValue;
     public float floatValue;
     public bool boolValue;
@@ -66,7 +65,6 @@ public class CustomVariable
         {
             case "int": return intValue;
             case "float": return floatValue;
-            case "string": return stringValue;
             case "bool": return boolValue;
             case "vector2":
                 return arrayValue != null && arrayValue.Length >= 2 ?

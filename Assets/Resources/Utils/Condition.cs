@@ -20,12 +20,12 @@ public static class Condition
             parser.ExpressionContext[pair.Key].Set(Utils.GetProperty(pair));
 
         var num = parser.ParseNumber(variable).GetNumber();
-        return ((float)num) != 0f;
+        return ((float)num) == 1f;
     }
 
     public static bool Collision(string tag, GameObject obj)
     {
-        var script = obj.GetComponent(typeof(MonoBehaviour));
+        var script = obj.GetComponent(obj.name);
         var tagCollisionsField = script.GetType().GetField("TagCollisions");
         if (tagCollisionsField == null) return false;
 
@@ -90,24 +90,26 @@ public static class Condition
     {
         float seconds = float.Parse(secondsString, System.Globalization.CultureInfo.InvariantCulture);
 
-        var script = obj.GetComponent<MonoBehaviour>();
+        var script = obj.GetComponent(obj.name);
         var field = script.GetType().GetField("timers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (field == null)
-            return false;
+        if (field == null) return false;
 
         var timers = field.GetValue(script) as Dictionary<string, float>;
-        if (timers == null)
-            return false;
+        if (timers == null) return false;
 
         string key = "timer_" + secondsString;
 
-        float lastTime = 0f;
-        if (timers.ContainsKey(key))
-            lastTime = timers[key];
-
-        if (UnityEngine.Time.time - lastTime >= seconds)
+        if (!timers.ContainsKey(key))
         {
-            timers[key] = UnityEngine.Time.time;
+            timers[key] = Time.time;
+            return false;
+        }
+
+        float lastTime = timers[key];
+
+        if (Time.time - lastTime >= seconds)
+        {
+            timers[key] = Time.time;
             return true;
         }
 

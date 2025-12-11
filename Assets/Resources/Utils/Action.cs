@@ -271,8 +271,8 @@ public static class Action
         Vector3 forceVector = direction * force;
         Rigidbody rb = obj.GetComponent<Rigidbody>();
 
-        if (rb != null) rb.AddForce(forceVector, ForceMode.Force); // F = m·a
-        else obj.transform.position += forceVector * Time.deltaTime;
+        if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
+        else obj.transform.position += forceVector * 0.02f;
     }
 
     public static void PushTo(string forceExp, string xExp, string yExp, string zExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -292,7 +292,7 @@ public static class Action
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
-        else obj.transform.position += forceVector * Time.deltaTime;
+        else obj.transform.position += forceVector * 0.02f;
     }
 
     public static void Torque(string rxExp, string ryExp, string rzExp, GameObject obj, Dictionary<string, GameObject> scopeList)

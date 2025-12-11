@@ -62,49 +62,85 @@ public static class Utils
 
         string[] parts = propertyPath.Split('.');
 
-        if (parts.Length == 2)
+        // Simple property
+        if (parts.Length == 1)
         {
             string mainProperty = parts[0];
-            string subProperty = parts[1];
+
             var field = typeof(GameManager).GetField(mainProperty);
             var property = typeof(GameManager).GetProperty(mainProperty);
 
             object value = null;
+
             if (field != null)
-            {
                 value = field.GetValue(gameManager);
-            }
             else if (property != null)
-            {
                 value = property.GetValue(gameManager);
-            }
             else
             {
                 Debug.LogError($"Property '{mainProperty}' not found in GameManager");
                 return float.NaN;
             }
 
+            // Float
+            if (value is float f) return f;
+
+            // Int
+            if (value is int i) return i;
+
+            // Bool
+            if (value is bool b) return b ? 1f : 0f;
+
+            Debug.LogError($"Unsupported GameManager property type for '{mainProperty}': {value.GetType()}");
+            return float.NaN;
+        }
+
+        // Compound property
+        if (parts.Length == 2)
+        {
+            string mainProperty = parts[0];
+            string subProperty = parts[1];
+
+            var field = typeof(GameManager).GetField(mainProperty);
+            var property = typeof(GameManager).GetProperty(mainProperty);
+
+            object value = null;
+            if (field != null)
+                value = field.GetValue(gameManager);
+            else if (property != null)
+                value = property.GetValue(gameManager);
+            else
+            {
+                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
+                return float.NaN;
+            }
+
+            // Vector3
             if (value is Vector3 vector3)
             {
                 if (subProperty == "x") return vector3.x;
                 if (subProperty == "y") return vector3.y;
                 if (subProperty == "z") return vector3.z;
             }
-            else if (value is Vector2 vector2)
+
+            // Vector2
+            if (value is Vector2 vector2)
             {
                 if (subProperty == "x") return vector2.x;
                 if (subProperty == "y") return vector2.y;
             }
-            else if (value is float f)
-            {
-                return f;
-            }
-            else if (value is int i)
-            {
-                return i;
-            }
+
+            // Float
+            if (value is float f) return f;
+
+            // Int
+            if (value is int i) return i;
+
+            // Bool
+            if (value is bool b) return b ? 1f : 0f;
 
             Debug.LogError($"Unsupported GameManager property type: {value.GetType()}");
+            return float.NaN;
         }
 
         return float.NaN;
@@ -167,74 +203,137 @@ public static class Utils
 
         string[] parts = propertyPath.Split('.');
 
+        // Simple property
+        if (parts.Length == 1)
+        {
+            string mainProperty = parts[0];
+
+            var field = typeof(GameManager).GetField(mainProperty);
+            var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
+
+            // Float
+            if (field != null && field.FieldType == typeof(float))
+            {
+                field.SetValue(gameManager, value);
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
+            {
+                propertyInfo.SetValue(gameManager, value);
+                return;
+            }
+
+            // Int
+            if (field != null && field.FieldType == typeof(int))
+            {
+                field.SetValue(gameManager, Mathf.RoundToInt(value));
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
+            {
+                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
+                return;
+            }
+
+            // Bool
+            if (field != null && field.FieldType == typeof(bool))
+            {
+                field.SetValue(gameManager, value != 0f);
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
+            {
+                propertyInfo.SetValue(gameManager, value != 0f);
+                return;
+            }
+
+            Debug.LogError($"Property '{mainProperty}' not found or unsupported type in GameManager.");
+            return;
+        }
+
+        // Compound property
         if (parts.Length == 2)
         {
             string mainProperty = parts[0];
             string subProperty = parts[1];
+
             var field = typeof(GameManager).GetField(mainProperty);
             var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
 
             object mainValue = null;
+
             if (field != null)
-            {
                 mainValue = field.GetValue(gameManager);
-            }
             else if (propertyInfo != null)
-            {
                 mainValue = propertyInfo.GetValue(gameManager);
-            }
             else
             {
                 Debug.LogError($"Property '{mainProperty}' not found in GameManager");
                 return;
             }
 
-            if (mainValue is Vector3 vector3)
+            // Vector3
+            if (mainValue is Vector3 v3)
             {
-                Vector3 newVector = vector3;
-                if (subProperty == "x") newVector.x = value;
-                else if (subProperty == "y") newVector.y = value;
-                else if (subProperty == "z") newVector.z = value;
+                if (subProperty == "x") v3.x = value;
+                else if (subProperty == "y") v3.y = value;
+                else if (subProperty == "z") v3.z = value;
 
-                if (field != null)
-                {
-                    field.SetValue(gameManager, newVector);
-                }
-                else if (propertyInfo != null)
-                {
-                    propertyInfo.SetValue(gameManager, newVector);
-                }
-            }
-            else if (mainValue is Vector2 vector2)
-            {
-                Vector2 newVector = vector2;
-                if (subProperty == "x") newVector.x = value;
-                else if (subProperty == "y") newVector.y = value;
+                if (field != null) field.SetValue(gameManager, v3);
+                else propertyInfo.SetValue(gameManager, v3);
 
-                if (field != null)
-                {
-                    field.SetValue(gameManager, newVector);
-                }
-                else if (propertyInfo != null)
-                {
-                    propertyInfo.SetValue(gameManager, newVector);
-                }
+                return;
             }
-            else
+
+            // Vector2
+            if (mainValue is Vector2 v2)
             {
-                if (field != null && field.FieldType == typeof(float))
-                {
-                    field.SetValue(gameManager, value);
-                }
-                else if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
-                {
-                    propertyInfo.SetValue(gameManager, value);
-                }
-                else
-                {
-                    Debug.LogError($"Unsupported property type for '{mainProperty}'");
-                }
+                if (subProperty == "x") v2.x = value;
+                else if (subProperty == "y") v2.y = value;
+
+                if (field != null) field.SetValue(gameManager, v2);
+                else propertyInfo.SetValue(gameManager, v2);
+
+                return;
             }
+
+            // Float
+            if (field != null && field.FieldType == typeof(float))
+            {
+                field.SetValue(gameManager, value);
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
+            {
+                propertyInfo.SetValue(gameManager, value);
+                return;
+            }
+
+            // Int
+            if (field != null && field.FieldType == typeof(int))
+            {
+                field.SetValue(gameManager, Mathf.RoundToInt(value));
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
+            {
+                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
+                return;
+            }
+
+            // Bool
+            if (field != null && field.FieldType == typeof(bool))
+            {
+                field.SetValue(gameManager, value != 0f);
+                return;
+            }
+            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
+            {
+                propertyInfo.SetValue(gameManager, value != 0f);
+                return;
+            }
+
+            Debug.LogError($"Unsupported property type for '{mainProperty}'");
         }
     }
 
@@ -243,12 +342,10 @@ public static class Utils
         Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
         List<string> baseProperties = new List<string> { "x", "y", "z", "rx", "ry", "rz", "sx", "sy", "sz", "Active" };
 
-        // Añadir objetos raíz de la escena
         GameObject[] rootObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
 
         foreach (GameObject root in rootObjects)
         {
-            // Añadir todos los hijos
             foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
             {
                 GameObject obj = t.gameObject;
@@ -292,20 +389,16 @@ public static class Utils
             }
         }
 
-        // AÑADIR AQUÍ: Agregar las propiedades del GameManager si se encuentran referencias con #
         if (scope.Contains("#"))
         {
-            // Buscar el GameManager en la escena
             GameManager gameManager = GameObject.FindFirstObjectByType<GameManager>();
             if (gameManager != null)
             {
-                // Obtener todas las propiedades públicas del GameManager
                 var gameManagerType = typeof(GameManager);
                 var fields = gameManagerType.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
                 foreach (var field in fields)
                 {
-                    // Para campos que son Vector2, Vector3, etc., agregamos sus componentes
                     if (field.FieldType == typeof(Vector2))
                     {
                         string[] components = { "x", "y" };
@@ -332,7 +425,6 @@ public static class Utils
                     }
                     else
                     {
-                        // Para otros campos, agregarlos directamente
                         string fullName = "#" + field.Name;
                         if (scope.Contains(fullName) && !scopeList.ContainsKey(fullName))
                         {
@@ -341,7 +433,6 @@ public static class Utils
                     }
                 }
 
-                // También procesar propiedades (no solo campos)
                 var properties = gameManagerType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                 foreach (var prop in properties)
                 {
@@ -395,7 +486,7 @@ public static class Utils
                 var elements = a.Split(new string[] { "=" }, StringSplitOptions.None);
                 if (!properties.ContainsKey(elements[0]))
                 {
-                    float value = float.Parse(elements[1], System.Globalization.CultureInfo.InvariantCulture); //Modificado para spawn
+                    float value = float.Parse(elements[1], System.Globalization.CultureInfo.InvariantCulture);
                     properties.Add(elements[0], value);
                 }
             }
