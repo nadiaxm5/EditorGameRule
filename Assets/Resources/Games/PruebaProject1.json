@@ -1,0 +1,52 @@
+{
+    "GameName": "PruebaProject1",
+    "ScreenResolution": [
+        1920.0,
+        1080.0
+    ],
+    "CameraPosition": [
+        0.0,
+        1.0,
+        -10.0
+    ],
+    "CameraRotation": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "SunPosition": [
+        0.0,
+        3.0,
+        0.0
+    ],
+    "SunRotation": [
+        50.0,
+        -30.0,
+        0.0
+    ],
+    "SunColor": [
+        255,
+        255,
+        255
+    ],
+    "SunAmbientColor": [
+        128,
+        128,
+        128
+    ],
+    "BackgroundColor": [
+        0,
+        0,
+        0
+    ],
+    "Gravity": [
+        0.0,
+        -9.8100004196167,
+        0.0
+    ],
+    "SoundTrack": "",
+    "Mouse": [],
+    "MouseWorld": [],
+    "Cast": [],
+    "CustomVariables": []
+}
