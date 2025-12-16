@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEditor;
-using UnityEngine.UIElements;
-using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
+using GameRuleEditor.Core;
+using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace GameRuleEditor.Windows
 {
@@ -21,6 +21,7 @@ namespace GameRuleEditor.Windows
 
         // UI Elements
         private ToolbarMenu projectMenu;
+
         private Label projectNameLabel;
         private Button saveButton;
         private Button generateButton;
@@ -127,7 +128,7 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        #endregion
+        #endregion Initialization
 
         #region UI Creation
 
@@ -219,7 +220,7 @@ namespace GameRuleEditor.Windows
             return button;
         }
 
-        #endregion
+        #endregion UI Creation
 
         #region Tab Management
 
@@ -278,59 +279,90 @@ namespace GameRuleEditor.Windows
 
         private void ShowScenePanel()
         {
-            var panel = new ScrollView();
-            panel.style.flexGrow = 1;
-
-            var label = new Label("SCENE SETTINGS PANEL");
-            label.style.fontSize = 20;
-            label.style.unityTextAlign = TextAnchor.MiddleCenter;
-            label.style.paddingTop = 50;
-            label.style.color = Color.gray;
-
-            panel.Add(label);
-
-            if (editorContext?.currentProject != null)
-            {
-                var info = new Label($"Game: {editorContext.currentProject.sceneData.GameName}");
-                info.style.unityTextAlign = TextAnchor.MiddleCenter;
-                info.style.paddingTop = 20;
-                panel.Add(info);
-            }
-
+            var panel = new GameRuleEditor.Panels.SceneSettingsPanel(editorContext, projectController);
             contentContainer.Add(panel);
         }
 
         private void ShowActorsPanel()
         {
-            var panel = new ScrollView();
-            panel.style.flexGrow = 1;
+            // Split view: Actor list on left, tabbed content on right
+            var splitView = new VisualElement();
+            splitView.style.flexDirection = FlexDirection.Row;
+            splitView.style.flexGrow = 1;
 
-            var label = new Label("ACTORS PANEL");
-            label.style.fontSize = 20;
-            label.style.unityTextAlign = TextAnchor.MiddleCenter;
-            label.style.paddingTop = 50;
-            label.style.color = Color.gray;
+            var actorListPanel = new GameRuleEditor.Panels.ActorListPanel(editorContext, projectController);
+            splitView.Add(actorListPanel);
 
-            panel.Add(label);
+            // Right side with tabs for Details and Script
+            var rightSide = new VisualElement();
+            rightSide.style.flexGrow = 1;
+            rightSide.style.flexDirection = FlexDirection.Column;
 
-            if (editorContext?.currentProject != null)
+            // Sub-tab bar
+            var subTabBar = new VisualElement();
+            subTabBar.style.flexDirection = FlexDirection.Row;
+            subTabBar.style.height = 30;
+            subTabBar.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+            subTabBar.style.borderBottomWidth = 1;
+            subTabBar.style.borderBottomColor = new Color(0.15f, 0.15f, 0.15f);
+
+            var detailsTab = new Button();
+            detailsTab.text = "Properties";
+            detailsTab.style.flexGrow = 1;
+
+            var scriptTab = new Button();
+            scriptTab.text = "Script Rules";
+            scriptTab.style.flexGrow = 1;
+
+            subTabBar.Add(detailsTab);
+            subTabBar.Add(scriptTab);
+            rightSide.Add(subTabBar);
+
+            // Content area
+            var rightContent = new VisualElement();
+            rightContent.style.flexGrow = 1;
+
+            var actorDetailsPanel = new GameRuleEditor.Panels.ActorDetailsPanel(editorContext, projectController);
+            var scriptEditorPanel = new GameRuleEditor.Panels.ScriptEditorPanel(editorContext, projectController);
+
+            // Initially show details
+            actorDetailsPanel.style.display = DisplayStyle.Flex;
+            scriptEditorPanel.style.display = DisplayStyle.None;
+
+            detailsTab.clicked += () =>
             {
-                var count = new Label($"Actors: {editorContext.currentProject.actors.Count}");
-                count.style.unityTextAlign = TextAnchor.MiddleCenter;
-                count.style.paddingTop = 20;
-                panel.Add(count);
+                actorDetailsPanel.style.display = DisplayStyle.Flex;
+                scriptEditorPanel.style.display = DisplayStyle.None;
+                detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+                scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+                detailsTab.style.borderTopLeftRadius = 0;
+                detailsTab.style.borderTopRightRadius = 0;
+                detailsTab.style.borderBottomLeftRadius = 0;
+                detailsTab.style.borderBottomRightRadius = 0;
+            };
 
-                // Simple actor list
-                foreach (var actor in editorContext.currentProject.actors)
-                {
-                    var actorLabel = new Label($"• {actor.ActorName} ({actor.PrefabName})");
-                    actorLabel.style.paddingLeft = 50;
-                    actorLabel.style.paddingTop = 5;
-                    panel.Add(actorLabel);
-                }
-            }
+            scriptTab.clicked += () =>
+            {
+                actorDetailsPanel.style.display = DisplayStyle.None;
+                scriptEditorPanel.style.display = DisplayStyle.Flex;
+                detailsTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+                scriptTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+                detailsTab.style.borderTopLeftRadius = 0;
+                detailsTab.style.borderTopRightRadius = 0;
+                detailsTab.style.borderBottomLeftRadius = 0;
+                detailsTab.style.borderBottomRightRadius = 0;
+            };
 
-            contentContainer.Add(panel);
+            // Set initial style
+            detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+            scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+
+            rightContent.Add(actorDetailsPanel);
+            rightContent.Add(scriptEditorPanel);
+            rightSide.Add(rightContent);
+
+            splitView.Add(rightSide);
+            contentContainer.Add(splitView);
         }
 
         private void ShowPreviewPanel()
@@ -365,7 +397,7 @@ namespace GameRuleEditor.Windows
             contentContainer.Add(panel);
         }
 
-        #endregion
+        #endregion Tab Management
 
         #region Menu Actions
 
@@ -505,7 +537,7 @@ namespace GameRuleEditor.Windows
             EditorUtility.DisplayDialog("Success", "Scene generated successfully!", "OK");
         }
 
-        #endregion
+        #endregion Menu Actions
 
         #region Event Handlers
 
@@ -520,7 +552,7 @@ namespace GameRuleEditor.Windows
             ShowTab(currentTab); // Refresh current tab
         }
 
-        #endregion
+        #endregion Event Handlers
 
         #region UI Updates
 
@@ -546,6 +578,6 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        #endregion
+        #endregion UI Updates
     }
 }

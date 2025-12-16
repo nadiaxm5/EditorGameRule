@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
   m_Name: NewGameRuleProject
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
-  projectName: NewGameRuleProject
+  projectName: NewGameRuleProjectP
   sceneData:
-    GameName: NewGameRuleProject
+    GameName: NewGameRuleProjectP
     ScreenResolution:
     - 1920
     - 1080
     CameraPosition:
-    - 0
-    - 1
+    - 5
+    - 20
     - -10
     CameraRotation:
     - 0

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0006a05f1531364e978c582786f6f14, type: 3}
   m_Name: EditorContext
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.EditorContext
-  currentProject: {fileID: 11400000, guid: d4bc6b88daac5ee4f92c72c48223d057, type: 2}
+  currentProject: {fileID: 11400000, guid: 10a441911a0ee454994905223934b37a, type: 2}
   selectedActorIndex: -1
   selectedScriptIndex: -1
