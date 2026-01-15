@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: NewGameRuleProject1501
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: NewGameRuleProject1501
+  sceneData:
+    GameName: NewGameRuleProject1501
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - 0
+    - 1
+    - -10
+    CameraRotation:
+    - 0
+    - 0
+    - 0
+    SunPosition:
+    - 0
+    - 3
+    - 0
+    SunRotation:
+    - 50
+    - -30
+    - 0
+    SunColor: ffffff
+    SunAmbientColor: 808080
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: Player
+      Active: 1
+      PrefabName: Player
+      Tag: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - 0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - Prop=2
+      - Temp=50
+      Script: []
+    CustomVariables: []
+  actors:
+  - ActorName: Player
+    Active: 1
+    PrefabName: Player
+    Tag: 
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - Prop=2
+    - Temp=50
+    Script: []
