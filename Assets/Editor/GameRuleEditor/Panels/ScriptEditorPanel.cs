@@ -119,6 +119,15 @@ namespace GameRuleEditor.Panels
                 return;
             }
 
+            var focused = this.focusController?.focusedElement as VisualElement;
+            if (focused != null && rulesContainer.Contains(focused))
+            {
+                if (!(focused is Button))
+                {
+                    return;
+                }
+            }
+
             // Show script editor
             noSelectionContainer.style.display = DisplayStyle.None;
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
@@ -167,7 +176,7 @@ namespace GameRuleEditor.Panels
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 10;
 
-            bool hasCondition = rule.When != null && rule.When.Count > 0 && !string.IsNullOrEmpty(rule.When[0]);
+            bool hasCondition = rule.When != null && rule.When.Count > 0;
 
             var titleLabel = new Label(hasCondition ? $"Rule {ruleIndex + 1}" : $"Unconditional Rule {ruleIndex + 1}");
             titleLabel.style.fontSize = 14;
@@ -233,8 +242,9 @@ namespace GameRuleEditor.Panels
                 conditionBuilder.OnConditionChanged += conditionStr =>
                 {
                     List<string> conditions = string.IsNullOrEmpty(conditionStr)
-                        ? new List<string>()
+                        ? new List<string> { "" }
                         : new List<string> { conditionStr };
+
                     controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex, conditions);
                 };
                 container.Add(conditionBuilder);

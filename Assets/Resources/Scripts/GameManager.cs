@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 
     public string GameName = "NewGameRuleProject1501";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(0f, 1f, -10f);
+    public Vector3 CameraPosition = new Vector3(10f, 1f, -10f);
     public Vector3 CameraRotation = new Vector3(0f, 0f, 0f);
     public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
     public Vector3 SunRotation = new Vector3(50f, -30f, 0f);

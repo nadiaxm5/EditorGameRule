@@ -5,7 +5,7 @@
         1080.0
     ],
     "CameraPosition": [
-        0.0,
+        10.0,
         1.0,
         -10.0
     ],
@@ -52,7 +52,7 @@
             "ActorName": "Player",
             "Active": true,
             "PrefabName": "Player",
-            "Tag": "",
+            "Tag": "Player",
             "Position": [
                 0.0,
                 0.0,
@@ -76,7 +76,20 @@
             "Bounciness": 0.0,
             "Drag": 0.0,
             "Properties": [],
-            "Script": []
+            "Script": [
+                {
+                    "When": [],
+                    "Do": [
+                        "Edit(y,1)"
+                    ]
+                },
+                {
+                    "When": [],
+                    "Do": [
+                        "Edit(x,0)"
+                    ]
+                }
+            ]
         }
     ],
     "CustomVariables": []

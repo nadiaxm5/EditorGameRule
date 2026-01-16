@@ -282,10 +282,14 @@ namespace GameRuleEditor.Panels
 
             SetEnabled(true);
 
+            if (context?.currentProject?.sceneData == null) { /*...*/ return; }
+
+            SetEnabled(true);
             var scene = context.currentProject.sceneData;
 
             // Update fields without triggering callbacks
-            gameNameField.SetValueWithoutNotify(scene.GameName ?? "");
+            if (gameNameField.value != (scene.GameName ?? ""))
+                gameNameField.SetValueWithoutNotify(scene.GameName ?? "");
 
             if (scene.ScreenResolution != null && scene.ScreenResolution.Length >= 2)
                 screenResolutionField.SetValueWithoutNotify(new Vector2(scene.ScreenResolution[0], scene.ScreenResolution[1]));
