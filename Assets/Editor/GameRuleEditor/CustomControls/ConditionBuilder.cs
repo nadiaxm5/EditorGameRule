@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 
@@ -13,27 +12,30 @@ namespace GameRuleEditor.CustomControls
             "Compare", "Check", "Collision", "Timer", "Touch", "Keyboard"
         };
 
-        private List<ConditionElement> conditions = new List<ConditionElement>();
+        private List<ConditionElement> elements = new List<ConditionElement>();
         private VisualElement conditionsContainer;
         private Label previewLabel;
         public System.Action<string> OnConditionChanged;
 
         public ConditionBuilder()
         {
-            // Styling matches original
             style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
             style.borderBottomLeftRadius = 5; style.borderBottomRightRadius = 5;
+            // Fixed padding syntax
             style.paddingTop = 10; style.paddingBottom = 10;
             style.paddingLeft = 10; style.paddingRight = 10;
+
             CreateUI();
         }
 
         private void CreateUI()
         {
+            // Header
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
+            header.style.alignItems = Align.Center;
             header.style.marginBottom = 10;
 
             var label = new Label("WHEN (Conditions)");
@@ -41,13 +43,26 @@ namespace GameRuleEditor.CustomControls
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.Add(label);
 
-            var addButton = new Button(() => AddCondition(null, ""));
-            addButton.text = "+ Add Condition";
-            addButton.AddToClassList("button-primary");
-            addButton.style.height = 25;
-            header.Add(addButton);
+            // Buttons Container
+            var btnContainer = new VisualElement();
+            btnContainer.style.flexDirection = FlexDirection.Row;
 
+            // Logic Buttons
+            CreateHeaderButton(btnContainer, "+ NOT", "button-success", () => AddElement("NOT"));
+            CreateHeaderButton(btnContainer, "+ AND", "button-primary", () => AddElement("AND"));
+            CreateHeaderButton(btnContainer, "+ OR", "button-primary", () => AddElement("OR"));
+
+            var spacer = new VisualElement();
+            spacer.style.width = 10;
+            btnContainer.Add(spacer);
+
+            // Condition Button
+            CreateHeaderButton(btnContainer, "+ Condition", "button-primary", () => AddElement(null));
+
+            header.Add(btnContainer);
             Add(header);
+
+            // Container
             conditionsContainer = new VisualElement();
             Add(conditionsContainer);
 
@@ -55,6 +70,10 @@ namespace GameRuleEditor.CustomControls
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
             previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            previewContainer.style.paddingTop = 5;
+            previewContainer.style.paddingBottom = 5;
+            previewContainer.style.paddingLeft = 5;
+            previewContainer.style.paddingRight = 5;
 
             previewLabel = new Label("");
             previewLabel.style.fontSize = 11;
@@ -64,38 +83,38 @@ namespace GameRuleEditor.CustomControls
             Add(previewContainer);
         }
 
-        private void AddCondition(string conditionStr, string operatorStr)
+        private void CreateHeaderButton(VisualElement container, string text, string className, System.Action onClick)
         {
-            var conditionElement = new ConditionElement(conditionTypes);
+            var btn = new Button(onClick) { text = text };
+            btn.AddToClassList(className);
+            btn.style.height = 20;
+            btn.style.fontSize = 10;
+            btn.style.marginRight = 2;
+            container.Add(btn);
+        }
 
-            // Set operator for elements after the first one
-            conditionElement.SetOperator(string.IsNullOrEmpty(operatorStr) ? "AND" : operatorStr);
+        private void AddElement(string specificType, string sourceValue = null)
+        {
+            var element = new ConditionElement(conditionTypes, specificType);
 
-            // Hide operator selector for the very first element
-            if (conditions.Count == 0) conditionElement.HideOperator();
-
-            if (!string.IsNullOrEmpty(conditionStr))
+            if (!string.IsNullOrEmpty(sourceValue))
             {
-                conditionElement.SetFromSource(conditionStr);
+                element.SetFromSource(sourceValue);
             }
 
-            conditionElement.OnChanged += UpdatePreview;
-            conditionElement.OnRemove += () => RemoveCondition(conditionElement);
+            element.OnChanged += UpdatePreview;
+            element.OnRemove += () => RemoveElement(element);
 
-            conditions.Add(conditionElement);
-            conditionsContainer.Add(conditionElement);
+            elements.Add(element);
+            conditionsContainer.Add(element);
 
             UpdatePreview();
         }
 
-        private void RemoveCondition(ConditionElement element)
+        private void RemoveElement(ConditionElement element)
         {
-            conditions.Remove(element);
+            elements.Remove(element);
             conditionsContainer.Remove(element);
-
-            // Ensure first element hides operator
-            if (conditions.Count > 0) conditions[0].HideOperator();
-
             UpdatePreview();
         }
 
@@ -108,190 +127,48 @@ namespace GameRuleEditor.CustomControls
 
         private string BuildConditionString()
         {
-            if (conditions.Count == 0) return "";
+            if (elements.Count == 0) return "";
+
             List<string> parts = new List<string>();
-
-            for (int i = 0; i < conditions.Count; i++)
+            foreach (var elem in elements)
             {
-                string conditionStr = conditions[i].GetConditionString();
-                if (string.IsNullOrEmpty(conditionStr)) continue;
-
-                if (i > 0)
-                {
-                    parts.Add($" {conditions[i].GetLogicalOperator()} ");
-                }
-                parts.Add(conditionStr);
+                string str = elem.GetString();
+                if (!string.IsNullOrEmpty(str)) parts.Add(str);
             }
-            return string.Join("", parts);
+
+            return string.Join(" ", parts);
         }
 
         public void SetCondition(string fullConditionString)
         {
-            foreach (var cond in conditions)
-            {
-                conditionsContainer.Remove(cond);
-            }
-            conditions.Clear();
+            foreach (var el in elements) conditionsContainer.Remove(el);
+            elements.Clear();
 
+            // FIX: If string is empty, we add a default empty condition row
+            // This happens when you create a new rule or manually clear the conditions.
             if (string.IsNullOrEmpty(fullConditionString))
             {
-                AddCondition(null, "");
+                AddElement(null, "");
                 UpdatePreview();
                 return;
             }
 
-            // Split by logical operators using our new parser
-            var parts = GameRuleParser.SplitConditions(fullConditionString);
+            // Tokenize and build
+            List<string> tokens = GameRuleParser.TokenizeCondition(fullConditionString);
 
-            foreach (var part in parts)
+            foreach (var token in tokens)
             {
-                AddCondition(part.condition, part.op);
+                if (token == "AND" || token == "OR" || token == "NOT")
+                {
+                    AddElement(token);
+                }
+                else
+                {
+                    AddElement(null, token);
+                }
             }
 
             UpdatePreview();
-        }
-    }
-
-    public class ConditionElement : VisualElement
-    {
-        private PopupField<string> typeDropdown;
-        private PopupField<string> logicalOpDropdown;
-        private VisualElement parametersContainer;
-        private List<string> availableTypes;
-        private List<TextField> parameterFields = new List<TextField>();
-
-        public System.Action OnChanged;
-        public System.Action OnRemove;
-
-        public ConditionElement(List<string> conditionTypes)
-        {
-            availableTypes = conditionTypes;
-            style.flexDirection = FlexDirection.Row;
-            style.marginBottom = 5;
-            style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            style.paddingTop = 5; style.paddingBottom = 5;
-            CreateUI();
-        }
-
-        public void SetFromSource(string conditionString)
-        {
-            var result = GameRuleParser.ParseFunction(conditionString);
-
-            if (availableTypes.Contains(result.Name))
-            {
-                typeDropdown.SetValueWithoutNotify(result.Name);
-
-                UpdateParameterFields(false);
-
-                for (int i = 0; i < parameterFields.Count && i < result.Params.Count; i++)
-                {
-                    parameterFields[i].SetValueWithoutNotify(result.Params[i]);
-                }
-            }
-        }
-
-        private void UpdateParameterFields(bool notifyChange = true)
-        {
-            parametersContainer.Clear();
-            parameterFields.Clear();
-            string type = typeDropdown.value;
-
-            switch (type)
-            {
-                case "Compare": AddParameterField("Expression"); break;
-                case "Check": AddParameterField("Variable"); break;
-                case "Collision": AddParameterField("Tag"); break;
-                case "Timer": AddParameterField("Seconds"); break;
-                case "Touch": AddParameterField("Mode"); AddParameterField("OnActor (true/false)"); break;
-                case "Keyboard": AddParameterField("Key"); AddParameterField("Mode"); break;
-            }
-
-            if (notifyChange) OnChanged?.Invoke();
-        }
-
-        public void HideOperator()
-        { logicalOpDropdown.style.display = DisplayStyle.None; }
-
-        public void SetOperator(string op)
-        { logicalOpDropdown.value = op; }
-
-        public string GetLogicalOperator()
-        { return logicalOpDropdown.value; }
-
-        private void CreateUI()
-        {
-            logicalOpDropdown = new PopupField<string>(new List<string> { "AND", "OR" }, 0);
-            logicalOpDropdown.style.width = 60;
-            logicalOpDropdown.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-            Add(logicalOpDropdown);
-
-            typeDropdown = new PopupField<string>(availableTypes, 0);
-            typeDropdown.style.width = 100;
-            typeDropdown.RegisterValueChangedCallback(evt =>
-            {
-                UpdateParameterFields(true);
-                OnChanged?.Invoke();
-            });
-            Add(typeDropdown);
-
-            parametersContainer = new VisualElement();
-            parametersContainer.style.flexDirection = FlexDirection.Row;
-            parametersContainer.style.flexGrow = 1;
-            Add(parametersContainer);
-
-            var removeBtn = new Button(() => OnRemove?.Invoke()) { text = "X" };
-            removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 20;
-            Add(removeBtn);
-
-            UpdateParameterFields();
-        }
-
-        private void UpdateParameterFields()
-        {
-            parametersContainer.Clear();
-            parameterFields.Clear();
-            string type = typeDropdown.value;
-
-            switch (type)
-            {
-                case "Compare": AddParameterField("Expression"); break;
-                case "Check": AddParameterField("Variable"); break;
-                case "Collision": AddParameterField("Tag"); break;
-                case "Timer": AddParameterField("Seconds"); break;
-                case "Touch": AddParameterField("Mode"); AddParameterField("OnActor (true/false)"); break;
-                case "Keyboard": AddParameterField("Key"); AddParameterField("Mode"); break;
-            }
-        }
-
-        private void AddParameterField(string placeholder)
-        {
-            var field = new TextField();
-            field.style.flexGrow = 1;
-            field.style.marginRight = 3;
-            field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-
-            // Simple placeholder logic
-            var label = new Label(placeholder);
-            label.style.fontSize = 8;
-            label.style.color = new Color(0.6f, 0.6f, 0.6f);
-            label.style.position = Position.Absolute;
-            label.style.left = 3; label.style.top = 2;
-            field.Add(label);
-            field.RegisterValueChangedCallback(evt => label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None);
-
-            parametersContainer.Add(field);
-            parameterFields.Add(field);
-        }
-
-        public string GetConditionString()
-        {
-            string type = typeDropdown.value;
-            List<string> parameters = new List<string>();
-            foreach (var field in parameterFields) parameters.Add(field.value);
-
-            if (parameters.Count == 0 || string.IsNullOrEmpty(parameters[0])) return "";
-            return $"{type}({string.Join(",", parameters)})";
         }
     }
 }

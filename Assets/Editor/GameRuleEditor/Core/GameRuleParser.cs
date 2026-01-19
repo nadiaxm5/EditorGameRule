@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace GameRuleEditor.Core
 {
@@ -10,7 +11,6 @@ namespace GameRuleEditor.Core
         {
             if (string.IsNullOrEmpty(input)) return (null, null);
 
-            // Regex to capture Name and Content inside outermost parentheses
             var match = Regex.Match(input.Trim(), @"^!?([a-zA-Z0-9_]+)\s*\((.*)\)\s*$");
 
             if (!match.Success) return (input.Trim(), new List<string>());
@@ -23,7 +23,6 @@ namespace GameRuleEditor.Core
             return (name, parameters);
         }
 
-        // Splits by comma, but respects nested parentheses if they exist (though rare in this DSL)
         private static List<string> SplitParameters(string content)
         {
             List<string> result = new List<string>();
@@ -51,47 +50,37 @@ namespace GameRuleEditor.Core
         private static string CleanParam(string p)
         {
             p = p.Trim();
-            // Remove wrapping quotes if they exist (e.g. "Enemy" -> Enemy)
             if (p.StartsWith("\"") && p.EndsWith("\"") && p.Length > 1)
                 return p.Substring(1, p.Length - 2);
             return p;
         }
 
-        // Splits a condition string by logical operators (AND, OR)
-        public static List<(string op, string condition)> SplitConditions(string fullCondition)
+        /// <summary>
+        /// Splits a full condition string into tokens (Conditions and Operators).
+        /// Example: "NOT Check(A) AND Compare(B)" -> ["NOT", "Check(A)", "AND", "Compare(B)"]
+        /// </summary>
+        public static List<string> TokenizeCondition(string fullCondition)
         {
-            var results = new List<(string, string)>();
+            List<string> tokens = new List<string>();
+            if (string.IsNullOrEmpty(fullCondition)) return tokens;
 
-            // Normalize operators
-            string input = fullCondition
-                .Replace(" && ", " AND ")
-                .Replace(" || ", " OR ");
+            // Normalize spaces around operators to ensure splitting works
+            // We use a regex that looks for whole words AND, OR, NOT
+            string pattern = @"\b(AND|OR|NOT)\b";
 
-            // Split keeping delimiters is tricky with Regex, doing a linear pass
-            string[] tokens = Regex.Split(input, @"\s+(AND|OR)\s+");
+            // Split keeps delimiters because of parentheses in pattern
+            string[] parts = Regex.Split(fullCondition, pattern);
 
-            string currentOp = ""; // First element has no operator
-
-            // Regex.Split returns: [Cond1, OP, Cond2, OP, Cond3]
-            for (int i = 0; i < tokens.Length; i++)
+            foreach (var part in parts)
             {
-                string token = tokens[i].Trim();
-
-                if (token == "AND" || token == "OR")
+                string trimmed = part.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
                 {
-                    currentOp = token;
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        results.Add((currentOp, token));
-                        currentOp = ""; // Reset for next
-                    }
+                    tokens.Add(trimmed);
                 }
             }
 
-            return results;
+            return tokens;
         }
     }
 }
