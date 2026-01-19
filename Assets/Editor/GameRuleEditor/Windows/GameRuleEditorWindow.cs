@@ -56,6 +56,14 @@ namespace GameRuleEditor.Windows
         {
             LoadEditorContext();
             InitializeControllers();
+
+            if (editorContext != null)
+            {
+                editorContext.OnProjectLoaded += OnProjectLoaded;
+                editorContext.OnProjectChanged += UpdateUI;
+            }
+
+            UpdateUI();
         }
 
         private void CreateGUI()
@@ -91,7 +99,7 @@ namespace GameRuleEditor.Windows
             if (editorContext != null)
             {
                 editorContext.OnProjectLoaded += OnProjectLoaded;
-                editorContext.OnProjectChanged += OnProjectChanged;
+                editorContext.OnProjectChanged += UpdateUI;
             }
 
             UpdateUI();
@@ -103,7 +111,7 @@ namespace GameRuleEditor.Windows
             if (editorContext != null)
             {
                 editorContext.OnProjectLoaded -= OnProjectLoaded;
-                editorContext.OnProjectChanged -= OnProjectChanged;
+                editorContext.OnProjectChanged -= UpdateUI;
             }
         }
 
@@ -547,11 +555,6 @@ namespace GameRuleEditor.Windows
             ShowTab(currentTab); // Refresh current tab
         }
 
-        private void OnProjectChanged()
-        {
-            ShowTab(currentTab); // Refresh current tab
-        }
-
         #endregion Event Handlers
 
         #region UI Updates
@@ -567,15 +570,8 @@ namespace GameRuleEditor.Windows
                     : "No Project Loaded";
             }
 
-            if (saveButton != null)
-            {
-                saveButton.SetEnabled(hasProject);
-            }
-
-            if (generateButton != null)
-            {
-                generateButton.SetEnabled(hasProject);
-            }
+            if (saveButton != null) saveButton.SetEnabled(hasProject);
+            if (generateButton != null) generateButton.SetEnabled(hasProject);
         }
 
         #endregion UI Updates

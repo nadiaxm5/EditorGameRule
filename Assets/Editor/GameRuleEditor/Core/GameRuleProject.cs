@@ -27,7 +27,11 @@ namespace GameRuleEditor.Core
             // Update the Cast in sceneData with current actors
             sceneData.Cast = new List<ActorJson>(actors);
 
-            return JsonUtility.ToJson(sceneData, true);
+            string json = JsonUtility.ToJson(sceneData, true);
+
+            json = System.Text.RegularExpressions.Regex.Replace(json, "\\s*\"When\": \\[\\],", "");
+
+            return json;
         }
 
         /// <summary>
@@ -53,6 +57,21 @@ namespace GameRuleEditor.Core
 
             string json = System.IO.File.ReadAllText(jsonPath);
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
+
+            if (sceneData.Cast != null)
+            {
+                foreach (var actor in sceneData.Cast)
+                {
+                    if (actor.Script != null)
+                    {
+                        foreach (var sentence in actor.Script)
+                        {
+                            if (sentence.When == null) sentence.When = new List<string>();
+                            if (sentence.Do == null) sentence.Do = new List<string>();
+                        }
+                    }
+                }
+            }
 
             // Create a new project instance
             GameRuleProject project = CreateInstance<GameRuleProject>();

@@ -302,9 +302,15 @@ namespace GameRuleEditor.Panels
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
             // Update fields without triggering callbacks
-            actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
-            prefabNameField.SetValueWithoutNotify(actor.PrefabName ?? "");
-            tagField.SetValueWithoutNotify(actor.Tag ?? "");
+            if (actorNameField.value != (actor.ActorName ?? ""))
+                actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
+
+            if (prefabNameField.value != (actor.PrefabName ?? ""))
+                prefabNameField.SetValueWithoutNotify(actor.PrefabName ?? "");
+
+            if (tagField.value != (actor.Tag ?? ""))
+                tagField.SetValueWithoutNotify(actor.Tag ?? "");
+
             activeToggle.SetValueWithoutNotify(actor.Active);
 
             // Transform

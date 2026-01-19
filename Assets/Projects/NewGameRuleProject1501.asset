@@ -19,7 +19,7 @@ MonoBehaviour:
     - 1920
     - 1080
     CameraPosition:
-    - 0
+    - 10
     - 1
     - -10
     CameraRotation:
@@ -48,7 +48,7 @@ MonoBehaviour:
     - ActorName: Player
       Active: 1
       PrefabName: Player
-      Tag: 
+      Tag: Player
       Position:
       - 0
       - 0
@@ -68,16 +68,21 @@ MonoBehaviour:
       Friction: 0
       Bounciness: 0
       Drag: 0
-      Properties:
-      - Prop=2
-      - Temp=50
-      Script: []
+      Properties: []
+      Script:
+      - When: []
+        Do:
+        - Edit(y,0)
+      - When:
+        - Check(x)
+        Do:
+        - Edit(x,1)
     CustomVariables: []
   actors:
   - ActorName: Player
     Active: 1
     PrefabName: Player
-    Tag: 
+    Tag: Player
     Position:
     - 0
     - 0
@@ -97,7 +102,12 @@ MonoBehaviour:
     Friction: 0
     Bounciness: 0
     Drag: 0
-    Properties:
-    - Prop=2
-    - Temp=50
-    Script: []
+    Properties: []
+    Script:
+    - When: []
+      Do:
+      - Edit(y,0)
+    - When:
+      - Check(x)
+      Do:
+      - Edit(x,1)
