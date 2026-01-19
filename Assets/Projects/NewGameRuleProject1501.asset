@@ -70,14 +70,61 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
+      - When:
+        - Timer(5)
+        Do:
+        - Animate(hello)
       - When: []
         Do:
-        - Edit(y,0)
-      - When:
-        - Check(x)
-        Do:
-        - Edit(x,1)
-    CustomVariables: []
+        - 
+    CustomVariables:
+    - name: VariableInt
+      type: int
+      intValue: 10
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: VariableFloat
+      type: float
+      intValue: 0
+      floatValue: 15
+      boolValue: 0
+      arrayValue: []
+    - name: VariableFloat2
+      type: float
+      intValue: 0
+      floatValue: 15.5
+      boolValue: 0
+      arrayValue: []
+    - name: VariableBoolTrue
+      type: bool
+      intValue: 0
+      floatValue: 0
+      boolValue: 1
+      arrayValue: []
+    - name: VariableBoolFalse
+      type: bool
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: VariableVector2
+      type: vector2
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue:
+      - 1
+      - 2
+    - name: VariableVector3
+      type: vector3
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue:
+      - 1
+      - 2
+      - 3
   actors:
   - ActorName: Player
     Active: 1
@@ -104,10 +151,10 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
+    - When:
+      - Timer(5)
+      Do:
+      - Animate(hello)
     - When: []
       Do:
-      - Edit(y,0)
-    - When:
-      - Check(x)
-      Do:
-      - Edit(x,1)
+      - 

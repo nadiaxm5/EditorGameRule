@@ -84,9 +84,9 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
-        /// Adds a custom global variable
+        /// Adds a custom global variable with an initial value
         /// </summary>
-        public void AddCustomVariable(string name, string type)
+        public void AddCustomVariable(string name, string type, object value)
         {
             if (context.currentProject == null) return;
 
@@ -97,6 +97,28 @@ namespace GameRuleEditor.Controllers
                 name = name,
                 type = type
             };
+
+            // Assign the initial value depending on the type
+            switch (type)
+            {
+                case "int":
+                    newVar.intValue = (int)value;
+                    break;
+                case "float":
+                    newVar.floatValue = (float)value;
+                    break;
+                case "bool":
+                    newVar.boolValue = (bool)value;
+                    break;
+                case "vector2":
+                    var v2 = (Vector2)value;
+                    newVar.arrayValue = new float[] { v2.x, v2.y };
+                    break;
+                case "vector3":
+                    var v3 = (Vector3)value;
+                    newVar.arrayValue = new float[] { v3.x, v3.y, v3.z };
+                    break;
+            }
 
             if (context.currentProject.sceneData.CustomVariables == null)
             {

@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
+using UnityEditor.UIElements;
+using System.Collections.Generic;
+using System;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 
@@ -13,6 +17,7 @@ namespace GameRuleEditor.Panels
         private EditorContext context;
         private ProjectController controller;
 
+        // Scene Fields
         private TextField gameNameField;
         private Vector2Field screenResolutionField;
         private Vector3Field cameraPosField;
@@ -21,7 +26,15 @@ namespace GameRuleEditor.Panels
         private Vector3Field sunRotField;
         private Vector3Field gravityField;
 
+        // Variable List Container
         private VisualElement customVariablesContainer;
+
+        // Creation Section References
+        private VisualElement valueFieldContainer;
+        private Func<object> activeValueGetter; // Delegate to retrieve value from dynamic field
+
+        // Available types matches your backend logic (but capitalized for UI)
+        private List<string> variableTypes = new List<string> { "Int", "Float", "Bool", "Vector2", "Vector3" };
 
         public SceneSettingsPanel(EditorContext editorContext, ProjectController projectController)
         {
@@ -52,7 +65,7 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            // Basic Settings Section
+            // --- Basic Settings Section ---
             var basicSection = CreateSection("Basic Settings");
             scrollView.Add(basicSection);
 
@@ -75,7 +88,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Screen Resolution");
             });
 
-            // Camera Section
+            // --- Camera Section ---
             var cameraSection = CreateSection("Camera");
             scrollView.Add(cameraSection);
 
@@ -97,7 +110,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Camera Rotation");
             });
 
-            // Lighting Section
+            // --- Lighting Section ---
             var lightingSection = CreateSection("Lighting (Sun)");
             scrollView.Add(lightingSection);
 
@@ -119,7 +132,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Sun Rotation");
             });
 
-            // Physics Section
+            // --- Physics Section ---
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
@@ -132,20 +145,133 @@ namespace GameRuleEditor.Panels
                 }, "Change Gravity");
             });
 
-            // Custom Variables Section
+            // --- Custom Variables Section ---
             var customVarSection = CreateSection("Custom Global Variables");
             scrollView.Add(customVarSection);
 
-            var addVarButton = new Button(() => ShowAddVariableDialog());
-            addVarButton.text = "+ Add Custom Variable";
-            addVarButton.AddToClassList("button-primary");
-            customVarSection.Add(addVarButton);
+            // 1. Variable Creation Area (Integrated)
+            var creationBox = new VisualElement();
+            creationBox.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            creationBox.style.paddingTop = 10;
+            creationBox.style.paddingBottom = 10;
+            creationBox.style.paddingLeft = 10;
+            creationBox.style.paddingRight = 10;
+            creationBox.style.borderTopLeftRadius = 5;
+            creationBox.style.borderTopRightRadius = 5;
+            creationBox.style.borderBottomLeftRadius = 5;
+            creationBox.style.borderBottomRightRadius = 5;
+            creationBox.style.marginBottom = 10;
 
+            var creationTitle = new Label("Add New Variable");
+            creationTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            creationTitle.style.marginBottom = 5;
+            creationBox.Add(creationTitle);
+
+            // Name Field
+            var nameInput = new TextField("Name:");
+            nameInput.value = "NewVariable";
+            creationBox.Add(nameInput);
+
+            // Type Dropdown (Now using PopupField<string> instead of EnumField)
+            var typeInput = new PopupField<string>("Type:", variableTypes, 0);
+            creationBox.Add(typeInput);
+
+            // Container for dynamic value field (changes based on Type)
+            valueFieldContainer = new VisualElement();
+            valueFieldContainer.style.marginTop = 5;
+            creationBox.Add(valueFieldContainer);
+
+            // Initialize default value field (Int is index 0)
+            CreateValueField("Int");
+
+            // Handle Type Change
+            typeInput.RegisterValueChangedCallback(evt =>
+            {
+                CreateValueField(evt.newValue);
+            });
+
+            // Add Button
+            var addButton = new Button(() =>
+            {
+                string varName = nameInput.value;
+                if (string.IsNullOrEmpty(varName))
+                {
+                    EditorUtility.DisplayDialog("Error", "Variable name cannot be empty.", "OK");
+                    return;
+                }
+
+                // Get value from the active field via delegate
+                object value = activeValueGetter?.Invoke();
+
+                // Convert UI type (e.g. "Int") to Backend type (e.g. "int")
+                string typeStr = typeInput.value.ToLower();
+
+                controller.AddCustomVariable(varName, typeStr, value);
+
+                // Reset Name for convenience
+                nameInput.value = "NewVariable";
+            });
+            addButton.text = "+ Add Variable";
+            addButton.AddToClassList("button-success");
+            addButton.style.marginTop = 10;
+            creationBox.Add(addButton);
+
+            customVarSection.Add(creationBox);
+
+            // 2. Variable List
             customVariablesContainer = new VisualElement();
             customVarSection.Add(customVariablesContainer);
 
             Add(scrollView);
         }
+
+        /// <summary>
+        /// Dynamically creates the input field for the initial value based on the selected Type string.
+        /// </summary>
+        private void CreateValueField(string type)
+        {
+            valueFieldContainer.Clear();
+
+            switch (type)
+            {
+                case "Int":
+                    var intField = new IntegerField("Initial Value:");
+                    intField.value = 0;
+                    valueFieldContainer.Add(intField);
+                    activeValueGetter = () => intField.value;
+                    break;
+
+                case "Float":
+                    var floatField = new FloatField("Initial Value:");
+                    floatField.value = 0f;
+                    valueFieldContainer.Add(floatField);
+                    activeValueGetter = () => floatField.value;
+                    break;
+
+                case "Bool":
+                    var boolField = new Toggle("Initial Value:");
+                    boolField.value = false;
+                    valueFieldContainer.Add(boolField);
+                    activeValueGetter = () => boolField.value;
+                    break;
+
+                case "Vector2":
+                    var v2Field = new Vector2Field("Initial Value:");
+                    v2Field.value = Vector2.zero;
+                    valueFieldContainer.Add(v2Field);
+                    activeValueGetter = () => v2Field.value;
+                    break;
+
+                case "Vector3":
+                    var v3Field = new Vector3Field("Initial Value:");
+                    v3Field.value = Vector3.zero;
+                    valueFieldContainer.Add(v3Field);
+                    activeValueGetter = () => v3Field.value;
+                    break;
+            }
+        }
+
+        #region UI Helpers
 
         private VisualElement CreateSection(string title)
         {
@@ -207,70 +333,7 @@ namespace GameRuleEditor.Panels
             return field;
         }
 
-        private void ShowAddVariableDialog()
-        {
-            var dialog = new VisualElement();
-            dialog.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            dialog.style.paddingTop = 20;
-            dialog.style.paddingBottom = 20;
-            dialog.style.paddingLeft = 20;
-            dialog.style.paddingRight = 20;
-            dialog.style.borderTopLeftRadius = 5;
-            dialog.style.borderTopRightRadius = 5;
-            dialog.style.borderBottomLeftRadius = 5;
-            dialog.style.borderBottomRightRadius = 5;
-            dialog.style.borderLeftWidth = 1;
-            dialog.style.borderRightWidth = 1;
-            dialog.style.borderTopWidth = 1;
-            dialog.style.borderBottomWidth = 1;
-            dialog.style.borderLeftColor = new Color(0.2f, 0.2f, 0.2f);
-            dialog.style.borderRightColor = new Color(0.2f, 0.2f, 0.2f);
-            dialog.style.borderTopColor = new Color(0.2f, 0.2f, 0.2f);
-            dialog.style.borderBottomColor = new Color(0.2f, 0.2f, 0.2f);
-
-            var nameField = new TextField("Variable Name:");
-            dialog.Add(nameField);
-
-            var typeField = new UnityEngine.UIElements.EnumField("Type:", CustomVariableType.Float);
-            dialog.Add(typeField);
-
-            var buttonRow = new VisualElement();
-            buttonRow.style.flexDirection = FlexDirection.Row;
-            buttonRow.style.justifyContent = Justify.FlexEnd;
-            buttonRow.style.marginTop = 10;
-
-            var cancelBtn = new Button(() => { /* Close dialog */ });
-            cancelBtn.text = "Cancel";
-            buttonRow.Add(cancelBtn);
-
-            var addBtn = new Button(() =>
-            {
-                if (!string.IsNullOrEmpty(nameField.value))
-                {
-                    string type = typeField.value.ToString().ToLower();
-                    controller.AddCustomVariable(nameField.value, type);
-                }
-            });
-            addBtn.text = "Add";
-            addBtn.AddToClassList("button-primary");
-            buttonRow.Add(addBtn);
-
-            dialog.Add(buttonRow);
-
-            // For now, let's use a simpler approach with EditorUtility
-            UnityEditor.EditorApplication.delayCall += () =>
-            {
-                string name = UnityEditor.EditorUtility.DisplayDialog(
-                    "Add Custom Variable",
-                    "Enter variable name in Console",
-                    "Float",
-                    "Int"
-                ) ? "float" : "int";
-
-                string varName = "NewVariable"; // TODO: Add proper dialog
-                controller.AddCustomVariable(varName, name);
-            };
-        }
+        #endregion
 
         private void UpdateUI()
         {
@@ -281,33 +344,53 @@ namespace GameRuleEditor.Panels
             }
 
             SetEnabled(true);
-
-            if (context?.currentProject?.sceneData == null) { /*...*/ return; }
-
-            SetEnabled(true);
             var scene = context.currentProject.sceneData;
 
-            // Update fields without triggering callbacks
+            // Update fields without triggering callbacks (safe checks)
             if (gameNameField.value != (scene.GameName ?? ""))
                 gameNameField.SetValueWithoutNotify(scene.GameName ?? "");
 
             if (scene.ScreenResolution != null && scene.ScreenResolution.Length >= 2)
-                screenResolutionField.SetValueWithoutNotify(new Vector2(scene.ScreenResolution[0], scene.ScreenResolution[1]));
+            {
+                var currentRes = new Vector2(scene.ScreenResolution[0], scene.ScreenResolution[1]);
+                if (screenResolutionField.value != currentRes)
+                    screenResolutionField.SetValueWithoutNotify(currentRes);
+            }
 
             if (scene.CameraPosition != null && scene.CameraPosition.Length >= 3)
-                cameraPosField.SetValueWithoutNotify(new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]));
+            {
+                var currentPos = new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]);
+                if (cameraPosField.value != currentPos)
+                    cameraPosField.SetValueWithoutNotify(currentPos);
+            }
 
             if (scene.CameraRotation != null && scene.CameraRotation.Length >= 3)
-                cameraRotField.SetValueWithoutNotify(new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]));
+            {
+                var currentRot = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
+                if (cameraRotField.value != currentRot)
+                    cameraRotField.SetValueWithoutNotify(currentRot);
+            }
 
             if (scene.SunPosition != null && scene.SunPosition.Length >= 3)
-                sunPosField.SetValueWithoutNotify(new Vector3(scene.SunPosition[0], scene.SunPosition[1], scene.SunPosition[2]));
+            {
+                var currentPos = new Vector3(scene.SunPosition[0], scene.SunPosition[1], scene.SunPosition[2]);
+                if (sunPosField.value != currentPos)
+                    sunPosField.SetValueWithoutNotify(currentPos);
+            }
 
             if (scene.SunRotation != null && scene.SunRotation.Length >= 3)
-                sunRotField.SetValueWithoutNotify(new Vector3(scene.SunRotation[0], scene.SunRotation[1], scene.SunRotation[2]));
+            {
+                var currentRot = new Vector3(scene.SunRotation[0], scene.SunRotation[1], scene.SunRotation[2]);
+                if (sunRotField.value != currentRot)
+                    sunRotField.SetValueWithoutNotify(currentRot);
+            }
 
             if (scene.Gravity != null && scene.Gravity.Length >= 3)
-                gravityField.SetValueWithoutNotify(new Vector3(scene.Gravity[0], scene.Gravity[1], scene.Gravity[2]));
+            {
+                var currentGrav = new Vector3(scene.Gravity[0], scene.Gravity[1], scene.Gravity[2]);
+                if (gravityField.value != currentGrav)
+                    gravityField.SetValueWithoutNotify(currentGrav);
+            }
 
             UpdateCustomVariablesList();
         }
@@ -328,7 +411,24 @@ namespace GameRuleEditor.Panels
                 item.AddToClassList("list-item");
                 item.style.marginTop = 5;
 
-                var label = new Label($"{customVar.name} ({customVar.type})");
+                // Format the value string based on type
+                string valueStr = "";
+                switch (customVar.type.ToLower())
+                {
+                    case "int": valueStr = customVar.intValue.ToString(); break;
+                    case "float": valueStr = customVar.floatValue.ToString("F2"); break;
+                    case "bool": valueStr = customVar.boolValue.ToString(); break;
+                    case "vector2":
+                        if (customVar.arrayValue?.Length >= 2)
+                            valueStr = $"({customVar.arrayValue[0]}, {customVar.arrayValue[1]})";
+                        break;
+                    case "vector3":
+                        if (customVar.arrayValue?.Length >= 3)
+                            valueStr = $"({customVar.arrayValue[0]}, {customVar.arrayValue[1]}, {customVar.arrayValue[2]})";
+                        break;
+                }
+
+                var label = new Label($"{customVar.name} ({customVar.type}) = {valueStr}");
                 label.style.flexGrow = 1;
                 item.Add(label);
 
@@ -347,15 +447,5 @@ namespace GameRuleEditor.Panels
             context.OnProjectLoaded -= UpdateUI;
             context.OnProjectChanged -= UpdateUI;
         }
-    }
-
-    // Helper enum for variable type selection
-    public enum CustomVariableType
-    {
-        Int,
-        Float,
-        Bool,
-        Vector2,
-        Vector3
     }
 }
