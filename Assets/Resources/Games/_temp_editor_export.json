@@ -1,96 +1,22 @@
 {
     "GameName": "NewGameRuleProject1501",
-    "ScreenResolution": [
-        1920.0,
-        1080.0
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [10, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "CustomVariables": [
+        {"name": "VariableInt", "type": "int", "intValue": 10},
+        {"name": "VariableFloat", "type": "float", "floatValue": 15},
+        {"name": "VariableFloat2", "type": "float", "floatValue": 15.5},
+        {"name": "VariableBoolTrue", "type": "bool", "boolValue": true},
+        {"name": "VariableBoolFalse", "type": "bool", "boolValue": false},
+        {"name": "VariableVector2", "type": "vector2", "arrayValue": [1, 2]},
+        {"name": "VariableVector3", "type": "vector3", "arrayValue": [1, 2, 3]}
     ],
-    "CameraPosition": [
-        10.0,
-        1.0,
-        -10.0
-    ],
-    "CameraRotation": [
-        0.0,
-        0.0,
-        0.0
-    ],
-    "SunPosition": [
-        0.0,
-        3.0,
-        0.0
-    ],
-    "SunRotation": [
-        50.0,
-        -30.0,
-        0.0
-    ],
-    "SunColor": [
-        255,
-        255,
-        255
-    ],
-    "SunAmbientColor": [
-        128,
-        128,
-        128
-    ],
-    "BackgroundColor": [
-        0,
-        0,
-        0
-    ],
-    "Gravity": [
-        0.0,
-        -9.8100004196167,
-        0.0
-    ],
-    "SoundTrack": "",
-    "Mouse": [],
-    "MouseWorld": [],
-    "Cast": [
-        {
-            "ActorName": "Player",
-            "Active": true,
-            "PrefabName": "Player",
-            "Tag": "Player",
-            "Position": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "Rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "Scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "Size": [],
-            "Velocity": [],
-            "AngularVelocity": [],
-            "Density": 0.0,
-            "Friction": 0.0,
-            "Bounciness": 0.0,
-            "Drag": 0.0,
-            "Properties": [],
-            "Script": [
-                {
-                    "When": [],
-                    "Do": [
-                        "Edit(y,1)"
-                    ]
-                },
-                {
-                    "When": [],
-                    "Do": [
-                        "Edit(x,0)"
-                    ]
-                }
-            ]
-        }
-    ],
-    "CustomVariables": []
+    "Cast": []
 }

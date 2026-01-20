@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 using UnityEngine;
+using System.Text.RegularExpressions; // Required for formatting
 
 namespace GameRuleEditor.Core
 {
@@ -26,14 +27,16 @@ namespace GameRuleEditor.Core
         /// </summary>
         public string ExportToJson()
         {
-            // Sync Actors
+            // 1. Sync Actors
             sceneData.Cast = new List<ActorJson>(actors);
 
-            // Backup and Temps cleanup of variables
+            // 2. BACKUP AND TEMP CLEANUP OF VARIABLES
+            // We save the real variables and clear the list in sceneData
+            // so JsonUtility writes "CustomVariables": [] which is easy to find and remove.
             var realVariables = sceneData.CustomVariables;
             sceneData.CustomVariables = new List<CustomVariable>();
 
-            // Temp cleanup of When (To handle Unconditional Rules)
+            // 3. TEMP CLEANUP OF "WHEN" (To handle Unconditional Rules)
             foreach (var actor in sceneData.Cast)
             {
                 if (actor.Script == null) continue;
@@ -44,10 +47,10 @@ namespace GameRuleEditor.Core
                 }
             }
 
-            // Generate base json
-            string json = JsonUtility.ToJson(sceneData, true);
+            // 4. GENERATE BASE JSON
+            string rawJson = JsonUtility.ToJson(sceneData, true);
 
-            // Restore editor state
+            // 5. RESTORE EDITOR STATE (Vital to avoid losing data in the UI)
             sceneData.CustomVariables = realVariables;
             foreach (var actor in sceneData.Cast)
             {
@@ -59,42 +62,101 @@ namespace GameRuleEditor.Core
                 }
             }
 
-            // Build CustomVariables manually and cleanly
+            // 6. MANUAL JSON CONSTRUCTION
+            // We build the file manually to enforce order: Settings -> CustomVars -> Cast
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("{");
+            sb.AppendLine($"    \"GameName\": \"{sceneData.GameName}\",");
+            sb.AppendLine($"    \"ScreenResolution\": [{F(sceneData.ScreenResolution[0])}, {F(sceneData.ScreenResolution[1])}],");
+
+            sb.AppendLine($"    \"CameraPosition\": {Vec3ToJson(sceneData.CameraPosition)},");
+            sb.AppendLine($"    \"CameraRotation\": {Vec3ToJson(sceneData.CameraRotation)},");
+
+            sb.AppendLine($"    \"SunPosition\": {Vec3ToJson(sceneData.SunPosition)},");
+            sb.AppendLine($"    \"SunRotation\": {Vec3ToJson(sceneData.SunRotation)},");
+            sb.AppendLine($"    \"SunColor\": {ColorToJson(sceneData.SunColor)},");
+            sb.AppendLine($"    \"SunAmbientColor\": {ColorToJson(sceneData.SunAmbientColor)},");
+
+            sb.AppendLine($"    \"BackgroundColor\": {ColorToJson(sceneData.BackgroundColor)},");
+            sb.AppendLine($"    \"Gravity\": {Vec3ToJson(sceneData.Gravity)},");
+
+            // Custom Variables
             if (realVariables != null && realVariables.Count > 0)
             {
-                string cleanVariablesJson = BuildCleanCustomVariablesJson(realVariables);
-                json = json.Replace("\"CustomVariables\": []", cleanVariablesJson);
+                sb.Append(BuildCleanCustomVariablesJson(realVariables));
+                sb.AppendLine(",");
+            }
+            else
+            {
+                sb.AppendLine("    \"CustomVariables\": [],");
             }
 
-            // Clean residual When from unconditional rules
-            json = System.Text.RegularExpressions.Regex.Replace(json, "\\s*\"When\": \\[\\],", "");
+            // --- Extract Cast from Raw JSON ---
+            // We strip the auto-generated "CustomVariables": [] from rawJson first
+            rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace(",\n    \"CustomVariables\": []", "").Replace("\"CustomVariables\": []", "");
 
-            return json;
+            int castIndex = rawJson.IndexOf("\"Cast\":");
+            if (castIndex != -1)
+            {
+                // Extract from "Cast": to the end (removing the last closing brace '}')
+                string castContent = rawJson.Substring(castIndex);
+                castContent = castContent.TrimEnd('}', '\r', '\n', ' ');
+
+                // --- COMPACT ARRAYS (Flatten Position, Rotation, etc.) ---
+                // Regex to collapse multi-line arrays into single line [x, y, z]
+                // Matches: "Key": [ \n num, \n num, \n num \n ]
+                string pattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
+                castContent = Regex.Replace(castContent, pattern, ": [$1, $2, $3]");
+
+                sb.Append("    " + castContent);
+            }
+            else
+            {
+                sb.Append("    \"Cast\": []");
+            }
+
+            sb.AppendLine();
+            sb.Append("}");
+
+            string finalJson = sb.ToString();
+
+            // 7. POST-PROCESSING: Clean residual "When": [] from unconditional rules
+            finalJson = Regex.Replace(finalJson, "\\s*\"When\": \\[\\],", "");
+
+            return finalJson;
+        }
+
+        private string F(float f) => f.ToString(CultureInfo.InvariantCulture);
+
+        private string Vec3ToJson(float[] v)
+        {
+            if (v == null || v.Length < 3) return "[0.0, 0.0, 0.0]";
+            return $"[{F(v[0])}, {F(v[1])}, {F(v[2])}]";
+        }
+
+        private string ColorToJson(byte[] c)
+        {
+            if (c == null || c.Length < 3) return "[255, 255, 255]";
+            return $"[{c[0]}, {c[1]}, {c[2]}]";
         }
 
         private string BuildCleanCustomVariablesJson(List<CustomVariable> variables)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("\"CustomVariables\": [");
+            sb.AppendLine("    \"CustomVariables\": [");
 
             for (int i = 0; i < variables.Count; i++)
             {
                 var v = variables[i];
-                sb.Append("        {"); // Indentation for pretty print
+                sb.Append("        {");
                 sb.Append($"\"name\": \"{v.name}\", \"type\": \"{v.type}\"");
 
-                // Write only the relevant value based on the type
                 switch (v.type.ToLower())
                 {
-                    case "int":
-                        sb.Append($", \"intValue\": {v.intValue}");
-                        break;
-                    case "float":
-                        sb.Append($", \"floatValue\": {v.floatValue.ToString(CultureInfo.InvariantCulture)}");
-                        break;
-                    case "bool":
-                        sb.Append($", \"boolValue\": {v.boolValue.ToString().ToLower()}");
-                        break;
+                    case "int": sb.Append($", \"intValue\": {v.intValue}"); break;
+                    case "float": sb.Append($", \"floatValue\": {v.floatValue.ToString(CultureInfo.InvariantCulture)}"); break;
+                    case "bool": sb.Append($", \"boolValue\": {v.boolValue.ToString().ToLower()}"); break;
                     case "vector2":
                     case "vector3":
                         string arrayStr = "[]";
@@ -107,13 +169,10 @@ namespace GameRuleEditor.Core
                         sb.Append($", \"arrayValue\": {arrayStr}");
                         break;
                 }
-
                 sb.Append("}");
-
                 if (i < variables.Count - 1) sb.AppendLine(",");
                 else sb.AppendLine();
             }
-
             sb.Append("    ]");
             return sb.ToString();
         }
@@ -136,7 +195,6 @@ namespace GameRuleEditor.Core
             string json = System.IO.File.ReadAllText(jsonPath);
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
 
-            // Sanitization on import
             if (sceneData.Cast != null)
             {
                 foreach (var actor in sceneData.Cast)
@@ -161,7 +219,6 @@ namespace GameRuleEditor.Core
         }
 
         // --- Helpers ---
-
         public ActorJson AddActor(string actorName, string prefabName)
         {
             ActorJson newActor = new ActorJson
@@ -175,62 +232,43 @@ namespace GameRuleEditor.Core
                 Properties = new List<string>(),
                 Script = new List<SentenceJson>()
             };
-
             actors.Add(newActor);
             return newActor;
         }
 
         public void RemoveActor(ActorJson actor)
-        {
-            actors.Remove(actor);
-        }
+        { actors.Remove(actor); }
 
         public ActorJson DuplicateActor(ActorJson original)
         {
             string json = JsonUtility.ToJson(original);
             ActorJson duplicate = JsonUtility.FromJson<ActorJson>(json);
-
             int counter = 1;
             string baseName = original.ActorName;
             string newName = $"{baseName}_{counter}";
-
-            while (actors.Exists(a => a.ActorName == newName))
-            {
-                counter++;
-                newName = $"{baseName}_{counter}";
-            }
-
+            while (actors.Exists(a => a.ActorName == newName)) { counter++; newName = $"{baseName}_{counter}"; }
             duplicate.ActorName = newName;
             actors.Add(duplicate);
-
             return duplicate;
         }
 
         public List<string> Validate()
         {
             List<string> errors = new List<string>();
-
-            if (string.IsNullOrEmpty(sceneData.GameName))
-                errors.Add("Game name is required");
-
+            if (string.IsNullOrEmpty(sceneData.GameName)) errors.Add("Game name is required");
             HashSet<string> actorNames = new HashSet<string>();
             foreach (var actor in actors)
             {
-                if (actorNames.Contains(actor.ActorName))
-                    errors.Add($"Duplicate actor name: {actor.ActorName}");
-                else
-                    actorNames.Add(actor.ActorName);
+                if (actorNames.Contains(actor.ActorName)) errors.Add($"Duplicate actor name: {actor.ActorName}");
+                else actorNames.Add(actor.ActorName);
 
-                if (string.IsNullOrEmpty(actor.PrefabName))
-                    errors.Add($"Actor '{actor.ActorName}' has no prefab assigned");
+                if (string.IsNullOrEmpty(actor.PrefabName)) errors.Add($"Actor '{actor.ActorName}' has no prefab assigned");
                 else
                 {
                     GameObject prefab = Resources.Load<GameObject>($"Prefabs/{actor.PrefabName}");
-                    if (prefab == null)
-                        errors.Add($"Prefab not found for actor '{actor.ActorName}': {actor.PrefabName}");
+                    if (prefab == null) errors.Add($"Prefab not found for actor '{actor.ActorName}': {actor.PrefabName}");
                 }
             }
-
             return errors;
         }
     }

@@ -48,7 +48,7 @@ namespace GameRuleEditor.CustomControls
             btnContainer.style.flexDirection = FlexDirection.Row;
 
             // Logic Buttons
-            CreateHeaderButton(btnContainer, "+ NOT", "button-success", () => AddElement("NOT"));
+            CreateHeaderButton(btnContainer, "+ NOT", "button-primary", () => AddElement("NOT"));
             CreateHeaderButton(btnContainer, "+ AND", "button-primary", () => AddElement("AND"));
             CreateHeaderButton(btnContainer, "+ OR", "button-primary", () => AddElement("OR"));
 

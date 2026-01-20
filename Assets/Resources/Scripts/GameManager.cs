@@ -32,6 +32,14 @@ public class GameManager : MonoBehaviour
     public Vector3 Mouse = Vector3.zero;
     public Vector3 MouseWorld = Vector3.zero;
 
+    // Custom Global Variables
+    public int VariableInt = 10;
+    public float VariableFloat = 15f;
+    public float VariableFloat2 = 15.5f;
+    public bool VariableBoolTrue = true;
+    public bool VariableBoolFalse = false;
+    public Vector2 VariableVector2 = new Vector2(1f, 2f);
+    public Vector3 VariableVector3 = new Vector3(1f, 2f, 3f);
     void Start()
     {
         if (Instance == null)
