@@ -4,45 +4,43 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.IO;
 
 namespace GameRuleEditor.Windows
 {
     /// <summary>
     /// Main editor window for GameRule.
-    /// Uses UI Toolkit with a tab-based interface.
+    /// Handles Auto-Initialization of the Context and switches between Start Screen and Editor Interface.
     /// </summary>
     public class GameRuleEditorWindow : EditorWindow
     {
-        // Reference to the editor context (loaded from assets)
-        private EditorContext editorContext;
+        // Internal path for the invisible singleton
+        private const string CONTEXT_FOLDER = "Assets/Editor/GameRuleEditor/Projects";
 
-        // Controllers
+        private const string CONTEXT_PATH = CONTEXT_FOLDER + "/EditorContext.asset";
+
+        private EditorContext editorContext;
         private ProjectController projectController;
 
         // UI Elements
-        private ToolbarMenu projectMenu;
+        private VisualElement root;
 
-        private Label projectNameLabel;
-        private Button saveButton;
-        private Button generateButton;
+        private VisualElement contentContainer;
 
-        // Tab system
+        // Navigation
         private enum EditorTab
-        {
-            Scene,
-            Actors,
-            Preview
-        }
+        { Scene, Actors, Preview }
 
         private EditorTab currentTab = EditorTab.Scene;
         private Button sceneTabButton;
         private Button actorsTabButton;
         private Button previewTabButton;
 
-        private VisualElement contentContainer;
+        // Toolbar references (for enabling/disabling)
+        private Label projectNameLabel;
 
-        // Current panel content
-        private VisualElement currentPanel;
+        private ToolbarButton saveButton;
+        private ToolbarButton generateButton;
 
         [MenuItem("GameRule/Editor Window")]
         public static void ShowWindow()
@@ -54,77 +52,46 @@ namespace GameRuleEditor.Windows
 
         private void OnEnable()
         {
-            LoadEditorContext();
+            EnsureEditorContextExists();
             InitializeControllers();
 
             if (editorContext != null)
             {
                 editorContext.OnProjectLoaded += OnProjectLoaded;
-                editorContext.OnProjectChanged += UpdateUI;
+                editorContext.OnProjectChanged += UpdateToolbarUI;
             }
-
-            UpdateUI();
-        }
-
-        private void CreateGUI()
-        {
-            // Root container
-            var root = rootVisualElement;
-            root.style.flexGrow = 1;
-
-            // Load shared styles
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
-            if (styleSheet != null)
-            {
-                root.styleSheets.Add(styleSheet);
-            }
-
-            // Create toolbar
-            CreateToolbar(root);
-
-            // Create tab bar
-            CreateTabBar(root);
-
-            // Create content container
-            contentContainer = new VisualElement();
-            contentContainer.name = "content-container";
-            contentContainer.style.flexGrow = 1;
-            root.Add(contentContainer);
-
-            // Show initial tab
-            ShowTab(EditorTab.Scene);
-
-            // Subscribe to context events
-            if (editorContext != null)
-            {
-                editorContext.OnProjectLoaded += OnProjectLoaded;
-                editorContext.OnProjectChanged += UpdateUI;
-            }
-
-            UpdateUI();
         }
 
         private void OnDisable()
         {
-            // Unsubscribe from events
             if (editorContext != null)
             {
                 editorContext.OnProjectLoaded -= OnProjectLoaded;
-                editorContext.OnProjectChanged -= UpdateUI;
+                editorContext.OnProjectChanged -= UpdateToolbarUI;
             }
         }
 
-        #region Initialization
+        #region Initialization (The "Invisible" Plumbing)
 
-        private void LoadEditorContext()
+        private void EnsureEditorContextExists()
         {
-            const string CONTEXT_PATH = "Assets/Editor/GameRuleEditor/EditorContext.asset";
+            // 1. Try to load existing
             editorContext = AssetDatabase.LoadAssetAtPath<EditorContext>(CONTEXT_PATH);
 
+            // 2. If missing, create it automatically
             if (editorContext == null)
             {
-                Debug.LogWarning("EditorContext not found. Please create it via GameRule > Setup > Create Editor Context");
+                if (!Directory.Exists(CONTEXT_FOLDER))
+                {
+                    Directory.CreateDirectory(CONTEXT_FOLDER);
+                    AssetDatabase.Refresh();
+                }
+
+                editorContext = ScriptableObject.CreateInstance<EditorContext>();
+                AssetDatabase.CreateAsset(editorContext, CONTEXT_PATH);
+                AssetDatabase.SaveAssets();
+
+                Debug.Log($"Initialized GameRule EditorContext at: {CONTEXT_PATH}");
             }
         }
 
@@ -136,9 +103,113 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        #endregion Initialization
+        #endregion Initialization (The "Invisible" Plumbing)
 
-        #region UI Creation
+        #region Main GUI Logic
+
+        private void CreateGUI()
+        {
+            root = rootVisualElement;
+            root.style.flexGrow = 1;
+
+            // Load styles
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
+            if (styleSheet != null) root.styleSheets.Add(styleSheet);
+
+            RefreshInterface();
+        }
+
+        /// <summary>
+        /// Decides whether to show the "Start Screen" or the "Main Editor"
+        /// </summary>
+        private void RefreshInterface()
+        {
+            root.Clear();
+
+            if (editorContext == null)
+            {
+                root.Add(new Label("Error: Could not initialize Editor Context."));
+                return;
+            }
+
+            if (editorContext.currentProject == null)
+            {
+                DrawStartScreen();
+            }
+            else
+            {
+                DrawMainEditorInterface();
+            }
+        }
+
+        #endregion Main GUI Logic
+
+        #region Start Screen
+
+        private void DrawStartScreen()
+        {
+            var container = new VisualElement();
+            container.style.flexGrow = 1;
+            container.style.justifyContent = Justify.Center;
+            container.style.alignItems = Align.Center;
+            container.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+
+            // Logo / Title
+            var title = new Label("GameRule Editor");
+            title.style.fontSize = 32;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginBottom = 10;
+            title.style.color = new Color(0.3f, 0.6f, 0.9f); // Nice blue
+            container.Add(title);
+
+            var subtitle = new Label("Select an action to begin");
+            subtitle.style.fontSize = 14;
+            subtitle.style.marginBottom = 30;
+            subtitle.style.color = Color.gray;
+            container.Add(subtitle);
+
+            // Buttons Container
+            var buttonsBox = new VisualElement();
+            buttonsBox.style.flexDirection = FlexDirection.Row;
+
+            var btnNew = new Button(OnNewProject);
+            btnNew.text = "Create New Project";
+            btnNew.style.width = 150;
+            btnNew.style.height = 40;
+            btnNew.style.fontSize = 12;
+            btnNew.AddToClassList("button-primary");
+            btnNew.style.marginRight = 10;
+            buttonsBox.Add(btnNew);
+
+            var btnOpen = new Button(OnOpenProject);
+            btnOpen.text = "Open Project";
+            btnOpen.style.width = 150;
+            btnOpen.style.height = 40;
+            btnOpen.style.fontSize = 12;
+            buttonsBox.Add(btnOpen);
+
+            container.Add(buttonsBox);
+            root.Add(container);
+        }
+
+        #endregion Start Screen
+
+        #region Main Editor Interface
+
+        private void DrawMainEditorInterface()
+        {
+            CreateToolbar(root);
+            CreateTabBar(root);
+
+            contentContainer = new VisualElement();
+            contentContainer.name = "content-container";
+            contentContainer.style.flexGrow = 1;
+            root.Add(contentContainer);
+
+            // Default to Scene tab
+            ShowTab(EditorTab.Scene);
+            UpdateToolbarUI();
+        }
 
         private void CreateToolbar(VisualElement root)
         {
@@ -146,40 +217,34 @@ namespace GameRuleEditor.Windows
             toolbar.style.height = 30;
 
             // Project menu
-            projectMenu = new ToolbarMenu();
+            var projectMenu = new ToolbarMenu();
             projectMenu.text = "Project";
-            projectMenu.menu.AppendAction("New Project", a => OnNewProject());
-            projectMenu.menu.AppendAction("Open Project", a => OnOpenProject());
+            projectMenu.menu.AppendAction("Close Project", a =>
+            {
+                editorContext.currentProject = null;
+                RefreshInterface();
+            });
             projectMenu.menu.AppendSeparator();
             projectMenu.menu.AppendAction("Import JSON", a => OnImportJson());
             projectMenu.menu.AppendAction("Export to JSON", a => OnExportJson());
             toolbar.Add(projectMenu);
 
-            // Spacer
             toolbar.Add(new ToolbarSpacer());
 
-            // Project name label
-            projectNameLabel = new Label("No Project Loaded");
+            projectNameLabel = new Label("No Project");
             projectNameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             projectNameLabel.style.paddingLeft = 10;
             projectNameLabel.style.paddingRight = 10;
             toolbar.Add(projectNameLabel);
 
-            // Flexible space
             var flexSpace = new VisualElement();
             flexSpace.style.flexGrow = 1;
             toolbar.Add(flexSpace);
 
-            // Save button
-            saveButton = new ToolbarButton(OnSaveProject);
-            saveButton.text = "Save";
-            saveButton.SetEnabled(false);
+            saveButton = new ToolbarButton(OnSaveProject) { text = "Save" };
             toolbar.Add(saveButton);
 
-            // Generate button
-            generateButton = new ToolbarButton(OnGenerateScene);
-            generateButton.text = "Generate Scene";
-            generateButton.SetEnabled(false);
+            generateButton = new ToolbarButton(OnGenerateScene) { text = "Generate Scene" };
             toolbar.Add(generateButton);
 
             root.Add(toolbar);
@@ -193,15 +258,12 @@ namespace GameRuleEditor.Windows
             tabBar.style.height = 35;
             tabBar.style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
 
-            // Scene tab
             sceneTabButton = CreateTabButton("Scene", EditorTab.Scene);
             tabBar.Add(sceneTabButton);
 
-            // Actors tab
             actorsTabButton = CreateTabButton("Actors", EditorTab.Actors);
             tabBar.Add(actorsTabButton);
 
-            // Preview tab
             previewTabButton = CreateTabButton("Preview", EditorTab.Preview);
             tabBar.Add(previewTabButton);
 
@@ -224,288 +286,79 @@ namespace GameRuleEditor.Windows
             button.style.borderRightColor = new Color(0.15f, 0.15f, 0.15f);
             button.style.borderBottomColor = Color.clear;
             button.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-
             return button;
         }
 
-        #endregion UI Creation
+        #endregion Main Editor Interface
 
-        #region Tab Management
-
-        private void ShowTab(EditorTab tab)
-        {
-            currentTab = tab;
-
-            // Update tab button styles
-            UpdateTabButtonStyles();
-
-            // Clear current content
-            contentContainer.Clear();
-
-            // Show appropriate panel
-            switch (tab)
-            {
-                case EditorTab.Scene:
-                    ShowScenePanel();
-                    break;
-
-                case EditorTab.Actors:
-                    ShowActorsPanel();
-                    break;
-
-                case EditorTab.Preview:
-                    ShowPreviewPanel();
-                    break;
-            }
-        }
-
-        private void UpdateTabButtonStyles()
-        {
-            // Reset all tabs
-            sceneTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            sceneTabButton.style.borderBottomColor = Color.clear;
-            actorsTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            actorsTabButton.style.borderBottomColor = Color.clear;
-            previewTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            previewTabButton.style.borderBottomColor = Color.clear;
-
-            // Highlight active tab
-            Button activeButton = null;
-            switch (currentTab)
-            {
-                case EditorTab.Scene: activeButton = sceneTabButton; break;
-                case EditorTab.Actors: activeButton = actorsTabButton; break;
-                case EditorTab.Preview: activeButton = previewTabButton; break;
-            }
-
-            if (activeButton != null)
-            {
-                activeButton.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
-                activeButton.style.borderBottomColor = new Color(0.3f, 0.5f, 0.8f);
-            }
-        }
-
-        private void ShowScenePanel()
-        {
-            var panel = new GameRuleEditor.Panels.SceneSettingsPanel(editorContext, projectController);
-            contentContainer.Add(panel);
-        }
-
-        private void ShowActorsPanel()
-        {
-            // Split view: Actor list on left, tabbed content on right
-            var splitView = new VisualElement();
-            splitView.style.flexDirection = FlexDirection.Row;
-            splitView.style.flexGrow = 1;
-
-            var actorListPanel = new GameRuleEditor.Panels.ActorListPanel(editorContext, projectController);
-            splitView.Add(actorListPanel);
-
-            // Right side with tabs for Details and Script
-            var rightSide = new VisualElement();
-            rightSide.style.flexGrow = 1;
-            rightSide.style.flexDirection = FlexDirection.Column;
-
-            // Sub-tab bar
-            var subTabBar = new VisualElement();
-            subTabBar.style.flexDirection = FlexDirection.Row;
-            subTabBar.style.height = 30;
-            subTabBar.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
-            subTabBar.style.borderBottomWidth = 1;
-            subTabBar.style.borderBottomColor = new Color(0.15f, 0.15f, 0.15f);
-
-            var detailsTab = new Button();
-            detailsTab.text = "Properties";
-            detailsTab.style.flexGrow = 1;
-
-            var scriptTab = new Button();
-            scriptTab.text = "Script Rules";
-            scriptTab.style.flexGrow = 1;
-
-            subTabBar.Add(detailsTab);
-            subTabBar.Add(scriptTab);
-            rightSide.Add(subTabBar);
-
-            // Content area
-            var rightContent = new VisualElement();
-            rightContent.style.flexGrow = 1;
-
-            var actorDetailsPanel = new GameRuleEditor.Panels.ActorDetailsPanel(editorContext, projectController);
-            var scriptEditorPanel = new GameRuleEditor.Panels.ScriptEditorPanel(editorContext, projectController);
-
-            // Initially show details
-            actorDetailsPanel.style.display = DisplayStyle.Flex;
-            scriptEditorPanel.style.display = DisplayStyle.None;
-
-            detailsTab.clicked += () =>
-            {
-                actorDetailsPanel.style.display = DisplayStyle.Flex;
-                scriptEditorPanel.style.display = DisplayStyle.None;
-                detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
-                scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
-                detailsTab.style.borderTopLeftRadius = 0;
-                detailsTab.style.borderTopRightRadius = 0;
-                detailsTab.style.borderBottomLeftRadius = 0;
-                detailsTab.style.borderBottomRightRadius = 0;
-            };
-
-            scriptTab.clicked += () =>
-            {
-                actorDetailsPanel.style.display = DisplayStyle.None;
-                scriptEditorPanel.style.display = DisplayStyle.Flex;
-                detailsTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
-                scriptTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
-                detailsTab.style.borderTopLeftRadius = 0;
-                detailsTab.style.borderTopRightRadius = 0;
-                detailsTab.style.borderBottomLeftRadius = 0;
-                detailsTab.style.borderBottomRightRadius = 0;
-            };
-
-            // Set initial style
-            detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
-            scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
-
-            rightContent.Add(actorDetailsPanel);
-            rightContent.Add(scriptEditorPanel);
-            rightSide.Add(rightContent);
-
-            splitView.Add(rightSide);
-            contentContainer.Add(splitView);
-        }
-
-        private void ShowPreviewPanel()
-        {
-            var panel = new ScrollView();
-            panel.style.flexGrow = 1;
-
-            var label = new Label("JSON PREVIEW");
-            label.style.fontSize = 20;
-            label.style.unityTextAlign = TextAnchor.MiddleCenter;
-            label.style.paddingTop = 20;
-            label.style.color = Color.gray;
-
-            panel.Add(label);
-
-            if (editorContext?.currentProject != null)
-            {
-                string json = editorContext.currentProject.ExportToJson();
-                var jsonField = new TextField();
-                jsonField.multiline = true;
-                jsonField.value = json;
-                jsonField.isReadOnly = true;
-                jsonField.style.flexGrow = 1;
-                jsonField.style.minHeight = 400;
-                jsonField.style.marginLeft = 20;
-                jsonField.style.marginRight = 20;
-                jsonField.style.marginTop = 20;
-
-                panel.Add(jsonField);
-            }
-
-            contentContainer.Add(panel);
-        }
-
-        #endregion Tab Management
-
-        #region Menu Actions
+        #region Actions (New, Open, Save)
 
         private void OnNewProject()
         {
-            string projectName = "NewGameRuleProject";
-
-            // Simple dialog
-            projectName = EditorUtility.SaveFilePanelInProject(
-                "Create New Project",
-                projectName,
+            // Use SaveFilePanel to get a path for the new asset
+            string path = EditorUtility.SaveFilePanelInProject(
+                "Create New GameRule Project",
+                "NewProject",
                 "asset",
-                "Choose location for new project"
+                "Choose where to save the new project"
             );
 
-            if (string.IsNullOrEmpty(projectName))
-                return;
+            if (string.IsNullOrEmpty(path)) return;
 
-            projectController.CreateNewProject(System.IO.Path.GetFileNameWithoutExtension(projectName));
+            string projectName = Path.GetFileNameWithoutExtension(path);
 
-            // Save the project asset
-            AssetDatabase.CreateAsset(editorContext.currentProject, projectName);
+            // Create the logic immediately
+            projectController.CreateNewProject(projectName);
+
+            // Save the asset
+            AssetDatabase.CreateAsset(editorContext.currentProject, path);
             AssetDatabase.SaveAssets();
 
-            UpdateUI();
+            // Refresh UI (will switch to Main Editor)
+            RefreshInterface();
         }
 
         private void OnOpenProject()
         {
-            string path = EditorUtility.OpenFilePanel(
-                "Open GameRule Project",
-                "Assets",
-                "asset"
-            );
+            string path = EditorUtility.OpenFilePanel("Open GameRule Project", "Assets", "asset");
+            if (string.IsNullOrEmpty(path)) return;
 
-            if (string.IsNullOrEmpty(path))
-                return;
-
-            // Convert absolute path to relative
+            // Convert to relative path
             if (path.StartsWith(Application.dataPath))
-            {
                 path = "Assets" + path.Substring(Application.dataPath.Length);
-            }
 
             var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(path);
             if (project != null)
             {
                 projectController.LoadProject(project);
+                RefreshInterface(); // Switch to Main Editor
             }
             else
             {
-                EditorUtility.DisplayDialog("Error", "Could not load project", "OK");
+                EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
             }
         }
 
         private void OnImportJson()
         {
-            string jsonPath = EditorUtility.OpenFilePanel(
-                "Import JSON",
-                Application.dataPath + "/Resources/Games",
-                "json"
-            );
+            string jsonPath = EditorUtility.OpenFilePanel("Import JSON", Application.dataPath + "/Resources/Games", "json");
+            if (string.IsNullOrEmpty(jsonPath)) return;
 
-            if (string.IsNullOrEmpty(jsonPath))
-                return;
-
-            string savePath = EditorUtility.SaveFilePanelInProject(
-                "Save Imported Project",
-                "ImportedProject",
-                "asset",
-                "Choose where to save the project"
-            );
-
-            if (string.IsNullOrEmpty(savePath))
-                return;
+            string savePath = EditorUtility.SaveFilePanelInProject("Save Imported Project", "ImportedProject", "asset", "Choose location");
+            if (string.IsNullOrEmpty(savePath)) return;
 
             projectController.ImportJsonAsProject(jsonPath, savePath);
-            UpdateUI();
+            RefreshInterface();
         }
 
         private void OnExportJson()
         {
-            if (editorContext?.currentProject == null)
+            string path = EditorUtility.SaveFilePanel("Export to JSON", Application.dataPath + "/Resources/Games", editorContext.currentProject.projectName + ".json", "json");
+            if (!string.IsNullOrEmpty(path))
             {
-                EditorUtility.DisplayDialog("Error", "No project loaded", "OK");
-                return;
+                projectController.SaveProjectToJson(path);
+                EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
             }
-
-            string path = EditorUtility.SaveFilePanel(
-                "Export to JSON",
-                Application.dataPath + "/Resources/Games",
-                editorContext.currentProject.projectName + ".json",
-                "json"
-            );
-
-            if (string.IsNullOrEmpty(path))
-                return;
-
-            projectController.SaveProjectToJson(path);
-            EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
         }
 
         private void OnSaveProject()
@@ -520,60 +373,183 @@ namespace GameRuleEditor.Windows
 
         private void OnGenerateScene()
         {
-            if (editorContext?.currentProject == null)
-            {
-                EditorUtility.DisplayDialog("Error", "No project loaded", "OK");
-                return;
-            }
+            if (editorContext?.currentProject == null) return;
 
-            // Validate first
             var errors = projectController.ValidateProject();
             if (errors.Count > 0)
             {
-                string errorMsg = "Cannot generate scene. Errors found:\n\n" + string.Join("\n", errors);
-                EditorUtility.DisplayDialog("Validation Errors", errorMsg, "OK");
+                EditorUtility.DisplayDialog("Validation Errors", string.Join("\n", errors), "OK");
                 return;
             }
 
-            // Export to temp JSON and load using existing Loader
+            // Export temp JSON
             string tempPath = Application.dataPath + "/Resources/Games/_temp_editor_export.json";
             projectController.SaveProjectToJson(tempPath);
 
-            // Use existing Loader
+            // Load Scene
             Loader.LoadJson("_temp_editor_export.json");
-
             EditorUtility.DisplayDialog("Success", "Scene generated successfully!", "OK");
         }
 
-        #endregion Menu Actions
+        #endregion Actions (New, Open, Save)
 
-        #region Event Handlers
+        #region Tab Management
 
-        private void OnProjectLoaded()
+        private void ShowTab(EditorTab tab)
         {
-            UpdateUI();
-            ShowTab(currentTab); // Refresh current tab
-        }
+            currentTab = tab;
+            UpdateTabButtonStyles();
+            contentContainer.Clear();
 
-        #endregion Event Handlers
-
-        #region UI Updates
-
-        private void UpdateUI()
-        {
-            bool hasProject = editorContext?.currentProject != null;
-
-            if (projectNameLabel != null)
+            switch (tab)
             {
-                projectNameLabel.text = hasProject
-                    ? editorContext.currentProject.projectName
-                    : "No Project Loaded";
-            }
+                case EditorTab.Scene:
+                    contentContainer.Add(new GameRuleEditor.Panels.SceneSettingsPanel(editorContext, projectController));
+                    break;
 
-            if (saveButton != null) saveButton.SetEnabled(hasProject);
-            if (generateButton != null) generateButton.SetEnabled(hasProject);
+                case EditorTab.Actors:
+                    ShowActorsPanel();
+                    break;
+
+                case EditorTab.Preview:
+                    ShowPreviewPanel();
+                    break;
+            }
         }
 
-        #endregion UI Updates
+        private void UpdateTabButtonStyles()
+        {
+            // Reset
+            sceneTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            sceneTabButton.style.borderBottomColor = Color.clear;
+            actorsTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            actorsTabButton.style.borderBottomColor = Color.clear;
+            previewTabButton.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            previewTabButton.style.borderBottomColor = Color.clear;
+
+            // Highlight Active
+            Button active = null;
+            switch (currentTab)
+            {
+                case EditorTab.Scene: active = sceneTabButton; break;
+                case EditorTab.Actors: active = actorsTabButton; break;
+                case EditorTab.Preview: active = previewTabButton; break;
+            }
+            if (active != null)
+            {
+                active.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+                active.style.borderBottomColor = new Color(0.3f, 0.5f, 0.8f);
+            }
+        }
+
+        // --- Panel Constructors ---
+
+        private void ShowActorsPanel()
+        {
+            var splitView = new VisualElement();
+            splitView.style.flexDirection = FlexDirection.Row;
+            splitView.style.flexGrow = 1;
+
+            var actorListPanel = new GameRuleEditor.Panels.ActorListPanel(editorContext, projectController);
+            splitView.Add(actorListPanel);
+
+            var rightSide = new VisualElement();
+            rightSide.style.flexGrow = 1;
+            rightSide.style.flexDirection = FlexDirection.Column;
+
+            // Sub-tabs
+            var subTabBar = new VisualElement();
+            subTabBar.style.flexDirection = FlexDirection.Row;
+            subTabBar.style.height = 30;
+            subTabBar.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+            subTabBar.style.borderBottomWidth = 1;
+            subTabBar.style.borderBottomColor = new Color(0.15f, 0.15f, 0.15f);
+
+            var detailsTab = new Button() { text = "Properties", style = { flexGrow = 1 } };
+            var scriptTab = new Button() { text = "Script Rules", style = { flexGrow = 1 } };
+            subTabBar.Add(detailsTab);
+            subTabBar.Add(scriptTab);
+            rightSide.Add(subTabBar);
+
+            var rightContent = new VisualElement();
+            rightContent.style.flexGrow = 1;
+
+            var detailsPanel = new GameRuleEditor.Panels.ActorDetailsPanel(editorContext, projectController);
+            var scriptPanel = new GameRuleEditor.Panels.ScriptEditorPanel(editorContext, projectController);
+
+            detailsPanel.style.display = DisplayStyle.Flex;
+            scriptPanel.style.display = DisplayStyle.None;
+
+            detailsTab.clicked += () =>
+            {
+                detailsPanel.style.display = DisplayStyle.Flex;
+                scriptPanel.style.display = DisplayStyle.None;
+                detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+                scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+            };
+
+            scriptTab.clicked += () =>
+            {
+                detailsPanel.style.display = DisplayStyle.None;
+                scriptPanel.style.display = DisplayStyle.Flex;
+                detailsTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+                scriptTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+            };
+
+            // Init styles
+            detailsTab.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+            scriptTab.style.backgroundColor = new Color(0.28f, 0.28f, 0.28f);
+
+            rightContent.Add(detailsPanel);
+            rightContent.Add(scriptPanel);
+            rightSide.Add(rightContent);
+
+            splitView.Add(rightSide);
+            contentContainer.Add(splitView);
+        }
+
+        private void ShowPreviewPanel()
+        {
+            var panel = new ScrollView();
+            panel.style.flexGrow = 1;
+            var label = new Label("JSON PREVIEW")
+            {
+                style = {
+                    fontSize = 20, unityTextAlign = TextAnchor.MiddleCenter,
+                    paddingTop = 20, color = Color.gray
+                }
+            };
+            panel.Add(label);
+
+            if (editorContext?.currentProject != null)
+            {
+                string json = editorContext.currentProject.ExportToJson();
+                var jsonField = new TextField();
+                jsonField.multiline = true;
+                jsonField.value = json;
+                jsonField.isReadOnly = true;
+                jsonField.style.flexGrow = 1;
+                jsonField.style.minHeight = 400;
+                jsonField.style.marginLeft = 20;
+                jsonField.style.marginRight = 20;
+                jsonField.style.marginTop = 20;
+                panel.Add(jsonField);
+            }
+            contentContainer.Add(panel);
+        }
+
+        #endregion Tab Management
+
+        // Event Handler: Only updates specific labels/buttons, does NOT redraw the whole window
+        private void OnProjectLoaded() => RefreshInterface();
+
+        private void UpdateToolbarUI()
+        {
+            if (projectNameLabel != null && editorContext?.currentProject != null)
+                projectNameLabel.text = editorContext.currentProject.projectName;
+
+            if (saveButton != null) saveButton.SetEnabled(editorContext?.currentProject != null);
+            if (generateButton != null) generateButton.SetEnabled(editorContext?.currentProject != null);
+        }
     }
 }

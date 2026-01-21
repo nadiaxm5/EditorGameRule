@@ -1,22 +1,35 @@
 {
-    "GameName": "NewGameRuleProject1501",
+    "GameName": "NewProject2101",
     "ScreenResolution": [1920, 1080],
-    "CameraPosition": [10, 1, -10],
-    "CameraRotation": [0, 0, 0],
-    "SunPosition": [0, 3, 0],
-    "SunRotation": [50, -30, 0],
-    "SunColor": [255, 255, 255],
-    "SunAmbientColor": [128, 128, 128],
+    "CameraPosition": [0, 6, -7],
+    "CameraRotation": [30, 0, 0],
+    "SunPosition": [3.3899, 10.902, -5.8255],
+    "SunRotation": [22.704, 65.875, -175.012],
+    "SunColor": [195, 184, 255],
+    "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
     "CustomVariables": [
-        {"name": "VariableInt", "type": "int", "intValue": 10},
-        {"name": "VariableFloat", "type": "float", "floatValue": 15},
-        {"name": "VariableFloat2", "type": "float", "floatValue": 15.5},
-        {"name": "VariableBoolTrue", "type": "bool", "boolValue": true},
-        {"name": "VariableBoolFalse", "type": "bool", "boolValue": false},
-        {"name": "VariableVector2", "type": "vector2", "arrayValue": [1, 2]},
-        {"name": "VariableVector3", "type": "vector3", "arrayValue": [1, 2, 3]}
+        {"name": "Score", "type": "float", "floatValue": 0}
     ],
-    "Cast": []
+    "Cast": [
+        {
+            "ActorName": "Environment",
+            "Active": true,
+            "PrefabName": "Environment",
+            "Tag": "Obstacle",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Size": [],
+            "Velocity": [],
+            "AngularVelocity": [],
+            "Density": 0.0,
+            "Friction": 0.0,
+            "Bounciness": 0.0,
+            "Drag": 0.0,
+            "Properties": [],
+            "Script": []
+        }
+    ]
 }

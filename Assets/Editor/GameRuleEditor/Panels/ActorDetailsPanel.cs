@@ -20,10 +20,17 @@ namespace GameRuleEditor.Panels
         private TextField tagField;
         private Toggle activeToggle;
 
+        // Transform
         private Vector3Field positionField;
+
         private Vector3Field rotationField;
         private Vector3Field scaleField;
+        private Vector3Field sizeField; // New
 
+        // Physics
+        private Vector3Field velocityField;        // New
+
+        private Vector3Field angularVelocityField; // New
         private FloatField densityField;
         private FloatField frictionField;
         private FloatField bouncinessField;
@@ -76,7 +83,7 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            // Basic Properties Section
+            // --- Basic Properties Section ---
             var basicSection = CreateSection("Basic Properties");
             scrollView.Add(basicSection);
 
@@ -120,7 +127,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Active State");
             });
 
-            // Transform Section
+            // --- Transform Section ---
             var transformSection = CreateSection("Transform");
             scrollView.Add(transformSection);
 
@@ -154,11 +161,41 @@ namespace GameRuleEditor.Panels
                 }, "Change Scale");
             });
 
-            // Physics Section
+            sizeField = CreateVector3Field(transformSection, "Size (Target):");
+            sizeField.RegisterValueChangedCallback(evt =>
+            {
+                if (context.selectedActorIndex < 0) return;
+                controller.UpdateActorProperty(context.selectedActorIndex, () =>
+                {
+                    context.SelectedActor.Size = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                }, "Change Size");
+            });
+
+            // --- Physics Section ---
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
-            densityField = CreateFloatField(physicsSection, "Density:");
+            velocityField = CreateVector3Field(physicsSection, "Linear Velocity:");
+            velocityField.RegisterValueChangedCallback(evt =>
+            {
+                if (context.selectedActorIndex < 0) return;
+                controller.UpdateActorProperty(context.selectedActorIndex, () =>
+                {
+                    context.SelectedActor.Velocity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                }, "Change Velocity");
+            });
+
+            angularVelocityField = CreateVector3Field(physicsSection, "Angular Velocity:");
+            angularVelocityField.RegisterValueChangedCallback(evt =>
+            {
+                if (context.selectedActorIndex < 0) return;
+                controller.UpdateActorProperty(context.selectedActorIndex, () =>
+                {
+                    context.SelectedActor.AngularVelocity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                }, "Change Angular Velocity");
+            });
+
+            densityField = CreateFloatField(physicsSection, "Density (Mass):");
             densityField.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
@@ -188,7 +225,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Bounciness");
             });
 
-            dragField = CreateFloatField(physicsSection, "Drag:");
+            dragField = CreateFloatField(physicsSection, "Drag (Damping):");
             dragField.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
@@ -198,7 +235,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Drag");
             });
 
-            // Custom Properties Section
+            // --- Custom Properties Section ---
             var propsSection = CreateSection("Custom Properties");
             scrollView.Add(propsSection);
 
@@ -329,7 +366,22 @@ namespace GameRuleEditor.Panels
             else
                 scaleField.SetValueWithoutNotify(Vector3.one);
 
+            if (actor.Size != null && actor.Size.Length >= 3)
+                sizeField.SetValueWithoutNotify(new Vector3(actor.Size[0], actor.Size[1], actor.Size[2]));
+            else
+                sizeField.SetValueWithoutNotify(Vector3.zero);
+
             // Physics
+            if (actor.Velocity != null && actor.Velocity.Length >= 3)
+                velocityField.SetValueWithoutNotify(new Vector3(actor.Velocity[0], actor.Velocity[1], actor.Velocity[2]));
+            else
+                velocityField.SetValueWithoutNotify(Vector3.zero);
+
+            if (actor.AngularVelocity != null && actor.AngularVelocity.Length >= 3)
+                angularVelocityField.SetValueWithoutNotify(new Vector3(actor.AngularVelocity[0], actor.AngularVelocity[1], actor.AngularVelocity[2]));
+            else
+                angularVelocityField.SetValueWithoutNotify(Vector3.zero);
+
             densityField.SetValueWithoutNotify(actor.Density);
             frictionField.SetValueWithoutNotify(actor.Friction);
             bouncinessField.SetValueWithoutNotify(actor.Bounciness);
