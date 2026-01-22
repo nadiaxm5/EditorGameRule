@@ -70,31 +70,6 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script: []
-    - ActorName: NewActor
-      Active: 1
-      PrefabName: Empty
-      Tag: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
-      Script: []
     CustomVariables:
     - name: Score
       type: float
@@ -102,4 +77,29 @@ MonoBehaviour:
       floatValue: 0
       boolValue: 0
       arrayValue: []
-  actors: []
+  actors:
+  - ActorName: Environment
+    Active: 1
+    PrefabName: Environment
+    Tag: Obstacle
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
