@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.IO;
 
 namespace GameRuleEditor.Controllers
 {
@@ -92,6 +93,7 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, "Add Custom Variable");
 
+            // Removed "GameRuleEditor.Core." prefix - referencing global namespace class
             CustomVariable newVar = new CustomVariable
             {
                 name = name,
@@ -153,15 +155,20 @@ namespace GameRuleEditor.Controllers
         #region Actor Operations
 
         /// <summary>
-        /// Adds a new actor to the project
+        /// Adds a new actor to the project with a default "Empty" prefab.
+        /// Automatically creates the Empty prefab if it doesn't exist.
         /// </summary>
-        public void AddActor(string actorName, string prefabName)
+        public void AddActor(string actorName)
         {
             if (context.currentProject == null) return;
 
             Undo.RecordObject(context.currentProject, "Add Actor");
 
-            ActorJson newActor = context.currentProject.AddActor(actorName, prefabName);
+            // Ensure "Empty" prefab exists
+            EnsureEmptyPrefabExists();
+
+            // Default to "Empty" prefab. Removed incorrect namespace prefix.
+            ActorJson newActor = context.currentProject.AddActor(actorName, "Empty");
 
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyActorListChanged();
@@ -169,6 +176,28 @@ namespace GameRuleEditor.Controllers
             // Auto-select the new actor
             int newIndex = context.currentProject.actors.Count - 1;
             context.SelectActor(newIndex);
+        }
+
+        private void EnsureEmptyPrefabExists()
+        {
+            string folderPath = "Assets/Resources/Prefabs";
+            string prefabPath = folderPath + "/Empty.prefab";
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+                AssetDatabase.Refresh();
+            }
+
+            if (!File.Exists(prefabPath))
+            {
+                // Create a simple empty GameObject
+                GameObject emptyGO = new GameObject("Empty");
+                PrefabUtility.SaveAsPrefabAsset(emptyGO, prefabPath);
+                Object.DestroyImmediate(emptyGO);
+                AssetDatabase.Refresh();
+                Debug.Log("Created default 'Empty' prefab at " + prefabPath);
+            }
         }
 
         /// <summary>
@@ -321,6 +350,7 @@ namespace GameRuleEditor.Controllers
                 actor.Script = new List<SentenceJson>();
             }
 
+            // Removed incorrect namespace prefixes
             SentenceJson newRule = new SentenceJson
             {
                 When = hasCondition ? new List<string> { "" } : new List<string>(),

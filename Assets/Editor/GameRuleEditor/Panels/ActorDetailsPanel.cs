@@ -1,36 +1,32 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
+using UnityEditor.UIElements; // Required for ObjectField
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 
 namespace GameRuleEditor.Panels
 {
-    /// <summary>
-    /// Panel for editing the selected actor's properties
-    /// </summary>
     public class ActorDetailsPanel : VisualElement
     {
         private EditorContext context;
         private ProjectController controller;
 
         private TextField actorNameField;
-        private TextField prefabNameField;
+        private ObjectField prefabPicker; // CHANGED: Replaced TextField
         private TextField tagField;
         private Toggle activeToggle;
 
         // Transform
         private Vector3Field positionField;
-
         private Vector3Field rotationField;
         private Vector3Field scaleField;
-        private Vector3Field sizeField; // New
+        private Vector3Field sizeField;
 
         // Physics
-        private Vector3Field velocityField;        // New
-
-        private Vector3Field angularVelocityField; // New
+        private Vector3Field velocityField;
+        private Vector3Field angularVelocityField;
         private FloatField densityField;
         private FloatField frictionField;
         private FloatField bouncinessField;
@@ -50,32 +46,26 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            // Subscribe to events
             context.OnActorSelected += _ => UpdateUI();
             context.OnProjectChanged += UpdateUI;
         }
 
         private void CreateUI()
         {
-            // No selection message
             noSelectionContainer = new VisualElement();
             noSelectionContainer.style.flexGrow = 1;
             noSelectionContainer.style.justifyContent = Justify.Center;
             noSelectionContainer.style.alignItems = Align.Center;
-
             var noSelectionLabel = new Label("Select an actor to edit its properties");
             noSelectionLabel.style.fontSize = 14;
             noSelectionLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
             noSelectionContainer.Add(noSelectionLabel);
-
             Add(noSelectionContainer);
 
-            // Properties container (initially hidden)
             var scrollView = new ScrollView();
             scrollView.style.flexGrow = 1;
             scrollView.style.display = DisplayStyle.None;
 
-            // Header
             var header = new Label("Actor Properties");
             header.AddToClassList("panel-header");
             header.style.fontSize = 18;
@@ -97,15 +87,36 @@ namespace GameRuleEditor.Panels
                 }, "Change Actor Name");
             });
 
-            prefabNameField = CreateTextField(basicSection, "Prefab Name:");
-            prefabNameField.RegisterValueChangedCallback(evt =>
+            // CHANGED: ObjectField for Prefab
+            var prefabRow = new VisualElement();
+            prefabRow.style.flexDirection = FlexDirection.Row;
+            prefabRow.style.alignItems = Align.Center;
+            prefabRow.style.marginBottom = 5;
+            var prefabLabel = new Label("Prefab:") { style = { minWidth = 150 } };
+            prefabRow.Add(prefabLabel);
+
+            prefabPicker = new ObjectField();
+            prefabPicker.objectType = typeof(GameObject);
+            prefabPicker.allowSceneObjects = false;
+            prefabPicker.style.flexGrow = 1;
+            prefabPicker.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
+
                 controller.UpdateActorProperty(context.selectedActorIndex, () =>
                 {
-                    context.SelectedActor.PrefabName = evt.newValue;
-                }, "Change Prefab Name");
+                    if (evt.newValue == null)
+                    {
+                        context.SelectedActor.PrefabName = "Empty"; // Default safety fallback
+                    }
+                    else
+                    {
+                        context.SelectedActor.PrefabName = evt.newValue.name;
+                    }
+                }, "Change Prefab");
             });
+            prefabRow.Add(prefabPicker);
+            basicSection.Add(prefabRow);
 
             tagField = CreateTextField(basicSection, "Tag:");
             tagField.RegisterValueChangedCallback(evt =>
@@ -254,13 +265,11 @@ namespace GameRuleEditor.Panels
         {
             var section = new VisualElement();
             section.AddToClassList("panel-section");
-
             var titleLabel = new Label(title);
             titleLabel.style.fontSize = 14;
             titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             titleLabel.style.marginBottom = 8;
             section.Add(titleLabel);
-
             return section;
         }
 
@@ -294,15 +303,12 @@ namespace GameRuleEditor.Panels
             container.style.flexDirection = FlexDirection.Row;
             container.style.alignItems = Align.Center;
             container.style.marginBottom = 5;
-
             var labelElement = new Label(label);
             labelElement.style.minWidth = 150;
             container.Add(labelElement);
-
             var field = new Vector3Field();
             field.style.flexGrow = 1;
             container.Add(field);
-
             parent.Add(container);
             return field;
         }
@@ -310,8 +316,6 @@ namespace GameRuleEditor.Panels
         private void ShowAddPropertyDialog()
         {
             if (context.selectedActorIndex < 0) return;
-
-            // Simple property format: "propertyName=value"
             var dialog = ScriptableObject.CreateInstance<AddPropertyDialog>();
             dialog.ShowModal(propertyDef =>
             {
@@ -328,59 +332,33 @@ namespace GameRuleEditor.Panels
 
             if (actor == null)
             {
-                // Show "no selection" message
                 noSelectionContainer.style.display = DisplayStyle.Flex;
                 this.Q<ScrollView>().style.display = DisplayStyle.None;
                 return;
             }
 
-            // Show properties
             noSelectionContainer.style.display = DisplayStyle.None;
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
-            // Update fields without triggering callbacks
+            // Updates without callbacks
             if (actorNameField.value != (actor.ActorName ?? ""))
                 actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
 
-            if (prefabNameField.value != (actor.PrefabName ?? ""))
-                prefabNameField.SetValueWithoutNotify(actor.PrefabName ?? "");
+            // UPDATE PREFAB FIELD: Try to load from Resources
+            GameObject prefabObj = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));
+            prefabPicker.SetValueWithoutNotify(prefabObj);
 
             if (tagField.value != (actor.Tag ?? ""))
                 tagField.SetValueWithoutNotify(actor.Tag ?? "");
 
             activeToggle.SetValueWithoutNotify(actor.Active);
 
-            // Transform
-            if (actor.Position != null && actor.Position.Length >= 3)
-                positionField.SetValueWithoutNotify(new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]));
-            else
-                positionField.SetValueWithoutNotify(Vector3.zero);
-
-            if (actor.Rotation != null && actor.Rotation.Length >= 3)
-                rotationField.SetValueWithoutNotify(new Vector3(actor.Rotation[0], actor.Rotation[1], actor.Rotation[2]));
-            else
-                rotationField.SetValueWithoutNotify(Vector3.zero);
-
-            if (actor.Scale != null && actor.Scale.Length >= 3)
-                scaleField.SetValueWithoutNotify(new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]));
-            else
-                scaleField.SetValueWithoutNotify(Vector3.one);
-
-            if (actor.Size != null && actor.Size.Length >= 3)
-                sizeField.SetValueWithoutNotify(new Vector3(actor.Size[0], actor.Size[1], actor.Size[2]));
-            else
-                sizeField.SetValueWithoutNotify(Vector3.zero);
-
-            // Physics
-            if (actor.Velocity != null && actor.Velocity.Length >= 3)
-                velocityField.SetValueWithoutNotify(new Vector3(actor.Velocity[0], actor.Velocity[1], actor.Velocity[2]));
-            else
-                velocityField.SetValueWithoutNotify(Vector3.zero);
-
-            if (actor.AngularVelocity != null && actor.AngularVelocity.Length >= 3)
-                angularVelocityField.SetValueWithoutNotify(new Vector3(actor.AngularVelocity[0], actor.AngularVelocity[1], actor.AngularVelocity[2]));
-            else
-                angularVelocityField.SetValueWithoutNotify(Vector3.zero);
+            UpdateVector3(positionField, actor.Position, Vector3.zero);
+            UpdateVector3(rotationField, actor.Rotation, Vector3.zero);
+            UpdateVector3(scaleField, actor.Scale, Vector3.one);
+            UpdateVector3(sizeField, actor.Size, Vector3.zero);
+            UpdateVector3(velocityField, actor.Velocity, Vector3.zero);
+            UpdateVector3(angularVelocityField, actor.AngularVelocity, Vector3.zero);
 
             densityField.SetValueWithoutNotify(actor.Density);
             frictionField.SetValueWithoutNotify(actor.Friction);
@@ -390,37 +368,37 @@ namespace GameRuleEditor.Panels
             UpdatePropertiesList();
         }
 
+        private void UpdateVector3(Vector3Field field, float[] data, Vector3 defaultVal)
+        {
+            if (data != null && data.Length >= 3)
+                field.SetValueWithoutNotify(new Vector3(data[0], data[1], data[2]));
+            else
+                field.SetValueWithoutNotify(defaultVal);
+        }
+
         private void UpdatePropertiesList()
         {
             propertiesContainer.Clear();
-
             var actor = context.SelectedActor;
             if (actor?.Properties == null || actor.Properties.Count == 0)
             {
-                var emptyLabel = new Label("No custom properties");
-                emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
-                emptyLabel.style.fontSize = 10;
-                emptyLabel.style.marginTop = 5;
+                var emptyLabel = new Label("No custom properties") { style = { color = new Color(0.5f, 0.5f, 0.5f), fontSize = 10, marginTop = 5 } };
                 propertiesContainer.Add(emptyLabel);
                 return;
             }
 
             for (int i = 0; i < actor.Properties.Count; i++)
             {
-                int index = i; // Capture for closure
+                int index = i;
                 string property = actor.Properties[i];
-
                 var item = new VisualElement();
                 item.AddToClassList("list-item");
                 item.style.marginTop = 5;
 
-                var label = new Label(property);
-                label.style.flexGrow = 1;
-                label.style.fontSize = 11;
+                var label = new Label(property) { style = { flexGrow = 1, fontSize = 11 } };
                 item.Add(label);
 
-                var removeBtn = new Button(() =>
-                    controller.RemoveActorProperty(context.selectedActorIndex, index));
+                var removeBtn = new Button(() => controller.RemoveActorProperty(context.selectedActorIndex, index));
                 removeBtn.text = "Remove";
                 removeBtn.AddToClassList("button-danger");
                 removeBtn.style.width = 80;
@@ -439,7 +417,7 @@ namespace GameRuleEditor.Panels
         }
     }
 
-    // Simple dialog for adding properties
+    // Helper Dialog remains the same
     public class AddPropertyDialog : EditorWindow
     {
         private System.Action<string> callback;
@@ -452,7 +430,6 @@ namespace GameRuleEditor.Panels
             titleContent = new GUIContent("Add Property");
             minSize = new Vector2(300, 120);
             maxSize = new Vector2(300, 120);
-
             ShowModal();
         }
 
@@ -461,20 +438,12 @@ namespace GameRuleEditor.Panels
             GUILayout.Space(10);
             GUILayout.Label("Property Definition", EditorStyles.boldLabel);
             GUILayout.Space(5);
-
             propertyName = EditorGUILayout.TextField("Name:", propertyName);
             propertyValue = EditorGUILayout.FloatField("Value:", propertyValue);
-
             GUILayout.Space(10);
-
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-
-            if (GUILayout.Button("Cancel", GUILayout.Width(80)))
-            {
-                Close();
-            }
-
+            if (GUILayout.Button("Cancel", GUILayout.Width(80))) Close();
             if (GUILayout.Button("Add", GUILayout.Width(80)))
             {
                 if (!string.IsNullOrEmpty(propertyName))
@@ -483,7 +452,6 @@ namespace GameRuleEditor.Panels
                     Close();
                 }
             }
-
             GUILayout.EndHorizontal();
         }
     }

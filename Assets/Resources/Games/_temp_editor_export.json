@@ -12,24 +12,5 @@
     "CustomVariables": [
         {"name": "Score", "type": "float", "floatValue": 0}
     ],
-    "Cast": [
-        {
-            "ActorName": "Environment",
-            "Active": true,
-            "PrefabName": "Environment",
-            "Tag": "Obstacle",
-            "Position": [0.0, 0.0, 0.0],
-            "Rotation": [0.0, 0.0, 0.0],
-            "Scale": [1.0, 1.0, 1.0],
-            "Size": [],
-            "Velocity": [],
-            "AngularVelocity": [],
-            "Density": 0.0,
-            "Friction": 0.0,
-            "Bounciness": 0.0,
-            "Drag": 0.0,
-            "Properties": [],
-            "Script": []
-        }
-    ]
+    "Cast": []
 }

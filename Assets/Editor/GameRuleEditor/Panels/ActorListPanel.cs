@@ -7,9 +7,6 @@ using GameRuleEditor.Controllers;
 
 namespace GameRuleEditor.Panels
 {
-    /// <summary>
-    /// Panel that displays the list of actors with add/remove/duplicate functionality
-    /// </summary>
     public class ActorListPanel : VisualElement
     {
         private EditorContext context;
@@ -32,16 +29,13 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            // Subscribe to events
             context.OnProjectLoaded += UpdateUI;
             context.OnActorListChanged += UpdateUI;
             context.OnActorSelected += OnActorSelected;
-            context.OnProjectChanged += UpdateUI;
         }
 
         private void CreateUI()
         {
-            // Header
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
@@ -68,7 +62,6 @@ namespace GameRuleEditor.Panels
 
             Add(header);
 
-            // Scroll view for actor list
             var scrollView = new ScrollView();
             scrollView.style.flexGrow = 1;
 
@@ -81,7 +74,6 @@ namespace GameRuleEditor.Panels
 
             Add(scrollView);
 
-            // Footer with count
             var footer = new VisualElement();
             footer.style.paddingTop = 5;
             footer.style.paddingBottom = 5;
@@ -112,17 +104,14 @@ namespace GameRuleEditor.Panels
                 emptyLabel.style.marginTop = 20;
                 emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
                 actorListContainer.Add(emptyLabel);
-
                 UpdateCount(0);
                 return;
             }
 
-            // Create list items
             for (int i = 0; i < context.currentProject.actors.Count; i++)
             {
-                int index = i; // Capture for closure
+                int index = i;
                 var actor = context.currentProject.actors[i];
-
                 var item = CreateActorItem(actor, index);
                 actorListContainer.Add(item);
                 actorItems.Add(item);
@@ -130,7 +119,6 @@ namespace GameRuleEditor.Panels
 
             UpdateCount(context.currentProject.actors.Count);
 
-            // Restore selection
             if (context.selectedActorIndex >= 0 && context.selectedActorIndex < actorItems.Count)
             {
                 HighlightItem(context.selectedActorIndex);
@@ -146,33 +134,25 @@ namespace GameRuleEditor.Panels
             item.style.paddingBottom = 8;
             item.style.paddingLeft = 10;
             item.style.paddingRight = 10;
-            item.style.cursor = new UnityEngine.UIElements.Cursor() { texture = null }; // Pointer cursor
+            item.style.cursor = new UnityEngine.UIElements.Cursor() { texture = null };
 
-            // Make clickable
-            item.RegisterCallback<MouseDownEvent>(evt =>
-            {
-                context.SelectActor(index);
-            });
+            item.RegisterCallback<MouseDownEvent>(evt => context.SelectActor(index));
 
-            // Content container
             var content = new VisualElement();
             content.style.flexDirection = FlexDirection.Column;
             content.style.flexGrow = 1;
 
-            // Actor name
             var nameLabel = new Label(actor.ActorName);
             nameLabel.style.fontSize = 12;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.marginBottom = 2;
             content.Add(nameLabel);
 
-            // Prefab name
             var prefabLabel = new Label($"Prefab: {actor.PrefabName}");
             prefabLabel.style.fontSize = 10;
             prefabLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
             content.Add(prefabLabel);
 
-            // Script count
             int scriptCount = actor.Script?.Count ?? 0;
             var scriptLabel = new Label($"Rules: {scriptCount}");
             scriptLabel.style.fontSize = 10;
@@ -181,12 +161,10 @@ namespace GameRuleEditor.Panels
 
             item.Add(content);
 
-            // Button container
             var buttonContainer = new VisualElement();
             buttonContainer.style.flexDirection = FlexDirection.Row;
             buttonContainer.style.marginTop = 5;
 
-            // Duplicate button
             var duplicateBtn = new Button(() => controller.DuplicateActor(index));
             duplicateBtn.text = "Duplicate";
             duplicateBtn.style.fontSize = 9;
@@ -195,14 +173,9 @@ namespace GameRuleEditor.Panels
             duplicateBtn.style.marginRight = 2;
             buttonContainer.Add(duplicateBtn);
 
-            // Remove button
             var removeBtn = new Button(() =>
             {
-                if (EditorUtility.DisplayDialog(
-                    "Remove Actor",
-                    $"Are you sure you want to remove '{actor.ActorName}'?",
-                    "Remove",
-                    "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove Actor", $"Are you sure you want to remove '{actor.ActorName}'?", "Remove", "Cancel"))
                 {
                     controller.RemoveActor(index);
                 }
@@ -221,64 +194,34 @@ namespace GameRuleEditor.Panels
 
         private void OnActorSelected(int index)
         {
-            // Remove highlight from all items
-            foreach (var item in actorItems)
-            {
-                item.RemoveFromClassList("list-item-selected");
-            }
-
-            // Highlight selected item
-            if (index >= 0 && index < actorItems.Count)
-            {
-                HighlightItem(index);
-            }
+            foreach (var item in actorItems) item.RemoveFromClassList("list-item-selected");
+            if (index >= 0 && index < actorItems.Count) HighlightItem(index);
         }
 
         private void HighlightItem(int index)
         {
-            if (index >= 0 && index < actorItems.Count)
-            {
-                actorItems[index].AddToClassList("list-item-selected");
-            }
+            if (index >= 0 && index < actorItems.Count) actorItems[index].AddToClassList("list-item-selected");
         }
 
         private void OnAddActor()
         {
-            // Show dialog to select prefab
-            string prefabPath = EditorUtility.OpenFilePanel(
-                "Select Prefab",
-                Application.dataPath + "/Resources/Prefabs",
-                "prefab"
-            );
-
-            if (string.IsNullOrEmpty(prefabPath))
-                return;
-
-            // Get prefab name without extension
-            string prefabName = System.IO.Path.GetFileNameWithoutExtension(prefabPath);
-
-            // Ask for actor name
-            string actorName = prefabName; // Default to prefab name
-
-            // Simple naming (could be improved with a proper dialog)
+            // CHANGED: No file panel. Just create with default logic.
+            string actorName = "NewActor";
             int counter = 1;
-            string baseName = actorName;
             while (context.currentProject.actors.Exists(a => a.ActorName == actorName))
             {
-                actorName = $"{baseName}_{counter}";
+                actorName = $"NewActor_{counter}";
                 counter++;
             }
 
-            controller.AddActor(actorName, prefabName);
+            controller.AddActor(actorName);
         }
 
         private void UpdateCount(int count)
         {
             var countLabel = this.Q<Label>("actor-count");
             if (countLabel != null)
-            {
                 countLabel.text = $"{count} actor{(count != 1 ? "s" : "")} in project";
-            }
         }
 
         ~ActorListPanel()
@@ -286,7 +229,6 @@ namespace GameRuleEditor.Panels
             context.OnProjectLoaded -= UpdateUI;
             context.OnActorListChanged -= UpdateUI;
             context.OnActorSelected -= OnActorSelected;
-            context.OnProjectChanged -= UpdateUI;
         }
     }
 }

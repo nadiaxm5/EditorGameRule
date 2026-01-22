@@ -45,10 +45,10 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: LightingReflection
+    - ActorName: Environment
       Active: 1
-      PrefabName: LightingReflection
-      Tag: 
+      PrefabName: Environment
+      Tag: Obstacle
       Position:
       - 0
       - 0
@@ -69,15 +69,11 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script:
-      - When:
-        - 
-        Do:
-        - Edit(#,)
-    - ActorName: Environment
+      Script: []
+    - ActorName: NewActor
       Active: 1
-      PrefabName: Environment
-      Tag: Obstacle
+      PrefabName: Empty
+      Tag: 
       Position:
       - 0
       - 0
@@ -106,29 +102,4 @@ MonoBehaviour:
       floatValue: 0
       boolValue: 0
       arrayValue: []
-  actors:
-  - ActorName: Environment
-    Active: 1
-    PrefabName: Environment
-    Tag: Obstacle
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script: []
+  actors: []

@@ -7,14 +7,14 @@ public class GameManager : MonoBehaviour
     private Light sunLight;
     private AudioSource audioSource;
 
-    public string GameName = "NewGameRuleProject1501";
+    public string GameName = "NewProject2101";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(10f, 1f, -10f);
-    public Vector3 CameraRotation = new Vector3(0f, 0f, 0f);
-    public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
-    public Vector3 SunRotation = new Vector3(50f, -30f, 0f);
-    public Color SunColor = new Color32(255, 255, 255, 255);
-    public Color SunAmbientColor = new Color32(128, 128, 128, 255);
+    public Vector3 CameraPosition = new Vector3(0f, 6f, -7f);
+    public Vector3 CameraRotation = new Vector3(30f, 0f, 0f);
+    public Vector3 SunPosition = new Vector3(3.3899f, 10.902f, -5.8255f);
+    public Vector3 SunRotation = new Vector3(22.704f, 65.875f, -175.012f);
+    public Color SunColor = new Color32(195, 184, 255, 255);
+    public Color SunAmbientColor = new Color32(170, 180, 200, 255);
     public Color BackgroundColor = new Color32(0, 0, 0, 255);
     public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
     public string SoundTrack
@@ -33,13 +33,7 @@ public class GameManager : MonoBehaviour
     public Vector3 MouseWorld = Vector3.zero;
 
     // Custom Global Variables
-    public int VariableInt = 10;
-    public float VariableFloat = 15f;
-    public float VariableFloat2 = 15.5f;
-    public bool VariableBoolTrue = true;
-    public bool VariableBoolFalse = false;
-    public Vector2 VariableVector2 = new Vector2(1f, 2f);
-    public Vector3 VariableVector3 = new Vector3(1f, 2f, 3f);
+    public float Score = 0f;
     void Start()
     {
         if (Instance == null)
