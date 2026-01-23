@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 using UnityEngine;
-using System.Text.RegularExpressions; // Required for formatting
+using System.Text.RegularExpressions;
 
 namespace GameRuleEditor.Core
 {
@@ -31,12 +31,10 @@ namespace GameRuleEditor.Core
             sceneData.Cast = new List<ActorJson>(actors);
 
             // 2. BACKUP AND TEMP CLEANUP OF VARIABLES
-            // We save the real variables and clear the list in sceneData
-            // so JsonUtility writes "CustomVariables": [] which is easy to find and remove.
             var realVariables = sceneData.CustomVariables;
             sceneData.CustomVariables = new List<CustomVariable>();
 
-            // 3. TEMP CLEANUP OF "WHEN" (To handle Unconditional Rules)
+            // 3. TEMP CLEANUP OF "WHEN"
             foreach (var actor in sceneData.Cast)
             {
                 if (actor.Script == null) continue;
@@ -50,20 +48,32 @@ namespace GameRuleEditor.Core
             // 4. GENERATE BASE JSON
             string rawJson = JsonUtility.ToJson(sceneData, true);
 
-            // 5. RESTORE EDITOR STATE (Vital to avoid losing data in the UI)
+            // --- RESTORE EDITOR STATE ---
             sceneData.CustomVariables = realVariables;
             foreach (var actor in sceneData.Cast)
             {
                 if (actor.Script == null) continue;
                 foreach (var sentence in actor.Script)
                 {
-                    if (sentence.When == null)
-                        sentence.When = new List<string>();
+                    if (sentence.When == null) sentence.When = new List<string>();
                 }
             }
 
-            // 6. MANUAL JSON CONSTRUCTION
-            // We build the file manually to enforce order: Settings -> CustomVars -> Cast
+            // =================================================================================
+            // 5. CLEANUP: REMOVE EMPTY ARRAYS ("Key": [],)
+            // This is the fix. JsonUtility writes "Position": [], for nulls. We delete those lines.
+            // =================================================================================
+            // Pattern: Whitespace + "Key": [], + optional comma
+            string emptyArrayPattern = @"\s*""[a-zA-Z0-9_]+"": \[\],?";
+            rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
+
+            // Also clean up scalar defaults if you want truly sparse JSON (Optional, but helps cleanliness)
+            // Removes "Density": 0.0, etc. Be careful if 0.0 is a meaningful value you want to save.
+            // For now, let's stick to cleaning arrays as that was the main request.
+
+            // =================================================================================
+            // 6. MANUAL CONSTRUCTION (Order: Settings -> Variables -> Cast)
+            // =================================================================================
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
@@ -92,22 +102,22 @@ namespace GameRuleEditor.Core
                 sb.AppendLine("    \"CustomVariables\": [],");
             }
 
-            // --- Extract Cast from Raw JSON ---
-            // We strip the auto-generated "CustomVariables": [] from rawJson first
-            rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace(",\n    \"CustomVariables\": []", "").Replace("\"CustomVariables\": []", "");
+            // Extract Cast from Cleaned Raw JSON
+            // We strip the "CustomVariables": [] line that JsonUtility created first
+            rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace("\"CustomVariables\": []", "");
 
             int castIndex = rawJson.IndexOf("\"Cast\":");
             if (castIndex != -1)
             {
-                // Extract from "Cast": to the end (removing the last closing brace '}')
                 string castContent = rawJson.Substring(castIndex);
                 castContent = castContent.TrimEnd('}', '\r', '\n', ' ');
 
-                // --- COMPACT ARRAYS (Flatten Position, Rotation, etc.) ---
-                // Regex to collapse multi-line arrays into single line [x, y, z]
-                // Matches: "Key": [ \n num, \n num, \n num \n ]
-                string pattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
-                castContent = Regex.Replace(castContent, pattern, ": [$1, $2, $3]");
+                // Compact multi-line number arrays: [ \n 1, \n 2 ] -> [1, 2]
+                string compactPattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
+                castContent = Regex.Replace(castContent, compactPattern, ": [$1, $2, $3]");
+
+                // Fix potential trailing commas caused by line removal
+                castContent = Regex.Replace(castContent, @",(\s*})", "$1");
 
                 sb.Append("    " + castContent);
             }
@@ -119,12 +129,7 @@ namespace GameRuleEditor.Core
             sb.AppendLine();
             sb.Append("}");
 
-            string finalJson = sb.ToString();
-
-            // 7. POST-PROCESSING: Clean residual "When": [] from unconditional rules
-            finalJson = Regex.Replace(finalJson, "\\s*\"When\": \\[\\],", "");
-
-            return finalJson;
+            return sb.ToString();
         }
 
         private string F(float f) => f.ToString(CultureInfo.InvariantCulture);
@@ -226,9 +231,9 @@ namespace GameRuleEditor.Core
                 ActorName = actorName,
                 PrefabName = prefabName,
                 Active = true,
-                Position = new float[] { 0, 0, 0 },
-                Rotation = new float[] { 0, 0, 0 },
-                Scale = new float[] { 1, 1, 1 },
+                Position = null,
+                Rotation = null,
+                Scale = null,
                 Properties = new List<string>(),
                 Script = new List<SentenceJson>()
             };

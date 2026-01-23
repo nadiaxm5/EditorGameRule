@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
-using UnityEditor.UIElements; // Required for ObjectField
+using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
@@ -13,27 +13,28 @@ namespace GameRuleEditor.Panels
         private EditorContext context;
         private ProjectController controller;
 
+        private VisualElement contentContainer;
+        private VisualElement noSelectionContainer;
+
+        // Fields
         private TextField actorNameField;
-        private ObjectField prefabPicker; // CHANGED: Replaced TextField
+
+        private ObjectField prefabPicker;
         private TextField tagField;
         private Toggle activeToggle;
 
-        // Transform
-        private Vector3Field positionField;
-        private Vector3Field rotationField;
-        private Vector3Field scaleField;
-        private Vector3Field sizeField;
-
-        // Physics
-        private Vector3Field velocityField;
-        private Vector3Field angularVelocityField;
-        private FloatField densityField;
-        private FloatField frictionField;
-        private FloatField bouncinessField;
-        private FloatField dragField;
-
         private VisualElement propertiesContainer;
-        private VisualElement noSelectionContainer;
+
+        // Reusable Helper to manage Override/Revert UI state
+        private class PropertyRow
+        {
+            public VisualElement container;
+            public VisualElement field;
+            public Button revertButton;
+            public Label label;
+        }
+
+        private Dictionary<string, PropertyRow> rows = new Dictionary<string, PropertyRow>();
 
         public ActorDetailsPanel(EditorContext editorContext, ProjectController projectController)
         {
@@ -52,19 +53,22 @@ namespace GameRuleEditor.Panels
 
         private void CreateUI()
         {
+            // 1. No Selection View
             noSelectionContainer = new VisualElement();
             noSelectionContainer.style.flexGrow = 1;
             noSelectionContainer.style.justifyContent = Justify.Center;
             noSelectionContainer.style.alignItems = Align.Center;
-            var noSelectionLabel = new Label("Select an actor to edit its properties");
-            noSelectionLabel.style.fontSize = 14;
-            noSelectionLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
-            noSelectionContainer.Add(noSelectionLabel);
+            noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = Color.gray } });
             Add(noSelectionContainer);
 
+            // 2. Content View
+            contentContainer = new VisualElement();
+            contentContainer.style.flexGrow = 1;
+            contentContainer.style.display = DisplayStyle.None;
+            Add(contentContainer);
+
             var scrollView = new ScrollView();
-            scrollView.style.flexGrow = 1;
-            scrollView.style.display = DisplayStyle.None;
+            contentContainer.Add(scrollView);
 
             var header = new Label("Actor Properties");
             header.AddToClassList("panel-header");
@@ -73,307 +77,225 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            // --- Basic Properties Section ---
+            // --- Basic Section ---
             var basicSection = CreateSection("Basic Properties");
             scrollView.Add(basicSection);
 
-            actorNameField = CreateTextField(basicSection, "Actor Name:");
+            // Name
+            actorNameField = new TextField("Name:");
             actorNameField.RegisterValueChangedCallback(evt =>
             {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.ActorName = evt.newValue;
-                }, "Change Actor Name");
+                if (context.selectedActorIndex >= 0)
+                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.ActorName = evt.newValue, "Renaming");
             });
+            basicSection.Add(actorNameField);
 
-            // CHANGED: ObjectField for Prefab
-            var prefabRow = new VisualElement();
-            prefabRow.style.flexDirection = FlexDirection.Row;
-            prefabRow.style.alignItems = Align.Center;
-            prefabRow.style.marginBottom = 5;
-            var prefabLabel = new Label("Prefab:") { style = { minWidth = 150 } };
-            prefabRow.Add(prefabLabel);
-
-            prefabPicker = new ObjectField();
-            prefabPicker.objectType = typeof(GameObject);
-            prefabPicker.allowSceneObjects = false;
-            prefabPicker.style.flexGrow = 1;
+            // Prefab Picker
+            var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 5 } };
+            prefabRow.Add(new Label("Prefab:") { style = { minWidth = 150 } });
+            prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
-                if (context.selectedActorIndex < 0) return;
-
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    if (evt.newValue == null)
+                if (context.selectedActorIndex >= 0)
+                    controller.UpdateActorProperty(context.selectedActorIndex, () =>
                     {
-                        context.SelectedActor.PrefabName = "Empty"; // Default safety fallback
-                    }
-                    else
-                    {
-                        context.SelectedActor.PrefabName = evt.newValue.name;
-                    }
-                }, "Change Prefab");
+                        context.SelectedActor.PrefabName = evt.newValue == null ? "Empty" : evt.newValue.name;
+                    }, "Change Prefab");
             });
             prefabRow.Add(prefabPicker);
             basicSection.Add(prefabRow);
 
-            tagField = CreateTextField(basicSection, "Tag:");
+            // Tag
+            tagField = new TextField("Tag:");
             tagField.RegisterValueChangedCallback(evt =>
             {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Tag = evt.newValue;
-                }, "Change Tag");
+                if (context.selectedActorIndex >= 0)
+                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.Tag = evt.newValue, "Change Tag");
             });
+            basicSection.Add(tagField);
 
-            activeToggle = CreateToggle(basicSection, "Active:");
+            // Active
+            activeToggle = new Toggle("Active:");
             activeToggle.RegisterValueChangedCallback(evt =>
             {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Active = evt.newValue;
-                }, "Change Active State");
+                if (context.selectedActorIndex >= 0)
+                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.Active = evt.newValue, "Toggle Active");
             });
+            basicSection.Add(activeToggle);
 
             // --- Transform Section ---
             var transformSection = CreateSection("Transform");
             scrollView.Add(transformSection);
 
-            positionField = CreateVector3Field(transformSection, "Position:");
-            positionField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Position = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Position");
-            });
-
-            rotationField = CreateVector3Field(transformSection, "Rotation:");
-            rotationField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Rotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Rotation");
-            });
-
-            scaleField = CreateVector3Field(transformSection, "Scale:");
-            scaleField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Scale = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Scale");
-            });
-
-            sizeField = CreateVector3Field(transformSection, "Size (Target):");
-            sizeField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Size = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Size");
-            });
+            CreateOverrideableVector3(transformSection, "Position", "Position");
+            CreateOverrideableVector3(transformSection, "Rotation", "Rotation");
+            CreateOverrideableVector3(transformSection, "Scale", "Scale");
+            CreateOverrideableVector3(transformSection, "Size (Target)", "Size");
 
             // --- Physics Section ---
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
-            velocityField = CreateVector3Field(physicsSection, "Linear Velocity:");
-            velocityField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Velocity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Velocity");
-            });
+            CreateOverrideableVector3(physicsSection, "Linear Velocity", "Velocity");
+            CreateOverrideableVector3(physicsSection, "Angular Velocity", "AngularVelocity");
 
-            angularVelocityField = CreateVector3Field(physicsSection, "Angular Velocity:");
-            angularVelocityField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.AngularVelocity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Angular Velocity");
-            });
+            // Scalars
+            CreateScalarField(physicsSection, "Density (Mass)", val => context.SelectedActor.Density = val);
+            CreateScalarField(physicsSection, "Friction", val => context.SelectedActor.Friction = val);
+            CreateScalarField(physicsSection, "Bounciness", val => context.SelectedActor.Bounciness = val);
+            CreateScalarField(physicsSection, "Drag", val => context.SelectedActor.Drag = val);
 
-            densityField = CreateFloatField(physicsSection, "Density (Mass):");
-            densityField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Density = evt.newValue;
-                }, "Change Density");
-            });
-
-            frictionField = CreateFloatField(physicsSection, "Friction:");
-            frictionField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Friction = evt.newValue;
-                }, "Change Friction");
-            });
-
-            bouncinessField = CreateFloatField(physicsSection, "Bounciness:");
-            bouncinessField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Bounciness = evt.newValue;
-                }, "Change Bounciness");
-            });
-
-            dragField = CreateFloatField(physicsSection, "Drag (Damping):");
-            dragField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex < 0) return;
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    context.SelectedActor.Drag = evt.newValue;
-                }, "Change Drag");
-            });
-
-            // --- Custom Properties Section ---
+            // --- Custom Properties ---
             var propsSection = CreateSection("Custom Properties");
             scrollView.Add(propsSection);
 
-            var addPropButton = new Button(() => ShowAddPropertyDialog());
-            addPropButton.text = "+ Add Property";
-            addPropButton.AddToClassList("button-primary");
-            propsSection.Add(addPropButton);
+            var addPropBtn = new Button(() => ShowAddPropertyDialog()) { text = "+ Add Property" };
+            addPropBtn.AddToClassList("button-primary");
+            propsSection.Add(addPropBtn);
 
             propertiesContainer = new VisualElement();
             propsSection.Add(propertiesContainer);
-
-            Add(scrollView);
         }
+
+        #region UI Construction Helpers
 
         private VisualElement CreateSection(string title)
         {
             var section = new VisualElement();
             section.AddToClassList("panel-section");
-            var titleLabel = new Label(title);
-            titleLabel.style.fontSize = 14;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.marginBottom = 8;
-            section.Add(titleLabel);
+            section.Add(new Label(title) { style = { fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 8 } });
             return section;
         }
 
-        private TextField CreateTextField(VisualElement parent, string label)
+        private void CreateOverrideableVector3(VisualElement parent, string labelText, string propertyKey)
         {
-            var field = new TextField(label);
-            field.style.marginBottom = 5;
-            parent.Add(field);
-            return field;
-        }
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
 
-        private Toggle CreateToggle(VisualElement parent, string label)
-        {
-            var toggle = new Toggle(label);
-            toggle.style.marginBottom = 5;
-            parent.Add(toggle);
-            return toggle;
-        }
+            // Label
+            var label = new Label(labelText) { style = { minWidth = 140 } };
+            row.Add(label);
 
-        private FloatField CreateFloatField(VisualElement parent, string label)
-        {
-            var field = new FloatField(label);
-            field.style.marginBottom = 5;
-            parent.Add(field);
-            return field;
-        }
-
-        private Vector3Field CreateVector3Field(VisualElement parent, string label)
-        {
-            var container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.alignItems = Align.Center;
-            container.style.marginBottom = 5;
-            var labelElement = new Label(label);
-            labelElement.style.minWidth = 150;
-            container.Add(labelElement);
-            var field = new Vector3Field();
-            field.style.flexGrow = 1;
-            container.Add(field);
-            parent.Add(container);
-            return field;
-        }
-
-        private void ShowAddPropertyDialog()
-        {
-            if (context.selectedActorIndex < 0) return;
-            var dialog = ScriptableObject.CreateInstance<AddPropertyDialog>();
-            dialog.ShowModal(propertyDef =>
+            // Field
+            var field = new Vector3Field { style = { flexGrow = 1 } };
+            field.RegisterValueChangedCallback(evt =>
             {
-                if (!string.IsNullOrEmpty(propertyDef))
+                if (context.selectedActorIndex < 0) return;
+
+                // When changed, we instantiate the array (Override)
+                controller.UpdateActorProperty(context.selectedActorIndex, () =>
                 {
-                    controller.AddActorProperty(context.selectedActorIndex, propertyDef);
-                }
+                    var vec = evt.newValue;
+                    float[] arr = new float[] { vec.x, vec.y, vec.z };
+
+                    var actor = context.SelectedActor;
+                    switch (propertyKey)
+                    {
+                        case "Position": actor.Position = arr; break;
+                        case "Rotation": actor.Rotation = arr; break;
+                        case "Scale": actor.Scale = arr; break;
+                        case "Size": actor.Size = arr; break;
+                        case "Velocity": actor.Velocity = arr; break;
+                        case "AngularVelocity": actor.AngularVelocity = arr; break;
+                    }
+                }, $"Edit {propertyKey}");
             });
+            row.Add(field);
+
+            // Revert Button
+            var revertBtn = new Button(() => controller.RevertActorProperty(context.selectedActorIndex, propertyKey));
+            revertBtn.text = "↺";
+            revertBtn.tooltip = "Revert to Prefab value";
+            revertBtn.style.width = 25;
+            revertBtn.style.marginLeft = 5;
+            row.Add(revertBtn);
+
+            parent.Add(row);
+
+            // Store references
+            rows[propertyKey] = new PropertyRow { container = row, field = field, revertButton = revertBtn, label = label };
         }
+
+        private void CreateScalarField(VisualElement parent, string labelText, System.Action<float> setter)
+        {
+            var field = new FloatField(labelText);
+            field.style.marginBottom = 5;
+            field.RegisterValueChangedCallback(evt =>
+            {
+                if (context.selectedActorIndex >= 0)
+                    controller.UpdateActorProperty(context.selectedActorIndex, () => setter(evt.newValue), "Edit Scalar");
+            });
+            parent.Add(field);
+            // Quick hack to map scalar fields to dictionary for updating later
+            field.name = labelText;
+        }
+
+        #endregion UI Construction Helpers
 
         private void UpdateUI()
         {
             var actor = context.SelectedActor;
-
             if (actor == null)
             {
                 noSelectionContainer.style.display = DisplayStyle.Flex;
-                this.Q<ScrollView>().style.display = DisplayStyle.None;
+                contentContainer.style.display = DisplayStyle.None;
                 return;
             }
 
             noSelectionContainer.style.display = DisplayStyle.None;
-            this.Q<ScrollView>().style.display = DisplayStyle.Flex;
+            contentContainer.style.display = DisplayStyle.Flex;
 
-            // Updates without callbacks
-            if (actorNameField.value != (actor.ActorName ?? ""))
-                actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
-
-            // UPDATE PREFAB FIELD: Try to load from Resources
-            GameObject prefabObj = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));
-            prefabPicker.SetValueWithoutNotify(prefabObj);
-
-            if (tagField.value != (actor.Tag ?? ""))
-                tagField.SetValueWithoutNotify(actor.Tag ?? "");
-
+            // --- Basics ---
+            if (actorNameField.value != (actor.ActorName ?? "")) actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
+            if (tagField.value != (actor.Tag ?? "")) tagField.SetValueWithoutNotify(actor.Tag ?? "");
             activeToggle.SetValueWithoutNotify(actor.Active);
 
-            UpdateVector3(positionField, actor.Position, Vector3.zero);
-            UpdateVector3(rotationField, actor.Rotation, Vector3.zero);
-            UpdateVector3(scaleField, actor.Scale, Vector3.one);
-            UpdateVector3(sizeField, actor.Size, Vector3.zero);
-            UpdateVector3(velocityField, actor.Velocity, Vector3.zero);
-            UpdateVector3(angularVelocityField, actor.AngularVelocity, Vector3.zero);
+            // Prefab Loading
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));
+            prefabPicker.SetValueWithoutNotify(prefab);
 
-            densityField.SetValueWithoutNotify(actor.Density);
-            frictionField.SetValueWithoutNotify(actor.Friction);
-            bouncinessField.SetValueWithoutNotify(actor.Bounciness);
-            dragField.SetValueWithoutNotify(actor.Drag);
+            // --- Logic: Check Overrides vs Prefab Defaults ---
+            UpdateVectorRow("Position", actor.Position, prefab?.transform.position ?? Vector3.zero);
+            UpdateVectorRow("Rotation", actor.Rotation, prefab?.transform.eulerAngles ?? Vector3.zero);
+            UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
+            UpdateVectorRow("Size", actor.Size, Vector3.zero); // Size usually starts empty
+            UpdateVectorRow("Velocity", actor.Velocity, Vector3.zero);
+            UpdateVectorRow("AngularVelocity", actor.AngularVelocity, Vector3.zero);
+
+            // Scalars (Simple Update)
+            this.Q<FloatField>("Density (Mass)")?.SetValueWithoutNotify(actor.Density);
+            this.Q<FloatField>("Friction")?.SetValueWithoutNotify(actor.Friction);
+            this.Q<FloatField>("Bounciness")?.SetValueWithoutNotify(actor.Bounciness);
+            this.Q<FloatField>("Drag")?.SetValueWithoutNotify(actor.Drag);
 
             UpdatePropertiesList();
         }
 
-        private void UpdateVector3(Vector3Field field, float[] data, Vector3 defaultVal)
+        private void UpdateVectorRow(string key, float[] actorData, Vector3 prefabDefault)
         {
-            if (data != null && data.Length >= 3)
-                field.SetValueWithoutNotify(new Vector3(data[0], data[1], data[2]));
+            if (!rows.ContainsKey(key)) return;
+            var row = rows[key];
+            var vecField = (Vector3Field)row.field;
+
+            bool isOverridden = (actorData != null && actorData.Length >= 3);
+
+            if (isOverridden)
+            {
+                // Show Actor Value
+                vecField.SetValueWithoutNotify(new Vector3(actorData[0], actorData[1], actorData[2]));
+
+                // Style: Bold Label, Show Revert
+                row.label.style.unityFontStyleAndWeight = FontStyle.Bold;
+                row.revertButton.style.visibility = Visibility.Visible;
+            }
             else
-                field.SetValueWithoutNotify(defaultVal);
+            {
+                // Show Prefab Value (Ghosted)
+                vecField.SetValueWithoutNotify(prefabDefault);
+
+                // Style: Normal Label, Hide Revert
+                row.label.style.unityFontStyleAndWeight = FontStyle.Normal;
+                row.revertButton.style.visibility = Visibility.Hidden;
+            }
         }
 
         private void UpdatePropertiesList()
@@ -382,42 +304,34 @@ namespace GameRuleEditor.Panels
             var actor = context.SelectedActor;
             if (actor?.Properties == null || actor.Properties.Count == 0)
             {
-                var emptyLabel = new Label("No custom properties") { style = { color = new Color(0.5f, 0.5f, 0.5f), fontSize = 10, marginTop = 5 } };
-                propertiesContainer.Add(emptyLabel);
+                propertiesContainer.Add(new Label("No custom properties") { style = { color = Color.gray, fontSize = 10, marginTop = 5 } });
                 return;
             }
 
             for (int i = 0; i < actor.Properties.Count; i++)
             {
-                int index = i;
-                string property = actor.Properties[i];
-                var item = new VisualElement();
-                item.AddToClassList("list-item");
-                item.style.marginTop = 5;
+                int idx = i;
+                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 5 } };
+                row.Add(new Label(actor.Properties[i]) { style = { flexGrow = 1, fontSize = 11 } });
 
-                var label = new Label(property) { style = { flexGrow = 1, fontSize = 11 } };
-                item.Add(label);
+                var btn = new Button(() => controller.RemoveActorProperty(context.selectedActorIndex, idx)) { text = "X" };
+                btn.AddToClassList("button-danger");
+                btn.style.width = 20;
+                row.Add(btn);
 
-                var removeBtn = new Button(() => controller.RemoveActorProperty(context.selectedActorIndex, index));
-                removeBtn.text = "Remove";
-                removeBtn.AddToClassList("button-danger");
-                removeBtn.style.width = 80;
-                removeBtn.style.height = 20;
-                removeBtn.style.fontSize = 9;
-                item.Add(removeBtn);
-
-                propertiesContainer.Add(item);
+                propertiesContainer.Add(row);
             }
         }
 
-        ~ActorDetailsPanel()
+        private void ShowAddPropertyDialog()
         {
-            context.OnActorSelected -= _ => UpdateUI();
-            context.OnProjectChanged -= UpdateUI;
+            if (context.selectedActorIndex < 0) return;
+            var dialog = ScriptableObject.CreateInstance<AddPropertyDialog>();
+            dialog.ShowModal(p => { if (!string.IsNullOrEmpty(p)) controller.AddActorProperty(context.selectedActorIndex, p); });
         }
     }
 
-    // Helper Dialog remains the same
+    // --- DIALOG CLASS (Included here) ---
     public class AddPropertyDialog : EditorWindow
     {
         private System.Action<string> callback;
@@ -430,6 +344,12 @@ namespace GameRuleEditor.Panels
             titleContent = new GUIContent("Add Property");
             minSize = new Vector2(300, 120);
             maxSize = new Vector2(300, 120);
+
+            var main = EditorGUIUtility.GetMainWindowPosition();
+            var pos = position;
+            pos.center = main.center;
+            position = pos;
+
             ShowModal();
         }
 

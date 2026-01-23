@@ -67,7 +67,7 @@ namespace GameRuleEditor.Controllers
             }
         }
 
-        #endregion
+        #endregion Project Operations
 
         #region Scene Settings Operations
 
@@ -106,16 +106,20 @@ namespace GameRuleEditor.Controllers
                 case "int":
                     newVar.intValue = (int)value;
                     break;
+
                 case "float":
                     newVar.floatValue = (float)value;
                     break;
+
                 case "bool":
                     newVar.boolValue = (bool)value;
                     break;
+
                 case "vector2":
                     var v2 = (Vector2)value;
                     newVar.arrayValue = new float[] { v2.x, v2.y };
                     break;
+
                 case "vector3":
                     var v3 = (Vector3)value;
                     newVar.arrayValue = new float[] { v3.x, v3.y, v3.z };
@@ -150,7 +154,7 @@ namespace GameRuleEditor.Controllers
             context.NotifyProjectChanged();
         }
 
-        #endregion
+        #endregion Scene Settings Operations
 
         #region Actor Operations
 
@@ -164,18 +168,61 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, "Add Actor");
 
-            // Ensure "Empty" prefab exists
             EnsureEmptyPrefabExists();
 
-            // Default to "Empty" prefab. Removed incorrect namespace prefix.
-            ActorJson newActor = context.currentProject.AddActor(actorName, "Empty");
+            // Initialize with NULL arrays to indicate "Use Prefab Defaults"
+            ActorJson newActor = new ActorJson
+            {
+                ActorName = actorName,
+                PrefabName = "Empty",
+                Active = true,
+                Tag = "Untagged",
+                // Explicitly leaving arrays as null
+                Position = null,
+                Rotation = null,
+                Scale = null,
+                Velocity = null,
+                AngularVelocity = null,
+                Size = null,
+                Properties = new List<string>(),
+                Script = new List<SentenceJson>()
+            };
+
+            context.currentProject.actors.Add(newActor);
 
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyActorListChanged();
 
-            // Auto-select the new actor
             int newIndex = context.currentProject.actors.Count - 1;
             context.SelectActor(newIndex);
+        }
+
+        // Add a helper to Revert properties to null
+        public void RevertActorProperty(int actorIndex, string propertyName)
+        {
+            if (context.currentProject == null || actorIndex < 0) return;
+
+            Undo.RecordObject(context.currentProject, "Revert Property");
+            var actor = context.currentProject.actors[actorIndex];
+
+            switch (propertyName)
+            {
+                case "Position": actor.Position = null; break;
+                case "Rotation": actor.Rotation = null; break;
+                case "Scale": actor.Scale = null; break;
+                case "Size": actor.Size = null; break;
+                case "Velocity": actor.Velocity = null; break;
+                case "AngularVelocity": actor.AngularVelocity = null; break;
+                case "Physics": // Revert all physics scalars
+                    actor.Density = 0;
+                    actor.Friction = 0;
+                    actor.Bounciness = 0;
+                    actor.Drag = 0;
+                    break;
+            }
+
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
         }
 
         private void EnsureEmptyPrefabExists()
@@ -326,7 +373,7 @@ namespace GameRuleEditor.Controllers
             context.NotifyProjectChanged();
         }
 
-        #endregion
+        #endregion Actor Operations
 
         #region Script/Rule Operations
 
@@ -553,7 +600,7 @@ namespace GameRuleEditor.Controllers
             context.NotifyProjectChanged();
         }
 
-        #endregion
+        #endregion Script/Rule Operations
 
         #region Validation
 
@@ -570,6 +617,6 @@ namespace GameRuleEditor.Controllers
             return context.currentProject.Validate();
         }
 
-        #endregion
+        #endregion Validation
     }
 }

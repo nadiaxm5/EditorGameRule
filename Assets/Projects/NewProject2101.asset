@@ -45,22 +45,13 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: Environment
+    - ActorName: NewActor
       Active: 1
-      PrefabName: Environment
-      Tag: Obstacle
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      PrefabName: Empty
+      Tag: Untagged
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -78,22 +69,13 @@ MonoBehaviour:
       boolValue: 0
       arrayValue: []
   actors:
-  - ActorName: Environment
+  - ActorName: NewActor
     Active: 1
-    PrefabName: Environment
-    Tag: Obstacle
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    PrefabName: Empty
+    Tag: Untagged
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
