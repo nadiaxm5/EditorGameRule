@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class NewActor : MonoBehaviour {
+public class NewActor_1 : MonoBehaviour {
     public bool Active = true;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void Start() {

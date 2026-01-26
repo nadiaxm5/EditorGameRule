@@ -14,7 +14,7 @@
     ],
     "Cast": [
         {
-            "ActorName": "NewActor",
+            "ActorName": "NewActor_1",
             "Active": true,
             "PrefabName": "Empty",
             "Tag": "Untagged"

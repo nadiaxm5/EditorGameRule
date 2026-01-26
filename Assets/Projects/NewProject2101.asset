@@ -45,26 +45,6 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: Actor1
-      Active: 1
-      PrefabName: Empty
-      Tag: Untagged
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
-      Script:
-      - When:
-        - Touch(,)
-        Do:
-        - MoveTo(,,,)
     - ActorName: NewActor_1
       Active: 1
       PrefabName: Empty
@@ -80,10 +60,7 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script:
-      - When: []
-        Do:
-        - Edit(Actor1.y,this.y)
+      Script: []
     CustomVariables:
     - name: Score
       type: float
@@ -92,26 +69,6 @@ MonoBehaviour:
       boolValue: 0
       arrayValue: []
   actors:
-  - ActorName: Actor1
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script:
-    - When:
-      - Touch(,)
-      Do:
-      - MoveTo(,,,)
   - ActorName: NewActor_1
     Active: 1
     PrefabName: Empty
@@ -127,7 +84,4 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties: []
-    Script:
-    - When: []
-      Do:
-      - Edit(Actor1.y,this.y)
+    Script: []
