@@ -31,7 +31,7 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            // Subscribe to events - SIN paréntesis
+            // Subscribe to events
             context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
         }
@@ -101,7 +101,7 @@ namespace GameRuleEditor.Panels
             Add(scrollView);
         }
 
-        // Método helper para manejar la selección de actor
+        // Helper method for actor selection
         private void OnActorSelected(int index)
         {
             UpdateUI();
@@ -234,7 +234,8 @@ namespace GameRuleEditor.Panels
             // Condition builder (if has condition)
             if (hasCondition)
             {
-                var conditionBuilder = new ConditionBuilder();
+                // ** FIX: Pass context **
+                var conditionBuilder = new ConditionBuilder(context);
                 if (rule.When.Count > 0)
                 {
                     conditionBuilder.SetCondition(rule.When[0]);
@@ -251,7 +252,8 @@ namespace GameRuleEditor.Panels
             }
 
             // Action builder
-            var actionBuilder = new ActionBuilder();
+            // ** FIX: Pass context **
+            var actionBuilder = new ActionBuilder(context);
             if (rule.Do != null && rule.Do.Count > 0)
             {
                 actionBuilder.SetActions(rule.Do);
@@ -276,7 +278,7 @@ namespace GameRuleEditor.Panels
 
         ~ScriptEditorPanel()
         {
-            // Desuscribirse - SIN paréntesis
+            // Unsubscribe
             context.OnActorSelected -= OnActorSelected;
             context.OnProjectChanged -= UpdateUI;
         }

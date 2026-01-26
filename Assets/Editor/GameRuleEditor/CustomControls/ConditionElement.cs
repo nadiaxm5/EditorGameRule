@@ -8,10 +8,10 @@ namespace GameRuleEditor.CustomControls
 {
     public class ConditionElement : VisualElement
     {
+        private EditorContext context;
         private PopupField<string> typeDropdown;
         private Label operatorLabel;
         private VisualElement parametersContainer;
-
         private List<string> availableTypes;
         private List<TextField> parameterFields = new List<TextField>();
 
@@ -20,8 +20,9 @@ namespace GameRuleEditor.CustomControls
 
         private bool isOperator = false;
 
-        public ConditionElement(List<string> conditionTypes, string specificType = null)
+        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string specificType = null)
         {
+            context = ctx;
             availableTypes = conditionTypes;
 
             style.flexDirection = FlexDirection.Row;
@@ -65,7 +66,8 @@ namespace GameRuleEditor.CustomControls
                     typeDropdown.SetValueWithoutNotify(specificType);
                 }
 
-                typeDropdown.RegisterValueChangedCallback(evt => {
+                typeDropdown.RegisterValueChangedCallback(evt =>
+                {
                     UpdateParameterFields(true);
                     OnChanged?.Invoke();
                 });
@@ -118,10 +120,10 @@ namespace GameRuleEditor.CustomControls
 
             switch (type)
             {
-                case "Compare": AddParameterField("Expression (e.g. health > 0)"); break;
-                case "Check": AddParameterField("Variable (e.g. Active)"); break;
-                case "Collision": AddParameterField("Tag (e.g. Enemy)"); break;
-                case "Timer": AddParameterField("Seconds (e.g. 2.5)"); break;
+                case "Compare": AddParameterField("Expression", true); break; // Can pick properties
+                case "Check": AddParameterField("Variable", true); break;     // Can pick properties
+                case "Collision": AddParameterField("Tag"); break;            // Just text
+                case "Timer": AddParameterField("Seconds"); break;            // Number
                 case "Touch": AddParameterField("Mode"); AddParameterField("OnActor (true/false)"); break;
                 case "Keyboard": AddParameterField("Key"); AddParameterField("Mode"); break;
             }
@@ -129,12 +131,16 @@ namespace GameRuleEditor.CustomControls
             if (notifyChange) OnChanged?.Invoke();
         }
 
-        private void AddParameterField(string placeholder)
+        private void AddParameterField(string placeholder, bool showPicker = false)
         {
+            var container = new VisualElement();
+            container.style.flexDirection = FlexDirection.Row;
+            container.style.flexGrow = 1;
+            container.style.marginRight = 3;
+            container.style.minWidth = 50;
+
             var field = new TextField();
             field.style.flexGrow = 1;
-            field.style.marginRight = 3;
-            field.style.minWidth = 50;
 
             var label = new Label(placeholder);
             label.style.fontSize = 9;
@@ -143,12 +149,41 @@ namespace GameRuleEditor.CustomControls
             label.style.left = 3; label.style.top = 2;
             field.Add(label);
 
-            field.RegisterValueChangedCallback(evt => {
+            field.RegisterValueChangedCallback(evt =>
+            {
                 label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None;
                 OnChanged?.Invoke();
             });
 
-            parametersContainer.Add(field);
+            container.Add(field);
+
+            if (showPicker)
+            {
+                var pickBtn = new Button(() =>
+                {
+                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
+                    {
+                        // Append picking logic for "Compare" could be complex (e.g. inserting at cursor),
+                        // but simple replacement is safer for now.
+                        // For "Compare", users often want "health > 0", so just inserting "health" might replace everything.
+                        // For V1, let's just Append or Replace. Let's Append if not empty to be helpful.
+                        if (!string.IsNullOrEmpty(field.value))
+                            field.value += picked;
+                        else
+                            field.value = picked;
+
+                        OnChanged?.Invoke();
+                    });
+                });
+                pickBtn.text = "°";
+                pickBtn.style.width = 18;
+                pickBtn.style.height = 18;
+                pickBtn.style.marginLeft = 1;
+                pickBtn.style.fontSize = 10;
+                container.Add(pickBtn);
+            }
+
+            parametersContainer.Add(container);
             parameterFields.Add(field);
         }
 
@@ -160,8 +195,6 @@ namespace GameRuleEditor.CustomControls
             List<string> parameters = new List<string>();
             foreach (var field in parameterFields) parameters.Add(field.value);
 
-            // FIX: Removed the check that returned "" if parameters were empty.
-            // Now it returns "Compare()" even if empty, so it saves successfully.
             return $"{type}({string.Join(",", parameters)})";
         }
     }

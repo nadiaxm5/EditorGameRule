@@ -15,14 +15,17 @@ namespace GameRuleEditor.CustomControls
         private List<ConditionElement> elements = new List<ConditionElement>();
         private VisualElement conditionsContainer;
         private Label previewLabel;
+        private EditorContext context; // Reference to Context
+
         public System.Action<string> OnConditionChanged;
 
-        public ConditionBuilder()
+        public ConditionBuilder(EditorContext editorContext) // Constructor Change
         {
+            context = editorContext;
+
             style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
             style.borderBottomLeftRadius = 5; style.borderBottomRightRadius = 5;
-            // Fixed padding syntax
             style.paddingTop = 10; style.paddingBottom = 10;
             style.paddingLeft = 10; style.paddingRight = 10;
 
@@ -31,7 +34,7 @@ namespace GameRuleEditor.CustomControls
 
         private void CreateUI()
         {
-            // Header
+            // ... (Same UI creation code as before) ...
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
@@ -43,11 +46,9 @@ namespace GameRuleEditor.CustomControls
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.Add(label);
 
-            // Buttons Container
             var btnContainer = new VisualElement();
             btnContainer.style.flexDirection = FlexDirection.Row;
 
-            // Logic Buttons
             CreateHeaderButton(btnContainer, "+ NOT", "button-primary", () => AddElement("NOT"));
             CreateHeaderButton(btnContainer, "+ AND", "button-primary", () => AddElement("AND"));
             CreateHeaderButton(btnContainer, "+ OR", "button-primary", () => AddElement("OR"));
@@ -56,17 +57,14 @@ namespace GameRuleEditor.CustomControls
             spacer.style.width = 10;
             btnContainer.Add(spacer);
 
-            // Condition Button
             CreateHeaderButton(btnContainer, "+ Condition", "button-primary", () => AddElement(null));
 
             header.Add(btnContainer);
             Add(header);
 
-            // Container
             conditionsContainer = new VisualElement();
             Add(conditionsContainer);
 
-            // Preview
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
             previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
@@ -95,7 +93,8 @@ namespace GameRuleEditor.CustomControls
 
         private void AddElement(string specificType, string sourceValue = null)
         {
-            var element = new ConditionElement(conditionTypes, specificType);
+            // Pass context to element
+            var element = new ConditionElement(context, conditionTypes, specificType);
 
             if (!string.IsNullOrEmpty(sourceValue))
             {
@@ -128,14 +127,12 @@ namespace GameRuleEditor.CustomControls
         private string BuildConditionString()
         {
             if (elements.Count == 0) return "";
-
             List<string> parts = new List<string>();
             foreach (var elem in elements)
             {
                 string str = elem.GetString();
                 if (!string.IsNullOrEmpty(str)) parts.Add(str);
             }
-
             return string.Join(" ", parts);
         }
 
@@ -144,8 +141,6 @@ namespace GameRuleEditor.CustomControls
             foreach (var el in elements) conditionsContainer.Remove(el);
             elements.Clear();
 
-            // FIX: If string is empty, we add a default empty condition row
-            // This happens when you create a new rule or manually clear the conditions.
             if (string.IsNullOrEmpty(fullConditionString))
             {
                 AddElement(null, "");
@@ -153,21 +148,12 @@ namespace GameRuleEditor.CustomControls
                 return;
             }
 
-            // Tokenize and build
             List<string> tokens = GameRuleParser.TokenizeCondition(fullConditionString);
-
             foreach (var token in tokens)
             {
-                if (token == "AND" || token == "OR" || token == "NOT")
-                {
-                    AddElement(token);
-                }
-                else
-                {
-                    AddElement(null, token);
-                }
+                if (token == "AND" || token == "OR" || token == "NOT") AddElement(token);
+                else AddElement(null, token);
             }
-
             UpdatePreview();
         }
     }
