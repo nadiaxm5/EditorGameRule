@@ -60,19 +60,19 @@ namespace GameRuleEditor.Core
             }
 
             // =================================================================================
-            // 5. CLEANUP: REMOVE EMPTY ARRAYS ("Key": [],)
-            // This is the fix. JsonUtility writes "Position": [], for nulls. We delete those lines.
+            // 5. CLEANUP: REMOVE EMPTY ARRAYS AND DEFAULT FLOATS
             // =================================================================================
-            // Pattern: Whitespace + "Key": [], + optional comma
+
+            // A. Remove Empty Arrays ("Key": [],)
             string emptyArrayPattern = @"\s*""[a-zA-Z0-9_]+"": \[\],?";
             rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
 
-            // Also clean up scalar defaults if you want truly sparse JSON (Optional, but helps cleanliness)
-            // Removes "Density": 0.0, etc. Be careful if 0.0 is a meaningful value you want to save.
-            // For now, let's stick to cleaning arrays as that was the main request.
+            // B. Remove Default Floats ("Key": 0.0,)
+            string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(\.0)?,?";
+            rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
 
             // =================================================================================
-            // 6. MANUAL CONSTRUCTION (Order: Settings -> Variables -> Cast)
+            // 6. MANUAL CONSTRUCTION
             // =================================================================================
 
             StringBuilder sb = new StringBuilder();
@@ -103,20 +103,23 @@ namespace GameRuleEditor.Core
             }
 
             // Extract Cast from Cleaned Raw JSON
-            // We strip the "CustomVariables": [] line that JsonUtility created first
+            // We clean up the temp variable list first (handles trailing commas if it was last)
             rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace("\"CustomVariables\": []", "");
 
             int castIndex = rawJson.IndexOf("\"Cast\":");
             if (castIndex != -1)
             {
                 string castContent = rawJson.Substring(castIndex);
-                castContent = castContent.TrimEnd('}', '\r', '\n', ' ');
 
-                // Compact multi-line number arrays: [ \n 1, \n 2 ] -> [1, 2]
+                // CRITICAL FIX: TrimEnd includes ',' to remove the trailing comma
+                castContent = castContent.TrimEnd('}', '\r', '\n', ' ', ',');
+
+                // C. Compact multi-line number arrays: [ \n 1, \n 2 ] -> [1, 2]
                 string compactPattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
                 castContent = Regex.Replace(castContent, compactPattern, ": [$1, $2, $3]");
 
-                // Fix potential trailing commas caused by line removal
+                // D. FIX TRAILING COMMAS INSIDE OBJECTS
+                // Removes commas that were left behind because we deleted properties like "Position": []
                 castContent = Regex.Replace(castContent, @",(\s*})", "$1");
 
                 sb.Append("    " + castContent);
