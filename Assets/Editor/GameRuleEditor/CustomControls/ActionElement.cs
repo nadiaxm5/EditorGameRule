@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
@@ -8,11 +9,11 @@ namespace GameRuleEditor.CustomControls
 {
     public class ActionElement : VisualElement
     {
-        private EditorContext context; // New Context
+        private EditorContext context;
         private PopupField<string> typeDropdown;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
-        private List<TextField> parameterFields = new List<TextField>();
+        private List<VisualElement> inputElements = new List<VisualElement>();
 
         public System.Action OnChanged;
         public System.Action OnRemove;
@@ -33,50 +34,35 @@ namespace GameRuleEditor.CustomControls
         public void SetFromSource(string actionString)
         {
             var result = GameRuleParser.ParseFunction(actionString);
-
             if (availableTypes.Contains(result.Name))
             {
                 typeDropdown.SetValueWithoutNotify(result.Name);
                 UpdateParameterFields();
 
-                for (int i = 0; i < parameterFields.Count && i < result.Params.Count; i++)
+                for (int i = 0; i < inputElements.Count && i < result.Params.Count; i++)
                 {
-                    parameterFields[i].SetValueWithoutNotify(result.Params[i]);
+                    if (inputElements[i] is TextField tf) tf.SetValueWithoutNotify(result.Params[i]);
+                    else if (inputElements[i] is ObjectField of) { var obj = Resources.Load(result.Params[i]); of.SetValueWithoutNotify(obj); }
                 }
             }
         }
 
         private void CreateUI()
         {
-            var mainRow = new VisualElement();
-            mainRow.style.flexDirection = FlexDirection.Row;
-            mainRow.style.alignItems = Align.Center;
+            var mainRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
 
-            // Move buttons
-            var moveButtons = new VisualElement();
-            moveButtons.style.flexDirection = FlexDirection.Column;
-            moveButtons.style.marginRight = 5;
-            var upBtn = new Button(() => OnMoveUp?.Invoke()) { text = "^" };
-            var downBtn = new Button(() => OnMoveDown?.Invoke()) { text = "v" };
-            upBtn.style.width = 20; upBtn.style.height = 15; upBtn.style.fontSize = 8;
-            downBtn.style.width = 20; downBtn.style.height = 15; downBtn.style.fontSize = 8;
-            moveButtons.Add(upBtn); moveButtons.Add(downBtn);
-            mainRow.Add(moveButtons);
+            // REMOVED: Move Buttons (Arrows)
 
-            typeDropdown = new PopupField<string>(availableTypes, 0);
-            typeDropdown.style.width = 120;
-            typeDropdown.style.marginRight = 5;
+            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 110, marginRight = 5 } };
             typeDropdown.RegisterValueChangedCallback(evt => { UpdateParameterFields(); OnChanged?.Invoke(); });
             mainRow.Add(typeDropdown);
 
-            parametersContainer = new VisualElement();
-            parametersContainer.style.flexDirection = FlexDirection.Row;
-            parametersContainer.style.flexGrow = 1;
+            parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, flexWrap = Wrap.Wrap } };
             mainRow.Add(parametersContainer);
 
             var removeBtn = new Button(() => OnRemove?.Invoke()) { text = "X" };
             removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 25; removeBtn.style.height = 25;
+            removeBtn.style.width = 20; removeBtn.style.height = 20;
             mainRow.Add(removeBtn);
 
             Add(mainRow);
@@ -86,103 +72,85 @@ namespace GameRuleEditor.CustomControls
         private void UpdateParameterFields()
         {
             parametersContainer.Clear();
-            parameterFields.Clear();
+            inputElements.Clear();
             string type = typeDropdown.value;
 
             switch (type)
             {
                 case "Edit":
-                    AddParameterField("Property", true); // Picker!
-                    AddParameterField("Value", true);    // Picker (read values)
-                    break;
-
+                    AddParameterField("Property", true); AddParameterField("Value", true); break;
                 case "Spawn":
-                    AddParameterField("Prefab");
-                    AddParameterField("Spawner");
-                    AddParameterField("Pos X"); AddParameterField("Pos Y"); AddParameterField("Pos Z");
-                    AddParameterField("Rot X"); AddParameterField("Rot Y"); AddParameterField("Rot Z");
+                    // Use actorsOnly=true for Prefab and Spawner
+                    AddParameterField("Prefab", true, false, true);
+                    AddParameterField("Spawner", true, false, true);
+                    AddParameterField("Pos X", true); AddParameterField("Pos Y", true); AddParameterField("Pos Z", true);
+                    AddParameterField("Rot X", true); AddParameterField("Rot Y", true); AddParameterField("Rot Z", true);
                     break;
 
-                case "Animate":
-                case "PlaySound":
-                case "PlayParticles":
-                    AddParameterField("Name"); break;
-                case "Move":
-                case "Push":
-                    AddParameterField("Value", true);
-                    AddParameterField("RX"); AddParameterField("RY"); AddParameterField("RZ"); break;
-                case "MoveTo":
-                case "NavigateTo":
-                case "PushTo":
-                    AddParameterField("Value", true);
-                    AddParameterField("X", true); // Picker target
-                    AddParameterField("Y", true);
-                    AddParameterField("Z", true);
-                    break;
+                case "Animate": AddResourceField<AnimationClip>("Animation"); break;
+                case "PlaySound": AddResourceField<AudioClip>("Sound"); break;
+                // CHANGED: Use ParticleSystem to filter assets
+                case "PlayParticles": AddResourceField<ParticleSystem>("ParticleSystem"); break;
 
-                case "Rotate":
-                case "Torque":
-                    AddParameterField("RX"); AddParameterField("RY"); AddParameterField("RZ"); break;
-                case "RotateTo":
-                    AddParameterField("Speed"); AddParameterField("DX"); AddParameterField("DY"); AddParameterField("DZ");
-                    AddParameterField("PivotX"); AddParameterField("PivotY"); AddParameterField("PivotZ"); break;
+                case "Move": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+                case "MoveTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
+                case "NavigateTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
+
+                case "Rotate": AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+                case "RotateTo": AddParameterField("Speed", true); AddParameterField("DX", true); AddParameterField("DY", true); AddParameterField("DZ", true); AddParameterField("PivotX", true); AddParameterField("PivotY", true); AddParameterField("PivotZ", true); break;
+                case "Torque": AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+
+                case "Push": AddParameterField("Force", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+                case "PushTo": AddParameterField("Force", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
             }
         }
 
-        private void AddParameterField(string placeholder, bool showPicker = false)
+        // Updated signature to support actorsOnly flag
+        private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false, bool actorsOnly = false)
         {
-            var container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.flexGrow = 1;
-            container.style.marginRight = 3;
-            container.style.minWidth = 50;
-
-            var field = new TextField();
-            field.style.flexGrow = 1;
-
-            var label = new Label(placeholder);
-            label.style.fontSize = 8;
-            label.style.color = new Color(0.6f, 0.6f, 0.6f);
-            label.style.position = Position.Absolute;
-            label.style.left = 2; label.style.top = 2;
+            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 40 } };
+            var field = new TextField() { style = { flexGrow = 1 } };
+            var label = new Label(placeholder) { style = { fontSize = 8, color = new Color(0.6f, 0.6f, 0.6f), position = Position.Absolute, left = 2, top = 2 }, pickingMode = PickingMode.Ignore };
             field.Add(label);
-
-            field.RegisterValueChangedCallback(evt =>
-            {
-                label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None;
-                OnChanged?.Invoke();
-            });
-
+            field.RegisterValueChangedCallback(evt => { label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None; OnChanged?.Invoke(); });
             container.Add(field);
 
             if (showPicker)
             {
-                var pickBtn = new Button(() =>
-                {
-                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
-                    {
-                        field.value = picked;
-                        OnChanged?.Invoke();
-                    });
-                });
-                pickBtn.text = "°"; // Small icon-like button
-                pickBtn.style.width = 18;
-                pickBtn.style.height = 18;
-                pickBtn.style.marginLeft = 1;
-                pickBtn.style.fontSize = 10;
+                var pickBtn = new Button(() => {
+                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly, actorsOnly);
+                })
+                { text = "°", style = { width = 18, height = 18, fontSize = 10, marginLeft = 0 } };
                 container.Add(pickBtn);
             }
+            parametersContainer.Add(container); inputElements.Add(field);
+        }
 
+        private void AddResourceField<T>(string placeholder) where T : Object
+        {
+            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 100 } };
+            var objField = new ObjectField() { objectType = typeof(T), allowSceneObjects = false, style = { flexGrow = 1 } };
+
+            objField.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
+
+            var label = new Label(placeholder) { style = { fontSize = 9, color = new Color(0.6f, 0.6f, 0.6f), position = Position.Absolute, left = 20, top = 2 }, pickingMode = PickingMode.Ignore };
+            objField.Add(label);
+            objField.RegisterValueChangedCallback(evt => label.style.display = evt.newValue == null ? DisplayStyle.Flex : DisplayStyle.None);
+
+            container.Add(objField);
             parametersContainer.Add(container);
-            parameterFields.Add(field);
+            inputElements.Add(objField);
         }
 
         public string GetActionString()
         {
             string type = typeDropdown.value;
             List<string> parameters = new List<string>();
-            foreach (var field in parameterFields) parameters.Add(field.value);
-
+            foreach (var el in inputElements)
+            {
+                if (el is TextField tf) parameters.Add(tf.value);
+                else if (el is ObjectField of) parameters.Add(of.value != null ? of.value.name : "");
+            }
             if (parameters.Count == 0) return $"{type}()";
             return $"{type}({string.Join(",", parameters)})";
         }

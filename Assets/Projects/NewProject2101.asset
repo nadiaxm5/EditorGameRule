@@ -45,7 +45,7 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: NewActor_1
+    - ActorName: NewActor
       Active: 1
       PrefabName: Empty
       Tag: Untagged
@@ -60,7 +60,11 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script: []
+      Script:
+      - When:
+        - Touch(press,false)
+        Do:
+        - Delete()
     CustomVariables:
     - name: Score
       type: float
@@ -69,7 +73,7 @@ MonoBehaviour:
       boolValue: 0
       arrayValue: []
   actors:
-  - ActorName: NewActor_1
+  - ActorName: NewActor
     Active: 1
     PrefabName: Empty
     Tag: Untagged
