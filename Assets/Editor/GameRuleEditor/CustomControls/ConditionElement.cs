@@ -9,7 +9,6 @@ namespace GameRuleEditor.CustomControls
 {
     public class ConditionElement : VisualElement
     {
-        // ... (Fields and Constructor remain the same) ...
         private EditorContext context;
         private PopupField<string> typeDropdown;
         private Label operatorLabel;
@@ -101,7 +100,6 @@ namespace GameRuleEditor.CustomControls
                 case "Timer": AddParameterField("Seconds"); break;
 
                 case "Touch":
-                    // FIXED: Lowercase keys
                     var touchModes = new List<string> { "press", "down", "up", "tap" };
                     var tMode = new PopupField<string>(touchModes, 0) { style = { width = 70 } };
                     tMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
@@ -114,7 +112,6 @@ namespace GameRuleEditor.CustomControls
 
                 case "Keyboard":
                     AddParameterField("Key (e.g. Space)");
-                    // FIXED: Lowercase keys
                     var keyModes = new List<string> { "press", "down", "up" };
                     var kMode = new PopupField<string>(keyModes, 0) { style = { width = 70 } };
                     kMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
@@ -135,7 +132,8 @@ namespace GameRuleEditor.CustomControls
 
             if (showPicker)
             {
-                var pickBtn = new Button(() => {
+                var pickBtn = new Button(() =>
+                {
                     GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly);
                 })
                 { text = "°", style = { width = 18, height = 18, fontSize = 10, marginLeft = 0 } };

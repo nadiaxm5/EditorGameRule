@@ -16,7 +16,6 @@ namespace GameRuleEditor.Panels
         private VisualElement contentContainer;
         private VisualElement noSelectionContainer;
 
-        // Fields
         private TextField actorNameField;
 
         private ObjectField prefabPicker;
@@ -25,7 +24,7 @@ namespace GameRuleEditor.Panels
 
         private VisualElement propertiesContainer;
 
-        // Reusable Helper to manage Override/Revert UI state
+        // Helper to manage Override/Revert UI state
         private class PropertyRow
         {
             public VisualElement container;
@@ -53,7 +52,7 @@ namespace GameRuleEditor.Panels
 
         private void CreateUI()
         {
-            // 1. No Selection View
+            // No Selection View
             noSelectionContainer = new VisualElement();
             noSelectionContainer.style.flexGrow = 1;
             noSelectionContainer.style.justifyContent = Justify.Center;
@@ -61,7 +60,7 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = Color.gray } });
             Add(noSelectionContainer);
 
-            // 2. Content View
+            // Content View
             contentContainer = new VisualElement();
             contentContainer.style.flexGrow = 1;
             contentContainer.style.display = DisplayStyle.None;
@@ -77,7 +76,6 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            // --- Basic Section ---
             var basicSection = CreateSection("Basic Properties");
             scrollView.Add(basicSection);
 
@@ -123,7 +121,7 @@ namespace GameRuleEditor.Panels
             });
             basicSection.Add(activeToggle);
 
-            // --- Transform Section ---
+            // Transform
             var transformSection = CreateSection("Transform");
             scrollView.Add(transformSection);
 
@@ -132,7 +130,7 @@ namespace GameRuleEditor.Panels
             CreateOverrideableVector3(transformSection, "Scale", "Scale");
             CreateOverrideableVector3(transformSection, "Size (Target)", "Size");
 
-            // --- Physics Section ---
+            // Physics
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
@@ -145,7 +143,7 @@ namespace GameRuleEditor.Panels
             CreateScalarField(physicsSection, "Bounciness", val => context.SelectedActor.Bounciness = val);
             CreateScalarField(physicsSection, "Drag", val => context.SelectedActor.Drag = val);
 
-            // --- Custom Properties ---
+            // Custom Properties
             var propsSection = CreateSection("Custom Properties");
             scrollView.Add(propsSection);
 
@@ -171,17 +169,15 @@ namespace GameRuleEditor.Panels
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
 
-            // Label
             var label = new Label(labelText) { style = { minWidth = 140 } };
             row.Add(label);
 
-            // Field
             var field = new Vector3Field { style = { flexGrow = 1 } };
             field.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
 
-                // When changed, we instantiate the array (Override)
+                // When changed, override
                 controller.UpdateActorProperty(context.selectedActorIndex, () =>
                 {
                     var vec = evt.newValue;
@@ -225,7 +221,6 @@ namespace GameRuleEditor.Panels
                     controller.UpdateActorProperty(context.selectedActorIndex, () => setter(evt.newValue), "Edit Scalar");
             });
             parent.Add(field);
-            // Quick hack to map scalar fields to dictionary for updating later
             field.name = labelText;
         }
 
@@ -244,7 +239,6 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.display = DisplayStyle.None;
             contentContainer.style.display = DisplayStyle.Flex;
 
-            // --- Basics ---
             if (actorNameField.value != (actor.ActorName ?? "")) actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
             if (tagField.value != (actor.Tag ?? "")) tagField.SetValueWithoutNotify(actor.Tag ?? "");
             activeToggle.SetValueWithoutNotify(actor.Active);
@@ -253,11 +247,11 @@ namespace GameRuleEditor.Panels
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));
             prefabPicker.SetValueWithoutNotify(prefab);
 
-            // --- Logic: Check Overrides vs Prefab Defaults ---
+            // Check Overrides vs Prefab defaults
             UpdateVectorRow("Position", actor.Position, prefab?.transform.position ?? Vector3.zero);
             UpdateVectorRow("Rotation", actor.Rotation, prefab?.transform.eulerAngles ?? Vector3.zero);
             UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
-            UpdateVectorRow("Size", actor.Size, Vector3.zero); // Size usually starts empty
+            UpdateVectorRow("Size", actor.Size, Vector3.zero);
             UpdateVectorRow("Velocity", actor.Velocity, Vector3.zero);
             UpdateVectorRow("AngularVelocity", actor.AngularVelocity, Vector3.zero);
 
@@ -280,19 +274,13 @@ namespace GameRuleEditor.Panels
 
             if (isOverridden)
             {
-                // Show Actor Value
                 vecField.SetValueWithoutNotify(new Vector3(actorData[0], actorData[1], actorData[2]));
-
-                // Style: Bold Label, Show Revert
                 row.label.style.unityFontStyleAndWeight = FontStyle.Bold;
                 row.revertButton.style.visibility = Visibility.Visible;
             }
             else
             {
-                // Show Prefab Value (Ghosted)
                 vecField.SetValueWithoutNotify(prefabDefault);
-
-                // Style: Normal Label, Hide Revert
                 row.label.style.unityFontStyleAndWeight = FontStyle.Normal;
                 row.revertButton.style.visibility = Visibility.Hidden;
             }
@@ -331,7 +319,6 @@ namespace GameRuleEditor.Panels
         }
     }
 
-    // --- DIALOG CLASS (Included here) ---
     public class AddPropertyDialog : EditorWindow
     {
         private System.Action<string> callback;

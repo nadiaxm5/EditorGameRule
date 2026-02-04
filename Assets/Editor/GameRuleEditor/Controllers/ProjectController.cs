@@ -93,7 +93,6 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, "Add Custom Variable");
 
-            // Removed "GameRuleEditor.Core." prefix - referencing global namespace class
             CustomVariable newVar = new CustomVariable
             {
                 name = name,
@@ -170,14 +169,13 @@ namespace GameRuleEditor.Controllers
 
             EnsureEmptyPrefabExists();
 
-            // Initialize with NULL arrays to indicate "Use Prefab Defaults"
+            // Initialize with null arrays to use prefab defaults
             ActorJson newActor = new ActorJson
             {
                 ActorName = actorName,
                 PrefabName = "Empty",
                 Active = true,
                 Tag = "Untagged",
-                // Explicitly leaving arrays as null
                 Position = null,
                 Rotation = null,
                 Scale = null,
@@ -197,7 +195,6 @@ namespace GameRuleEditor.Controllers
             context.SelectActor(newIndex);
         }
 
-        // Add a helper to Revert properties to null
         public void RevertActorProperty(int actorIndex, string propertyName)
         {
             if (context.currentProject == null || actorIndex < 0) return;
@@ -213,7 +210,7 @@ namespace GameRuleEditor.Controllers
                 case "Size": actor.Size = null; break;
                 case "Velocity": actor.Velocity = null; break;
                 case "AngularVelocity": actor.AngularVelocity = null; break;
-                case "Physics": // Revert all physics scalars
+                case "Physics":
                     actor.Density = 0;
                     actor.Friction = 0;
                     actor.Bounciness = 0;
@@ -238,7 +235,6 @@ namespace GameRuleEditor.Controllers
 
             if (!File.Exists(prefabPath))
             {
-                // Create a simple empty GameObject
                 GameObject emptyGO = new GameObject("Empty");
                 PrefabUtility.SaveAsPrefabAsset(emptyGO, prefabPath);
                 Object.DestroyImmediate(emptyGO);
@@ -265,7 +261,6 @@ namespace GameRuleEditor.Controllers
 
             EditorUtility.SetDirty(context.currentProject);
 
-            // Adjust selection
             if (context.selectedActorIndex == actorIndex)
             {
                 context.SelectActor(-1);
@@ -298,7 +293,6 @@ namespace GameRuleEditor.Controllers
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyActorListChanged();
 
-            // Select the duplicated actor
             int newIndex = context.currentProject.actors.IndexOf(duplicate);
             context.SelectActor(newIndex);
         }
@@ -397,7 +391,6 @@ namespace GameRuleEditor.Controllers
                 actor.Script = new List<SentenceJson>();
             }
 
-            // Removed incorrect namespace prefixes
             SentenceJson newRule = new SentenceJson
             {
                 When = hasCondition ? new List<string> { "" } : new List<string>(),
@@ -409,7 +402,6 @@ namespace GameRuleEditor.Controllers
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
 
-            // Select the new rule
             context.SelectScript(actor.Script.Count - 1);
         }
 
@@ -438,7 +430,6 @@ namespace GameRuleEditor.Controllers
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
 
-            // Adjust selection
             if (context.selectedScriptIndex == ruleIndex)
             {
                 context.SelectScript(-1);
@@ -533,7 +524,6 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, "Duplicate Rule");
 
-            // Deep copy of the rule
             SentenceJson original = actor.Script[ruleIndex];
             SentenceJson duplicate = new SentenceJson
             {

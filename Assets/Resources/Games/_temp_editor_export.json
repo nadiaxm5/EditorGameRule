@@ -14,10 +14,17 @@
     ],
     "Cast": [
         {
-            "ActorName": "NewActor",
+            "ActorName": "ActorVacio",
             "Active": true,
             "PrefabName": "Empty",
-            "Tag": "Untagged"
+            "Tag": "Untagged",
+            "Script": [
+                {
+                    "Do": [
+                        "Move(5,0,0,0)"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -15,11 +15,11 @@ namespace GameRuleEditor.CustomControls
         private List<ConditionElement> elements = new List<ConditionElement>();
         private VisualElement conditionsContainer;
         private Label previewLabel;
-        private EditorContext context; // Reference to Context
+        private EditorContext context;
 
         public System.Action<string> OnConditionChanged;
 
-        public ConditionBuilder(EditorContext editorContext) // Constructor Change
+        public ConditionBuilder(EditorContext editorContext)
         {
             context = editorContext;
 
@@ -34,7 +34,6 @@ namespace GameRuleEditor.CustomControls
 
         private void CreateUI()
         {
-            // ... (Same UI creation code as before) ...
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;

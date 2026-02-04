@@ -6,7 +6,6 @@ namespace GameRuleEditor.Core
 {
     public static class GameRuleParser
     {
-        // Extracts "Move" and ["5", "0", "90", "0"] from "Move(5, 0, 90, 0)"
         public static (string Name, List<string> Params) ParseFunction(string input)
         {
             if (string.IsNullOrEmpty(input)) return (null, null);
@@ -57,7 +56,6 @@ namespace GameRuleEditor.Core
 
         /// <summary>
         /// Splits a full condition string into tokens (Conditions and Operators).
-        /// Example: "NOT Check(A) AND Compare(B)" -> ["NOT", "Check(A)", "AND", "Compare(B)"]
         /// </summary>
         public static List<string> TokenizeCondition(string fullCondition)
         {
@@ -65,7 +63,6 @@ namespace GameRuleEditor.Core
             if (string.IsNullOrEmpty(fullCondition)) return tokens;
 
             // Normalize spaces around operators to ensure splitting works
-            // We use a regex that looks for whole words AND, OR, NOT
             string pattern = @"\b(AND|OR|NOT)\b";
 
             // Split keeps delimiters because of parentheses in pattern

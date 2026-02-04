@@ -45,7 +45,7 @@ namespace GameRuleEditor.Panels
         // Creation Section References
         private VisualElement valueFieldContainer;
 
-        private Func<object> activeValueGetter; // Delegate to retrieve value from dynamic field
+        private Func<object> activeValueGetter;
 
         // Available types
         private List<string> variableTypes = new List<string> { "Int", "Float", "Bool", "Vector2", "Vector3" };
@@ -79,7 +79,7 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            // --- Basic Settings Section ---
+            // Basic settings section
             var basicSection = CreateSection("Basic Settings");
             scrollView.Add(basicSection);
 
@@ -111,7 +111,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Background Color");
             });
 
-            // --- Camera Section ---
+            // Camera section
             var cameraSection = CreateSection("Camera");
             scrollView.Add(cameraSection);
 
@@ -133,7 +133,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Camera Rotation");
             });
 
-            // --- Lighting Section ---
+            // Lighting section
             var lightingSection = CreateSection("Lighting (Sun)");
             scrollView.Add(lightingSection);
 
@@ -173,7 +173,7 @@ namespace GameRuleEditor.Panels
                 }, "Change Ambient Color");
             });
 
-            // --- Physics Section ---
+            // Physics section
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
@@ -186,11 +186,11 @@ namespace GameRuleEditor.Panels
                 }, "Change Gravity");
             });
 
-            // --- Custom Variables Section ---
+            // Custom Variables section
             var customVarSection = CreateSection("Custom Global Variables");
             scrollView.Add(customVarSection);
 
-            // Variable Creation Area (Integrated)
+            // Variable creation
             var creationBox = new VisualElement();
             creationBox.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
             creationBox.style.paddingTop = 10; creationBox.style.paddingBottom = 10;
@@ -215,7 +215,7 @@ namespace GameRuleEditor.Panels
             valueFieldContainer.style.marginTop = 5;
             creationBox.Add(valueFieldContainer);
 
-            CreateValueField("Int"); // Default
+            CreateValueField("Int"); // Default int
 
             typeInput.RegisterValueChangedCallback(evt => CreateValueField(evt.newValue));
 

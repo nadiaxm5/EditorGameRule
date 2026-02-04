@@ -27,14 +27,14 @@ namespace GameRuleEditor.Core
         /// </summary>
         public string ExportToJson()
         {
-            // 1. Sync Actors
+            // Sync Actors
             sceneData.Cast = new List<ActorJson>(actors);
 
-            // 2. BACKUP AND TEMP CLEANUP OF VARIABLES
+            // Backup and temp cleanup of variables
             var realVariables = sceneData.CustomVariables;
             sceneData.CustomVariables = new List<CustomVariable>();
 
-            // 3. TEMP CLEANUP OF "WHEN"
+            // Temp cleanup of "when"
             foreach (var actor in sceneData.Cast)
             {
                 if (actor.Script == null) continue;
@@ -45,10 +45,10 @@ namespace GameRuleEditor.Core
                 }
             }
 
-            // 4. GENERATE BASE JSON
+            // Generate base json
             string rawJson = JsonUtility.ToJson(sceneData, true);
 
-            // --- RESTORE EDITOR STATE ---
+            // Restore editor state
             sceneData.CustomVariables = realVariables;
             foreach (var actor in sceneData.Cast)
             {
@@ -59,22 +59,15 @@ namespace GameRuleEditor.Core
                 }
             }
 
-            // =================================================================================
-            // 5. CLEANUP: REMOVE EMPTY ARRAYS AND DEFAULT FLOATS
-            // =================================================================================
-
-            // A. Remove Empty Arrays ("Key": [],)
+            // Remove empty arrays
             string emptyArrayPattern = @"\s*""[a-zA-Z0-9_]+"": \[\],?";
             rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
 
-            // B. Remove Default Floats ("Key": 0.0,)
+            // Remove default floats
             string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(\.0)?,?";
             rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
 
-            // =================================================================================
-            // 6. MANUAL CONSTRUCTION
-            // =================================================================================
-
+            // Manual construction
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
             sb.AppendLine($"    \"GameName\": \"{sceneData.GameName}\",");
@@ -102,8 +95,7 @@ namespace GameRuleEditor.Core
                 sb.AppendLine("    \"CustomVariables\": [],");
             }
 
-            // Extract Cast from Cleaned Raw JSON
-            // We clean up the temp variable list first (handles trailing commas if it was last)
+            // Clean Raw JSON and temp variable list and extract
             rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace("\"CustomVariables\": []", "");
 
             int castIndex = rawJson.IndexOf("\"Cast\":");
@@ -111,15 +103,13 @@ namespace GameRuleEditor.Core
             {
                 string castContent = rawJson.Substring(castIndex);
 
-                // CRITICAL FIX: TrimEnd includes ',' to remove the trailing comma
                 castContent = castContent.TrimEnd('}', '\r', '\n', ' ', ',');
 
-                // C. Compact multi-line number arrays: [ \n 1, \n 2 ] -> [1, 2]
+                // Compact multi-line number arrays
                 string compactPattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
                 castContent = Regex.Replace(castContent, compactPattern, ": [$1, $2, $3]");
 
-                // D. FIX TRAILING COMMAS INSIDE OBJECTS
-                // Removes commas that were left behind because we deleted properties like "Position": []
+                // Removes commas left behind
                 castContent = Regex.Replace(castContent, @",(\s*})", "$1");
 
                 sb.Append("    " + castContent);
@@ -226,7 +216,7 @@ namespace GameRuleEditor.Core
             return project;
         }
 
-        // --- Helpers ---
+        // Helpers
         public ActorJson AddActor(string actorName, string prefabName)
         {
             ActorJson newActor = new ActorJson

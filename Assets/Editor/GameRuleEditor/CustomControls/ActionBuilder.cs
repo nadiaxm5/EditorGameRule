@@ -17,11 +17,11 @@ namespace GameRuleEditor.CustomControls
         private List<ActionElement> actions = new List<ActionElement>();
         private VisualElement actionsContainer;
         private Label previewLabel;
-        private EditorContext context; // NEW
+        private EditorContext context;
 
         public System.Action<List<string>> OnActionsChanged;
 
-        public ActionBuilder(EditorContext editorContext) // NEW Constructor
+        public ActionBuilder(EditorContext editorContext)
         {
             context = editorContext;
 

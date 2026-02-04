@@ -205,7 +205,6 @@ namespace GameRuleEditor.Panels
 
         private void OnAddActor()
         {
-            // CHANGED: No file panel. Just create with default logic.
             string actorName = "NewActor";
             int counter = 1;
             while (context.currentProject.actors.Exists(a => a.ActorName == actorName))

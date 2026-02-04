@@ -14,9 +14,7 @@ namespace GameRuleEditor.Windows
     /// </summary>
     public class GameRuleEditorWindow : EditorWindow
     {
-        // Internal path for the invisible singleton
         private const string CONTEXT_FOLDER = "Assets/Editor/GameRuleEditor/Projects";
-
         private const string CONTEXT_PATH = CONTEXT_FOLDER + "/EditorContext.asset";
 
         private EditorContext editorContext;
@@ -36,7 +34,7 @@ namespace GameRuleEditor.Windows
         private Button actorsTabButton;
         private Button previewTabButton;
 
-        // Toolbar references (for enabling/disabling)
+        // Toolbar references
         private Label projectNameLabel;
 
         private ToolbarButton saveButton;
@@ -75,10 +73,8 @@ namespace GameRuleEditor.Windows
 
         private void EnsureEditorContextExists()
         {
-            // 1. Try to load existing
             editorContext = AssetDatabase.LoadAssetAtPath<EditorContext>(CONTEXT_PATH);
 
-            // 2. If missing, create it automatically
             if (editorContext == null)
             {
                 if (!Directory.Exists(CONTEXT_FOLDER))
@@ -112,7 +108,6 @@ namespace GameRuleEditor.Windows
             root = rootVisualElement;
             root.style.flexGrow = 1;
 
-            // Load styles
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
@@ -154,12 +149,11 @@ namespace GameRuleEditor.Windows
             container.style.alignItems = Align.Center;
             container.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
 
-            // Logo / Title
             var title = new Label("GameRule Editor");
             title.style.fontSize = 32;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             title.style.marginBottom = 10;
-            title.style.color = new Color(0.3f, 0.6f, 0.9f); // Nice blue
+            title.style.color = new Color(0.3f, 0.6f, 0.9f);
             container.Add(title);
 
             var subtitle = new Label("Select an action to begin");
@@ -168,7 +162,6 @@ namespace GameRuleEditor.Windows
             subtitle.style.color = Color.gray;
             container.Add(subtitle);
 
-            // Buttons Container
             var buttonsBox = new VisualElement();
             buttonsBox.style.flexDirection = FlexDirection.Row;
 
@@ -216,7 +209,6 @@ namespace GameRuleEditor.Windows
             var toolbar = new Toolbar();
             toolbar.style.height = 30;
 
-            // Project menu
             var projectMenu = new ToolbarMenu();
             projectMenu.text = "Project";
             projectMenu.menu.AppendAction("Close Project", a =>
@@ -295,7 +287,6 @@ namespace GameRuleEditor.Windows
 
         private void OnNewProject()
         {
-            // Use SaveFilePanel to get a path for the new asset
             string path = EditorUtility.SaveFilePanelInProject(
                 "Create New GameRule Project",
                 "NewProject",
@@ -307,14 +298,11 @@ namespace GameRuleEditor.Windows
 
             string projectName = Path.GetFileNameWithoutExtension(path);
 
-            // Create the logic immediately
             projectController.CreateNewProject(projectName);
 
-            // Save the asset
             AssetDatabase.CreateAsset(editorContext.currentProject, path);
             AssetDatabase.SaveAssets();
 
-            // Refresh UI (will switch to Main Editor)
             RefreshInterface();
         }
 
@@ -323,7 +311,6 @@ namespace GameRuleEditor.Windows
             string path = EditorUtility.OpenFilePanel("Open GameRule Project", "Assets", "asset");
             if (string.IsNullOrEmpty(path)) return;
 
-            // Convert to relative path
             if (path.StartsWith(Application.dataPath))
                 path = "Assets" + path.Substring(Application.dataPath.Length);
 
@@ -442,7 +429,7 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        // --- Panel Constructors ---
+        // Panel Constructors
 
         private void ShowActorsPanel()
         {
@@ -540,7 +527,6 @@ namespace GameRuleEditor.Windows
 
         #endregion Tab Management
 
-        // Event Handler: Only updates specific labels/buttons, does NOT redraw the whole window
         private void OnProjectLoaded() => RefreshInterface();
 
         private void UpdateToolbarUI()

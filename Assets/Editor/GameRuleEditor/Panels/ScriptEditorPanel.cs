@@ -38,7 +38,7 @@ namespace GameRuleEditor.Panels
 
         private void CreateUI()
         {
-            // No selection message
+            // No selection
             noSelectionContainer = new VisualElement();
             noSelectionContainer.style.flexGrow = 1;
             noSelectionContainer.style.justifyContent = Justify.Center;
@@ -51,7 +51,7 @@ namespace GameRuleEditor.Panels
 
             Add(noSelectionContainer);
 
-            // Script editor container (initially hidden)
+            // Script editor container
             var scrollView = new ScrollView();
             scrollView.style.flexGrow = 1;
             scrollView.style.display = DisplayStyle.None;
@@ -113,7 +113,6 @@ namespace GameRuleEditor.Panels
 
             if (actor == null)
             {
-                // Show "no selection" message
                 noSelectionContainer.style.display = DisplayStyle.Flex;
                 this.Q<ScrollView>().style.display = DisplayStyle.None;
                 return;
@@ -128,7 +127,6 @@ namespace GameRuleEditor.Panels
                 }
             }
 
-            // Show script editor
             noSelectionContainer.style.display = DisplayStyle.None;
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
@@ -155,7 +153,7 @@ namespace GameRuleEditor.Panels
 
             for (int i = 0; i < actor.Script.Count; i++)
             {
-                int ruleIndex = i; // Capture for closure
+                int ruleIndex = i;
                 var rule = actor.Script[i];
 
                 var ruleElement = CreateRuleElement(rule, ruleIndex);
@@ -231,10 +229,9 @@ namespace GameRuleEditor.Panels
             header.Add(buttonContainer);
             container.Add(header);
 
-            // Condition builder (if has condition)
+            // Condition builder
             if (hasCondition)
             {
-                // ** FIX: Pass context **
                 var conditionBuilder = new ConditionBuilder(context);
                 if (rule.When.Count > 0)
                 {
@@ -252,7 +249,6 @@ namespace GameRuleEditor.Panels
             }
 
             // Action builder
-            // ** FIX: Pass context **
             var actionBuilder = new ActionBuilder(context);
             if (rule.Do != null && rule.Do.Count > 0)
             {
@@ -278,7 +274,6 @@ namespace GameRuleEditor.Panels
 
         ~ScriptEditorPanel()
         {
-            // Unsubscribe
             context.OnActorSelected -= OnActorSelected;
             context.OnProjectChanged -= UpdateUI;
         }

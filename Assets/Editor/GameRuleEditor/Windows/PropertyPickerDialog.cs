@@ -11,7 +11,7 @@ namespace GameRuleEditor.Windows
         private System.Action<string> onPick;
         private EditorContext context;
         private bool boolOnly = false;
-        private bool actorsOnly = false; // NEW FILTER
+        private bool actorsOnly = false;
 
         private string selectedCategory = "Me";
         private string selectedGroup = "Transform";
@@ -29,7 +29,7 @@ namespace GameRuleEditor.Windows
             win.context = ctx;
             win.onPick = callback;
             win.boolOnly = onlyBooleans;
-            win.actorsOnly = onlyActors; // Set filter
+            win.actorsOnly = onlyActors;
             win.minSize = new Vector2(500, 300);
             win.InitData();
             win.ShowUtility();
@@ -47,7 +47,7 @@ namespace GameRuleEditor.Windows
 
         private void OnGUI()
         {
-            // If Actors Only mode, we skip the 3-column layout and just show a list
+            // If Actors Only mode, skip the 3-column layout and just show a list
             if (actorsOnly)
             {
                 DrawActorsOnlyMode();
@@ -110,9 +110,6 @@ namespace GameRuleEditor.Windows
 
             scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory);
 
-            // "Me" usually isn't a prefab reference, but "Game" might be needed? 
-            // Usually Spawn takes a string name of an Actor/Prefab.
-
             foreach (var actorName in actorNames)
             {
                 if (GUILayout.Button(actorName, EditorStyles.miniButton))
@@ -122,11 +119,9 @@ namespace GameRuleEditor.Windows
                 }
             }
 
-            // Also list available Prefabs in Resources (Optional but helpful)
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Resources/Prefabs:", EditorStyles.boldLabel);
 
-            // Simple way to get prefabs from the Resources folder you use
             var prefabs = Resources.LoadAll<GameObject>("Prefabs");
             foreach (var p in prefabs)
             {
@@ -145,12 +140,14 @@ namespace GameRuleEditor.Windows
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(width), GUILayout.ExpandHeight(true));
             scroll = EditorGUILayout.BeginScrollView(scroll); drawContent(); EditorGUILayout.EndScrollView(); EditorGUILayout.EndVertical();
         }
+
         private void DrawSelectable(string label, string id)
         {
             GUI.backgroundColor = (selectedCategory == id) ? Color.cyan : Color.white;
             if (GUILayout.Button(label, EditorStyles.miniButton)) { selectedCategory = id; selectedGroup = (id == "Game") ? "Global" : "Transform"; }
             GUI.backgroundColor = Color.white;
         }
+
         private void DrawGroupSelectable(string label, string id)
         {
             GUI.backgroundColor = (selectedGroup == id) ? Color.cyan : Color.white;

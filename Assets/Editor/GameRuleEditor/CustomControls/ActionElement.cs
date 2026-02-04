@@ -51,8 +51,6 @@ namespace GameRuleEditor.CustomControls
         {
             var mainRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
 
-            // REMOVED: Move Buttons (Arrows)
-
             typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 110, marginRight = 5 } };
             typeDropdown.RegisterValueChangedCallback(evt => { UpdateParameterFields(); OnChanged?.Invoke(); });
             mainRow.Add(typeDropdown);
@@ -80,7 +78,6 @@ namespace GameRuleEditor.CustomControls
                 case "Edit":
                     AddParameterField("Property", true); AddParameterField("Value", true); break;
                 case "Spawn":
-                    // Use actorsOnly=true for Prefab and Spawner
                     AddParameterField("Prefab", true, false, true);
                     AddParameterField("Spawner", true, false, true);
                     AddParameterField("Pos X", true); AddParameterField("Pos Y", true); AddParameterField("Pos Z", true);
@@ -89,7 +86,6 @@ namespace GameRuleEditor.CustomControls
 
                 case "Animate": AddResourceField<AnimationClip>("Animation"); break;
                 case "PlaySound": AddResourceField<AudioClip>("Sound"); break;
-                // CHANGED: Use ParticleSystem to filter assets
                 case "PlayParticles": AddResourceField<ParticleSystem>("ParticleSystem"); break;
 
                 case "Move": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
@@ -117,7 +113,8 @@ namespace GameRuleEditor.CustomControls
 
             if (showPicker)
             {
-                var pickBtn = new Button(() => {
+                var pickBtn = new Button(() =>
+                {
                     GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly, actorsOnly);
                 })
                 { text = "°", style = { width = 18, height = 18, fontSize = 10, marginLeft = 0 } };
