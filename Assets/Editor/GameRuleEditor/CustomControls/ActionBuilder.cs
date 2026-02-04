@@ -1,18 +1,15 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
 using GameRuleEditor.Core;
 
 namespace GameRuleEditor.CustomControls
 {
     public class ActionBuilder : VisualElement
     {
-        private List<string> actionTypes = new List<string>
-        {
-            "Edit", "Delete", "Spawn", "Animate", "PlaySound", "PlayParticles",
-            "Move", "MoveTo", "NavigateTo", "Rotate", "RotateTo",
-            "Push", "PushTo", "Torque", "LoadScene", "QuitGame"
-        };
+        private List<string> actionTypes;
 
         private List<ActionElement> actions = new List<ActionElement>();
         private VisualElement actionsContainer;
@@ -24,6 +21,17 @@ namespace GameRuleEditor.CustomControls
         public ActionBuilder(EditorContext editorContext)
         {
             context = editorContext;
+
+            actionTypes = new List<string>();
+            MethodInfo[] methods = typeof(global::Action).GetMethods(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var method in methods)
+            {
+                if (method.ReturnType == typeof(void))
+                {
+                    actionTypes.Add(method.Name);
+                }
+            }
 
             style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
@@ -85,7 +93,6 @@ namespace GameRuleEditor.CustomControls
 
         private void AddAction(string actionString = null)
         {
-            // Pass context to ActionElement
             var actionElement = new ActionElement(context, actionTypes);
 
             if (!string.IsNullOrEmpty(actionString))

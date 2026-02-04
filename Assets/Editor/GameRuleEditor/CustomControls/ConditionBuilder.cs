@@ -1,16 +1,15 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
 using GameRuleEditor.Core;
 
 namespace GameRuleEditor.CustomControls
 {
     public class ConditionBuilder : VisualElement
     {
-        private List<string> conditionTypes = new List<string>
-        {
-            "Compare", "Check", "Collision", "Timer", "Touch", "Keyboard"
-        };
+        private List<string> conditionTypes;
 
         private List<ConditionElement> elements = new List<ConditionElement>();
         private VisualElement conditionsContainer;
@@ -22,6 +21,17 @@ namespace GameRuleEditor.CustomControls
         public ConditionBuilder(EditorContext editorContext)
         {
             context = editorContext;
+
+            conditionTypes = new List<string>();
+            MethodInfo[] methods = typeof(global::Condition).GetMethods(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var method in methods)
+            {
+                if (method.ReturnType == typeof(bool))
+                {
+                    conditionTypes.Add(method.Name);
+                }
+            }
 
             style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
@@ -92,7 +102,6 @@ namespace GameRuleEditor.CustomControls
 
         private void AddElement(string specificType, string sourceValue = null)
         {
-            // Pass context to element
             var element = new ConditionElement(context, conditionTypes, specificType);
 
             if (!string.IsNullOrEmpty(sourceValue))
