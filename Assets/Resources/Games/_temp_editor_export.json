@@ -21,7 +21,7 @@
             "Script": [
                 {
                     "Do": [
-                        "Move(5,0,0,0)"
+                        "Spawn(Environment,,#SunPosition.x,,,,,)"
                     ]
                 }
             ]
