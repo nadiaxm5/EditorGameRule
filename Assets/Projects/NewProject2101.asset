@@ -49,9 +49,18 @@ MonoBehaviour:
       Active: 1
       PrefabName: Empty
       Tag: OtroTag
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -61,14 +70,26 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script: []
-    - ActorName: NewActor_1
+    - ActorName: Actor2
       Active: 1
-      PrefabName: Empty
+      PrefabName: Player
       Tag: Untagged
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Size:
+      - 0
+      - 0
+      - 0
       Velocity: []
       AngularVelocity: []
       Density: 0
@@ -93,9 +114,18 @@ MonoBehaviour:
     Active: 1
     PrefabName: Empty
     Tag: OtroTag
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -108,6 +138,38 @@ MonoBehaviour:
   - ActorName: Actor2
     Active: 1
     PrefabName: Player
+    Tag: Untagged
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size:
+    - 0
+    - 0
+    - 0
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - When:
+      - Collision(OtroTag)
+      Do:
+      - Delete()
+  - ActorName: NewActor
+    Active: 1
+    PrefabName: Empty
     Tag: Untagged
     Position: []
     Rotation: []
@@ -122,6 +184,6 @@ MonoBehaviour:
     Properties: []
     Script:
     - When:
-      - Collision(OtroTag)
+      - 
       Do:
-      - Delete()
+      - 

@@ -193,6 +193,41 @@ namespace GameRuleEditor.Core
             string json = System.IO.File.ReadAllText(jsonPath);
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
 
+            // --- SANITIZE & DEFAULTS ---
+            // Si el JSON importado no tenía estos campos, JsonUtility los deja null.
+            // Aquí asignamos los valores por defecto.
+
+            if (sceneData.ScreenResolution == null || sceneData.ScreenResolution.Length < 2)
+                sceneData.ScreenResolution = new float[] { 1920, 1080 };
+
+            if (sceneData.CameraPosition == null || sceneData.CameraPosition.Length < 3)
+                sceneData.CameraPosition = new float[] { 0, 1, -10 };
+
+            if (sceneData.CameraRotation == null || sceneData.CameraRotation.Length < 3)
+                sceneData.CameraRotation = new float[] { 0, 0, 0 };
+
+            if (sceneData.SunPosition == null || sceneData.SunPosition.Length < 3)
+                sceneData.SunPosition = new float[] { 0, 3, 0 };
+
+            if (sceneData.SunRotation == null || sceneData.SunRotation.Length < 3)
+                sceneData.SunRotation = new float[] { 50, -30, 0 };
+
+            if (sceneData.SunColor == null || sceneData.SunColor.Length < 3)
+                sceneData.SunColor = new byte[] { 255, 255, 255 };
+
+            if (sceneData.SunAmbientColor == null || sceneData.SunAmbientColor.Length < 3)
+                sceneData.SunAmbientColor = new byte[] { 128, 128, 128 };
+
+            if (sceneData.BackgroundColor == null || sceneData.BackgroundColor.Length < 3)
+                sceneData.BackgroundColor = new byte[] { 0, 0, 0 };
+
+            if (sceneData.Gravity == null || sceneData.Gravity.Length < 3)
+                sceneData.Gravity = new float[] { 0, -9.81f, 0 };
+
+            if (sceneData.CustomVariables == null)
+                sceneData.CustomVariables = new List<CustomVariable>();
+
+            // Validar actores
             if (sceneData.Cast != null)
             {
                 foreach (var actor in sceneData.Cast)
@@ -205,8 +240,14 @@ namespace GameRuleEditor.Core
                             if (sentence.Do == null) sentence.Do = new List<string>();
                         }
                     }
+                    if (actor.Properties == null) actor.Properties = new List<string>();
                 }
             }
+            else
+            {
+                sceneData.Cast = new List<ActorJson>();
+            }
+            // ---------------------------
 
             GameRuleProject project = CreateInstance<GameRuleProject>();
             project.projectName = sceneData.GameName ?? "ImportedProject";

@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     private Light sunLight;
     private AudioSource audioSource;
 
-    public string GameName = "NewProject2101";
+    public string GameName = "SURVIVAL_SHOOTER";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
     public Vector3 CameraPosition = new Vector3(0f, 6f, -7f);
     public Vector3 CameraRotation = new Vector3(30f, 0f, 0f);

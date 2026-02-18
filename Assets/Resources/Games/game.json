@@ -313,7 +313,7 @@
             "PrefabName":"HUDCanvas",
             "Script": [
                 {
-                    "Do": ["Edit(this.value,Player.health)", "Edit(this.text,#Score)"]
+                    "Do": ["Edit(this.sliderValue,Player.health)", "Edit(this.text,#Score)"]
                 }
             ]
         },{

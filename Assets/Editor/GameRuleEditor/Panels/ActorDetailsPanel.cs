@@ -24,12 +24,11 @@ namespace GameRuleEditor.Panels
 
         private VisualElement propertiesContainer;
 
-        // Helper to manage Override/Revert UI state
+        // Helper to manage Override UI state
         private class PropertyRow
         {
             public VisualElement container;
             public VisualElement field;
-            public Button revertButton;
             public Label label;
         }
 
@@ -47,6 +46,7 @@ namespace GameRuleEditor.Panels
             UpdateUI();
 
             context.OnActorSelected += _ => UpdateUI();
+            // Update UI when project data changes (including scene sync)
             context.OnProjectChanged += UpdateUI;
         }
 
@@ -130,20 +130,6 @@ namespace GameRuleEditor.Panels
             CreateOverrideableVector3(transformSection, "Scale", "Scale");
             CreateOverrideableVector3(transformSection, "Size (Target)", "Size");
 
-            //We don't want physicis right now
-            // Physics
-            //var physicsSection = CreateSection("Physics");
-            //scrollView.Add(physicsSection);
-
-            //CreateOverrideableVector3(physicsSection, "Linear Velocity", "Velocity");
-            //CreateOverrideableVector3(physicsSection, "Angular Velocity", "AngularVelocity");
-
-            // Scalars
-            //CreateScalarField(physicsSection, "Density (Mass)", val => context.SelectedActor.Density = val);
-            //CreateScalarField(physicsSection, "Friction", val => context.SelectedActor.Friction = val);
-            //CreateScalarField(physicsSection, "Bounciness", val => context.SelectedActor.Bounciness = val);
-            //CreateScalarField(physicsSection, "Drag", val => context.SelectedActor.Drag = val);
-
             // Custom Properties
             var propsSection = CreateSection("Custom Properties");
             scrollView.Add(propsSection);
@@ -178,7 +164,7 @@ namespace GameRuleEditor.Panels
             {
                 if (context.selectedActorIndex < 0) return;
 
-                // When changed, override
+                // When changed, override value
                 controller.UpdateActorProperty(context.selectedActorIndex, () =>
                 {
                     var vec = evt.newValue;
@@ -198,18 +184,10 @@ namespace GameRuleEditor.Panels
             });
             row.Add(field);
 
-            // Revert Button
-            var revertBtn = new Button(() => controller.RevertActorProperty(context.selectedActorIndex, propertyKey));
-            revertBtn.text = "↺";
-            revertBtn.tooltip = "Revert to Prefab value";
-            revertBtn.style.width = 25;
-            revertBtn.style.marginLeft = 5;
-            row.Add(revertBtn);
-
             parent.Add(row);
 
             // Store references
-            rows[propertyKey] = new PropertyRow { container = row, field = field, revertButton = revertBtn, label = label };
+            rows[propertyKey] = new PropertyRow { container = row, field = field, label = label };
         }
 
         private void CreateScalarField(VisualElement parent, string labelText, System.Action<float> setter)
@@ -256,7 +234,7 @@ namespace GameRuleEditor.Panels
             UpdateVectorRow("Velocity", actor.Velocity, Vector3.zero);
             UpdateVectorRow("AngularVelocity", actor.AngularVelocity, Vector3.zero);
 
-            // Scalars (Simple Update)
+            // Scalars
             this.Q<FloatField>("Density (Mass)")?.SetValueWithoutNotify(actor.Density);
             this.Q<FloatField>("Friction")?.SetValueWithoutNotify(actor.Friction);
             this.Q<FloatField>("Bounciness")?.SetValueWithoutNotify(actor.Bounciness);
@@ -277,13 +255,11 @@ namespace GameRuleEditor.Panels
             {
                 vecField.SetValueWithoutNotify(new Vector3(actorData[0], actorData[1], actorData[2]));
                 row.label.style.unityFontStyleAndWeight = FontStyle.Bold;
-                row.revertButton.style.visibility = Visibility.Visible;
             }
             else
             {
                 vecField.SetValueWithoutNotify(prefabDefault);
                 row.label.style.unityFontStyleAndWeight = FontStyle.Normal;
-                row.revertButton.style.visibility = Visibility.Hidden;
             }
         }
 

@@ -41,8 +41,10 @@ namespace GameRuleEditor.CustomControls
 
                 for (int i = 0; i < inputElements.Count && i < result.Params.Count; i++)
                 {
-                    if (inputElements[i] is TextField tf) tf.SetValueWithoutNotify(result.Params[i]);
-                    else if (inputElements[i] is ObjectField of) { var obj = Resources.Load(result.Params[i]); of.SetValueWithoutNotify(obj); }
+                    if (inputElements[i] is TextField tf)
+                    {
+                        tf.SetValueWithoutNotify(result.Params[i]);
+                    }
                 }
             }
         }
@@ -84,9 +86,9 @@ namespace GameRuleEditor.CustomControls
                     AddParameterField("Rot X", true); AddParameterField("Rot Y", true); AddParameterField("Rot Z", true);
                     break;
 
-                case "Animate": AddResourceField<AnimationClip>("Animation"); break;
-                case "PlaySound": AddResourceField<AudioClip>("Sound"); break;
-                case "PlayParticles": AddResourceField<ParticleSystem>("ParticleSystem"); break;
+                case "Animate": AddResourceField<AnimationClip>("Animation Name"); break;
+                case "PlaySound": AddResourceField<AudioClip>("Sound Name"); break;
+                case "PlayParticles": AddResourceField<ParticleSystem>("Particle Prefab"); break;
 
                 case "Move": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
                 case "MoveTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
@@ -101,7 +103,7 @@ namespace GameRuleEditor.CustomControls
             }
         }
 
-        // Updated signature to support actorsOnly flag
+        // Standard Text + Picker Button
         private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false, bool actorsOnly = false)
         {
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 40 } };
@@ -123,20 +125,36 @@ namespace GameRuleEditor.CustomControls
             parametersContainer.Add(container); inputElements.Add(field);
         }
 
+        // [Updated] Now looks identical to AddParameterField but picks resources
         private void AddResourceField<T>(string placeholder) where T : Object
         {
-            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 100 } };
-            var objField = new ObjectField() { objectType = typeof(T), allowSceneObjects = false, style = { flexGrow = 1 } };
+            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 120 } };
 
-            objField.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
+            var textField = new TextField() { style = { flexGrow = 1 } };
+            var label = new Label(placeholder) { style = { fontSize = 8, color = new Color(0.6f, 0.6f, 0.6f), position = Position.Absolute, left = 2, top = 2 }, pickingMode = PickingMode.Ignore };
+            textField.Add(label);
+            textField.RegisterValueChangedCallback(evt =>
+            {
+                label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None;
+                OnChanged?.Invoke();
+            });
+            container.Add(textField);
 
-            var label = new Label(placeholder) { style = { fontSize = 9, color = new Color(0.6f, 0.6f, 0.6f), position = Position.Absolute, left = 20, top = 2 }, pickingMode = PickingMode.Ignore };
-            objField.Add(label);
-            objField.RegisterValueChangedCallback(evt => label.style.display = evt.newValue == null ? DisplayStyle.Flex : DisplayStyle.None);
+            // Use exact same button style as AddParameterField
+            var pickBtn = new Button(() =>
+            {
+                // Call PropertyPickerDialog with resource type filter
+                GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (name) =>
+                {
+                    textField.value = name;
+                    OnChanged?.Invoke();
+                }, resourceFilter: typeof(T));
+            })
+            { text = "°", style = { width = 18, height = 18, fontSize = 10, marginLeft = 0 } };
 
-            container.Add(objField);
+            container.Add(pickBtn);
             parametersContainer.Add(container);
-            inputElements.Add(objField);
+            inputElements.Add(textField);
         }
 
         public string GetActionString()
@@ -146,7 +164,6 @@ namespace GameRuleEditor.CustomControls
             foreach (var el in inputElements)
             {
                 if (el is TextField tf) parameters.Add(tf.value);
-                else if (el is ObjectField of) parameters.Add(of.value != null ? of.value.name : "");
             }
             if (parameters.Count == 0) return $"{type}()";
             return $"{type}({string.Join(",", parameters)})";

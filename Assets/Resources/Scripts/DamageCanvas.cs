@@ -1,8 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Actor1 : MonoBehaviour {
-    public bool Active = true;
+public class DamageCanvas : MonoBehaviour {
+    public bool Active = false;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void Start() {
         if (Active) gameObject.SetActive(true);

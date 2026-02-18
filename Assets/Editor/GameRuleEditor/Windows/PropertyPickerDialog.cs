@@ -8,10 +8,54 @@ namespace GameRuleEditor.Windows
 {
     public class PropertyPickerDialog : EditorWindow
     {
+        // --- CONFIGURATION ---
+        private struct PropDef
+        { public string Label; public string Suffix; public bool IsBool; }
+
+        private readonly Dictionary<string, List<PropDef>> propertyDefinitions = new Dictionary<string, List<PropDef>>
+        {
+            { "Transform", new List<PropDef> {
+                new PropDef { Label = "Pos X", Suffix = "x", IsBool = false },
+                new PropDef { Label = "Pos Y", Suffix = "y", IsBool = false },
+                new PropDef { Label = "Pos Z", Suffix = "z", IsBool = false },
+                new PropDef { Label = "Rot X", Suffix = "rx", IsBool = false },
+                new PropDef { Label = "Rot Y", Suffix = "ry", IsBool = false },
+                new PropDef { Label = "Rot Z", Suffix = "rz", IsBool = false },
+                new PropDef { Label = "Scale X", Suffix = "sx", IsBool = false },
+                new PropDef { Label = "Scale Y", Suffix = "sy", IsBool = false },
+                new PropDef { Label = "Scale Z", Suffix = "sz", IsBool = false }
+            }},
+            { "Physics", new List<PropDef> {
+                new PropDef { Label = "Velocity X", Suffix = "Velocity.x", IsBool = false },
+                new PropDef { Label = "Velocity Y", Suffix = "Velocity.y", IsBool = false },
+                new PropDef { Label = "Velocity Z", Suffix = "Velocity.z", IsBool = false },
+                new PropDef { Label = "Ang.Vel X", Suffix = "AngularVelocity.x", IsBool = false },
+                new PropDef { Label = "Ang.Vel Y", Suffix = "AngularVelocity.y", IsBool = false },
+                new PropDef { Label = "Ang.Vel Z", Suffix = "AngularVelocity.z", IsBool = false },
+                new PropDef { Label = "Density", Suffix = "Density", IsBool = false },
+                new PropDef { Label = "Friction", Suffix = "Friction", IsBool = false },
+                new PropDef { Label = "Bounciness", Suffix = "Bounciness", IsBool = false },
+                new PropDef { Label = "Drag", Suffix = "Drag", IsBool = false }
+            }},
+            { "State", new List<PropDef> {
+                new PropDef { Label = "Active", Suffix = "Active", IsBool = true }
+            }},
+            { "UI", new List<PropDef> {
+                new PropDef { Label = "Slider Value", Suffix = "sliderValue", IsBool = false },
+                new PropDef { Label = "Text Content", Suffix = "text", IsBool = false }
+            }}
+        };
+
+        // ---------------------
+
         private System.Action<string> onPick;
         private EditorContext context;
+
+        // Filters
         private bool boolOnly = false;
+
         private bool actorsOnly = false;
+        private System.Type resourceType = null; // [New] Filter for resources
 
         private string selectedCategory = "Me";
         private string selectedGroup = "Transform";
@@ -23,13 +67,15 @@ namespace GameRuleEditor.Windows
         private List<string> actorNames;
         private ActorJson currentActor;
 
-        public static void Show(EditorContext ctx, System.Action<string> callback, bool onlyBooleans = false, bool onlyActors = false)
+        // [Updated] Added resourceFilter parameter
+        public static void Show(EditorContext ctx, System.Action<string> callback, bool onlyBooleans = false, bool onlyActors = false, System.Type resourceFilter = null)
         {
             var win = GetWindow<PropertyPickerDialog>(true, "Pick Property", true);
             win.context = ctx;
             win.onPick = callback;
             win.boolOnly = onlyBooleans;
             win.actorsOnly = onlyActors;
+            win.resourceType = resourceFilter;
             win.minSize = new Vector2(500, 300);
             win.InitData();
             win.ShowUtility();
@@ -47,14 +93,21 @@ namespace GameRuleEditor.Windows
 
         private void OnGUI()
         {
-            // If Actors Only mode, skip the 3-column layout and just show a list
+            // 1. Resource Mode (New)
+            if (resourceType != null)
+            {
+                DrawResourceMode();
+                return;
+            }
+
+            // 2. Actors Only Mode
             if (actorsOnly)
             {
                 DrawActorsOnlyMode();
                 return;
             }
 
-            // Standard 3-column layout
+            // 3. Standard Property Mode
             EditorGUILayout.BeginHorizontal();
 
             // Col 1: Category
@@ -82,14 +135,12 @@ namespace GameRuleEditor.Windows
                 }
                 else
                 {
-                    if (!boolOnly)
+                    foreach (var groupName in propertyDefinitions.Keys)
                     {
-                        DrawGroupSelectable("Transform", "Transform");
-                        DrawGroupSelectable("Physics", "Physics");
+                        bool hasValidProps = !boolOnly || propertyDefinitions[groupName].Any(p => p.IsBool);
+                        if (hasValidProps) DrawGroupSelectable(groupName, groupName);
                     }
-                    DrawGroupSelectable("State", "State");
                     DrawGroupSelectable("Custom Properties", "Custom");
-                    if (!boolOnly) DrawGroupSelectable("UI", "UI");
                 }
             });
 
@@ -101,6 +152,34 @@ namespace GameRuleEditor.Windows
             });
 
             EditorGUILayout.EndHorizontal();
+        }
+
+        // [New] Draws list of files in Resources folder matching the type
+        private void DrawResourceMode()
+        {
+            EditorGUILayout.LabelField($"Select {resourceType.Name}:", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory);
+
+            // Find all assets of type in Resources folder
+            var assets = Resources.LoadAll("", resourceType);
+
+            if (assets.Length == 0)
+            {
+                EditorGUILayout.HelpBox($"No {resourceType.Name} found in Resources folder.", MessageType.Info);
+            }
+
+            foreach (var asset in assets)
+            {
+                if (GUILayout.Button(asset.name, EditorStyles.miniButton))
+                {
+                    onPick?.Invoke(asset.name);
+                    Close();
+                }
+            }
+
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawActorsOnlyMode()
@@ -144,7 +223,8 @@ namespace GameRuleEditor.Windows
         private void DrawSelectable(string label, string id)
         {
             GUI.backgroundColor = (selectedCategory == id) ? Color.cyan : Color.white;
-            if (GUILayout.Button(label, EditorStyles.miniButton)) { selectedCategory = id; selectedGroup = (id == "Game") ? "Global" : "Transform"; }
+            string defaultGroup = (id == "Game") ? "Global" : "Transform";
+            if (GUILayout.Button(label, EditorStyles.miniButton)) { selectedCategory = id; selectedGroup = defaultGroup; }
             GUI.backgroundColor = Color.white;
         }
 
@@ -174,9 +254,13 @@ namespace GameRuleEditor.Windows
                     }
                 }
             }
-            if (!boolOnly && selectedGroup == "Camera") { DrawVector3Group("CameraPosition", prefix + "CameraPosition"); DrawVector3Group("CameraRotation", prefix + "CameraRotation"); }
-            if (!boolOnly && selectedGroup == "Sun") { DrawVector3Group("SunPosition", prefix + "SunPosition"); DrawVector3Group("SunRotation", prefix + "SunRotation"); }
-            if (!boolOnly && selectedGroup == "Physics") { DrawVector3Group("Gravity", prefix + "Gravity"); }
+
+            if (!boolOnly)
+            {
+                if (selectedGroup == "Camera") { DrawVector3Group("CameraPosition", prefix + "CameraPosition"); DrawVector3Group("CameraRotation", prefix + "CameraRotation"); }
+                else if (selectedGroup == "Sun") { DrawVector3Group("SunPosition", prefix + "SunPosition"); DrawVector3Group("SunRotation", prefix + "SunRotation"); }
+                else if (selectedGroup == "Physics") { DrawVector3Group("Gravity", prefix + "Gravity"); }
+            }
         }
 
         private void DrawActorProperties()
@@ -184,7 +268,14 @@ namespace GameRuleEditor.Windows
             string prefix = (selectedCategory == "Me") ? "this." : selectedCategory + ".";
             ActorJson targetData = (selectedCategory == "Me") ? currentActor : context.currentProject.actors.Find(a => a.ActorName == selectedCategory);
 
-            if (selectedGroup == "State") DrawFinalItem("Active", prefix + "Active");
+            if (propertyDefinitions.ContainsKey(selectedGroup))
+            {
+                var props = propertyDefinitions[selectedGroup];
+                foreach (var prop in props)
+                {
+                    if (!boolOnly || prop.IsBool) DrawFinalItem(prop.Label, prefix + prop.Suffix);
+                }
+            }
 
             if (selectedGroup == "Custom" && targetData?.Properties != null)
             {
@@ -193,26 +284,6 @@ namespace GameRuleEditor.Windows
                     string propName = prop.Contains("=") ? prop.Split('=')[0] : prop;
                     DrawFinalItem(propName, prefix + propName);
                 }
-            }
-
-            if (boolOnly) return;
-
-            if (selectedGroup == "Transform")
-            {
-                DrawFinalItem("Pos X", prefix + "x"); DrawFinalItem("Pos Y", prefix + "y"); DrawFinalItem("Pos Z", prefix + "z");
-                DrawFinalItem("Rot X", prefix + "rx"); DrawFinalItem("Rot Y", prefix + "ry"); DrawFinalItem("Rot Z", prefix + "rz");
-                DrawFinalItem("Scale X", prefix + "sx"); DrawFinalItem("Scale Y", prefix + "sy"); DrawFinalItem("Scale Z", prefix + "sz");
-            }
-            if (selectedGroup == "Physics")
-            {
-                DrawFinalItem("Velocity X", prefix + "Velocity.x"); DrawFinalItem("Velocity Y", prefix + "Velocity.y"); DrawFinalItem("Velocity Z", prefix + "Velocity.z");
-                DrawFinalItem("Ang.Vel X", prefix + "AngularVelocity.x"); DrawFinalItem("Ang.Vel Y", prefix + "AngularVelocity.y"); DrawFinalItem("Ang.Vel Z", prefix + "AngularVelocity.z");
-                DrawFinalItem("Density", prefix + "Density"); DrawFinalItem("Friction", prefix + "Friction"); DrawFinalItem("Bounciness", prefix + "Bounciness"); DrawFinalItem("Drag", prefix + "Drag");
-            }
-            if (selectedGroup == "UI")
-            {
-                DrawFinalItem("Slider Value", prefix + "sliderValue");
-                DrawFinalItem("Text Content", prefix + "text");
             }
         }
 

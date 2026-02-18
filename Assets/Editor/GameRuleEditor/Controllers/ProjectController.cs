@@ -18,6 +18,25 @@ namespace GameRuleEditor.Controllers
             context = editorContext;
         }
 
+        // Enable update loop listener
+        public void Enable()
+        {
+            EditorApplication.update += OnEditorUpdate;
+        }
+
+        // Disable update loop listener
+        public void Disable()
+        {
+            EditorApplication.update -= OnEditorUpdate;
+        }
+
+        // Check for scene changes every frame (efficiently)
+        private void OnEditorUpdate()
+        {
+            if (context.currentProject == null || context.selectedActorIndex < 0) return;
+            SyncSceneToData(context.SelectedActor);
+        }
+
         #region Project Operations
 
         /// <summary>
@@ -102,27 +121,11 @@ namespace GameRuleEditor.Controllers
             // Assign the initial value depending on the type
             switch (type)
             {
-                case "int":
-                    newVar.intValue = (int)value;
-                    break;
-
-                case "float":
-                    newVar.floatValue = (float)value;
-                    break;
-
-                case "bool":
-                    newVar.boolValue = (bool)value;
-                    break;
-
-                case "vector2":
-                    var v2 = (Vector2)value;
-                    newVar.arrayValue = new float[] { v2.x, v2.y };
-                    break;
-
-                case "vector3":
-                    var v3 = (Vector3)value;
-                    newVar.arrayValue = new float[] { v3.x, v3.y, v3.z };
-                    break;
+                case "int": newVar.intValue = (int)value; break;
+                case "float": newVar.floatValue = (float)value; break;
+                case "bool": newVar.boolValue = (bool)value; break;
+                case "vector2": var v2 = (Vector2)value; newVar.arrayValue = new float[] { v2.x, v2.y }; break;
+                case "vector3": var v3 = (Vector3)value; newVar.arrayValue = new float[] { v3.x, v3.y, v3.z }; break;
             }
 
             if (context.currentProject.sceneData.CustomVariables == null)
@@ -218,6 +221,9 @@ namespace GameRuleEditor.Controllers
                     break;
             }
 
+            // Sync reset values to scene
+            SyncDataToScene(actor);
+
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }
@@ -311,6 +317,10 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, undoName);
             modifyAction?.Invoke();
+
+            // Push changes to scene
+            SyncDataToScene(context.currentProject.actors[actorIndex]);
+
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }
@@ -365,6 +375,71 @@ namespace GameRuleEditor.Controllers
             actor.Properties.RemoveAt(propertyIndex);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
+        }
+
+        // Push data from JSON to GameObject
+        public void SyncDataToScene(ActorJson actor)
+        {
+            GameObject obj = GameObject.Find(actor.ActorName);
+            if (obj == null) return;
+
+            if (actor.Position != null && actor.Position.Length >= 3)
+                obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
+
+            if (actor.Rotation != null && actor.Rotation.Length >= 3)
+                obj.transform.eulerAngles = new Vector3(actor.Rotation[0], actor.Rotation[1], actor.Rotation[2]);
+
+            if (actor.Scale != null && actor.Scale.Length >= 3)
+                obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
+        }
+
+        // Pull data from GameObject to JSON if changed
+        public bool SyncSceneToData(ActorJson actor)
+        {
+            GameObject obj = GameObject.Find(actor.ActorName);
+            if (obj == null) return false;
+
+            if (!obj.transform.hasChanged) return false;
+
+            bool changed = false;
+            bool Diff(float a, float b) => Mathf.Abs(a - b) > 0.001f;
+
+            // Position Check
+            Vector3 pos = obj.transform.position;
+            if (actor.Position == null || actor.Position.Length < 3 || Diff(actor.Position[0], pos.x) || Diff(actor.Position[1], pos.y) || Diff(actor.Position[2], pos.z))
+            {
+                if (actor.Position == null || actor.Position.Length < 3) actor.Position = new float[3];
+                actor.Position[0] = pos.x; actor.Position[1] = pos.y; actor.Position[2] = pos.z;
+                changed = true;
+            }
+
+            // Rotation Check
+            Vector3 rot = obj.transform.eulerAngles;
+            if (actor.Rotation == null || actor.Rotation.Length < 3 || Diff(actor.Rotation[0], rot.x) || Diff(actor.Rotation[1], rot.y) || Diff(actor.Rotation[2], rot.z))
+            {
+                if (actor.Rotation == null || actor.Rotation.Length < 3) actor.Rotation = new float[3];
+                actor.Rotation[0] = rot.x; actor.Rotation[1] = rot.y; actor.Rotation[2] = rot.z;
+                changed = true;
+            }
+
+            // Scale Check
+            Vector3 scl = obj.transform.localScale;
+            if (actor.Scale == null || actor.Scale.Length < 3 || Diff(actor.Scale[0], scl.x) || Diff(actor.Scale[1], scl.y) || Diff(actor.Scale[2], scl.z))
+            {
+                if (actor.Scale == null || actor.Scale.Length < 3) actor.Scale = new float[] { 1, 1, 1 };
+                actor.Scale[0] = scl.x; actor.Scale[1] = scl.y; actor.Scale[2] = scl.z;
+                changed = true;
+            }
+
+            obj.transform.hasChanged = false;
+
+            if (changed)
+            {
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
+            }
+
+            return changed;
         }
 
         #endregion Actor Operations

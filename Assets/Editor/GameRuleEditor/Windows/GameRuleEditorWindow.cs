@@ -58,6 +58,9 @@ namespace GameRuleEditor.Windows
                 editorContext.OnProjectLoaded += OnProjectLoaded;
                 editorContext.OnProjectChanged += UpdateToolbarUI;
             }
+
+            // Enable scene sync
+            projectController?.Enable();
         }
 
         private void OnDisable()
@@ -67,6 +70,9 @@ namespace GameRuleEditor.Windows
                 editorContext.OnProjectLoaded -= OnProjectLoaded;
                 editorContext.OnProjectChanged -= UpdateToolbarUI;
             }
+
+            // Disable scene sync
+            projectController?.Disable();
         }
 
         #region Initialization (The "Invisible" Plumbing)
