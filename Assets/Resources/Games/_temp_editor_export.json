@@ -14,14 +14,23 @@
     ],
     "Cast": [
         {
-            "ActorName": "ActorVacio",
+            "ActorName": "Actor1",
             "Active": true,
             "PrefabName": "Empty",
+            "Tag": "OtroTag"
+        },
+        {
+            "ActorName": "Actor2",
+            "Active": true,
+            "PrefabName": "Player",
             "Tag": "Untagged",
             "Script": [
                 {
+                    "When": [
+                        "Collision(OtroTag)"
+                    ],
                     "Do": [
-                        "Spawn(Environment,,#SunPosition.x,,,,,)"
+                        "Delete()"
                     ]
                 }
             ]

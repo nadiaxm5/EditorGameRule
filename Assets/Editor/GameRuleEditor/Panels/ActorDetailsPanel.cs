@@ -130,18 +130,19 @@ namespace GameRuleEditor.Panels
             CreateOverrideableVector3(transformSection, "Scale", "Scale");
             CreateOverrideableVector3(transformSection, "Size (Target)", "Size");
 
+            //We don't want physicis right now
             // Physics
-            var physicsSection = CreateSection("Physics");
-            scrollView.Add(physicsSection);
+            //var physicsSection = CreateSection("Physics");
+            //scrollView.Add(physicsSection);
 
-            CreateOverrideableVector3(physicsSection, "Linear Velocity", "Velocity");
-            CreateOverrideableVector3(physicsSection, "Angular Velocity", "AngularVelocity");
+            //CreateOverrideableVector3(physicsSection, "Linear Velocity", "Velocity");
+            //CreateOverrideableVector3(physicsSection, "Angular Velocity", "AngularVelocity");
 
             // Scalars
-            CreateScalarField(physicsSection, "Density (Mass)", val => context.SelectedActor.Density = val);
-            CreateScalarField(physicsSection, "Friction", val => context.SelectedActor.Friction = val);
-            CreateScalarField(physicsSection, "Bounciness", val => context.SelectedActor.Bounciness = val);
-            CreateScalarField(physicsSection, "Drag", val => context.SelectedActor.Drag = val);
+            //CreateScalarField(physicsSection, "Density (Mass)", val => context.SelectedActor.Density = val);
+            //CreateScalarField(physicsSection, "Friction", val => context.SelectedActor.Friction = val);
+            //CreateScalarField(physicsSection, "Bounciness", val => context.SelectedActor.Bounciness = val);
+            //CreateScalarField(physicsSection, "Drag", val => context.SelectedActor.Drag = val);
 
             // Custom Properties
             var propsSection = CreateSection("Custom Properties");

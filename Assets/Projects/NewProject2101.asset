@@ -45,38 +45,10 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: ActorVacio
+    - ActorName: Actor1
       Active: 1
       PrefabName: Empty
-      Tag: Untagged
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
-      Script:
-      - When:
-        - 
-        Do:
-        - Edit(,)
-        - Edit(,)
-        - Edit(,)
-      - When: []
-        Do:
-        - 
-      - When: []
-        Do:
-        - 
-    - ActorName: NewActor
-      Active: 1
-      PrefabName: Empty
-      Tag: Untagged
+      Tag: OtroTag
       Position: []
       Rotation: []
       Scale: []
@@ -104,30 +76,11 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script: []
-    - ActorName: NewActor_2
-      Active: 1
-      PrefabName: Empty
-      Tag: Untagged
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
       Script:
       - When:
-        - 
+        - Collision(OtroTag)
         Do:
-        - Edit(ActorVacio.x,)
-      - When: []
-        Do:
-        - 
+        - Delete()
     CustomVariables:
     - name: Score
       type: float
@@ -136,9 +89,25 @@ MonoBehaviour:
       boolValue: 0
       arrayValue: []
   actors:
-  - ActorName: ActorVacio
+  - ActorName: Actor1
     Active: 1
     PrefabName: Empty
+    Tag: OtroTag
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+  - ActorName: Actor2
+    Active: 1
+    PrefabName: Player
     Tag: Untagged
     Position: []
     Rotation: []
@@ -153,69 +122,6 @@ MonoBehaviour:
     Properties: []
     Script:
     - When:
-      - 
+      - Collision(OtroTag)
       Do:
-      - Edit(,)
-      - Edit(,)
-      - Edit(,)
-    - When: []
-      Do:
-      - 
-    - When: []
-      Do:
-      - 
-  - ActorName: NewActor
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script: []
-  - ActorName: NewActor_1
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script: []
-  - ActorName: NewActor_2
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script:
-    - When:
-      - 
-      Do:
-      - Edit(ActorVacio.x,)
-    - When: []
-      Do:
-      - 
+      - Delete()

@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Obstacle
   - ZomBunny
+  - NuevoTag
+  - OtroTag
   layers:
   - Default
   - TransparentFX

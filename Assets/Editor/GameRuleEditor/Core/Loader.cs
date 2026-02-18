@@ -41,33 +41,33 @@ public static class Loader
 
     public static void CreateTags(List<ActorJson> actorList)
     {
-        // Remove Tags
+        // Load TagManager asset
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
         SerializedProperty tagsProperty = tagManager.FindProperty("tags");
-        tagsProperty.ClearArray();
-        tagManager.ApplyModifiedProperties();
-        tagManager.Update();
 
-        // Create Tags
-        List<string> tags = new List<string>() { "Untagged", "Respawn", "Finish", "EditorOnly", "MainCamera", "Player", "GameController" };
+        // Get existing tags to avoid duplicates
+        HashSet<string> existingTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+
         foreach (ActorJson actor in actorList)
         {
-            if (!tags.Contains(actor.Tag) && actor.Tag != null)
+            string tagToCheck = actor.Tag;
+
+            // Skip if invalid or already exists
+            if (string.IsNullOrEmpty(tagToCheck) || existingTags.Contains(tagToCheck))
             {
-                bool found = false;
-                int i = 0;
-                while (i < tagsProperty.arraySize && !found)
-                {
-                    if (tagsProperty.GetArrayElementAtIndex(i).stringValue == actor.Tag) found = true;
-                    i++;
-                }
-                if (!found)
-                {
-                    tagsProperty.InsertArrayElementAtIndex(0);
-                    tagsProperty.GetArrayElementAtIndex(0).stringValue = actor.Tag;
-                }
+                continue;
             }
+
+            // Add new tag
+            int index = tagsProperty.arraySize;
+            tagsProperty.InsertArrayElementAtIndex(index);
+            SerializedProperty newTag = tagsProperty.GetArrayElementAtIndex(index);
+            newTag.stringValue = tagToCheck;
+
+            existingTags.Add(tagToCheck);
         }
+
+        // Save changes
         tagManager.ApplyModifiedProperties();
         tagManager.Update();
     }

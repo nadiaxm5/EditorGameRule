@@ -4,6 +4,7 @@ using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using System.Text.RegularExpressions;
+using System.Linq; // Required for Sorting/ToList
 
 namespace GameRuleEditor.CustomControls
 {
@@ -91,8 +92,22 @@ namespace GameRuleEditor.CustomControls
                 case "Check": AddParameterField("Boolean Var", true, true); break;
 
                 case "Collision":
-                    var tags = new List<string>(UnityEditorInternal.InternalEditorUtility.tags);
-                    var tagDrop = new PopupField<string>(tags, 0) { style = { flexGrow = 1 } };
+                    // Start with Unity tags
+                    HashSet<string> allTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+
+                    // Add tags from current project actors
+                    if (context?.currentProject?.actors != null)
+                    {
+                        foreach (var actor in context.currentProject.actors)
+                        {
+                            if (!string.IsNullOrEmpty(actor.Tag)) allTags.Add(actor.Tag);
+                        }
+                    }
+
+                    var sortedTags = allTags.ToList();
+                    sortedTags.Sort();
+
+                    var tagDrop = new PopupField<string>(sortedTags, 0) { style = { flexGrow = 1 } };
                     tagDrop.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(tagDrop); inputElements.Add(tagDrop);
                     break;
@@ -100,7 +115,7 @@ namespace GameRuleEditor.CustomControls
                 case "Timer": AddParameterField("Seconds"); break;
 
                 case "Touch":
-                    var touchModes = new List<string> { "press", "down", "up", "tap" };
+                    var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
                     var tMode = new PopupField<string>(touchModes, 0) { style = { width = 70 } };
                     tMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(tMode); inputElements.Add(tMode);

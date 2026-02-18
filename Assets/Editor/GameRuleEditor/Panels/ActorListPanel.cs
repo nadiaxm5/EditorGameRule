@@ -32,6 +32,7 @@ namespace GameRuleEditor.Panels
             context.OnProjectLoaded += UpdateUI;
             context.OnActorListChanged += UpdateUI;
             context.OnActorSelected += OnActorSelected;
+            context.OnProjectChanged += UpdateUI;
         }
 
         private void CreateUI()
@@ -228,6 +229,7 @@ namespace GameRuleEditor.Panels
             context.OnProjectLoaded -= UpdateUI;
             context.OnActorListChanged -= UpdateUI;
             context.OnActorSelected -= OnActorSelected;
+            context.OnProjectChanged -= UpdateUI;
         }
     }
 }
