@@ -357,11 +357,11 @@ public static class Scripts
             outfile.WriteLine("");
 
             // Custom variables
-            if (scene.CustomVariables != null && scene.CustomVariables.Count > 0)
+            if (scene.CustomVariable != null && scene.CustomVariable.Count > 0)
             {
                 outfile.WriteLine("    // Custom Global Variables");
 
-                foreach (var customVar in scene.CustomVariables)
+                foreach (var customVar in scene.CustomVariable)
                 {
                     if (!string.IsNullOrEmpty(customVar.name) && !string.IsNullOrEmpty(customVar.type))
                     {

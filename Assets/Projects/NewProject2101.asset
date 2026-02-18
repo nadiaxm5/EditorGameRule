@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
   m_Name: NewProject2101
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
-  projectName: NewProject2101
+  projectName: Prueba
   sceneData:
-    GameName: NewProject2101
+    GameName: Prueba
     ScreenResolution:
     - 1920
     - 1080
@@ -44,43 +44,7 @@ MonoBehaviour:
     SoundTrack: 
     Mouse: []
     MouseWorld: []
-    Cast:
-    - ActorName: Actor1
-      Active: 1
-      PrefabName: Empty
-      Tag: OtroTag
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
-      Script: []
-    - ActorName: NewActor_1
-      Active: 1
-      PrefabName: Empty
-      Tag: Untagged
-      Position: []
-      Rotation: []
-      Scale: []
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties: []
-      Script:
-      - When:
-        - Collision(OtroTag)
-        Do:
-        - Delete()
+    Cast: []
     CustomVariables:
     - name: Score
       type: float
@@ -88,40 +52,4 @@ MonoBehaviour:
       floatValue: 0
       boolValue: 0
       arrayValue: []
-  actors:
-  - ActorName: Actor1
-    Active: 1
-    PrefabName: Empty
-    Tag: OtroTag
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script: []
-  - ActorName: Actor2
-    Active: 1
-    PrefabName: Player
-    Tag: Untagged
-    Position: []
-    Rotation: []
-    Scale: []
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script:
-    - When:
-      - Collision(OtroTag)
-      Do:
-      - Delete()
+  actors: []

@@ -125,12 +125,12 @@ namespace GameRuleEditor.Controllers
                     break;
             }
 
-            if (context.currentProject.sceneData.CustomVariables == null)
+            if (context.currentProject.sceneData.CustomVariable == null)
             {
-                context.currentProject.sceneData.CustomVariables = new List<CustomVariable>();
+                context.currentProject.sceneData.CustomVariable = new List<CustomVariable>();
             }
 
-            context.currentProject.sceneData.CustomVariables.Add(newVar);
+            context.currentProject.sceneData.CustomVariable.Add(newVar);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }
@@ -141,14 +141,14 @@ namespace GameRuleEditor.Controllers
         public void RemoveCustomVariable(int index)
         {
             if (context.currentProject == null ||
-                context.currentProject.sceneData.CustomVariables == null ||
-                index < 0 || index >= context.currentProject.sceneData.CustomVariables.Count)
+                context.currentProject.sceneData.CustomVariable == null ||
+                index < 0 || index >= context.currentProject.sceneData.CustomVariable.Count)
             {
                 return;
             }
 
             Undo.RecordObject(context.currentProject, "Remove Custom Variable");
-            context.currentProject.sceneData.CustomVariables.RemoveAt(index);
+            context.currentProject.sceneData.CustomVariable.RemoveAt(index);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }

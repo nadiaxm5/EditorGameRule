@@ -18,7 +18,7 @@ public class SceneJson
     public float[] Mouse;
     public float[] MouseWorld;
     public List<ActorJson> Cast;
-    public List<CustomVariable> CustomVariables;
+    public List<CustomVariable> CustomVariable;
 }
 
 [System.Serializable]

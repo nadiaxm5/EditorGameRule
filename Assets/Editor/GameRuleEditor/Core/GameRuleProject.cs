@@ -31,8 +31,8 @@ namespace GameRuleEditor.Core
             sceneData.Cast = new List<ActorJson>(actors);
 
             // Backup and temp cleanup of variables
-            var realVariables = sceneData.CustomVariables;
-            sceneData.CustomVariables = new List<CustomVariable>();
+            var realVariables = sceneData.CustomVariable;
+            sceneData.CustomVariable = new List<CustomVariable>();
 
             // Temp cleanup of "when"
             foreach (var actor in sceneData.Cast)
@@ -49,7 +49,7 @@ namespace GameRuleEditor.Core
             string rawJson = JsonUtility.ToJson(sceneData, true);
 
             // Restore editor state
-            sceneData.CustomVariables = realVariables;
+            sceneData.CustomVariable = realVariables;
             foreach (var actor in sceneData.Cast)
             {
                 if (actor.Script == null) continue;
@@ -92,11 +92,11 @@ namespace GameRuleEditor.Core
             }
             else
             {
-                sb.AppendLine("    \"CustomVariables\": [],");
+                sb.AppendLine("    \"CustomVariable\": [],");
             }
 
             // Clean Raw JSON and temp variable list and extract
-            rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace("\"CustomVariables\": []", "");
+            rawJson = rawJson.Replace("\"CustomVariable\": [],", "").Replace("\"CustomVariable\": []", "");
 
             int castIndex = rawJson.IndexOf("\"Cast\":");
             if (castIndex != -1)
@@ -142,7 +142,7 @@ namespace GameRuleEditor.Core
         private string BuildCleanCustomVariablesJson(List<CustomVariable> variables)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("    \"CustomVariables\": [");
+            sb.AppendLine("    \"CustomVariable\": [");
 
             for (int i = 0; i < variables.Count; i++)
             {

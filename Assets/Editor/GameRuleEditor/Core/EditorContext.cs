@@ -141,7 +141,7 @@ namespace GameRuleEditor.Core
                 SunAmbientColor = new byte[] { 128, 128, 128 },
                 BackgroundColor = new byte[] { 0, 0, 0 },
                 Gravity = new float[] { 0, -9.81f, 0 },
-                CustomVariables = new List<CustomVariable>(),
+                CustomVariable = new List<CustomVariable>(),
                 Cast = new List<ActorJson>()
             };
 

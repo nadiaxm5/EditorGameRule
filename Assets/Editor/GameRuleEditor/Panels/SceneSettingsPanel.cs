@@ -417,12 +417,12 @@ namespace GameRuleEditor.Panels
         private void UpdateCustomVariablesList()
         {
             customVariablesContainer.Clear();
-            if (context?.currentProject?.sceneData?.CustomVariables == null) return;
+            if (context?.currentProject?.sceneData?.CustomVariable == null) return;
 
-            for (int i = 0; i < context.currentProject.sceneData.CustomVariables.Count; i++)
+            for (int i = 0; i < context.currentProject.sceneData.CustomVariable.Count; i++)
             {
                 int index = i;
-                var customVar = context.currentProject.sceneData.CustomVariables[i];
+                var customVar = context.currentProject.sceneData.CustomVariable[i];
                 var item = new VisualElement();
                 item.AddToClassList("list-item");
                 item.style.marginTop = 5;

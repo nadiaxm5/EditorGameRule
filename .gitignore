@@ -73,3 +73,14 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+/Assets/Plugins/x86_64/cublas64_13.dll
+/Assets/Plugins/x86_64/cublasLt64_13.dll
+/Assets/Plugins/x86_64/cudart64_13.dll
+/Assets/Plugins/x86_64/curand64_10.dll
+/Assets/Plugins/x86_64/ggml-base.dll
+/Assets/Plugins/x86_64/ggml-cpu.dll
+/Assets/Plugins/x86_64/ggml-cuda.dll
+/Assets/Plugins/x86_64/ggml.dll
+/Assets/Plugins/x86_64/libllama.dll
+/Assets/StreamingAssets/gamerule4.gbnf
+/Assets/StreamingAssets/gamerule_model750-q5_k_m.gguf

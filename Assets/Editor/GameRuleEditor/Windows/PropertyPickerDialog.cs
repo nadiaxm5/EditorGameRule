@@ -158,9 +158,9 @@ namespace GameRuleEditor.Windows
         private void DrawGameProperties()
         {
             string prefix = "#";
-            if (selectedGroup == "Global" && context.currentProject.sceneData.CustomVariables != null)
+            if (selectedGroup == "Global" && context.currentProject.sceneData.CustomVariable != null)
             {
-                foreach (var v in context.currentProject.sceneData.CustomVariables)
+                foreach (var v in context.currentProject.sceneData.CustomVariable)
                 {
                     if (!boolOnly || v.type == "bool")
                     {
