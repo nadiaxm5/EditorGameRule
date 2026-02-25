@@ -416,38 +416,174 @@ namespace GameRuleEditor.Panels
 
         private void UpdateCustomVariablesList()
         {
-            customVariablesContainer.Clear();
             if (context?.currentProject?.sceneData?.CustomVariables == null) return;
+            var variables = context.currentProject.sceneData.CustomVariables;
 
-            for (int i = 0; i < context.currentProject.sceneData.CustomVariables.Count; i++)
+            // Determina si es necesario reconstruir las filas para no perder el foco de escritura
+            bool needsRebuild = customVariablesContainer.childCount != variables.Count;
+            if (!needsRebuild)
             {
-                int index = i;
-                var customVar = context.currentProject.sceneData.CustomVariables[i];
-                var item = new VisualElement();
-                item.AddToClassList("list-item");
-                item.style.marginTop = 5;
-
-                string valueStr = "";
-                switch (customVar.type.ToLower())
+                for (int i = 0; i < variables.Count; i++)
                 {
-                    case "int": valueStr = customVar.intValue.ToString(); break;
-                    case "float": valueStr = customVar.floatValue.ToString("F2"); break;
-                    case "bool": valueStr = customVar.boolValue.ToString(); break;
-                    case "vector2":
-                        if (customVar.arrayValue?.Length >= 2) valueStr = $"({customVar.arrayValue[0]}, {customVar.arrayValue[1]})"; break;
-                    case "vector3":
-                        if (customVar.arrayValue?.Length >= 3) valueStr = $"({customVar.arrayValue[0]}, {customVar.arrayValue[1]}, {customVar.arrayValue[2]})"; break;
+                    var row = customVariablesContainer[i];
+                    string expectedType = variables[i].type.ToLower();
+                    bool hasCorrectField = false;
+
+                    // Comprueba si el campo de valor visual coincide con el tipo de la variable real
+                    switch (expectedType)
+                    {
+                        case "int": hasCorrectField = row.Q<IntegerField>("VarValue") != null; break;
+                        case "float": hasCorrectField = row.Q<FloatField>("VarValue") != null; break;
+                        case "bool": hasCorrectField = row.Q<Toggle>("VarValue") != null; break;
+                        case "vector2": hasCorrectField = row.Q<Vector2Field>("VarValue") != null; break;
+                        case "vector3": hasCorrectField = row.Q<Vector3Field>("VarValue") != null; break;
+                    }
+
+                    if (!hasCorrectField)
+                    {
+                        needsRebuild = true;
+                        break;
+                    }
                 }
+            }
 
-                var label = new Label($"{customVar.name} ({customVar.type}) = {valueStr}") { style = { flexGrow = 1 } };
-                item.Add(label);
+            if (needsRebuild)
+            {
+                customVariablesContainer.Clear();
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    int index = i;
+                    var customVar = variables[index];
 
-                var removeBtn = new Button(() => controller.RemoveCustomVariable(index)) { text = "Remove" };
-                removeBtn.AddToClassList("button-danger");
-                removeBtn.style.width = 80;
-                item.Add(removeBtn);
+                    var item = new VisualElement();
+                    item.AddToClassList("list-item");
+                    item.style.marginTop = 5;
+                    item.style.flexDirection = FlexDirection.Row;
+                    item.style.alignItems = Align.Center;
 
-                customVariablesContainer.Add(item);
+                    // Campo para el nombre
+                    var nameField = new TextField { name = "VarName", value = customVar.name, style = { width = 120, marginRight = 5 } };
+                    nameField.RegisterValueChangedCallback(evt =>
+                    {
+                        controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].name = evt.newValue, "Change Var Name");
+                    });
+                    item.Add(nameField);
+
+                    // Desplegable de tipo
+                    string currentTypeStr = customVar.type.ToLower();
+                    string matchType = variableTypes.Find(t => t.ToLower() == currentTypeStr) ?? "Int";
+
+                    var typeDropdown = new PopupField<string>(variableTypes, variableTypes.IndexOf(matchType)) { name = "VarType", style = { width = 80, marginRight = 5 } };
+                    typeDropdown.RegisterValueChangedCallback(evt =>
+                    {
+                        controller.UpdateSceneProperty(() =>
+                        {
+                            var v = context.currentProject.sceneData.CustomVariables[index];
+                            v.type = evt.newValue.ToLower();
+                            v.intValue = 0; v.floatValue = 0f; v.boolValue = false;
+                            if (v.type == "vector2") v.arrayValue = new float[2];
+                            if (v.type == "vector3") v.arrayValue = new float[3];
+                        }, "Change Var Type");
+                    });
+                    item.Add(typeDropdown);
+
+                    // Contenedor dinámico de valor
+                    var valueContainer = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, marginRight = 5 } };
+
+                    switch (currentTypeStr)
+                    {
+                        case "int":
+                            var intF = new IntegerField { name = "VarValue", value = customVar.intValue, style = { flexGrow = 1 } };
+                            intF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].intValue = evt.newValue, "Change Var Value"));
+                            valueContainer.Add(intF);
+                            break;
+
+                        case "float":
+                            var floatF = new FloatField { name = "VarValue", value = customVar.floatValue, style = { flexGrow = 1 } };
+                            floatF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].floatValue = evt.newValue, "Change Var Value"));
+                            valueContainer.Add(floatF);
+                            break;
+
+                        case "bool":
+                            var boolF = new Toggle { name = "VarValue", value = customVar.boolValue, style = { flexGrow = 1 } };
+                            boolF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].boolValue = evt.newValue, "Change Var Value"));
+                            valueContainer.Add(boolF);
+                            break;
+
+                        case "vector2":
+                            Vector2 v2 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 2) ? new Vector2(customVar.arrayValue[0], customVar.arrayValue[1]) : Vector2.zero;
+                            var v2F = new Vector2Field { name = "VarValue", value = v2, style = { flexGrow = 1 } };
+                            v2F.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y }, "Change Var Value"));
+                            valueContainer.Add(v2F);
+                            break;
+
+                        case "vector3":
+                            Vector3 v3 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 3) ? new Vector3(customVar.arrayValue[0], customVar.arrayValue[1], customVar.arrayValue[2]) : Vector3.zero;
+                            var v3F = new Vector3Field { name = "VarValue", value = v3, style = { flexGrow = 1 } };
+                            v3F.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z }, "Change Var Value"));
+                            valueContainer.Add(v3F);
+                            break;
+                    }
+
+                    item.Add(valueContainer);
+
+                    // Botón para eliminar la variable
+                    var removeBtn = new Button(() => controller.RemoveCustomVariable(index)) { text = "Remove" };
+                    removeBtn.AddToClassList("button-danger");
+                    removeBtn.style.width = 70;
+                    item.Add(removeBtn);
+
+                    customVariablesContainer.Add(item);
+                }
+            }
+            else
+            {
+                // Solo actualiza los valores de forma silenciosa para no interrumpir si el usuario está escribiendo
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    var customVar = variables[i];
+                    var row = customVariablesContainer[i];
+
+                    var nameField = row.Q<TextField>("VarName");
+                    if (nameField != null && nameField.value != customVar.name)
+                        nameField.SetValueWithoutNotify(customVar.name);
+
+                    switch (customVar.type.ToLower())
+                    {
+                        case "int":
+                            var intF = row.Q<IntegerField>("VarValue");
+                            if (intF != null && intF.value != customVar.intValue) intF.SetValueWithoutNotify(customVar.intValue);
+                            break;
+
+                        case "float":
+                            var floatF = row.Q<FloatField>("VarValue");
+                            if (floatF != null && floatF.value != customVar.floatValue) floatF.SetValueWithoutNotify(customVar.floatValue);
+                            break;
+
+                        case "bool":
+                            var boolF = row.Q<Toggle>("VarValue");
+                            if (boolF != null && boolF.value != customVar.boolValue) boolF.SetValueWithoutNotify(customVar.boolValue);
+                            break;
+
+                        case "vector2":
+                            var v2F = row.Q<Vector2Field>("VarValue");
+                            if (v2F != null)
+                            {
+                                Vector2 v2 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 2) ? new Vector2(customVar.arrayValue[0], customVar.arrayValue[1]) : Vector2.zero;
+                                if (v2F.value != v2) v2F.SetValueWithoutNotify(v2);
+                            }
+                            break;
+
+                        case "vector3":
+                            var v3F = row.Q<Vector3Field>("VarValue");
+                            if (v3F != null)
+                            {
+                                Vector3 v3 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 3) ? new Vector3(customVar.arrayValue[0], customVar.arrayValue[1], customVar.arrayValue[2]) : Vector3.zero;
+                                if (v3F.value != v3) v3F.SetValueWithoutNotify(v3);
+                            }
+                            break;
+                    }
+                }
             }
         }
 

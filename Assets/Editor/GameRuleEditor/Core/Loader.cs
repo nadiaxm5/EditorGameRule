@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Rendering;
+using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 public static class Loader
 {
@@ -132,14 +133,37 @@ public static class Loader
 
         Scripts.CreateGameManager(scene);
         Scripts.Create(scene.Cast);
-        AssetDatabase.Refresh();
 
-        // Add scripts to gameObjects
-        var scripts = Resources.LoadAll<MonoScript>("Scripts");
-        foreach (var script in scripts)
+        // Save a flag indicating we need to attach scripts after compilation finishes
+        EditorPrefs.SetBool("GameRule_PendingScriptAttach", true);
+
+        // Triggers compilation (Asynchronous)
+        AssetDatabase.Refresh();
+    }
+
+    // Automatically called by Unity when C# compilation finishes
+    [UnityEditor.Callbacks.DidReloadScripts]
+    private static void OnScriptsReloaded()
+    {
+        // Check if this script compilation was triggered by the Generate Scene button
+        if (EditorPrefs.GetBool("GameRule_PendingScriptAttach", false))
         {
-            GameObject obj = GameObject.Find(script.name);
-            obj.AddComponent(script.GetClass());
+            // Clear the flag so it doesn't run on normal manual recompiles
+            EditorPrefs.DeleteKey("GameRule_PendingScriptAttach");
+
+            var scripts = Resources.LoadAll<MonoScript>("Scripts");
+            foreach (var script in scripts)
+            {
+                GameObject obj = GameObject.Find(script.name);
+                if (obj != null)
+                {
+                    System.Type scriptType = script.GetClass();
+                    if (scriptType != null && obj.GetComponent(scriptType) == null)
+                    {
+                        obj.AddComponent(scriptType);
+                    }
+                }
+            }
         }
     }
 }

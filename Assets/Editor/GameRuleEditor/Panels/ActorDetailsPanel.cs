@@ -13,7 +13,7 @@ namespace GameRuleEditor.Panels
         private EditorContext context;
         private ProjectController controller;
 
-        private VisualElement contentContainer;
+        private VisualElement mainContainer;
         private VisualElement noSelectionContainer;
 
         private TextField actorNameField;
@@ -60,14 +60,14 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = Color.gray } });
             Add(noSelectionContainer);
 
-            // Content View
-            contentContainer = new VisualElement();
-            contentContainer.style.flexGrow = 1;
-            contentContainer.style.display = DisplayStyle.None;
-            Add(contentContainer);
+            // Content View (Usando mainContainer)
+            mainContainer = new VisualElement();
+            mainContainer.style.flexGrow = 1;
+            mainContainer.style.display = DisplayStyle.None;
+            Add(mainContainer);
 
             var scrollView = new ScrollView();
-            contentContainer.Add(scrollView);
+            mainContainer.Add(scrollView);
 
             var header = new Label("Actor Properties");
             header.AddToClassList("panel-header");
@@ -211,12 +211,12 @@ namespace GameRuleEditor.Panels
             if (actor == null)
             {
                 noSelectionContainer.style.display = DisplayStyle.Flex;
-                contentContainer.style.display = DisplayStyle.None;
+                mainContainer.style.display = DisplayStyle.None;
                 return;
             }
 
             noSelectionContainer.style.display = DisplayStyle.None;
-            contentContainer.style.display = DisplayStyle.Flex;
+            mainContainer.style.display = DisplayStyle.Flex;
 
             if (actorNameField.value != (actor.ActorName ?? "")) actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
             if (tagField.value != (actor.Tag ?? "")) tagField.SetValueWithoutNotify(actor.Tag ?? "");
