@@ -49,9 +49,18 @@ MonoBehaviour:
       Active: 1
       PrefabName: LightingReflection
       Tag: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0.6
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -628,15 +637,26 @@ MonoBehaviour:
       intValue: 0
       floatValue: 0
       boolValue: 0
-      arrayValue: []
+      arrayValue:
+      - 0
+      - 0
   actors:
   - ActorName: LightingReflection
     Active: 1
     PrefabName: LightingReflection
     Tag: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0.6
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
