@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using LLama;
 using LLama.Common;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 /// Includes an integrated auditor layer that validates and fixes output
 /// before applying changes.
 /// </summary>
-public class GameAgentTool : EditorWindow
+public class GameAgentMini : EditorWindow
 {
     // ══════════════════════════════════════════════════════════
     #region  MODEL STATE (persistent across domain reloads)
@@ -28,6 +28,14 @@ public class GameAgentTool : EditorWindow
     private static InteractiveExecutor _executor;
     private static ModelParams        _parameters;
     private static bool               _isModelLoaded;
+
+    // ── Translator model (Qwen 2.5 0.5B) — translates user input to English ──
+    private static LLamaWeights       _translatorModel;
+    private static LLamaContext       _translatorContext;
+    private static InteractiveExecutor _translatorExecutor;
+    private static ModelParams        _translatorParameters;
+    private static bool               _isTranslatorLoaded;
+    private static bool               _isLoadingModels;
 
     // ══════════════════════════════════════════════════════════
     #endregion
@@ -87,6 +95,7 @@ public class GameAgentTool : EditorWindow
     private string[] _availableModels     = Array.Empty<string>();
     private string[] _availableModelNames = Array.Empty<string>();
     private int      _selectedModelIndex  = 0;
+    private string   _translatorModelPath = "";
 
     // ── Grammar ──
     private bool   _useGrammar;
@@ -291,10 +300,35 @@ Example 3 — Projectile spawned and auto-deleted:
     #region  MENU ENTRY
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/Game Coding Agent")]
+    // ── Singleton-like access for embedding in other windows ──
+    private static GameAgentMini _instance;
+
+    /// <summary>
+    /// Returns the current GameAgentMini instance, creating one if needed.
+    /// Does NOT open a standalone window — use ShowWindow() for that.
+    /// </summary>
+    public static GameAgentMini GetOrCreateInstance()
+    {
+        if (_instance == null)
+        {
+            // Try to find an existing instance (hidden or docked)
+            var existing = Resources.FindObjectsOfTypeAll<GameAgentMini>();
+            if (existing.Length > 0)
+                _instance = existing[0];
+            else
+            {
+                _instance = CreateInstance<GameAgentMini>();
+                _instance.hideFlags = HideFlags.DontSave;
+                _instance.OnEnable();
+            }
+        }
+        return _instance;
+    }
+
+    [MenuItem("Tools/Game Agent Mini")]
     public static void ShowWindow()
     {
-        GetWindow<GameAgentTool>("Game Coding Agent");
+        _instance = GetWindow<GameAgentMini>("Game Agent Mini");
     }
 
     // ══════════════════════════════════════════════════════════
@@ -308,15 +342,18 @@ Example 3 — Projectile spawned and auto-deleted:
         LoadSkeletonAuto();
         FindEditorContext();
         TryLoadDefaultGameJson();
+        AutoLoadGrammar();
 
-        if (_isModelLoaded)
-            _statusMessage = "Modelo ya cargado en memoria.";
+        if (_isModelLoaded && _isTranslatorLoaded)
+            _statusMessage = "Modelos ya cargados en memoria.";
+        else if (!_isLoadingModels)
+            InitModels();
     }
 
     private void OnDestroy()
     {
-        // Keep model in memory for quick reopen
         UnsubscribeEditorContext();
+        UnloadModel();
     }
 
     // ══════════════════════════════════════════════════════════
@@ -327,10 +364,25 @@ Example 3 — Projectile spawned and auto-deleted:
     private void RefreshModelList()
     {
         string streamingPath = Application.streamingAssetsPath;
+        _translatorModelPath = "";
+
         if (Directory.Exists(streamingPath))
         {
-            _availableModels = Directory.GetFiles(streamingPath, "*.gguf")
+            var allModels = Directory.GetFiles(streamingPath, "*.gguf")
                 .OrderBy(f => f).ToArray();
+
+            // Separate translator (Qwen) from agent models
+            var agentModels = new List<string>();
+            foreach (var m in allModels)
+            {
+                string name = Path.GetFileName(m).ToLowerInvariant();
+                if (name.Contains("qwen"))
+                    _translatorModelPath = m;
+                else
+                    agentModels.Add(m);
+            }
+
+            _availableModels = agentModels.ToArray();
             _availableModelNames = _availableModels
                 .Select(Path.GetFileName).ToArray();
         }
@@ -343,74 +395,51 @@ Example 3 — Projectile spawned and auto-deleted:
             _selectedModelIndex = 0;
     }
 
-    private async void InitModel()
+    private async void InitModels()
     {
-        if (_isModelLoaded)
+        if (_isLoadingModels) return;
+        if (_isModelLoaded && _isTranslatorLoaded)
         {
-            _statusMessage = "El modelo ya está cargado.";
+            _statusMessage = "Modelos ya cargados.";
             return;
         }
 
-        if (_availableModels.Length == 0)
+        bool hasAgent      = _availableModels.Length > 0;
+        bool hasTranslator = !string.IsNullOrEmpty(_translatorModelPath);
+
+        if (!hasAgent && !hasTranslator)
         {
             _statusMessage = "No se encontraron modelos .gguf en StreamingAssets.";
             Repaint();
             return;
         }
 
-        _statusMessage = "Cargando modelo…";
+        _isLoadingModels = true;
+        _statusMessage = "Cargando modelos…";
         Repaint();
 
         try
         {
             int cpuThreads = Math.Max(1, Environment.ProcessorCount / 2);
-            string modelPath = _availableModels[_selectedModelIndex];
-            _statusMessage = $"Cargando: {Path.GetFileName(modelPath)}…";
-            Repaint();
 
-            _parameters = new ModelParams(modelPath)
+            // ── 1. Load translator model (small, fast) ──
+            if (hasTranslator && !_isTranslatorLoaded)
             {
-                ContextSize    = 16384,
-                BatchSize      = 8192,
-                UBatchSize     = 512,
-                GpuLayerCount  = 99,
-                MainGpu        = 0,
-                Threads        = cpuThreads,
-                BatchThreads   = cpuThreads,
-                UseMemorymap   = true,
-                UseMemoryLock  = false,
-                FlashAttention = true
-            };
+                _statusMessage = $"Cargando traductor: {Path.GetFileName(_translatorModelPath)}…";
+                Repaint();
+                await LoadTranslatorModelAsync(cpuThreads);
+            }
 
-            await Task.Run(() =>
+            // ── 2. Load agent model ──
+            if (hasAgent && !_isModelLoaded)
             {
-                _model    = LLamaWeights.LoadFromFile(_parameters);
-                _context  = _model.CreateContext(_parameters);
-                _executor = new InteractiveExecutor(_context);
-            });
+                string modelPath = _availableModels[_selectedModelIndex];
+                _statusMessage = $"Cargando agente: {Path.GetFileName(modelPath)}…";
+                Repaint();
+                await LoadAgentModelAsync(cpuThreads, modelPath);
+            }
 
-            _isModelLoaded = true;
-
-            // Warm-up
-            _statusMessage = "Calentando modelo…";
-            Repaint();
-
-            await Task.Run(async () =>
-            {
-                var warmParams = new InferenceParams
-                {
-                    MaxTokens    = 1,
-                    AntiPrompts  = AntiPrompts,
-                    SamplingPipeline = new DefaultSamplingPipeline { Temperature = 0.1f }
-                };
-                await foreach (var _ in _executor.InferAsync("Hello\n", warmParams)) { }
-            });
-
-            _context.Dispose();
-            _context  = _model.CreateContext(_parameters);
-            _executor = new InteractiveExecutor(_context);
-
-            _statusMessage = "Modelo cargado y listo.";
+            _statusMessage = BuildLoadedStatusMessage();
             _chatHistory.Clear();
             _chatHistory.Add("Sistema: Agente listo.");
         }
@@ -418,10 +447,92 @@ Example 3 — Projectile spawned and auto-deleted:
         {
             _statusMessage = $"Error al cargar: {ex.Message}";
             Debug.LogError($"[GameAgent] {ex}");
-            _isModelLoaded = false;
         }
+        finally
+        {
+            _isLoadingModels = false;
+            Repaint();
+        }
+    }
 
+    private async Task LoadAgentModelAsync(int cpuThreads, string modelPath)
+    {
+        _parameters = new ModelParams(modelPath)
+        {
+            ContextSize    = 16384,
+            BatchSize      = 8192,
+            UBatchSize     = 512,
+            GpuLayerCount  = 99,
+            MainGpu        = 0,
+            Threads        = cpuThreads,
+            BatchThreads   = cpuThreads,
+            UseMemorymap   = true,
+            UseMemoryLock  = false,
+            FlashAttention = true
+        };
+
+        await Task.Run(() =>
+        {
+            _model    = LLamaWeights.LoadFromFile(_parameters);
+            _context  = _model.CreateContext(_parameters);
+            _executor = new InteractiveExecutor(_context);
+        });
+
+        _isModelLoaded = true;
+
+        // Warm-up
+        _statusMessage = "Calentando modelo agente…";
         Repaint();
+
+        await Task.Run(async () =>
+        {
+            var warmParams = new InferenceParams
+            {
+                MaxTokens    = 1,
+                AntiPrompts  = AntiPrompts,
+                SamplingPipeline = new DefaultSamplingPipeline { Temperature = 0.1f }
+            };
+            await foreach (var _ in _executor.InferAsync("Hello\n", warmParams)) { }
+        });
+
+        _context.Dispose();
+        _context  = _model.CreateContext(_parameters);
+        _executor = new InteractiveExecutor(_context);
+    }
+
+    private async Task LoadTranslatorModelAsync(int cpuThreads)
+    {
+        _translatorParameters = new ModelParams(_translatorModelPath)
+        {
+            ContextSize    = 2048,
+            BatchSize      = 512,
+            UBatchSize     = 256,
+            GpuLayerCount  = 99,
+            MainGpu        = 0,
+            Threads        = cpuThreads,
+            BatchThreads   = cpuThreads,
+            UseMemorymap   = true,
+            UseMemoryLock  = false,
+            FlashAttention = true
+        };
+
+        await Task.Run(() =>
+        {
+            _translatorModel    = LLamaWeights.LoadFromFile(_translatorParameters);
+            _translatorContext  = _translatorModel.CreateContext(_translatorParameters);
+            _translatorExecutor = new InteractiveExecutor(_translatorContext);
+        });
+
+        _isTranslatorLoaded = true;
+    }
+
+    private string BuildLoadedStatusMessage()
+    {
+        var parts = new List<string>();
+        if (_isModelLoaded)      parts.Add("Agente");
+        if (_isTranslatorLoaded) parts.Add("Traductor");
+        if (parts.Count == 0)    return "No se cargaron modelos.";
+        return $"Modelos cargados: {string.Join(", ", parts)}. Listo.";
     }
 
     private void UnloadModel()
@@ -433,10 +544,20 @@ Example 3 — Projectile spawned and auto-deleted:
         _model         = null;
         _parameters    = null;
         _isModelLoaded = false;
-        _isGenerating  = false;
+
+        _translatorContext?.Dispose();
+        _translatorModel?.Dispose();
+        _translatorContext    = null;
+        _translatorExecutor   = null;
+        _translatorModel      = null;
+        _translatorParameters = null;
+        _isTranslatorLoaded   = false;
+
+        _isLoadingModels = false;
+        _isGenerating    = false;
         _chatHistory.Clear();
         _lastAIResponse = "";
-        _statusMessage  = "Modelo descargado.";
+        _statusMessage  = "Modelos descargados.";
         Repaint();
     }
 
@@ -993,9 +1114,64 @@ Example 3 — Projectile spawned and auto-deleted:
     #region  INFERENCE — sends instruction to LLM, audits output
     // ══════════════════════════════════════════════════════════
 
+    /// <summary>
+    /// Translate user input to English using the small Qwen translator model.
+    /// Returns the original text if the translator is unavailable or translation fails.
+    /// </summary>
+    private async Task<string> TranslateToEnglish(string userInput)
+    {
+        if (!_isTranslatorLoaded || string.IsNullOrWhiteSpace(userInput))
+            return userInput;
+
+        try
+        {
+            // Reset translator context for a clean translation
+            _translatorContext?.Dispose();
+            _translatorContext  = _translatorModel.CreateContext(_translatorParameters);
+            _translatorExecutor = new InteractiveExecutor(_translatorContext);
+
+            string prompt =
+                "Translate the following text to English. Output ONLY the English translation, nothing else. Do NOT output nothing else than the exact translation. Do NOT add nothing that is not in the text provided\n\n" +
+                $"Text: {userInput}\n" +
+                "English translation:";
+
+            var inferParams = new InferenceParams
+            {
+                MaxTokens = 512,
+                AntiPrompts = new[] { "\n\n", "Text:", "Translation:", "###" },
+                SamplingPipeline = new DefaultSamplingPipeline
+                {
+                    Temperature      = 0.0f,
+                    RepeatPenalty    = 1.1f,
+                    PenalizeNewline  = true
+                }
+            };
+
+            string translation = "";
+            await Task.Run(async () =>
+            {
+                await foreach (var text in _translatorExecutor.InferAsync(prompt, inferParams))
+                {
+                    translation += text;
+                }
+            });
+
+            translation = translation.Trim();
+            if (string.IsNullOrEmpty(translation))
+                return userInput;
+
+            return translation;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[GameAgent] Translation failed, using original: {ex.Message}");
+            return userInput;
+        }
+    }
+
     private async void SendMessageToAgent()
     {
-        if (!_isModelLoaded || _isGenerating) return;
+        if (!_isModelLoaded || _isGenerating || _isLoadingModels) return;
 
         string userMsg = _userInput.Trim();
         if (string.IsNullOrEmpty(userMsg)) return;
@@ -1011,7 +1187,19 @@ Example 3 — Projectile spawned and auto-deleted:
 
         try
         {
-            string prompt = BuildAgentPrompt(userMsg);
+            // ── Translate user input to English via Qwen ──
+            string translatedMsg = userMsg;
+            if (_isTranslatorLoaded)
+            {
+                _statusMessage = "Traduciendo…";
+                Repaint();
+                translatedMsg = await TranslateToEnglish(userMsg);
+                Debug.Log($"[GameAgent] Original: \"{userMsg}\" → Translated: \"{translatedMsg}\"");
+                if (translatedMsg != userMsg)
+                    _auditLog.Add($"↗ Traducido: {translatedMsg}");
+            }
+
+            string prompt = BuildAgentPrompt(translatedMsg);
 
             var inferParams = new InferenceParams
             {
@@ -1416,15 +1604,20 @@ Example 3 — Projectile spawned and auto-deleted:
             foreach (var warn in gameAudit.Warnings)
                 _auditLog.Add($"⚠ [Game] {warn}");
 
-            // Collect pending globals for user type selection
+            // Auto-apply pending globals as float (mini mode — no UI for type selection)
             if (gameAudit.PendingGlobals.Count > 0)
             {
+                if (_gameData.CustomVariable == null)
+                    _gameData.CustomVariable = new List<CustomVariable>();
+
                 foreach (var name in gameAudit.PendingGlobals)
                 {
-                    if (!_pendingGlobalNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    bool exists = _gameData.CustomVariable.Any(
+                        cv => cv.name != null && cv.name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    if (!exists)
                     {
-                        _pendingGlobalNames.Add(name);
-                        _pendingGlobalTypes.Add(0); // default: float
+                        _gameData.CustomVariable.Add(new CustomVariable { name = name, type = "float" });
+                        _auditLog.Add($"+ Variable global '#{name}' (float) añadida automáticamente.");
                     }
                 }
             }
@@ -1721,6 +1914,24 @@ Example 3 — Projectile spawned and auto-deleted:
         Repaint();
     }
 
+    /// <summary>
+    /// Auto-load the first .gbnf grammar found in StreamingAssets.
+    /// </summary>
+    private void AutoLoadGrammar()
+    {
+        if (_useGrammar && !string.IsNullOrEmpty(_grammarText)) return;
+
+        string streamingPath = Application.streamingAssetsPath;
+        if (!Directory.Exists(streamingPath)) return;
+
+        string[] gbnfFiles = Directory.GetFiles(streamingPath, "*.gbnf");
+        if (gbnfFiles.Length == 0) return;
+
+        _grammarPath = gbnfFiles[0];
+        _useGrammar = true;
+        LoadGrammar();
+    }
+
     // ══════════════════════════════════════════════════════════
     #endregion
     #region  GUI
@@ -1728,566 +1939,92 @@ Example 3 — Projectile spawned and auto-deleted:
 
     private void OnGUI()
     {
-        // ── Header ──
-        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-        GUILayout.Label("Game Coding Agent", EditorStyles.boldLabel, GUILayout.Width(150));
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(_statusMessage, EditorStyles.miniLabel);
-        EditorGUILayout.EndHorizontal();
-
-        // ── Master scroll view — wraps the entire window ──
-        _scrollMain = EditorGUILayout.BeginScrollView(_scrollMain);
-
-        DrawModelSection();
-        DrawSettingsSection();
-        DrawGameJsonSection();
-        DrawModeSection();
-        DrawJsonViewerSection();
-        DrawAuditLogSection();
-        DrawPendingGlobalsSection();
-        DrawChatSection();
-
-        EditorGUILayout.EndScrollView();
-
-        // Input stays pinned at the bottom (outside scroll)
-        DrawInputSection();
+        DrawAgentGUI();
     }
 
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Model Section
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawModelSection()
+    /// <summary>
+    /// Public GUI drawing method. Can be called from an IMGUIContainer in another window.
+    /// </summary>
+    public void DrawAgentGUI()
     {
-        EditorGUILayout.Space(2);
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Modelo", GUILayout.Width(45));
+        EditorGUILayout.Space(4);
 
-        GUI.enabled = !_isModelLoaded && !_isGenerating;
-        if (_availableModelNames.Length > 0)
-            _selectedModelIndex = EditorGUILayout.Popup(_selectedModelIndex, _availableModelNames);
-        else
-            EditorGUILayout.LabelField("(no hay modelos .gguf)");
-        GUI.enabled = true;
-
-        if (GUILayout.Button("↻", GUILayout.Width(22), GUILayout.Height(16)))
-            RefreshModelList();
-
-        if (GUILayout.Button(_isModelLoaded ? "Descargar" : "Cargar",
-            GUILayout.Width(70), GUILayout.Height(16)))
-        {
-            if (_isModelLoaded) UnloadModel(); else InitModel();
-        }
-        EditorGUILayout.EndHorizontal();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Settings Section (collapsible)
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawSettingsSection()
-    {
-        EditorGUILayout.Space(2);
-        _showSettings = EditorGUILayout.Foldout(_showSettings, "Ajustes", true);
-        if (!_showSettings) return;
-
-        EditorGUI.indentLevel++;
-
-        EditorGUILayout.BeginHorizontal();
-        _temperature = EditorGUILayout.Slider("Temp", _temperature, 0f, 2f);
-        _maxTokens   = EditorGUILayout.IntField("Tokens", _maxTokens, GUILayout.Width(120));
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
-        _repeatPenalty    = EditorGUILayout.Slider("Rep.Pen", _repeatPenalty, 1.0f, 2.0f);
-        _penaltyCount     = EditorGUILayout.IntField("Window", _penaltyCount, GUILayout.Width(120));
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
-        _frequencyPenalty = EditorGUILayout.Slider("Freq.Pen", _frequencyPenalty, 0f, 1f);
-        _presencePenalty  = EditorGUILayout.Slider("Pres.Pen", _presencePenalty, 0f, 1f);
-        EditorGUILayout.EndHorizontal();
-
-        // Grammar
-        EditorGUILayout.BeginHorizontal();
-        _useGrammar = EditorGUILayout.Toggle("GBNF", _useGrammar, GUILayout.Width(60));
-        if (_useGrammar)
-        {
-            EditorGUILayout.LabelField(_grammarFileName, EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("…", GUILayout.Width(22)))
-            {
-                string startDir = string.IsNullOrEmpty(_grammarPath)
-                    ? Application.dataPath : Path.GetDirectoryName(_grammarPath);
-                string picked = EditorUtility.OpenFilePanel("Seleccionar GBNF", startDir, "gbnf");
-                if (!string.IsNullOrEmpty(picked)) { _grammarPath = picked; LoadGrammar(); }
-            }
-            if (!string.IsNullOrEmpty(_grammarText) && GUILayout.Button("✕", GUILayout.Width(18)))
-            { _grammarText = ""; _grammarPath = ""; _grammarFileName = "(ninguno)"; }
-        }
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUI.indentLevel--;
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Game JSON Section
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawGameJsonSection()
-    {
-        EditorGUILayout.Space(3);
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("game.json", EditorStyles.boldLabel, GUILayout.Width(70));
-        _gameName = EditorGUILayout.TextField(_gameName);
-
-        if (GUILayout.Button("Nuevo", EditorStyles.miniButton, GUILayout.Width(45)))
-        {
-            if (_gameData != null && _gameData.Cast != null && _gameData.Cast.Count > 0)
-            { if (EditorUtility.DisplayDialog("Crear Nuevo", "Se perderán los datos actuales. ¿Continuar?", "Sí", "No")) CreateNewGame(); }
-            else CreateNewGame();
-        }
-        if (GUILayout.Button("Abrir", EditorStyles.miniButton, GUILayout.Width(40)))
-            LoadExternalGameJson();
-        if (GUILayout.Button("↻", EditorStyles.miniButton, GUILayout.Width(20)))
-        { if (File.Exists(_gameJsonPath)) LoadGameJsonFromDisk(); }
-
-        GUI.enabled = _gameData != null;
-        if (GUILayout.Button("Guardar", EditorStyles.miniButton, GUILayout.Width(55)))
-            SaveGameJsonToDisk();
-        GUI.enabled = true;
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.LabelField(_gameJsonPath ?? "(no definida)", EditorStyles.miniLabel);
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Mode Section
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawModeSection()
-    {
-        EditorGUILayout.Space(3);
+        // ── Mode selector + Actor dropdown (one line) ──
         EditorGUILayout.BeginHorizontal();
 
         Color defaultBg = GUI.backgroundColor;
 
         GUI.backgroundColor = _mode == AgentMode.Create ? new Color(0.3f, 0.8f, 0.3f) : defaultBg;
-        if (GUILayout.Button("+ Crear", EditorStyles.miniButtonLeft, GUILayout.Height(20)))
+        if (GUILayout.Button("Crear", EditorStyles.miniButtonLeft, GUILayout.Height(22)))
             _mode = AgentMode.Create;
 
         GUI.backgroundColor = _mode == AgentMode.Modify ? new Color(0.9f, 0.8f, 0.2f) : defaultBg;
-        if (GUILayout.Button("Modificar", EditorStyles.miniButtonMid, GUILayout.Height(20)))
+        if (GUILayout.Button("Modificar", EditorStyles.miniButtonRight, GUILayout.Height(22)))
             _mode = AgentMode.Modify;
-
-        GUI.backgroundColor = _mode == AgentMode.Delete ? new Color(0.9f, 0.3f, 0.3f) : defaultBg;
-        if (GUILayout.Button("Eliminar", EditorStyles.miniButtonRight, GUILayout.Height(20)))
-            _mode = AgentMode.Delete;
 
         GUI.backgroundColor = defaultBg;
 
-        // Actor selector inline (for Modify/Delete)
-        if (_mode == AgentMode.Modify || _mode == AgentMode.Delete)
+        // Actor selector (visible in Modify mode)
+        if (_mode == AgentMode.Modify)
         {
             string[] actorNames = GetActorNames();
             _selectedActorIndex = EditorGUILayout.Popup(
                 _selectedActorIndex, actorNames, GUILayout.MinWidth(80));
             if (_selectedActorIndex >= actorNames.Length)
                 _selectedActorIndex = 0;
-
-            if (_mode == AgentMode.Delete)
-            {
-                GUI.enabled = _gameData?.Cast != null && _gameData.Cast.Count > 0;
-                if (GUILayout.Button("✕", GUILayout.Width(20), GUILayout.Height(20)))
-                {
-                    if (EditorUtility.DisplayDialog("Eliminar Actor",
-                        $"¿Eliminar '{actorNames[_selectedActorIndex]}'?", "Sí", "No"))
-                        DeleteActorFromGame(_selectedActorIndex);
-                }
-                GUI.enabled = true;
-            }
         }
 
         EditorGUILayout.EndHorizontal();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: JSON Viewer with Change Markers
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawJsonViewerSection()
-    {
-        EditorGUILayout.Space(3);
-
-        // Header with stats inline
-        EditorGUILayout.BeginHorizontal();
-        int actorCount = _gameData?.Cast?.Count ?? 0;
-        int changed = _changedLines.Count;
-        _showJsonView = EditorGUILayout.Foldout(_showJsonView,
-            $"JSON  ({actorCount} actores, {_currentJsonLines.Length} lineas)", true);
-
-        // Undo / Redo buttons
-        EditorGUI.BeginDisabledGroup(_undoStack.Count == 0);
-        if (GUILayout.Button("◀ Deshacer", EditorStyles.miniButton, GUILayout.Width(72)))
-            Undo();
-        EditorGUI.EndDisabledGroup();
-        EditorGUI.BeginDisabledGroup(_redoStack.Count == 0);
-        if (GUILayout.Button("Rehacer ▶", EditorStyles.miniButton, GUILayout.Width(72)))
-            Redo();
-        EditorGUI.EndDisabledGroup();
-
-        if (changed > 0)
-        {
-            GUILayout.FlexibleSpace();
-            GUIStyle chgLabel = new GUIStyle(EditorStyles.miniLabel);
-            chgLabel.normal.textColor = new Color(0.3f, 1f, 0.3f);
-            GUILayout.Label($"{changed} modificadas", chgLabel, GUILayout.Width(90));
-            if (GUILayout.Button("Limpiar", EditorStyles.miniButton, GUILayout.Width(50)))
-                _changedLines.Clear();
-        }
-        EditorGUILayout.EndHorizontal();
-
-        if (!_showJsonView) return;
-
-        if (_currentJsonLines.Length == 0)
-        {
-            EditorGUILayout.HelpBox("No hay JSON cargado.", MessageType.Info);
-            return;
-        }
-
-        // Monospace-ish style for JSON
-        GUIStyle lineStyle = new GUIStyle(EditorStyles.label)
-        {
-            richText  = true,
-            fontSize  = 10,
-            wordWrap  = false,
-            clipping  = TextClipping.Clip,
-            alignment = TextAnchor.UpperLeft,
-            padding   = new RectOffset(0, 0, 0, 0),
-            margin    = new RectOffset(0, 0, 0, 0)
-        };
-
-        int lineH = 14;
-        float viewHeight = Mathf.Min(_currentJsonLines.Length * lineH + 8, 250);
-        _scrollJson = EditorGUILayout.BeginScrollView(_scrollJson,
-            GUILayout.Height(viewHeight));
-
-        for (int i = 0; i < _currentJsonLines.Length; i++)
-        {
-            bool isChanged = _changedLines.Contains(i);
-            string numColor  = isChanged ? "#33ff55" : "#888888";
-            string marker    = isChanged ? "<color=#33ff55>▌</color>" : " ";
-            string textColor = isChanged ? "#55ff77" : "#cccccc";
-            string lineText  = _currentJsonLines[i]
-                .Replace("<", "&lt;").Replace(">", "&gt;");
-
-            string richLine =
-                $"<color={numColor}>{i + 1,4}</color> {marker} <color={textColor}>{lineText}</color>";
-
-            GUILayout.Label(richLine, lineStyle, GUILayout.Height(lineH));
-        }
-
-        EditorGUILayout.EndScrollView();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Audit Log
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawAuditLogSection()
-    {
-        if (_auditLog.Count == 0) return;
 
         EditorGUILayout.Space(2);
-        _showAuditLog = EditorGUILayout.Foldout(_showAuditLog,
-            $"Auditoria ({_auditLog.Count})", true);
-        if (!_showAuditLog) return;
 
-        float auditHeight = Mathf.Min(_auditLog.Count * 16 + 4, 100);
-        _scrollAudit = EditorGUILayout.BeginScrollView(_scrollAudit,
-            GUILayout.Height(auditHeight));
-
-        GUIStyle auditStyle = new GUIStyle(EditorStyles.miniLabel)
-        {
-            wordWrap = true,
-            richText = false,
-            padding  = new RectOffset(2, 2, 0, 0)
-        };
-
-        foreach (var entry in _auditLog)
-        {
-            if (entry.StartsWith("OK") || entry.StartsWith("+") || entry.StartsWith("♻") || entry.StartsWith("✏"))
-                auditStyle.normal.textColor = new Color(0.4f, 0.85f, 1f);
-            else if (entry.Contains("⚠") || entry.Contains("WARN"))
-                auditStyle.normal.textColor = new Color(1f, 0.8f, 0.2f);
-            else if (entry.Contains("ERROR") || entry.Contains("✕"))
-                auditStyle.normal.textColor = new Color(1f, 0.35f, 0.35f);
-            else
-                auditStyle.normal.textColor = new Color(0.4f, 0.9f, 0.4f);
-
-            GUILayout.Label(entry, auditStyle);
-        }
-
-        EditorGUILayout.EndScrollView();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Pending Global Variables
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawPendingGlobalsSection()
-    {
-        if (_pendingGlobalNames.Count == 0) return;
-
-        EditorGUILayout.Space(3);
-        var headerStyle = new GUIStyle(EditorStyles.boldLabel)
-        {
-            normal = { textColor = new Color(1f, 0.75f, 0.2f) }
-        };
-        GUILayout.Label($"⚠ Variables globales sin declarar ({_pendingGlobalNames.Count})", headerStyle);
-
-        EditorGUILayout.HelpBox(
-            "El agente usa estas variables globales (#variable) que no existen en CustomVariables. " +
-            "Elige el tipo y pulsa 'Crear' para añadirlas al juego.",
-            MessageType.Warning);
-
-        // Draw each pending variable with type dropdown
-        for (int i = 0; i < _pendingGlobalNames.Count; i++)
-        {
-            EditorGUILayout.BeginHorizontal();
-
-            GUILayout.Label($"#{_pendingGlobalNames[i]}", EditorStyles.label, GUILayout.Width(160));
-            _pendingGlobalTypes[i] = EditorGUILayout.Popup(
-                _pendingGlobalTypes[i], GlobalVarTypes, GUILayout.Width(70));
-
-            if (GUILayout.Button("Crear", EditorStyles.miniButton, GUILayout.Width(50)))
-            {
-                ApplySinglePendingGlobal(i);
-                i--; // list shrinks
-            }
-            if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22)))
-            {
-                _pendingGlobalNames.RemoveAt(i);
-                _pendingGlobalTypes.RemoveAt(i);
-                i--;
-            }
-
-            EditorGUILayout.EndHorizontal();
-        }
-
-        // Bulk actions
-        EditorGUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Crear todas", EditorStyles.miniButton, GUILayout.Width(80)))
-        {
-            ApplyAllPendingGlobals();
-        }
-        if (GUILayout.Button("Descartar todas", EditorStyles.miniButton, GUILayout.Width(100)))
-        {
-            _pendingGlobalNames.Clear();
-            _pendingGlobalTypes.Clear();
-        }
-        EditorGUILayout.EndHorizontal();
-    }
-
-    private void ApplySinglePendingGlobal(int index)
-    {
-        if (_gameData == null || index < 0 || index >= _pendingGlobalNames.Count) return;
-
-        if (_gameData.CustomVariable == null)
-            _gameData.CustomVariable = new List<CustomVariable>();
-
-        string varName = _pendingGlobalNames[index];
-        string varType = GlobalVarTypes[_pendingGlobalTypes[index]];
-
-        var cv = new CustomVariable { name = varName, type = varType };
-        // Value fields are non-nullable; defaults (0, false) are already correct
-
-        _gameData.CustomVariable.Add(cv);
-        _auditLog.Add($"+ Variable global '#{varName}' ({varType}) añadida a CustomVariables.");
-
-        _pendingGlobalNames.RemoveAt(index);
-        _pendingGlobalTypes.RemoveAt(index);
-
-        UpdateJsonDisplay();
-        ComputeChangedLines();
-        SyncToEditorProject();
-        Repaint();
-    }
-
-    private void ApplyAllPendingGlobals()
-    {
-        if (_gameData == null) return;
-        if (_gameData.CustomVariable == null)
-            _gameData.CustomVariable = new List<CustomVariable>();
-
-        for (int i = 0; i < _pendingGlobalNames.Count; i++)
-        {
-            string varName = _pendingGlobalNames[i];
-            string varType = GlobalVarTypes[_pendingGlobalTypes[i]];
-
-            var cv = new CustomVariable { name = varName, type = varType };
-            // Value fields are non-nullable; defaults (0, false) are already correct
-
-            _gameData.CustomVariable.Add(cv);
-            _auditLog.Add($"+ Variable global '#{varName}' ({varType}) añadida a CustomVariables.");
-        }
-
-        _pendingGlobalNames.Clear();
-        _pendingGlobalTypes.Clear();
-
-        UpdateJsonDisplay();
-        ComputeChangedLines();
-        SyncToEditorProject();
-        Repaint();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region  GUI: Chat Section
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawChatSection()
-    {
-        EditorGUILayout.Space(2);
-
-        // ── Chat header with Think toggle ──
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Chat", EditorStyles.boldLabel, GUILayout.Width(40));
-        GUILayout.FlexibleSpace();
-
-        // Think reasoning toggle button
-        Color defaultBg = GUI.backgroundColor;
-        GUI.backgroundColor = _showThinkReasoning ? new Color(0.6f, 0.4f, 1f) : defaultBg;
-        string thinkLabel = _showThinkReasoning ? "▼ Razonamiento" : "▶ Razonamiento";
-        if (GUILayout.Button(thinkLabel, EditorStyles.miniButton, GUILayout.Width(110)))
-            _showThinkReasoning = !_showThinkReasoning;
-        GUI.backgroundColor = defaultBg;
-
-        EditorGUILayout.EndHorizontal();
-
-        // ── Think reasoning panel (collapsible) ──
-        if (_showThinkReasoning)
-        {
-            DrawThinkReasoningPanel();
-        }
-
-        _scrollChat = EditorGUILayout.BeginScrollView(_scrollChat,
-            GUILayout.MinHeight(80), GUILayout.MaxHeight(200));
-
-        GUIStyle chatStyle = new GUIStyle(EditorStyles.wordWrappedLabel)
-        {
-            fontSize = 11,
-            padding  = new RectOffset(4, 4, 1, 1)
-        };
-
-        foreach (var msg in _chatHistory)
-        {
-            if (msg.StartsWith("User:"))
-                chatStyle.normal.textColor = new Color(0.4f, 0.75f, 1f);
-            else if (msg.StartsWith("Agent:"))
-                chatStyle.normal.textColor = new Color(0.4f, 1f, 0.5f);
-            else
-                chatStyle.normal.textColor = new Color(1f, 0.9f, 0.4f);
-
-            GUILayout.Label(msg, chatStyle);
-        }
-
-        EditorGUILayout.EndScrollView();
-    }
-
-    /// <summary>
-    /// Draw the think reasoning panel showing the model's internal reasoning.
-    /// Only visible when toggled on. Models without think tags simply show nothing.
-    /// </summary>
-    private void DrawThinkReasoningPanel()
-    {
-        if (string.IsNullOrEmpty(_lastThinkContent))
-        {
-            EditorGUILayout.HelpBox(
-                "El modelo no generó razonamiento (<think>) en la última respuesta, " +
-                "o el modelo utilizado no soporta esta función.",
-                MessageType.Info);
-            return;
-        }
-
-        // Styled box for reasoning
-        GUIStyle thinkStyle = new GUIStyle(EditorStyles.wordWrappedLabel)
-        {
-            fontSize  = 10,
-            fontStyle = FontStyle.Italic,
-            padding   = new RectOffset(6, 6, 4, 4)
-        };
-        thinkStyle.normal.textColor = new Color(0.7f, 0.55f, 1f);
-
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        GUIStyle headerStyle = new GUIStyle(EditorStyles.miniLabel)
-        {
-            fontStyle = FontStyle.Bold
-        };
-        headerStyle.normal.textColor = new Color(0.8f, 0.6f, 1f);
-        GUILayout.Label("💡 Razonamiento del modelo:", headerStyle);
-        GUILayout.Label(_lastThinkContent, thinkStyle);
-        EditorGUILayout.EndVertical();
-    }
-
-    // ══════════════════════════════════════════════════════════
-    #endregion
-    #region GUI: Input Section
-    // ══════════════════════════════════════════════════════════
-
-    private void DrawInputSection()
-    {
-        // Thin separator
-        EditorGUILayout.Space(2);
-        Rect sep = EditorGUILayout.GetControlRect(false, 1);
-        EditorGUI.DrawRect(sep, new Color(0.3f, 0.3f, 0.3f));
-        EditorGUILayout.Space(2);
-
+        // ── Input field (with status hint) + Send button ──
         EditorGUILayout.BeginHorizontal();
 
+        string controlName = "MiniAgentInput";
+        GUI.SetNextControlName(controlName);
         _userInput = EditorGUILayout.TextArea(_userInput,
             GUILayout.Height(32), GUILayout.ExpandWidth(true));
 
-        EditorGUILayout.BeginVertical(GUILayout.Width(60));
-
-        GUI.enabled = _isModelLoaded && !_isGenerating && _mode != AgentMode.Delete;
-        if (GUILayout.Button("Enviar", GUILayout.Height(15)))
-            SendMessageToAgent();
-
-        GUI.enabled = _isModelLoaded && !_isGenerating;
-        if (GUILayout.Button("Reset", GUILayout.Height(15)))
+        // Draw status as placeholder hint when input is empty and unfocused
+        if (string.IsNullOrEmpty(_userInput) && GUI.GetNameOfFocusedControl() != controlName)
         {
-            ResetContext();
-            _chatHistory.Clear();
-            _chatHistory.Add("Sistema: Contexto reiniciado.");
-            _lastAIResponse = "";
-            _statusMessage = "Contexto reiniciado.";
-            Repaint();
+            Rect lastRect = GUILayoutUtility.GetLastRect();
+            var hintStyle = new GUIStyle(EditorStyles.label)
+            {
+                fontStyle = FontStyle.Italic,
+                fontSize  = 11,
+                padding   = new RectOffset(4, 4, 6, 0)
+            };
+            hintStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f, 0.7f);
+            GUI.Label(lastRect, _statusMessage, hintStyle);
         }
-            
+
+        GUI.enabled = _isModelLoaded && !_isGenerating && !_isLoadingModels;
+        if (GUILayout.Button("Enviar", GUILayout.Height(32), GUILayout.Width(55)))
+            SendMessageToAgent();
         GUI.enabled = true;
 
-        EditorGUILayout.EndVertical();
         EditorGUILayout.EndHorizontal();
+
+        // Loading indicator
+        if (_isLoadingModels)
+        {
+            EditorGUILayout.HelpBox(_statusMessage, MessageType.Info);
+        }
 
         // Send on Ctrl+Enter
         if (Event.current.type == EventType.KeyDown
             && Event.current.keyCode == KeyCode.Return
             && Event.current.control
-            && _isModelLoaded && !_isGenerating
-            && !string.IsNullOrEmpty(_userInput)
-            && _mode != AgentMode.Delete)
+            && _isModelLoaded && !_isGenerating && !_isLoadingModels
+            && !string.IsNullOrEmpty(_userInput))
         {
             SendMessageToAgent();
             Event.current.Use();
         }
     }
+
+    // ══════════════════════════════════════════════════════════
+    #endregion
 }
-#endregion

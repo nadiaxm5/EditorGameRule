@@ -1,39 +1,60 @@
 {
-    "GameName": "NewProject2101",
-    "ScreenResolution": [1920, 1080],
-    "CameraPosition": [0, 6, -7],
-    "CameraRotation": [30, 0, 0],
-    "SunPosition": [3.3899, 10.902, -5.8255],
-    "SunRotation": [22.704, 65.875, -175.012],
-    "SunColor": [195, 184, 255],
-    "SunAmbientColor": [170, 180, 200],
-    "BackgroundColor": [0, 0, 0],
-    "Gravity": [0, -9.81, 0],
-    "CustomVariables": [
-        {"name": "Score", "type": "float", "floatValue": 0}
-    ],
-    "Cast": [
+  "GameName": "NewProject2101",
+  "ScreenResolution": [
+    1920,
+    1080
+  ],
+  "CameraPosition": [0, 6, -7],
+  "CameraRotation": [30, 0, 0],
+  "SunPosition": [3.38989997, 10.9020004, -5.82550001],
+  "SunRotation": [22.7040005, 65.875, -175.011993],
+  "SunColor": [195, 184, 255],
+  "SunAmbientColor": [170, 180, 200],
+  "BackgroundColor": [0, 0, 0],
+  "Gravity": [0, -9.81000042, 0],
+  "Cast": [
+    {
+      "ActorName": "Actor1",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "OtroTag"
+    },
+    {
+      "ActorName": "Actor2",
+      "Active": true,
+      "PrefabName": "Player",
+      "Tag": "Untagged",
+      "Script": [
         {
-            "ActorName": "Actor1",
-            "Active": true,
-            "PrefabName": "Empty",
-            "Tag": "OtroTag"
+          "When": ["Collision(OtroTag)"],
+          "Do": ["Delete(0)"]
+        }
+      ]
+    },
+    {
+      "ActorName": "Ball",
+      "Active": true,
+      "PrefabName": "Ball",
+      "Rotation": [90, 0, 0],
+      "Scale": [2.5, 2.5, 2.5],
+      "Properties": ["jumpForce=400", "gravity=30"],
+      "Script": [
+        {
+          "When": ["Keyboard(Space,down)"],
+          "Do": ["Push(this.jumpForce,this.rx,this.ry,this.rz)", "Edit(#JumpCount,#JumpCount+1)"]
         },
         {
-            "ActorName": "Actor2",
-            "Active": true,
-            "PrefabName": "Player",
-            "Tag": "Untagged",
-            "Script": [
-                {
-                    "When": [
-                        "Collision(OtroTag)"
-                    ],
-                    "Do": [
-                        "Delete()"
-                    ]
-                }
-            ]
+          "When": ["Compare(#JumpCount>0)"],
+          "Do": ["MoveTo(10,this.x,this.y-1,this.z)"]
         }
-    ]
+      ]
+    }
+  ],
+  "CustomVariable": [
+    {
+      "name": "JumpCount",
+      "type": "float",
+      "floatValue": 0
+    }
+  ]
 }

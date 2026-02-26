@@ -34,6 +34,11 @@ namespace GameRuleEditor.Windows
         private Button actorsTabButton;
         private Button previewTabButton;
 
+        // Agent panel (embedded at bottom)
+        private bool agentPanelVisible = false;
+        private GameAgentMini agentInstance;
+        private IMGUIContainer agentIMGUIContainer;
+
         // Toolbar references
         private Label projectNameLabel;
 
@@ -202,6 +207,9 @@ namespace GameRuleEditor.Windows
             // Default to Scene tab
             ShowTab(EditorTab.Scene);
             UpdateToolbarUI();
+
+            // Agent panel at the bottom
+            CreateAgentPanel(root);
         }
 
         private void CreateToolbar(VisualElement root)
@@ -279,6 +287,56 @@ namespace GameRuleEditor.Windows
             button.style.borderBottomColor = Color.clear;
             button.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
             return button;
+        }
+
+        private void CreateAgentPanel(VisualElement parent)
+        {
+            // Container for the entire agent section
+            var agentSection = new VisualElement();
+            agentSection.name = "agent-section";
+            agentSection.style.borderTopWidth = 1;
+            agentSection.style.borderTopColor = new Color(0.15f, 0.15f, 0.15f);
+
+            // Toggle header bar
+            var headerBar = new VisualElement();
+            headerBar.style.flexDirection = FlexDirection.Row;
+            headerBar.style.height = 24;
+            headerBar.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f);
+            headerBar.style.alignItems = Align.Center;
+            headerBar.style.paddingLeft = 8;
+            headerBar.style.paddingRight = 8;
+
+            var toggleLabel = new Label("\u25B6 AI Agent");
+            toggleLabel.style.color = new Color(0.7f, 0.8f, 1f);
+            toggleLabel.style.fontSize = 11;
+            toggleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            toggleLabel.style.flexGrow = 1;
+            headerBar.Add(toggleLabel);
+
+            // IMGUI container for the agent GUI
+            agentIMGUIContainer = new IMGUIContainer(() =>
+            {
+                if (agentInstance != null)
+                    agentInstance.DrawAgentGUI();
+            });
+            agentIMGUIContainer.style.minHeight = 70;
+            agentIMGUIContainer.style.display = DisplayStyle.None;
+
+            headerBar.RegisterCallback<ClickEvent>(evt =>
+            {
+                agentPanelVisible = !agentPanelVisible;
+                agentIMGUIContainer.style.display = agentPanelVisible ? DisplayStyle.Flex : DisplayStyle.None;
+                toggleLabel.text = agentPanelVisible ? "\u25BC AI Agent" : "\u25B6 AI Agent";
+
+                if (agentPanelVisible && agentInstance == null)
+                {
+                    agentInstance = GameAgentMini.GetOrCreateInstance();
+                }
+            });
+
+            agentSection.Add(headerBar);
+            agentSection.Add(agentIMGUIContainer);
+            parent.Add(agentSection);
         }
 
         #endregion Main Editor Interface

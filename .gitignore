@@ -84,3 +84,4 @@ crashlytics-build.properties
 /Assets/Plugins/x86_64/libllama.dll
 /Assets/StreamingAssets/gamerule4.gbnf
 /Assets/StreamingAssets/gamerule_model750-q5_k_m.gguf
+Assets/StreamingAssets/qwen-2.5-0.5b-q4_0.gguf

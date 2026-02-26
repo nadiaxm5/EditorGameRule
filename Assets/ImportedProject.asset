@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: ImportedProject
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: NewProject2101
+  sceneData:
+    GameName: NewProject2101
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - 0
+    - 6
+    - -7
+    CameraRotation:
+    - 30
+    - 0
+    - 0
+    SunPosition:
+    - 3.3899
+    - 10.902
+    - -5.8255
+    SunRotation:
+    - 22.704
+    - 65.875
+    - -175.012
+    SunColor: c3b8ff
+    SunAmbientColor: aab4c8
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: Actor1
+      Active: 1
+      PrefabName: Empty
+      Tag: OtroTag
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+    - ActorName: Actor2
+      Active: 1
+      PrefabName: Player
+      Tag: Untagged
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - When:
+        - Collision(OtroTag)
+        Do:
+        - Delete()
+    CustomVariable: []
+  actors:
+  - ActorName: Actor1
+    Active: 1
+    PrefabName: Empty
+    Tag: OtroTag
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+  - ActorName: Actor2
+    Active: 1
+    PrefabName: Player
+    Tag: Untagged
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - When:
+      - Collision(OtroTag)
+      Do:
+      - Delete()
