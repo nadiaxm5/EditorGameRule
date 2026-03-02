@@ -22,12 +22,26 @@ namespace GameRuleEditor.Controllers
         public void Enable()
         {
             EditorApplication.update += OnEditorUpdate;
+            Undo.undoRedoPerformed += OnUndoRedoPerformed; // Escucha eventos de undo/redo para forzar refresh
         }
 
         // Disable update loop listener
         public void Disable()
         {
             EditorApplication.update -= OnEditorUpdate;
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed; // Deja de escuchar eventos de undo/redo
+        }
+
+        /// <summary>
+        /// Basicamente se llama cada vez que el usuario hace Ctrl+Z o Ctrl+Y, para asegurarnos de que la UI se actualice con los datos restaurados por Unity. Sin esto, la UI podría quedar desincronizada después de un undo/redo.
+        /// </summary>
+        private void OnUndoRedoPerformed() 
+        {
+            if (context == null) return;
+
+            context.isUndoRedoRefresh = true;
+            context.NotifyAll();
+            context.isUndoRedoRefresh = false;
         }
 
         // Check for scene changes every frame (efficiently)

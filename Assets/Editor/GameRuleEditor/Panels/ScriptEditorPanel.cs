@@ -118,12 +118,16 @@ namespace GameRuleEditor.Panels
                 return;
             }
 
-            var focused = this.focusController?.focusedElement as VisualElement;
-            if (focused != null && rulesContainer.Contains(focused))
+            // Se salta el focus para evitar que durante un undo/redo, si el usuario tiene el foco en un campo dentro de este panel, no se bloquee la actualización de la UI por el guard de foco.
+            if (!context.isUndoRedoRefresh)
             {
-                if (!(focused is Button))
+                var focused = this.focusController?.focusedElement as VisualElement;
+                if (focused != null && rulesContainer.Contains(focused))
                 {
-                    return;
+                    if (!(focused is Button))
+                    {
+                        return;
+                    }
                 }
             }
 

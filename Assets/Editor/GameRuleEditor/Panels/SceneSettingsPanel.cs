@@ -83,32 +83,35 @@ namespace GameRuleEditor.Panels
             var basicSection = CreateSection("Basic Settings");
             scrollView.Add(basicSection);
 
+            // VinculaciÃ³n nativa (El binding)
             gameNameField = CreateTextField(basicSection, "Game Name:");
+            // Secondary callback to keep projectName in sync (native binding handles GameName + undo)
             gameNameField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.GameName = evt.newValue;
+                if (context.currentProject != null)
                     context.currentProject.projectName = evt.newValue;
-                }, "Change Game Name");
             });
 
             screenResolutionField = CreateVector2Field(basicSection, "Screen Resolution:");
             screenResolutionField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.ScreenResolution = new float[] { evt.newValue.x, evt.newValue.y };
-                }, "Change Screen Resolution");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector2Field (Vector2) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Screen Resolution");
+                context.currentProject.sceneData.ScreenResolution = new float[] { evt.newValue.x, evt.newValue.y };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             backgroundColorField = CreateColorField(basicSection, "Background Color:");
             backgroundColorField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.BackgroundColor = ColorToBytes(evt.newValue);
-                }, "Change Background Color");
+                if (context.currentProject == null) return;
+                // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Background Color");
+                context.currentProject.sceneData.BackgroundColor = ColorToBytes(evt.newValue);
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             // Camera section
@@ -118,19 +121,23 @@ namespace GameRuleEditor.Panels
             cameraPosField = CreateVector3Field(cameraSection, "Position:");
             cameraPosField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.CameraPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Camera Position");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Camera Position");
+                context.currentProject.sceneData.CameraPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             cameraRotField = CreateVector3Field(cameraSection, "Rotation:");
             cameraRotField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.CameraRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Camera Rotation");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Camera Rotation");
+                context.currentProject.sceneData.CameraRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             // Lighting section
@@ -140,37 +147,45 @@ namespace GameRuleEditor.Panels
             sunPosField = CreateVector3Field(lightingSection, "Position:");
             sunPosField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.SunPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Sun Position");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Sun Position");
+                context.currentProject.sceneData.SunPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             sunRotField = CreateVector3Field(lightingSection, "Rotation:");
             sunRotField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.SunRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Sun Rotation");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Sun Rotation");
+                context.currentProject.sceneData.SunRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             sunColorField = CreateColorField(lightingSection, "Sun Color:");
             sunColorField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.SunColor = ColorToBytes(evt.newValue);
-                }, "Change Sun Color");
+                if (context.currentProject == null) return;
+                // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Sun Color");
+                context.currentProject.sceneData.SunColor = ColorToBytes(evt.newValue);
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             sunAmbientField = CreateColorField(lightingSection, "Ambient Color:");
             sunAmbientField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.SunAmbientColor = ColorToBytes(evt.newValue);
-                }, "Change Ambient Color");
+                if (context.currentProject == null) return;
+                // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Ambient Color");
+                context.currentProject.sceneData.SunAmbientColor = ColorToBytes(evt.newValue);
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             // Physics section
@@ -180,10 +195,12 @@ namespace GameRuleEditor.Panels
             gravityField = CreateVector3Field(physicsSection, "Gravity:");
             gravityField.RegisterValueChangedCallback(evt =>
             {
-                controller.UpdateSceneProperty(() =>
-                {
-                    context.currentProject.sceneData.Gravity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                }, "Change Gravity");
+                if (context.currentProject == null) return;
+                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                Undo.RecordObject(context.currentProject, "Change Gravity");
+                context.currentProject.sceneData.Gravity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             // Custom Variables section
@@ -374,12 +391,19 @@ namespace GameRuleEditor.Panels
 
         private void UpdateUI()
         {
-            if (context?.currentProject?.sceneData == null) { SetEnabled(false); return; }
+            if (context?.currentProject?.sceneData == null)
+            {
+                SetEnabled(false);
+                gameNameField.Unbind();
+                return;
+            }
             SetEnabled(true);
             var scene = context.currentProject.sceneData;
 
-            if (gameNameField.value != (scene.GameName ?? ""))
-                gameNameField.SetValueWithoutNotify(scene.GameName ?? "");
+            // --- Native Data Binding for direct 1:1 type field ---
+            // SerializedProperty binding gives automatic Undo/Redo support for GameName.
+            var so = new SerializedObject(context.currentProject);
+            gameNameField.BindProperty(so.FindProperty("sceneData.GameName"));
 
             if (scene.ScreenResolution != null && scene.ScreenResolution.Length >= 2)
             {
@@ -465,7 +489,10 @@ namespace GameRuleEditor.Panels
                     var nameField = new TextField { name = "VarName", value = customVar.name, style = { width = 120, marginRight = 5 } };
                     nameField.RegisterValueChangedCallback(evt =>
                     {
-                        controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].name = evt.newValue, "Change Var Name");
+                        Undo.RecordObject(context.currentProject, "Change Var Name");
+                        context.currentProject.sceneData.CustomVariables[index].name = evt.newValue;
+                        EditorUtility.SetDirty(context.currentProject);
+                        context.NotifyProjectChanged();
                     });
                     item.Add(nameField);
 
@@ -476,58 +503,90 @@ namespace GameRuleEditor.Panels
                     var typeDropdown = new PopupField<string>(variableTypes, variableTypes.IndexOf(matchType)) { name = "VarType", style = { width = 80, marginRight = 5 } };
                     typeDropdown.RegisterValueChangedCallback(evt =>
                     {
-                        controller.UpdateSceneProperty(() =>
-                        {
-                            var v = context.currentProject.sceneData.CustomVariables[index];
-                            v.type = evt.newValue.ToLower();
-                            v.intValue = 0; v.floatValue = 0f; v.boolValue = false;
-                            if (v.type == "vector2") v.arrayValue = new float[2];
-                            if (v.type == "vector3") v.arrayValue = new float[3];
-                        }, "Change Var Type");
+                        Undo.RecordObject(context.currentProject, "Change Var Type");
+                        var v = context.currentProject.sceneData.CustomVariables[index];
+                        v.type = evt.newValue.ToLower();
+                        v.intValue = 0; v.floatValue = 0f; v.boolValue = false;
+                        if (v.type == "vector2") v.arrayValue = new float[2];
+                        if (v.type == "vector3") v.arrayValue = new float[3];
+                        EditorUtility.SetDirty(context.currentProject);
+                        context.NotifyProjectChanged();
                     });
                     item.Add(typeDropdown);
 
-                    // Contenedor dinámico de valor
+                    // Contenedor dinï¿½mico de valor
                     var valueContainer = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, marginRight = 5 } };
 
                     switch (currentTypeStr)
                     {
                         case "int":
                             var intF = new IntegerField { name = "VarValue", value = customVar.intValue, style = { flexGrow = 1 } };
-                            intF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].intValue = evt.newValue, "Change Var Value"));
+                            intF.RegisterValueChangedCallback(evt =>
+                            {
+                                Undo.RecordObject(context.currentProject, "Change Var Value");
+                                context.currentProject.sceneData.CustomVariables[index].intValue = evt.newValue;
+                                EditorUtility.SetDirty(context.currentProject);
+                                context.NotifyProjectChanged();
+                            });
                             valueContainer.Add(intF);
                             break;
 
                         case "float":
                             var floatF = new FloatField { name = "VarValue", value = customVar.floatValue, style = { flexGrow = 1 } };
-                            floatF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].floatValue = evt.newValue, "Change Var Value"));
+                            floatF.RegisterValueChangedCallback(evt =>
+                            {
+                                Undo.RecordObject(context.currentProject, "Change Var Value");
+                                context.currentProject.sceneData.CustomVariables[index].floatValue = evt.newValue;
+                                EditorUtility.SetDirty(context.currentProject);
+                                context.NotifyProjectChanged();
+                            });
                             valueContainer.Add(floatF);
                             break;
 
                         case "bool":
                             var boolF = new Toggle { name = "VarValue", value = customVar.boolValue, style = { flexGrow = 1 } };
-                            boolF.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].boolValue = evt.newValue, "Change Var Value"));
+                            boolF.RegisterValueChangedCallback(evt =>
+                            {
+                                Undo.RecordObject(context.currentProject, "Change Var Value");
+                                context.currentProject.sceneData.CustomVariables[index].boolValue = evt.newValue;
+                                EditorUtility.SetDirty(context.currentProject);
+                                context.NotifyProjectChanged();
+                            });
                             valueContainer.Add(boolF);
                             break;
 
                         case "vector2":
                             Vector2 v2 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 2) ? new Vector2(customVar.arrayValue[0], customVar.arrayValue[1]) : Vector2.zero;
                             var v2F = new Vector2Field { name = "VarValue", value = v2, style = { flexGrow = 1 } };
-                            v2F.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y }, "Change Var Value"));
+                            v2F.RegisterValueChangedCallback(evt =>
+                            {
+                                // Manual Undo: Vector2Field (Vector2) -> float[] (type mismatch)
+                                Undo.RecordObject(context.currentProject, "Change Var Value");
+                                context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y };
+                                EditorUtility.SetDirty(context.currentProject);
+                                context.NotifyProjectChanged();
+                            });
                             valueContainer.Add(v2F);
                             break;
 
                         case "vector3":
                             Vector3 v3 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 3) ? new Vector3(customVar.arrayValue[0], customVar.arrayValue[1], customVar.arrayValue[2]) : Vector3.zero;
                             var v3F = new Vector3Field { name = "VarValue", value = v3, style = { flexGrow = 1 } };
-                            v3F.RegisterValueChangedCallback(evt => controller.UpdateSceneProperty(() => context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z }, "Change Var Value"));
+                            v3F.RegisterValueChangedCallback(evt =>
+                            {
+                                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
+                                Undo.RecordObject(context.currentProject, "Change Var Value");
+                                context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                                EditorUtility.SetDirty(context.currentProject);
+                                context.NotifyProjectChanged();
+                            });
                             valueContainer.Add(v3F);
                             break;
                     }
 
                     item.Add(valueContainer);
 
-                    // Botón para eliminar la variable
+                    // Botï¿½n para eliminar la variable
                     var removeBtn = new Button(() => controller.RemoveCustomVariable(index)) { text = "Remove" };
                     removeBtn.AddToClassList("button-danger");
                     removeBtn.style.width = 70;
@@ -538,7 +597,7 @@ namespace GameRuleEditor.Panels
             }
             else
             {
-                // Solo actualiza los valores de forma silenciosa para no interrumpir si el usuario está escribiendo
+                // Solo actualiza los valores de forma silenciosa para no interrumpir si el usuario estï¿½ escribiendo
                 for (int i = 0; i < variables.Count; i++)
                 {
                     var customVar = variables[i];

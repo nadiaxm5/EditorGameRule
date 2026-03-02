@@ -79,13 +79,8 @@ namespace GameRuleEditor.Panels
             var basicSection = CreateSection("Basic Properties");
             scrollView.Add(basicSection);
 
-            // Name
+            // Name (native binding - undo handled automatically via SerializedProperty)
             actorNameField = new TextField("Name:");
-            actorNameField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex >= 0)
-                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.ActorName = evt.newValue, "Renaming");
-            });
             basicSection.Add(actorNameField);
 
             // Prefab Picker
@@ -94,31 +89,24 @@ namespace GameRuleEditor.Panels
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
-                if (context.selectedActorIndex >= 0)
-                    controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                    {
-                        context.SelectedActor.PrefabName = evt.newValue == null ? "Empty" : evt.newValue.name;
-                    }, "Change Prefab");
+                if (context.selectedActorIndex < 0) return;
+
+                // Deshacer manual porque ObjectField no se enlaza directamente a un SerializedProperty (string), y necesitamos convertir GameObject -> prefab name (string).
+                Undo.RecordObject(context.currentProject, "Change Prefab");
+                context.SelectedActor.PrefabName = evt.newValue == null ? "Empty" : evt.newValue.name;
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(context.SelectedActor);
+                context.NotifyProjectChanged();
             });
             prefabRow.Add(prefabPicker);
             basicSection.Add(prefabRow);
 
-            // Tag
+            // Tag (native binding - undo handled automatically via SerializedProperty)
             tagField = new TextField("Tag:");
-            tagField.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex >= 0)
-                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.Tag = evt.newValue, "Change Tag");
-            });
             basicSection.Add(tagField);
 
-            // Active
+            // Active (native binding - undo handled automatically via SerializedProperty)
             activeToggle = new Toggle("Active:");
-            activeToggle.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex >= 0)
-                    controller.UpdateActorProperty(context.selectedActorIndex, () => context.SelectedActor.Active = evt.newValue, "Toggle Active");
-            });
             basicSection.Add(activeToggle);
 
             // Transform
@@ -164,23 +152,26 @@ namespace GameRuleEditor.Panels
             {
                 if (context.selectedActorIndex < 0) return;
 
-                // When changed, override value
-                controller.UpdateActorProperty(context.selectedActorIndex, () =>
-                {
-                    var vec = evt.newValue;
-                    float[] arr = new float[] { vec.x, vec.y, vec.z };
+                // Deshacer manual porque Vector3Field no se enlaza directamente a un SerializedProperty (float[]), y necesitamos convertir Vector3 -> float[].
+                Undo.RecordObject(context.currentProject, $"Change {propertyKey}");
 
-                    var actor = context.SelectedActor;
-                    switch (propertyKey)
-                    {
-                        case "Position": actor.Position = arr; break;
-                        case "Rotation": actor.Rotation = arr; break;
-                        case "Scale": actor.Scale = arr; break;
-                        case "Size": actor.Size = arr; break;
-                        case "Velocity": actor.Velocity = arr; break;
-                        case "AngularVelocity": actor.AngularVelocity = arr; break;
-                    }
-                }, $"Edit {propertyKey}");
+                var vec = evt.newValue;
+                float[] arr = new float[] { vec.x, vec.y, vec.z };
+
+                var actor = context.SelectedActor;
+                switch (propertyKey)
+                {
+                    case "Position": actor.Position = arr; break;
+                    case "Rotation": actor.Rotation = arr; break;
+                    case "Scale": actor.Scale = arr; break;
+                    case "Size": actor.Size = arr; break;
+                    case "Velocity": actor.Velocity = arr; break;
+                    case "AngularVelocity": actor.AngularVelocity = arr; break;
+                }
+
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(actor);
+                context.NotifyProjectChanged();
             });
             row.Add(field);
 
@@ -212,15 +203,29 @@ namespace GameRuleEditor.Panels
             {
                 noSelectionContainer.style.display = DisplayStyle.Flex;
                 mainContainer.style.display = DisplayStyle.None;
+                // Desvincular campos para evitar mostrar datos obsoletos si no hay selección
+                actorNameField.Unbind();
+                tagField.Unbind();
+                activeToggle.Unbind();
                 return;
             }
 
             noSelectionContainer.style.display = DisplayStyle.None;
             mainContainer.style.display = DisplayStyle.Flex;
 
-            if (actorNameField.value != (actor.ActorName ?? "")) actorNameField.SetValueWithoutNotify(actor.ActorName ?? "");
-            if (tagField.value != (actor.Tag ?? "")) tagField.SetValueWithoutNotify(actor.Tag ?? "");
-            activeToggle.SetValueWithoutNotify(actor.Active);
+            // --- Native Data Binding for direct 1:1 type fields ---
+            // Esto es lo del bindeo pero ha sido un poco curioso de implementar (lo ha hecho el agente) ya que he tenido que idear
+            // la arquitectura híbrido de las dos cosas (SerializedProperty + manual) para poder usar el sistema de undo automático 
+            // de Unity en la medida de lo posible, pero sin que el hecho de que algunos campos no sean directamente bindables (como 
+            // el prefab o los vectores) impida que podamos usarlo para los campos simples. La clave ha sido usar un SerializedObject 
+            // temporal para hacer el bind de los campos simples, y luego manejar manualmente los campos complejos con callbacks personalizados 
+            // donde hacemos el Undo.RecordObject y marcamos dirty manualmente. De esta forma conseguimos lo mejor de ambos mundos: bindeo directo 
+            // con undo automático para lo que se puede, y manejo manual con undo para lo que no se puede bindear directamente.
+            var so = new SerializedObject(context.currentProject);
+            var actorProp = so.FindProperty("actors").GetArrayElementAtIndex(context.selectedActorIndex);
+            actorNameField.BindProperty(actorProp.FindPropertyRelative("ActorName"));
+            tagField.BindProperty(actorProp.FindPropertyRelative("Tag"));
+            activeToggle.BindProperty(actorProp.FindPropertyRelative("Active"));
 
             // Prefab Loading
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));

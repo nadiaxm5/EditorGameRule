@@ -26,6 +26,12 @@ namespace GameRuleEditor.Core
         public event System.Action<int> OnScriptSelected;
 
         /// <summary>
+        /// Para evitar que durante un undo/redo, algunos paneles ignoren la actualización porque creen que no están enfocados o activos. Al establecer esta bandera, los paneles pueden saber que deben actualizarse incluso si normalmente no lo harían. Después de la actualización, se debe restablecer a false.
+        /// </summary>
+        [System.NonSerialized]
+        public bool isUndoRedoRefresh;
+
+        /// <summary>
         /// Gets the currently selected actor, or null if none selected
         /// </summary>
         public ActorJson SelectedActor
@@ -120,6 +126,17 @@ namespace GameRuleEditor.Core
         public void NotifyActorListChanged()
         {
             OnActorListChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Lo llama todo para forzar que toda la UI se actualice después de un undo/redo, asegurándonos de que todos los paneles vuelvan a leer el estado actual del proyecto y la selección. Sin esto, algunos paneles podrían quedar desincronizados con el estado real después de un undo/redo.
+        /// </summary>
+        public void NotifyAll()
+        {
+            OnActorListChanged?.Invoke();
+            OnProjectChanged?.Invoke();
+            OnActorSelected?.Invoke(selectedActorIndex);
+            OnScriptSelected?.Invoke(selectedScriptIndex);
         }
 
         /// <summary>
