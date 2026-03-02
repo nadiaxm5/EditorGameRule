@@ -8,6 +8,12 @@ TagManager:
   - ZomBunny
   - NuevoTag
   - OtroTag
+  - Enemy
+  - End
+  - Canvas
+  - Bullet
+  - Hellephant
+  - ZomBear
   layers:
   - Default
   - TransparentFX
