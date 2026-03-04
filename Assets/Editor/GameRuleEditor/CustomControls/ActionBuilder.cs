@@ -70,7 +70,7 @@ namespace GameRuleEditor.CustomControls
 
             actionsContainer = new VisualElement();
             Add(actionsContainer);
-
+/*
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
             previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
@@ -88,7 +88,7 @@ namespace GameRuleEditor.CustomControls
             previewLabel.style.whiteSpace = WhiteSpace.Normal;
             previewContainer.Add(previewLabel);
 
-            Add(previewContainer);
+            Add(previewContainer); */
         }
 
         private void AddAction(string actionString = null)
@@ -100,7 +100,7 @@ namespace GameRuleEditor.CustomControls
                 actionElement.SetFromSource(actionString);
             }
 
-            actionElement.OnChanged += UpdatePreview;
+            //actionElement.OnChanged += UpdatePreview;
             actionElement.OnRemove += () => RemoveAction(actionElement);
             actionElement.OnMoveUp += () => MoveActionUp(actionElement);
             actionElement.OnMoveDown += () => MoveActionDown(actionElement);
@@ -108,11 +108,12 @@ namespace GameRuleEditor.CustomControls
             actions.Add(actionElement);
             actionsContainer.Add(actionElement);
 
-            UpdatePreview();
+            //UpdatePreview();
         }
 
         private void RemoveAction(ActionElement element)
-        { actions.Remove(element); actionsContainer.Remove(element); UpdatePreview(); }
+        { actions.Remove(element); actionsContainer.Remove(element); //UpdatePreview();
+        }
 
         private void MoveActionUp(ActionElement element)
         {
@@ -120,7 +121,7 @@ namespace GameRuleEditor.CustomControls
             if (index <= 0) return;
             actions.RemoveAt(index); actions.Insert(index - 1, element);
             actionsContainer.Remove(element); actionsContainer.Insert(index - 1, element);
-            UpdatePreview();
+            //UpdatePreview();
         }
 
         private void MoveActionDown(ActionElement element)
@@ -129,7 +130,7 @@ namespace GameRuleEditor.CustomControls
             if (index < 0 || index >= actions.Count - 1) return;
             actions.RemoveAt(index); actions.Insert(index + 1, element);
             actionsContainer.Remove(element); actionsContainer.Insert(index + 1, element);
-            UpdatePreview();
+            //UpdatePreview();
         }
 
         private void UpdatePreview()
@@ -157,7 +158,7 @@ namespace GameRuleEditor.CustomControls
 
             if (actionStrings == null || actionStrings.Count == 0)
             {
-                UpdatePreview();
+                //UpdatePreview();
                 return;
             }
 

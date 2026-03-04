@@ -88,7 +88,7 @@ namespace GameRuleEditor.CustomControls
 
             conditionsContainer = new VisualElement();
             Add(conditionsContainer);
-
+/*
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
             previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
@@ -102,7 +102,7 @@ namespace GameRuleEditor.CustomControls
             previewLabel.style.color = new Color(0.8f, 0.9f, 1f);
             previewLabel.style.whiteSpace = WhiteSpace.Normal;
             previewContainer.Add(previewLabel);
-            Add(previewContainer);
+            Add(previewContainer); */
         }
 
         private void CreateHeaderButton(VisualElement container, string text, string className, System.Action onClick)
@@ -124,20 +124,20 @@ namespace GameRuleEditor.CustomControls
                 element.SetFromSource(sourceValue);
             }
 
-            element.OnChanged += UpdatePreview;
+            //element.OnChanged += UpdatePreview;
             element.OnRemove += () => RemoveElement(element);
 
             elements.Add(element);
             conditionsContainer.Add(element);
 
-            UpdatePreview();
+            //UpdatePreview();
         }
 
         private void RemoveElement(ConditionElement element)
         {
             elements.Remove(element);
             conditionsContainer.Remove(element);
-            UpdatePreview();
+            //UpdatePreview();
         }
 
         private void UpdatePreview()
@@ -167,7 +167,7 @@ namespace GameRuleEditor.CustomControls
             if (string.IsNullOrEmpty(fullConditionString))
             {
                 AddElement(null, "");
-                UpdatePreview();
+                //UpdatePreview();
                 return;
             }
 
@@ -177,7 +177,7 @@ namespace GameRuleEditor.CustomControls
                 if (token == "AND" || token == "OR" || token == "NOT") AddElement(token);
                 else AddElement(null, token);
             }
-            UpdatePreview();
+            //UpdatePreview();
         }
     }
 }
