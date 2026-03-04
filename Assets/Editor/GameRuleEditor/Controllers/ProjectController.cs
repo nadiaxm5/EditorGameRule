@@ -102,6 +102,35 @@ namespace GameRuleEditor.Controllers
 
         #endregion Project Operations
 
+        #region Scene Generation
+
+        /// <summary>
+        /// Generates the Unity scene from the current project data.
+        /// Exports a temporary JSON to Resources/Games and calls Loader.LoadJson.
+        /// </summary>
+        public void GenerateScene()
+        {
+            if (context.currentProject == null)
+            {
+                Debug.LogError("No project loaded to generate scene from.");
+                return;
+            }
+
+            string gamesFolder = Application.dataPath + "/Resources/Games";
+            if (!Directory.Exists(gamesFolder))
+                Directory.CreateDirectory(gamesFolder);
+
+            string fileName = context.currentProject.projectName + ".json";
+            string fullPath = gamesFolder + "/" + fileName;
+            context.currentProject.SaveToJsonFile(fullPath);
+            AssetDatabase.Refresh();
+
+            Loader.LoadJson(fileName);
+            Debug.Log($"Scene generated from project '{context.currentProject.projectName}'");
+        }
+
+        #endregion Scene Generation
+
         #region Scene Settings Operations
 
         /// <summary>

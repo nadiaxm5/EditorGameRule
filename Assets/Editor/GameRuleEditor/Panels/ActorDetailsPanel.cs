@@ -45,10 +45,18 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            context.OnActorSelected += _ => UpdateUI();
-            // Update UI when project data changes (including scene sync)
+            context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
+
+            // Cleanup when removed from visual tree
+            RegisterCallback<DetachFromPanelEvent>(evt =>
+            {
+                context.OnActorSelected -= OnActorSelected;
+                context.OnProjectChanged -= UpdateUI;
+            });
         }
+
+        private void OnActorSelected(int _) => UpdateUI();
 
         private void CreateUI()
         {

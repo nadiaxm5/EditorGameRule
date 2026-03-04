@@ -34,7 +34,7 @@ public static class Condition
         var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
         if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
 
-        tagCollisions[tag].RemoveWhere(obj => obj == null);
+        tagCollisions[tag].RemoveWhere(o => o == null);
 
         return tagCollisions[tag].Count > 0;
     }

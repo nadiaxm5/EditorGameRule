@@ -69,7 +69,14 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script: []
+      Script:
+      - When: []
+        Do:
+        - 
+      - When:
+        - 
+        Do:
+        - 
     - ActorName: Environment
       Active: 1
       PrefabName: Environment
@@ -94,8 +101,14 @@ MonoBehaviour:
       - 0
       - 0
       - 0
-      Rotation: []
-      Scale: []
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -200,14 +213,17 @@ MonoBehaviour:
       PrefabName: Hellephant
       Tag: Hellephant
       Position:
-      - 0
-      - 0
-      - 32
+      - -3.0381298
+      - 0.035427637
+      - -16.268959
       Rotation:
+      - -0
+      - 158.36176
       - 0
-      - -130
-      - 0
-      Scale: []
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -254,9 +270,18 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBear
       Tag: ZomBear
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 9.400304
+      - 0.08061561
+      - 9.104917
+      Rotation:
+      - -0
+      - 156.19412
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -303,9 +328,18 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBunny
       Tag: ZomBunny
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - -0.38638973
+      - 0.055752616
+      - -26.992296
+      Rotation:
+      - -0
+      - 178.69621
+      - -0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -455,9 +489,18 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBearDead
       Tag: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -472,10 +515,6 @@ MonoBehaviour:
         - Animate(Death)
         - PlaySound(ZomBearDeath)
         - PlayParticles(DeathParticles)
-      - When:
-        - Timer(1)
-        Do:
-        - Delete(this)
     - ActorName: ZomBunnyDead
       Active: 0
       PrefabName: ZomBunnyDead
@@ -505,12 +544,18 @@ MonoBehaviour:
       Active: 0
       PrefabName: Bullet
       Tag: Bullet
-      Position: []
-      Rotation: []
+      Position:
+      - 3.4745336
+      - 0.36617625
+      - 10.446494
+      Rotation:
+      - 0.06195584
+      - 4.9874244
+      - 0.00044973174
       Scale:
-      - 0.05
-      - 0.05
-      - 0.05
+      - 0.15
+      - 0.15
+      - 0.15
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -520,7 +565,7 @@ MonoBehaviour:
       Drag: 0
       Properties:
       - speed=50
-      - damage=5
+      - damage=500000
       Script:
       - When: []
         Do:
@@ -665,14 +710,30 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties: []
-    Script: []
+    Script:
+    - When: []
+      Do:
+      - 
+    - When:
+      - 
+      Do:
+      - 
   - ActorName: Environment
     Active: 1
     PrefabName: Environment
     Tag: Obstacle
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -690,8 +751,14 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-    Rotation: []
-    Scale: []
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -796,14 +863,17 @@ MonoBehaviour:
     PrefabName: Hellephant
     Tag: Hellephant
     Position:
-    - 0
-    - 0
-    - 32
+    - -3.0381298
+    - 0.035427637
+    - -16.268959
     Rotation:
+    - -0
+    - 158.36176
     - 0
-    - -130
-    - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -850,9 +920,18 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBear
     Tag: ZomBear
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 9.400304
+    - 0.08061561
+    - 9.104917
+    Rotation:
+    - -0
+    - 156.19412
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -899,9 +978,18 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBunny
     Tag: ZomBunny
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - -10.433114
+    - 0.013660904
+    - -0.12613936
+    Rotation:
+    - -0
+    - 141.91791
+    - -0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -954,9 +1042,12 @@ MonoBehaviour:
     - 32
     Rotation:
     - 0
-    - -130
+    - 230
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -980,9 +1071,12 @@ MonoBehaviour:
     - 15
     Rotation:
     - 0
-    - -120
+    - 240
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1008,7 +1102,10 @@ MonoBehaviour:
     - 0
     - 130
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1051,9 +1148,18 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBearDead
     Tag: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1068,10 +1174,6 @@ MonoBehaviour:
       - Animate(Death)
       - PlaySound(ZomBearDeath)
       - PlayParticles(DeathParticles)
-    - When:
-      - Timer(1)
-      Do:
-      - Delete(this)
   - ActorName: ZomBunnyDead
     Active: 0
     PrefabName: ZomBunnyDead
@@ -1101,12 +1203,18 @@ MonoBehaviour:
     Active: 0
     PrefabName: Bullet
     Tag: Bullet
-    Position: []
-    Rotation: []
+    Position:
+    - 3.4745336
+    - 0.36617625
+    - 10.446494
+    Rotation:
+    - 0.06195584
+    - 4.9874244
+    - 0.00044973174
     Scale:
-    - 0.05
-    - 0.05
-    - 0.05
+    - 0.15
+    - 0.15
+    - 0.15
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1116,7 +1224,7 @@ MonoBehaviour:
     Drag: 0
     Properties:
     - speed=50
-    - damage=5
+    - damage=500000
     Script:
     - When: []
       Do:
@@ -1186,9 +1294,18 @@ MonoBehaviour:
     Active: 1
     PrefabName: HUDCanvas
     Tag: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 395
+    - 408.5
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []

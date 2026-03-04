@@ -5,6 +5,17 @@ using UnityEngine;
 namespace GameRuleEditor.Core
 {
     /// <summary>
+    /// Possible states for the inspector panel
+    /// </summary>
+    public enum GRInspectorMode
+    {
+        None,
+        SceneProps,
+        ActorProps,
+        ActorRules
+    }
+
+    /// <summary>
     /// ScriptableObject that maintains the global state of the GameRule Editor.
     /// This allows different panels to communicate and stay synchronized.
     /// </summary>
@@ -18,12 +29,30 @@ namespace GameRuleEditor.Core
         public int selectedActorIndex = -1;
         public int selectedScriptIndex = -1;
 
+        [Header("Inspector State")]
+        [SerializeField]
+        private GRInspectorMode _activeInspectorMode = GRInspectorMode.None;
+
+        public GRInspectorMode activeInspectorMode
+        {
+            get => _activeInspectorMode;
+            set
+            {
+                if (_activeInspectorMode != value)
+                {
+                    _activeInspectorMode = value;
+                    OnInspectorModeChanged?.Invoke(_activeInspectorMode);
+                }
+            }
+        }
+
         // Events for UI synchronization
         public event System.Action OnProjectLoaded;
         public event System.Action OnProjectChanged;
         public event System.Action<int> OnActorSelected;
         public event System.Action OnActorListChanged;
         public event System.Action<int> OnScriptSelected;
+        public event System.Action<GRInspectorMode> OnInspectorModeChanged;
 
         /// <summary>
         /// Para evitar que durante un undo/redo, algunos paneles ignoren la actualización porque creen que no están enfocados o activos. Al establecer esta bandera, los paneles pueden saber que deben actualizarse incluso si normalmente no lo harían. Después de la actualización, se debe restablecer a false.
@@ -137,6 +166,47 @@ namespace GameRuleEditor.Core
             OnProjectChanged?.Invoke();
             OnActorSelected?.Invoke(selectedActorIndex);
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnInspectorModeChanged?.Invoke(_activeInspectorMode);
+        }
+
+        /// <summary>
+        /// Sets the inspector to show scene properties (toggle: if already open, close it)
+        /// </summary>
+        public void ToggleScenePropsInspector()
+        {
+            if (_activeInspectorMode == GRInspectorMode.SceneProps)
+                activeInspectorMode = GRInspectorMode.None;
+            else
+            {
+                selectedActorIndex = -1;
+                activeInspectorMode = GRInspectorMode.SceneProps;
+            }
+        }
+
+        /// <summary>
+        /// Opens the inspector in actor properties mode for the given actor
+        /// </summary>
+        public void OpenActorPropsInspector(int actorIndex)
+        {
+            SelectActor(actorIndex);
+            activeInspectorMode = GRInspectorMode.ActorProps;
+        }
+
+        /// <summary>
+        /// Opens the inspector in actor rules mode for the given actor
+        /// </summary>
+        public void OpenActorRulesInspector(int actorIndex)
+        {
+            SelectActor(actorIndex);
+            activeInspectorMode = GRInspectorMode.ActorRules;
+        }
+
+        /// <summary>
+        /// Closes the inspector panel
+        /// </summary>
+        public void CloseInspector()
+        {
+            activeInspectorMode = GRInspectorMode.None;
         }
 
         /// <summary>

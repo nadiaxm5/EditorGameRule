@@ -10,13 +10,10 @@ public class ZomBearDead : MonoBehaviour {
             Action.PlaySound("ZomBearDeath",gameObject);
             Action.PlayParticles("DeathParticles",gameObject);
         }
-        if(Condition.Timer("1",gameObject)){
-            Action.Delete(gameObject);
-        }
     }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
-        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Animate(Death);PlaySound(ZomBearDeath);PlayParticles(DeathParticles);Timer(1);Delete(this)");
+        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Animate(Death);PlaySound(ZomBearDeath);PlayParticles(DeathParticles)");
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
     }

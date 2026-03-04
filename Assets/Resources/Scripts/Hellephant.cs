@@ -63,8 +63,9 @@ public class Hellephant : MonoBehaviour {
         TagCollisions["ZomBunny"] = new HashSet<GameObject>();
         TagCollisions["NuevoTag"] = new HashSet<GameObject>();
         TagCollisions["OtroTag"] = new HashSet<GameObject>();
+        TagCollisions["Canvas"] = new HashSet<GameObject>();
+        TagCollisions["Bullet"] = new HashSet<GameObject>();
         TagCollisions["Hellephant"] = new HashSet<GameObject>();
         TagCollisions["ZomBear"] = new HashSet<GameObject>();
-        TagCollisions["Bullet"] = new HashSet<GameObject>();
     }
 }

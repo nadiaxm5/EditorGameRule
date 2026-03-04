@@ -64,6 +64,13 @@ namespace GameRuleEditor.Panels
             // Subscribe to events
             context.OnProjectLoaded += UpdateUI;
             context.OnProjectChanged += UpdateUI;
+
+            // Cleanup when removed from visual tree
+            RegisterCallback<DetachFromPanelEvent>(evt =>
+            {
+                context.OnProjectLoaded -= UpdateUI;
+                context.OnProjectChanged -= UpdateUI;
+            });
         }
 
         private void CreateUI()

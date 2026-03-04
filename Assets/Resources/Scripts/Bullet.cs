@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class Bullet : MonoBehaviour {
     public bool Active = false;
     public float speed=50f;
-    public float damage=5f;
+    public float damage=500000f;
     public Dictionary<string, float> propertyList = new Dictionary<string, float>();
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void FixedUpdate(){
@@ -31,7 +31,7 @@ public class Bullet : MonoBehaviour {
             TagCollisions[other.tag].Remove(other.gameObject);
     }
     void Awake() {
-        propertyList = Utils.CreateProperties("speed=50;damage=5");
+        propertyList = Utils.CreateProperties("speed=50;damage=500000");
         TagCollisions["Untagged"] = new HashSet<GameObject>();
         TagCollisions["Respawn"] = new HashSet<GameObject>();
         TagCollisions["Finish"] = new HashSet<GameObject>();
@@ -43,8 +43,9 @@ public class Bullet : MonoBehaviour {
         TagCollisions["ZomBunny"] = new HashSet<GameObject>();
         TagCollisions["NuevoTag"] = new HashSet<GameObject>();
         TagCollisions["OtroTag"] = new HashSet<GameObject>();
+        TagCollisions["Canvas"] = new HashSet<GameObject>();
+        TagCollisions["Bullet"] = new HashSet<GameObject>();
         TagCollisions["Hellephant"] = new HashSet<GameObject>();
         TagCollisions["ZomBear"] = new HashSet<GameObject>();
-        TagCollisions["Bullet"] = new HashSet<GameObject>();
     }
 }

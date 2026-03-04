@@ -358,6 +358,17 @@ public static class Utils
                     properties.AddRange(propertyList.Keys);
                 }
 
+                // Also discover public float fields via reflection (handles inactive objects
+                // where Awake never ran and propertyList is still empty)
+                if (script != null)
+                {
+                    foreach (var field in script.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                    {
+                        if (field.FieldType == typeof(float) && !properties.Contains(field.Name))
+                            properties.Add(field.Name);
+                    }
+                }
+
                 if (obj.GetComponent<UnityEngine.UI.Slider>() != null)
                     properties.Add("sliderValue");
 

@@ -13,6 +13,26 @@ public static class Loader
         string jsonPath = Application.dataPath + "/Resources/Games/" + fileName;
         string json = File.ReadAllText(jsonPath);
         SceneJson scene = JsonUtility.FromJson<SceneJson>(json);
+
+        // Sanitize: the JSON export strips empty arrays, so When/Do can be null after re-import
+        if (scene.Cast != null)
+        {
+            foreach (var actor in scene.Cast)
+            {
+                if (actor.Script == null) actor.Script = new List<SentenceJson>();
+                if (actor.Properties == null) actor.Properties = new List<string>();
+                foreach (var sentence in actor.Script)
+                {
+                    if (sentence.When == null) sentence.When = new List<string>();
+                    if (sentence.Do == null) sentence.Do = new List<string>();
+                }
+            }
+        }
+        else
+        {
+            scene.Cast = new List<ActorJson>();
+        }
+
         scene.Cast.Reverse();
         var newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
         newScene.name = scene.GameName;
@@ -84,7 +104,7 @@ public static class Loader
 
             obj.name = actor.ActorName;
 
-            if (actor.Tag != null) obj.tag = actor.Tag;
+            if (!string.IsNullOrEmpty(actor.Tag)) obj.tag = actor.Tag;
             if (actor.Position != null) obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
             if (actor.Rotation != null) obj.transform.eulerAngles = new Vector3(actor.Rotation[0], actor.Rotation[1], actor.Rotation[2]);
             if (actor.Scale != null) obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
@@ -121,6 +141,9 @@ public static class Loader
                     obj.transform.localScale = newScale;
                 }
             }
+
+            // Apply active state (must be last — deactivating hides components)
+            obj.SetActive(actor.Active);
         }
         AssetDatabase.Refresh();
     }
@@ -136,9 +159,10 @@ public static class Loader
 
         // Save a flag indicating we need to attach scripts after compilation finishes
         EditorPrefs.SetBool("GameRule_PendingScriptAttach", true);
+        EditorPrefs.SetInt("GameRule_ScriptAttachRetries", 0);
 
-        // Triggers compilation (Asynchronous)
-        AssetDatabase.Refresh();
+        // Force synchronous import so scripts compile before Play mode domain reload
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
     }
 
     // Automatically called by Unity when C# compilation finishes
@@ -146,24 +170,77 @@ public static class Loader
     private static void OnScriptsReloaded()
     {
         // Check if this script compilation was triggered by the Generate Scene button
-        if (EditorPrefs.GetBool("GameRule_PendingScriptAttach", false))
-        {
-            // Clear the flag so it doesn't run on normal manual recompiles
-            EditorPrefs.DeleteKey("GameRule_PendingScriptAttach");
+        if (!EditorPrefs.GetBool("GameRule_PendingScriptAttach", false)) return;
 
-            var scripts = Resources.LoadAll<MonoScript>("Scripts");
-            foreach (var script in scripts)
+        int retries = EditorPrefs.GetInt("GameRule_ScriptAttachRetries", 0);
+
+        var scripts = Resources.LoadAll<MonoScript>("Scripts");
+        int attachedCount = 0;
+        int pendingCount = 0;
+
+        foreach (var script in scripts)
+        {
+            System.Type scriptType = script.GetClass();
+            if (scriptType == null)
             {
-                GameObject obj = GameObject.Find(script.name);
-                if (obj != null)
-                {
-                    System.Type scriptType = script.GetClass();
-                    if (scriptType != null && obj.GetComponent(scriptType) == null)
-                    {
-                        obj.AddComponent(scriptType);
-                    }
-                }
+                // Script exists but hasn't been compiled yet — need another reload
+                pendingCount++;
+                continue;
+            }
+
+            GameObject obj = FindGameObjectByName(script.name);
+            if (obj != null && obj.GetComponent(scriptType) == null)
+            {
+                obj.AddComponent(scriptType);
+                attachedCount++;
             }
         }
+
+        // Only clear the flag once all scripts resolved or we've retried enough
+        if (pendingCount == 0 || retries >= 3)
+        {
+            EditorPrefs.DeleteKey("GameRule_PendingScriptAttach");
+            EditorPrefs.DeleteKey("GameRule_ScriptAttachRetries");
+
+            // If there's a pending auto-play request, enter Play mode now
+            if (EditorPrefs.GetBool("GameRule_AutoPlayAfterGenerate", false))
+            {
+                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+                EditorApplication.delayCall += () =>
+                {
+                    EditorApplication.isPlaying = true;
+                };
+            }
+        }
+        else
+        {
+            // Keep the flag — scripts haven't compiled yet, wait for next domain reload
+            EditorPrefs.SetInt("GameRule_ScriptAttachRetries", retries + 1);
+        }
+    }
+
+    /// <summary>
+    /// Finds a root GameObject by name, including inactive objects.
+    /// GameObject.Find() only returns active objects, so we search all root objects manually.
+    /// </summary>
+    private static GameObject FindGameObjectByName(string name)
+    {
+        // First try the fast path (active objects)
+        GameObject obj = GameObject.Find(name);
+        if (obj != null) return obj;
+
+        // Search all root objects in loaded scenes (includes inactive)
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+            if (!scene.isLoaded) continue;
+
+            foreach (var rootObj in scene.GetRootGameObjects())
+            {
+                if (rootObj.name == name)
+                    return rootObj;
+            }
+        }
+        return null;
     }
 }

@@ -34,6 +34,13 @@ namespace GameRuleEditor.Panels
             // Subscribe to events
             context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
+
+            // Cleanup when removed from visual tree
+            RegisterCallback<DetachFromPanelEvent>(evt =>
+            {
+                context.OnActorSelected -= OnActorSelected;
+                context.OnProjectChanged -= UpdateUI;
+            });
         }
 
         private void CreateUI()
@@ -291,12 +298,6 @@ namespace GameRuleEditor.Panels
                 return;
 
             controller.AddRule(context.selectedActorIndex, hasCondition);
-        }
-
-        ~ScriptEditorPanel()
-        {
-            context.OnActorSelected -= OnActorSelected;
-            context.OnProjectChanged -= UpdateUI;
         }
     }
 }

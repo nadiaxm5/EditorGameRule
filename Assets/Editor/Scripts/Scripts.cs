@@ -51,7 +51,14 @@ public static class Scripts
 
             foreach (SentenceJson s in actor.Script)
             {
-                bool isUpdate = s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
+                // Filter out empty entries
+                if (s.When != null) s.When = s.When.Where(w => !string.IsNullOrWhiteSpace(w)).ToList();
+                if (s.Do != null) s.Do = s.Do.Where(d => !string.IsNullOrWhiteSpace(d)).ToList();
+
+                // Skip sentences with no actions
+                if (s.Do == null || !s.Do.Any()) continue;
+
+                bool isUpdate = s.When != null && s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
                 if (isUpdate) updateSentences.Add(s);
                 else fixedSentences.Add(s);
             }
@@ -62,7 +69,7 @@ public static class Scripts
                 outfile.WriteLine("    void FixedUpdate(){");
                 foreach (SentenceJson s in fixedSentences)
                 {
-                    if (s.When.Any())
+                    if (s.When != null && s.When.Any())
                     {
                         outfile.Write("        if(");
                         string conditionExpression = ProcessCondition(s.When[0]);
@@ -97,7 +104,7 @@ public static class Scripts
                 outfile.WriteLine("    void Update(){");
                 foreach (SentenceJson s in updateSentences)
                 {
-                    if (s.When.Any())
+                    if (s.When != null && s.When.Any())
                     {
                         outfile.Write("        if(");
                         string conditionExpression = ProcessCondition(s.When[0]);
@@ -185,6 +192,16 @@ public static class Scripts
         // Traslate a game.json comand into a valid unity command
         int init = element.IndexOf("(");
         int end = element.LastIndexOf(")");
+
+        // Handle elements without parentheses (e.g. bare command names)
+        if (init < 0 || end < 0 || end <= init)
+        {
+            string bare = element.Trim();
+            if (bare == "Delete") return "Delete(gameObject)";
+            if (bare == "QuitGame" || bare == "LoadScene") return bare + "()";
+            return bare + "()";
+        }
+
         string name = element.Substring(0, init);
         string command = name;
         string rest = element.Substring(init + 1, end - init - 1);
@@ -403,8 +420,13 @@ public static class Scripts
             outfile.WriteLine("    void FixedUpdate()");
             outfile.WriteLine("    {");
             outfile.WriteLine("        UpdateMousePosition();");
-            outfile.WriteLine("        ApplyCameraSettings();");
             outfile.WriteLine("        ApplySunSettings();");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    void LateUpdate()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        ApplyCameraSettings();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 

@@ -61,8 +61,12 @@ public class GameManager : MonoBehaviour
     void FixedUpdate()
     {
         UpdateMousePosition();
-        ApplyCameraSettings();
         ApplySunSettings();
+    }
+
+    void LateUpdate()
+    {
+        ApplyCameraSettings();
     }
 
     private void UpdateRuntimeVariables()

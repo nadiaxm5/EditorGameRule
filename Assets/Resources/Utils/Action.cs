@@ -40,6 +40,14 @@ public static class Action
         newObj.name = prefab.name;
         newObj.SetActive(true);
 
+        // Copy the tag from the original scene instance (including inactive objects set up by Loader)
+        string actorTag = FindTagForActor(prefabName);
+        if (!string.IsNullOrEmpty(actorTag))
+        {
+            try { newObj.tag = actorTag; }
+            catch (UnityException) { /* Tag not registered */ }
+        }
+
         newObj.transform.position = spawnerObj.transform.TransformPoint(offsetPos);
         newObj.transform.rotation = spawnerObj.transform.rotation * Quaternion.Euler(offsetRot);
         newObj.transform.localScale = prefab.transform.localScale;
@@ -313,5 +321,25 @@ public static class Action
         Utils.SetProperty(obj.name + ".rx", obj.transform.eulerAngles.x, obj);
         Utils.SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
         Utils.SetProperty(obj.name + ".rz", obj.transform.eulerAngles.z, obj);
+    }
+
+    /// <summary>
+    /// Finds the tag assigned to an actor by searching all root GameObjects (including inactive)
+    /// for one with the matching name. The tag was set by Loader.LoadPrefabs from the actor's Tag field.
+    /// </summary>
+    private static string FindTagForActor(string actorName)
+    {
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+            if (!scene.isLoaded) continue;
+
+            foreach (var rootObj in scene.GetRootGameObjects())
+            {
+                if (rootObj.name == actorName && !rootObj.CompareTag("Untagged"))
+                    return rootObj.tag;
+            }
+        }
+        return null;
     }
 }
