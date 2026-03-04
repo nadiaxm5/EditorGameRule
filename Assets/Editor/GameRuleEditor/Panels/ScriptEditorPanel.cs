@@ -249,7 +249,24 @@ namespace GameRuleEditor.Panels
 
                     controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex, conditions);
                 };
+                conditionBuilder.OnRemoveCondition += () =>
+                {
+                    controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
+                };
                 container.Add(conditionBuilder);
+            }
+            else
+            {
+                // Add Condition button for unconditional rules
+                var addConditionBtn = new Button(() =>
+                {
+                    controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
+                });
+                addConditionBtn.text = "+ Add Condition";
+                addConditionBtn.AddToClassList("button-primary");
+                addConditionBtn.style.marginBottom = 10;
+                addConditionBtn.style.alignSelf = Align.FlexStart;
+                container.Add(addConditionBtn);
             }
 
             // Action builder

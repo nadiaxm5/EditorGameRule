@@ -239,6 +239,21 @@ namespace GameRuleEditor.Windows
             flexSpace.style.flexGrow = 1;
             toolbar.Add(flexSpace);
 
+            // Undo / Redo buttons
+            var undoBtn = new ToolbarButton(() => Undo.PerformUndo()) { text = "\u21A9" };
+            undoBtn.tooltip = "Undo (Ctrl+Z)";
+            undoBtn.style.fontSize = 16;
+            undoBtn.style.unityTextAlign = TextAnchor.MiddleCenter;
+            undoBtn.style.width = 30;
+            toolbar.Add(undoBtn);
+
+            var redoBtn = new ToolbarButton(() => Undo.PerformRedo()) { text = "\u21AA" };
+            redoBtn.tooltip = "Redo (Ctrl+Shift+Z)";
+            redoBtn.style.fontSize = 16;
+            redoBtn.style.unityTextAlign = TextAnchor.MiddleCenter;
+            redoBtn.style.width = 30;
+            toolbar.Add(redoBtn);
+
             saveButton = new ToolbarButton(OnSaveProject) { text = "Save" };
             toolbar.Add(saveButton);
 

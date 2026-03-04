@@ -17,6 +17,7 @@ namespace GameRuleEditor.CustomControls
         private EditorContext context;
 
         public System.Action<string> OnConditionChanged;
+        public System.Action OnRemoveCondition;
 
         public ConditionBuilder(EditorContext editorContext)
         {
@@ -50,10 +51,24 @@ namespace GameRuleEditor.CustomControls
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 10;
 
+            var labelRow = new VisualElement();
+            labelRow.style.flexDirection = FlexDirection.Row;
+            labelRow.style.alignItems = Align.Center;
+
             var label = new Label("WHEN (Conditions)");
             label.style.fontSize = 12;
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(label);
+            labelRow.Add(label);
+
+            var removeConditionBtn = new Button(() => OnRemoveCondition?.Invoke()) { text = "X" };
+            removeConditionBtn.AddToClassList("button-danger");
+            removeConditionBtn.style.width = 20;
+            removeConditionBtn.style.height = 20;
+            removeConditionBtn.style.marginLeft = 8;
+            removeConditionBtn.style.fontSize = 10;
+            labelRow.Add(removeConditionBtn);
+
+            header.Add(labelRow);
 
             var btnContainer = new VisualElement();
             btnContainer.style.flexDirection = FlexDirection.Row;

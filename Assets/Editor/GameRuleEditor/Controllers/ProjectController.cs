@@ -628,6 +628,58 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
+        /// Removes the condition from a rule, converting it to unconditional
+        /// </summary>
+        public void RemoveRuleCondition(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Remove Rule Condition");
+            actor.Script[ruleIndex].When = new List<string>();
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Adds a condition to an unconditional rule, converting it to conditional
+        /// </summary>
+        public void AddRuleCondition(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Rule Condition");
+            actor.Script[ruleIndex].When = new List<string> { "" };
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        /// <summary>
         /// Updates a rule's condition (When)
         /// </summary>
         public void UpdateRuleCondition(int actorIndex, int ruleIndex, List<string> conditions)
