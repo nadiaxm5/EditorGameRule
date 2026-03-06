@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
-  m_Name: ImportedSurvivalShooter
+  m_Name: SURVIVAL_SHOOTER 1
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
   projectName: SURVIVAL_SHOOTER
   sceneData:
@@ -54,7 +54,7 @@ MonoBehaviour:
       - 0.6
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -86,7 +86,7 @@ MonoBehaviour:
       - 0
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -111,7 +111,7 @@ MonoBehaviour:
       - 0
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -226,7 +226,7 @@ MonoBehaviour:
       - 0.035427637
       - -16.268959
       Rotation:
-      - -0
+      - 0
       - 158.36176
       - 0
       Scale:
@@ -284,7 +284,7 @@ MonoBehaviour:
       - 0.08061561
       - 9.104917
       Rotation:
-      - -0
+      - 0
       - 156.19412
       - 0
       Scale:
@@ -342,9 +342,9 @@ MonoBehaviour:
       - 0.013660904
       - -0.12613936
       Rotation:
-      - -0
+      - 0
       - 141.91791
-      - -0
+      - 0
       Scale:
       - 1
       - 1
@@ -512,7 +512,7 @@ MonoBehaviour:
       - 0
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -658,7 +658,7 @@ MonoBehaviour:
       - 408.5
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -709,9 +709,7 @@ MonoBehaviour:
       intValue: 0
       floatValue: 0
       boolValue: 0
-      arrayValue:
-      - 0
-      - 0
+      arrayValue: []
   actors:
   - ActorName: LightingReflection
     Active: 1
@@ -722,7 +720,7 @@ MonoBehaviour:
     - 0.6
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -754,7 +752,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -769,11 +767,7 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties: []
-    Script:
-    - When:
-      - 
-      Do:
-      - 
+    Script: []
   - ActorName: Player
     Active: 1
     PrefabName: Player
@@ -783,7 +777,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -898,7 +892,7 @@ MonoBehaviour:
     - 0.035427637
     - -16.268959
     Rotation:
-    - -0
+    - 0
     - 158.36176
     - 0
     Scale:
@@ -956,7 +950,7 @@ MonoBehaviour:
     - 0.08061561
     - 9.104917
     Rotation:
-    - -0
+    - 0
     - 156.19412
     - 0
     Scale:
@@ -1014,9 +1008,9 @@ MonoBehaviour:
     - 0.013660904
     - -0.12613936
     Rotation:
-    - -0
+    - 0
     - 141.91791
-    - -0
+    - 0
     Scale:
     - 1
     - 1
@@ -1184,7 +1178,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -1330,7 +1324,7 @@ MonoBehaviour:
     - 408.5
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:

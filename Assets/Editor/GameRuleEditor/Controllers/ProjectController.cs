@@ -39,6 +39,31 @@ namespace GameRuleEditor.Controllers
         {
             if (context == null) return;
 
+            // After undo/redo, the project data may have changed (e.g. actor removed),
+            // but selectedActorIndex/selectedScriptIndex on EditorContext are NOT part of
+            // the undo record. Clamp them to valid ranges to avoid null references.
+            if (context.currentProject != null)
+            {
+                int actorCount = context.currentProject.actors.Count;
+                if (context.selectedActorIndex >= actorCount)
+                {
+                    context.selectedActorIndex = actorCount - 1;
+                    context.selectedScriptIndex = -1;
+                }
+
+                if (context.selectedActorIndex >= 0)
+                {
+                    var actor = context.currentProject.actors[context.selectedActorIndex];
+                    int scriptCount = actor.Script?.Count ?? 0;
+                    if (context.selectedScriptIndex >= scriptCount)
+                        context.selectedScriptIndex = scriptCount - 1;
+                }
+                else
+                {
+                    context.selectedScriptIndex = -1;
+                }
+            }
+
             context.isUndoRedoRefresh = true;
             context.NotifyAll();
             context.isUndoRedoRefresh = false;
@@ -48,7 +73,9 @@ namespace GameRuleEditor.Controllers
         private void OnEditorUpdate()
         {
             if (context.currentProject == null || context.selectedActorIndex < 0) return;
-            SyncSceneToData(context.SelectedActor);
+            var actor = context.SelectedActor;
+            if (actor == null) return;
+            SyncSceneToData(actor);
         }
 
         #region Project Operations
@@ -89,15 +116,26 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Imports a JSON file and loads it as a project
         /// </summary>
-        public void ImportJsonAsProject(string jsonPath, string projectSavePath)
+        public void ImportJsonAsProject(string jsonPath)
         {
             var project = GameRuleEditor.Core.GameRuleProject.ImportFromJson(jsonPath);
-            if (project != null)
-            {
-                AssetDatabase.CreateAsset(project, projectSavePath);
-                AssetDatabase.SaveAssets();
-                LoadProject(project);
-            }
+            if (project == null) return;
+
+            string safeName = SanitizeFileName(project.projectName);
+            string savePath = $"Assets/{safeName}.asset";
+            savePath = AssetDatabase.GenerateUniqueAssetPath(savePath);
+
+            AssetDatabase.CreateAsset(project, savePath);
+            AssetDatabase.SaveAssets();
+            LoadProject(project);
+        }
+
+        private static string SanitizeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "ImportedProject";
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+                name = name.Replace(c, '_');
+            return name;
         }
 
         #endregion Project Operations
@@ -423,6 +461,7 @@ namespace GameRuleEditor.Controllers
         // Push data from JSON to GameObject
         public void SyncDataToScene(ActorJson actor)
         {
+            if (actor == null) return;
             GameObject obj = GameObject.Find(actor.ActorName);
             if (obj == null) return;
 
@@ -439,6 +478,7 @@ namespace GameRuleEditor.Controllers
         // Pull data from GameObject to JSON if changed
         public bool SyncSceneToData(ActorJson actor)
         {
+            if (actor == null) return false;
             GameObject obj = GameObject.Find(actor.ActorName);
             if (obj == null) return false;
 

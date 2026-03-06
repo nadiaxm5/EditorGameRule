@@ -513,11 +513,7 @@ namespace GameRuleEditor.Windows
                 Application.dataPath + "/Resources/Games", "json");
             if (string.IsNullOrEmpty(jsonPath)) return;
 
-            string savePath = EditorUtility.SaveFilePanelInProject(
-                "Save Imported Project", "ImportedProject", "asset", "Choose location");
-            if (string.IsNullOrEmpty(savePath)) return;
-
-            controller.ImportJsonAsProject(jsonPath, savePath);
+            controller.ImportJsonAsProject(jsonPath);
             Rebuild();
         }
 
