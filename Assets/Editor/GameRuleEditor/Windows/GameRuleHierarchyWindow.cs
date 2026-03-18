@@ -376,10 +376,19 @@ namespace GameRuleEditor.Windows
             nameLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary #e5e7eb
             item.Add(nameLabel);
 
-            // 3-dot menu button (visible on hover via USS)
+            // 3-dot menu button (permanently visible)
             var menuBtn = new Button(() => ShowActorContextMenu(index));
             menuBtn.text = "\u22EE"; // ⋮
             menuBtn.AddToClassList("actor-menu-btn");
+            menuBtn.style.display = DisplayStyle.Flex;
+            menuBtn.style.opacity = 1f;
+            menuBtn.style.color = new Color(0.898f, 0.906f, 0.922f); // same as textPrimary
+            menuBtn.style.fontSize = 16;
+            menuBtn.style.backgroundColor = Color.clear;
+            menuBtn.style.borderTopWidth = 0;
+            menuBtn.style.borderBottomWidth = 0;
+            menuBtn.style.borderLeftWidth = 0;
+            menuBtn.style.borderRightWidth = 0;
             item.Add(menuBtn);
 
             return item;
