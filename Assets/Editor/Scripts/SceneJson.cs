@@ -28,6 +28,7 @@ public class ActorJson
     public bool Active = true;
     public string PrefabName;
     public string Tag;
+    public string IconColorHex;
     public float[] Position;
     public float[] Rotation;
     public float[] Scale;
@@ -45,6 +46,7 @@ public class ActorJson
 [System.Serializable]
 public class SentenceJson
 {
+    public string Name;
     public List<string> When;
     public List<string> Do;
 }

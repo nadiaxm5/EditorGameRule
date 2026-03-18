@@ -52,6 +52,12 @@ namespace GameRuleEditor.Windows
             var context = EnsureEditorContext();
             var controller = GetOrCreateController(context);
 
+            // 0. Open Toolbar window (docked top preferably)
+            var toolbarWindow = EditorWindow.GetWindow<GameRuleToolbarWindow>("GR Toolbar", false);
+            toolbarWindow.minSize = new Vector2(300, 32);
+            toolbarWindow.maxSize = new Vector2(4000, 32);
+            toolbarWindow.Init(context, controller);
+
             // 1. Open Hierarchy window (docked next to Unity's Hierarchy)
             var hierarchyWindow = EditorWindow.GetWindow<GameRuleHierarchyWindow>(
                 "GR Hierarchy", false, typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow"));

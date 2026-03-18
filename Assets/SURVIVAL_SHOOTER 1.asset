@@ -49,6 +49,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: LightingReflection
       Tag: 
+      IconColorHex: 
       Position:
       - 0
       - 0.6
@@ -70,10 +71,12 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - 
-      - When:
+      - Name: 
+        When:
         - 
         Do:
         - 
@@ -81,6 +84,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: Environment
       Tag: Obstacle
+      IconColorHex: 
       Position:
       - 0
       - 0
@@ -106,6 +110,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: Player
       Tag: Player
+      IconColorHex: 
       Position:
       - 0
       - 0
@@ -136,68 +141,81 @@ MonoBehaviour:
       - offsetZ=0.7
       - moving=0
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
         - Edit(#CameraPosition.x,this.x)
         - Edit(#CameraPosition.z,this.z-this.offsetCam)
-      - When:
+      - Name: 
+        When:
         - Keyboard(RightArrow,press)
         Do:
         - Move(this.speed, 0, 90, 0)
         - Edit(this.moving,1)
-      - When:
+      - Name: 
+        When:
         - Keyboard(LeftArrow,press)
         Do:
         - Move(this.speed, 0, -90, 0)
         - Edit(this.moving,1)
-      - When:
+      - Name: 
+        When:
         - Keyboard(UpArrow,press)
         Do:
         - Move(this.speed, 0, 0, 0)
         - Edit(this.moving,1)
-      - When:
+      - Name: 
+        When:
         - Keyboard(DownArrow,press)
         Do:
         - Move(this.speed, 0, 180, 0)
         - Edit(this.moving,1)
-      - When:
+      - Name: 
+        When:
         - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
           OR Keyboard(DownArrow,up)
         Do:
         - Edit(this.moving,0)
-      - When:
+      - Name: 
+        When:
         - Collision(Hellephant)
         Do:
         - Edit(this.health,this.health-Hellephant.damage)
         - PlaySound(PlayerHurt)
-      - When:
+      - Name: 
+        When:
         - Collision(ZomBear)
         Do:
         - Edit(this.health,this.health-ZomBear.damage)
         - PlaySound(PlayerHurt)
-      - When:
+      - Name: 
+        When:
         - Collision(ZomBunny)
         Do:
         - Edit(this.health,this.health-ZomBunny.damage)
         - PlaySound(PlayerHurt)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health<=0)
         Do:
         - Edit(GameOver.Active,1)
         - PlaySound(PlayerDeath)
         - Edit(this.moving,0)
         - Edit(this.speed,0)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health==this.lastHealth)
         Do:
         - Edit(DamageCanvas.Active,0)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health<this.lastHealth)
         Do:
         - Edit(DamageCanvas.Active,1)
         - Edit(this.lastHealth,this.health)
-      - When:
+      - Name: 
+        When:
         - Touch(press,false)
         Do:
         - Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ)
@@ -205,15 +223,18 @@ MonoBehaviour:
         - Edit(ShotLight.Active,1)
         - PlaySound(PlayerGunShot)
         - PlayParticles(GunBarrelEnd)
-      - When:
+      - Name: 
+        When:
         - Check(this.moving)
         Do:
         - Animate(Move)
-      - When:
+      - Name: 
+        When:
         - NOT Check(this.moving) AND Compare(this.health>0)
         Do:
         - Animate(Idle)
-      - When:
+      - Name: 
+        When:
         - NOT Check(this.moving) AND Compare(this.health<=0)
         Do:
         - Animate(Death)
@@ -221,6 +242,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: Hellephant
       Tag: Hellephant
+      IconColorHex: 
       Position:
       - -3.0381298
       - 0.035427637
@@ -246,32 +268,38 @@ MonoBehaviour:
       - damage=0.3
       - moving=0
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Edit(this.moving,1)
         - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      - When:
+      - Name: 
+        When:
         - Compare(Player.health<0)
         Do:
         - Edit(this.moving,0)
         - Edit(this.speed,0)
-      - When:
+      - Name: 
+        When:
         - Collision(Bullet)
         Do:
         - Edit(this.health,this.health-Bullet.damage)
         - PlaySound(HellephantHurt)
         - PlayParticles(HitParticles)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health<=0)
         Do:
         - Edit(#Score,#Score+50)
         - Spawn(HellephantDead,this)
         - Delete(this)
-      - When:
+      - Name: 
+        When:
         - NOT Check(this.moving)
         Do:
         - Animate(Idle)
-      - When:
+      - Name: 
+        When:
         - Check(this.moving)
         Do:
         - Animate(Move)
@@ -279,6 +307,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBear
       Tag: ZomBear
+      IconColorHex: 
       Position:
       - 9.400304
       - 0.08061561
@@ -304,32 +333,38 @@ MonoBehaviour:
       - damage=0.2
       - moving=0
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Edit(this.moving,1)
         - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      - When:
+      - Name: 
+        When:
         - Compare(Player.health<0)
         Do:
         - Edit(this.moving,0)
         - Edit(this.speed,0)
-      - When:
+      - Name: 
+        When:
         - Collision(Bullet)
         Do:
         - Edit(this.health,this.health-Bullet.damage)
         - PlaySound(ZomBearHurt)
         - PlayParticles(HitParticles)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health<=0)
         Do:
         - Edit(#Score,#Score+10)
         - Spawn(ZomBearDead,this)
         - Delete(this)
-      - When:
+      - Name: 
+        When:
         - NOT Check(this.moving)
         Do:
         - Animate(Idle)
-      - When:
+      - Name: 
+        When:
         - Check(this.moving)
         Do:
         - Animate(Move)
@@ -337,6 +372,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBunny
       Tag: ZomBunny
+      IconColorHex: 
       Position:
       - -10.433114
       - 0.013660904
@@ -362,32 +398,38 @@ MonoBehaviour:
       - damage=0.15
       - moving=0
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Edit(this.moving,1)
         - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      - When:
+      - Name: 
+        When:
         - Compare(Player.health<0)
         Do:
         - Edit(this.moving,0)
         - Edit(this.speed,0)
-      - When:
+      - Name: 
+        When:
         - Collision(Bullet)
         Do:
         - Edit(this.health,this.health-Bullet.damage)
         - PlaySound(ZomBunnyHurt)
         - PlayParticles(HitParticles)
-      - When:
+      - Name: 
+        When:
         - Compare(this.health<=0)
         Do:
         - Edit(#Score,#Score+10)
         - Spawn(ZomBunnyDead,this)
         - Delete(this)
-      - When:
+      - Name: 
+        When:
         - NOT Check(this.moving)
         Do:
         - Animate(Idle)
-      - When:
+      - Name: 
+        When:
         - Check(this.moving)
         Do:
         - Animate(Move)
@@ -395,6 +437,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: HellephantSpawner
       Tag: 
+      IconColorHex: 
       Position:
       - 0
       - 0
@@ -416,7 +459,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When:
+      - Name: 
+        When:
         - Timer(5)
         Do:
         - Spawn(Hellephant,this)
@@ -424,6 +468,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: ZomBearSpawner
       Tag: 
+      IconColorHex: 
       Position:
       - 22.5
       - 0
@@ -445,7 +490,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When:
+      - Name: 
+        When:
         - Timer(2)
         Do:
         - Spawn(ZomBear,this)
@@ -453,6 +499,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: ZomBunnySpawner
       Tag: 
+      IconColorHex: 
       Position:
       - -20.5
       - 0
@@ -474,7 +521,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When:
+      - Name: 
+        When:
         - Timer(3)
         Do:
         - Spawn(ZomBunny,this)
@@ -482,6 +530,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: HellephantDead
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -494,12 +543,14 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Animate(Death)
         - PlaySound(HellephantDeath)
         - PlayParticles(DeathParticles)
-      - When:
+      - Name: 
+        When:
         - Timer(1)
         Do:
         - Delete(this)
@@ -507,6 +558,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBearDead
       Tag: 
+      IconColorHex: 
       Position:
       - 0
       - 0
@@ -528,7 +580,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Animate(Death)
         - PlaySound(ZomBearDeath)
@@ -537,6 +590,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: ZomBunnyDead
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -549,12 +603,14 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Animate(Death)
         - PlaySound(ZomBunnyDeath)
         - PlayParticles(DeathParticles)
-      - When:
+      - Name: 
+        When:
         - Timer(1)
         Do:
         - Delete(this)
@@ -562,6 +618,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: Bullet
       Tag: Bullet
+      IconColorHex: 
       Position:
       - 3.4745336
       - 0.36617625
@@ -585,10 +642,12 @@ MonoBehaviour:
       - speed=50
       - damage=500000
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Move(this.speed,0,this.ry,0)
-      - When:
+      - Name: 
+        When:
         - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
         Do:
         - Delete(this)
@@ -596,6 +655,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: ShotLight
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -608,7 +668,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Edit(this.x,Player.x)
         - Edit(this.y,Player.y)
@@ -618,6 +679,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: Laser
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -630,13 +692,15 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Delete(this)
     - ActorName: DamageCanvas
       Active: 0
       PrefabName: DamageCanvas
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -653,6 +717,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: HUDCanvas
       Tag: 
+      IconColorHex: 
       Position:
       - 395
       - 408.5
@@ -674,7 +739,8 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When: []
+      - Name: 
+        When: []
         Do:
         - Edit(this.sliderValue,Player.health)
         - Edit(this.text,#Score)
@@ -682,6 +748,7 @@ MonoBehaviour:
       Active: 0
       PrefabName: GameOver
       Tag: 
+      IconColorHex: 
       Position: []
       Rotation: []
       Scale: []
@@ -694,15 +761,34 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - When:
+      - Name: 
+        When:
         - Timer(2)
         Do:
         - Animate(GameOver)
-      - When:
+      - Name: 
+        When:
         - Timer(3)
         Do:
         - Edit(#Score,0)
         - LoadScene()
+    - ActorName: NewActor
+      Active: 1
+      PrefabName: Empty
+      Tag: Untagged
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
     CustomVariables:
     - name: Score
       type: float
@@ -714,7 +800,8 @@ MonoBehaviour:
   - ActorName: LightingReflection
     Active: 1
     PrefabName: LightingReflection
-    Tag: 
+    Tag: Untagged
+    IconColorHex: '#FF0F12'
     Position:
     - 0
     - 0.6
@@ -736,10 +823,12 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - 
-    - When:
+    - Name: 
+      When:
       - 
       Do:
       - 
@@ -747,6 +836,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: Environment
     Tag: Obstacle
+    IconColorHex: 
     Position:
     - 0
     - 0
@@ -772,6 +862,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: Player
     Tag: Player
+    IconColorHex: 
     Position:
     - 0
     - 0
@@ -792,78 +883,91 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - speed=5
+    - health=100.0
     - rotSpeed=360
     - lastHealth=100.0
-    - health=100.0
+    - speed=5
     - offsetCam=7
     - offsetX=0.28
     - offsetY=0.3
     - offsetZ=0.7
     - moving=0
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
       - Edit(#CameraPosition.x,this.x)
       - Edit(#CameraPosition.z,this.z-this.offsetCam)
-    - When:
+    - Name: 
+      When:
       - Keyboard(RightArrow,press)
       Do:
       - Move(this.speed, 0, 90, 0)
       - Edit(this.moving,1)
-    - When:
+    - Name: 
+      When:
       - Keyboard(LeftArrow,press)
       Do:
       - Move(this.speed, 0, -90, 0)
       - Edit(this.moving,1)
-    - When:
+    - Name: 
+      When:
       - Keyboard(UpArrow,press)
       Do:
       - Move(this.speed, 0, 0, 0)
       - Edit(this.moving,1)
-    - When:
+    - Name: 
+      When:
       - Keyboard(DownArrow,press)
       Do:
       - Move(this.speed, 0, 180, 0)
       - Edit(this.moving,1)
-    - When:
+    - Name: 
+      When:
       - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
         OR Keyboard(DownArrow,up)
       Do:
       - Edit(this.moving,0)
-    - When:
+    - Name: 
+      When:
       - Collision(Hellephant)
       Do:
       - Edit(this.health,this.health-Hellephant.damage)
       - PlaySound(PlayerHurt)
-    - When:
+    - Name: 
+      When:
       - Collision(ZomBear)
       Do:
       - Edit(this.health,this.health-ZomBear.damage)
       - PlaySound(PlayerHurt)
-    - When:
+    - Name: 
+      When:
       - Collision(ZomBunny)
       Do:
       - Edit(this.health,this.health-ZomBunny.damage)
       - PlaySound(PlayerHurt)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health<=0)
       Do:
       - Edit(GameOver.Active,1)
       - PlaySound(PlayerDeath)
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health==this.lastHealth)
       Do:
       - Edit(DamageCanvas.Active,0)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health<this.lastHealth)
       Do:
       - Edit(DamageCanvas.Active,1)
       - Edit(this.lastHealth,this.health)
-    - When:
+    - Name: 
+      When:
       - Touch(press,false)
       Do:
       - Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ)
@@ -871,15 +975,18 @@ MonoBehaviour:
       - Edit(ShotLight.Active,1)
       - PlaySound(PlayerGunShot)
       - PlayParticles(GunBarrelEnd)
-    - When:
+    - Name: 
+      When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-    - When:
+    - Name: 
+      When:
       - NOT Check(this.moving) AND Compare(this.health>0)
       Do:
       - Animate(Idle)
-    - When:
+    - Name: 
+      When:
       - NOT Check(this.moving) AND Compare(this.health<=0)
       Do:
       - Animate(Death)
@@ -887,6 +994,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: Hellephant
     Tag: Hellephant
+    IconColorHex: 
     Position:
     - -3.0381298
     - 0.035427637
@@ -912,32 +1020,38 @@ MonoBehaviour:
     - damage=0.3
     - moving=0
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-    - When:
+    - Name: 
+      When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-    - When:
+    - Name: 
+      When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(HellephantHurt)
       - PlayParticles(HitParticles)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+50)
       - Spawn(HellephantDead,this)
       - Delete(this)
-    - When:
+    - Name: 
+      When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-    - When:
+    - Name: 
+      When:
       - Check(this.moving)
       Do:
       - Animate(Move)
@@ -945,6 +1059,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBear
     Tag: ZomBear
+    IconColorHex: 
     Position:
     - 9.400304
     - 0.08061561
@@ -970,32 +1085,38 @@ MonoBehaviour:
     - damage=0.2
     - moving=0
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-    - When:
+    - Name: 
+      When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-    - When:
+    - Name: 
+      When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBearHurt)
       - PlayParticles(HitParticles)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBearDead,this)
       - Delete(this)
-    - When:
+    - Name: 
+      When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-    - When:
+    - Name: 
+      When:
       - Check(this.moving)
       Do:
       - Animate(Move)
@@ -1003,6 +1124,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBunny
     Tag: ZomBunny
+    IconColorHex: 
     Position:
     - -10.433114
     - 0.013660904
@@ -1028,32 +1150,38 @@ MonoBehaviour:
     - damage=0.15
     - moving=0
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-    - When:
+    - Name: 
+      When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-    - When:
+    - Name: 
+      When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBunnyHurt)
       - PlayParticles(HitParticles)
-    - When:
+    - Name: 
+      When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBunnyDead,this)
       - Delete(this)
-    - When:
+    - Name: 
+      When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-    - When:
+    - Name: 
+      When:
       - Check(this.moving)
       Do:
       - Animate(Move)
@@ -1061,6 +1189,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: HellephantSpawner
     Tag: 
+    IconColorHex: 
     Position:
     - 0
     - 0
@@ -1082,7 +1211,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When:
+    - Name: 
+      When:
       - Timer(5)
       Do:
       - Spawn(Hellephant,this)
@@ -1090,6 +1220,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: ZomBearSpawner
     Tag: 
+    IconColorHex: 
     Position:
     - 22.5
     - 0
@@ -1111,7 +1242,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When:
+    - Name: 
+      When:
       - Timer(2)
       Do:
       - Spawn(ZomBear,this)
@@ -1119,6 +1251,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: ZomBunnySpawner
     Tag: 
+    IconColorHex: 
     Position:
     - -20.5
     - 0
@@ -1140,7 +1273,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When:
+    - Name: 
+      When:
       - Timer(3)
       Do:
       - Spawn(ZomBunny,this)
@@ -1148,6 +1282,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: HellephantDead
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1160,12 +1295,14 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Animate(Death)
       - PlaySound(HellephantDeath)
       - PlayParticles(DeathParticles)
-    - When:
+    - Name: 
+      When:
       - Timer(1)
       Do:
       - Delete(this)
@@ -1173,6 +1310,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBearDead
     Tag: 
+    IconColorHex: 
     Position:
     - 0
     - 0
@@ -1194,7 +1332,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Animate(Death)
       - PlaySound(ZomBearDeath)
@@ -1203,6 +1342,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: ZomBunnyDead
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1215,12 +1355,14 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Animate(Death)
       - PlaySound(ZomBunnyDeath)
       - PlayParticles(DeathParticles)
-    - When:
+    - Name: 
+      When:
       - Timer(1)
       Do:
       - Delete(this)
@@ -1228,6 +1370,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: Bullet
     Tag: Bullet
+    IconColorHex: 
     Position:
     - 3.4745336
     - 0.36617625
@@ -1251,10 +1394,12 @@ MonoBehaviour:
     - speed=50
     - damage=500000
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Move(this.speed,0,this.ry,0)
-    - When:
+    - Name: 
+      When:
       - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
       Do:
       - Delete(this)
@@ -1262,6 +1407,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: ShotLight
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1274,7 +1420,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Edit(this.x,Player.x)
       - Edit(this.y,Player.y)
@@ -1284,6 +1431,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: Laser
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1296,13 +1444,15 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Delete(this)
   - ActorName: DamageCanvas
     Active: 0
     PrefabName: DamageCanvas
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1319,8 +1469,9 @@ MonoBehaviour:
     Active: 1
     PrefabName: HUDCanvas
     Tag: 
+    IconColorHex: 
     Position:
-    - 395
+    - 467.83334
     - 408.5
     - 0
     Rotation:
@@ -1340,7 +1491,8 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When: []
+    - Name: 
+      When: []
       Do:
       - Edit(this.sliderValue,Player.health)
       - Edit(this.text,#Score)
@@ -1348,6 +1500,7 @@ MonoBehaviour:
     Active: 0
     PrefabName: GameOver
     Tag: 
+    IconColorHex: 
     Position: []
     Rotation: []
     Scale: []
@@ -1360,11 +1513,13 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - When:
+    - Name: 
+      When:
       - Timer(2)
       Do:
       - Animate(GameOver)
-    - When:
+    - Name: 
+      When:
       - Timer(3)
       Do:
       - Edit(#Score,0)

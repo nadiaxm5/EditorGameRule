@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 
@@ -20,7 +21,6 @@ namespace GameRuleEditor.Windows
 
         private VisualElement actorListContainer;
         private List<VisualElement> actorItems = new List<VisualElement>();
-        private Label projectNameLabel;
         private Label actorCountLabel;
 
         [MenuItem("GameRule/Editor")]
@@ -163,85 +163,28 @@ namespace GameRuleEditor.Windows
             root.style.flexGrow = 1;
             root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // #252526
 
-            BuildToolbar(root);
+            BuildHeader(root);
             BuildContent(root);
-            BuildFooter(root);
         }
 
-        // ── Toolbar ────────────────────
-        private void BuildToolbar(VisualElement root)
+        // ── Header ────────────
+        private void BuildHeader(VisualElement root)
         {
-            var toolbar = new Toolbar();
-            toolbar.style.height = 32;
-            toolbar.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f); // #333333
-            toolbar.style.borderBottomWidth = 1;
-            toolbar.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f); // #1a1a1a
-            toolbar.style.flexShrink = 0;
-
-            // Project menu
-            var projectMenu = new ToolbarMenu();
-            projectMenu.text = "Project";
-            projectMenu.menu.AppendAction("New Project", a => OnNewProject());
-            projectMenu.menu.AppendAction("Open Project", a => OnOpenProject());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Import JSON", a => OnImportJson());
-            projectMenu.menu.AppendAction("Export to JSON", a => OnExportJson());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Close Project", a => OnCloseProject());
-            toolbar.Add(projectMenu);
-
-            toolbar.Add(new ToolbarSpacer());
-
-            // Project name
-            projectNameLabel = new Label(context?.currentProject?.projectName ?? "No Project");
-            projectNameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
-            projectNameLabel.style.flexGrow = 1;
-            projectNameLabel.style.overflow = Overflow.Hidden;
-            projectNameLabel.style.textOverflow = TextOverflow.Ellipsis;
-            projectNameLabel.style.fontSize = 11;
-            projectNameLabel.style.color = new Color(0.61f, 0.64f, 0.69f); // #9ca3af
-            toolbar.Add(projectNameLabel);
-
-            // Undo / Redo
-            var undoBtn = new ToolbarButton(() => Undo.PerformUndo()) { text = "\u21A9" };
-            undoBtn.tooltip = "Undo (Ctrl+Z)";
-            undoBtn.style.fontSize = 14;
-            undoBtn.style.width = 28;
-            toolbar.Add(undoBtn);
-
-            var redoBtn = new ToolbarButton(() => Undo.PerformRedo()) { text = "\u21AA" };
-            redoBtn.tooltip = "Redo (Ctrl+Shift+Z)";
-            redoBtn.style.fontSize = 14;
-            redoBtn.style.width = 28;
-            toolbar.Add(redoBtn);
-
-            toolbar.Add(new ToolbarSpacer());
-
-            // Scene Settings button
-            var sceneSettingsBtn = new ToolbarButton(() =>
-            {
-                context.ToggleScenePropsInspector();
-                GameRuleInspectorWindow.EnsureVisible(context, controller);
-            })
-            { text = "\u2699" };
-            sceneSettingsBtn.tooltip = "Scene Settings";
-            sceneSettingsBtn.style.fontSize = 14;
-            sceneSettingsBtn.style.width = 28;
-            toolbar.Add(sceneSettingsBtn);
-
-            // Generate Scene
-            var generateBtn = new ToolbarButton(OnGenerateScene) { text = "\u25B6" }; // ▶
-            generateBtn.tooltip = "Generate Scene";
-            generateBtn.style.fontSize = 11;
-            generateBtn.style.width = 28;
-            toolbar.Add(generateBtn);
-
-            // Save
-            var saveBtn = new ToolbarButton(OnSaveProject) { text = "Save" };
-            saveBtn.style.fontSize = 11;
-            toolbar.Add(saveBtn);
-
-            root.Add(toolbar);
+            var header = new VisualElement();
+            header.style.height = 30;
+            header.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            header.style.borderBottomWidth = 1;
+            header.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
+            header.style.justifyContent = Justify.Center;
+            header.style.paddingLeft = 8;
+            
+            var label = new Label("Cast");
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            label.style.fontSize = 12;
+            label.style.color = new Color(0.898f, 0.906f, 0.922f);
+            header.Add(label);
+            
+            root.Add(header);
         }
 
         // ── Content (actor list) ────────
@@ -263,35 +206,6 @@ namespace GameRuleEditor.Windows
             RefreshList();
         }
 
-        // ── Footer with FAB ────────────
-        private void BuildFooter(VisualElement root)
-        {
-            var footer = new VisualElement();
-            footer.style.flexDirection = FlexDirection.Row;
-            footer.style.justifyContent = Justify.SpaceBetween;
-            footer.style.alignItems = Align.Center;
-            footer.style.height = 48;
-            footer.style.paddingLeft = 10;
-            footer.style.paddingRight = 10;
-            footer.style.backgroundColor = new Color(0.176f, 0.176f, 0.176f); // #2d2d2d
-            footer.style.borderTopWidth = 1;
-            footer.style.borderTopColor = new Color(0.102f, 0.102f, 0.102f); // #1a1a1a
-            footer.style.flexShrink = 0;
-
-            actorCountLabel = new Label("0 actors");
-            actorCountLabel.style.fontSize = 10;
-            actorCountLabel.style.color = new Color(0.42f, 0.44f, 0.50f); // textMuted #6b7280
-            footer.Add(actorCountLabel);
-
-            // FAB — Create Actor
-            var fab = new Button(OnAddActor);
-            fab.text = "+";
-            fab.tooltip = "Create new actor";
-            fab.AddToClassList("fab-create");
-            footer.Add(fab);
-
-            root.Add(footer);
-        }
 
         // ──────────────────────────────────
         //  ACTOR LIST RENDERING
@@ -310,7 +224,7 @@ namespace GameRuleEditor.Windows
                 empty.style.unityTextAlign = TextAnchor.MiddleCenter;
                 empty.style.marginTop = 30;
                 actorListContainer.Add(empty);
-                UpdateCount(0);
+                
                 return;
             }
 
@@ -323,14 +237,30 @@ namespace GameRuleEditor.Windows
                 actorItems.Add(item);
             }
 
-            UpdateCount(context.currentProject.actors.Count);
+            
+
+            
+            var addActorBtn = new Button(OnAddActor);
+            addActorBtn.text = "+ Add Actor";
+            addActorBtn.style.marginTop = 10;
+            addActorBtn.style.marginBottom = 10;
+            addActorBtn.style.paddingTop = 6;
+            addActorBtn.style.paddingBottom = 6;
+            addActorBtn.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+            addActorBtn.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
+            addActorBtn.style.borderTopWidth = 1;
+            addActorBtn.style.borderBottomWidth = 1;
+            addActorBtn.style.borderLeftWidth = 1;
+            addActorBtn.style.borderRightWidth = 1;
+            addActorBtn.style.borderTopColor = new Color(0.1f, 0.1f, 0.1f);
+            addActorBtn.style.borderBottomColor = new Color(0.1f, 0.1f, 0.1f);
+            addActorBtn.style.borderLeftColor = new Color(0.1f, 0.1f, 0.1f);
+            addActorBtn.style.borderRightColor = new Color(0.1f, 0.1f, 0.1f);
+            actorListContainer.Add(addActorBtn);
 
             if (context.selectedActorIndex >= 0 && context.selectedActorIndex < actorItems.Count)
                 HighlightItem(context.selectedActorIndex);
 
-            // Update project name label
-            if (projectNameLabel != null)
-                projectNameLabel.text = context.currentProject?.projectName ?? "No Project";
         }
 
         private VisualElement CreateActorItem(ActorJson actor, int index)
@@ -344,8 +274,8 @@ namespace GameRuleEditor.Windows
             item.style.paddingRight = 4;
             item.style.marginLeft = 2;
             item.style.marginRight = 2;
-            item.style.marginTop = 1;
-            item.style.marginBottom = 1;
+            item.style.marginTop = 0;
+            item.style.marginBottom = 0;
             item.style.borderTopLeftRadius = 4;
             item.style.borderTopRightRadius = 4;
             item.style.borderBottomLeftRadius = 4;
@@ -357,16 +287,25 @@ namespace GameRuleEditor.Windows
                 if (evt.button == 0) // Left click
                     context.SelectActor(index);
             });
+            item.RegisterCallback<PointerDownEvent>(evt => OnActorDragStart(evt, item, index));
+            item.RegisterCallback<PointerMoveEvent>(evt => OnActorDragMove(evt, item));
+            item.RegisterCallback<PointerUpEvent>(evt => OnActorDragEnd(evt, item, index));
+            item.RegisterCallback<PointerCaptureOutEvent>(evt => OnActorDragEnd(evt, item, index));
 
             // Icon placeholder (box)
-            var icon = new Label("\u25A0"); // ■
-            icon.style.fontSize = 14;
-            icon.style.width = 20;
-            icon.style.color = new Color(0.42f, 0.44f, 0.50f); // textMuted
-            icon.style.unityTextAlign = TextAnchor.MiddleCenter;
+            var icon = new Image();
+            icon.image = EditorGUIUtility.IconContent("Prefab Icon").image;
+            icon.style.width = 16;
+            icon.style.height = 16;
+            icon.style.marginRight = 4;
+              
+              Color iconColor = new Color(0.8f, 0.8f, 0.8f);
+              if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
+                  icon.tintColor = iconColor;
+              } else {
+                  icon.tintColor = new Color(0.8f, 0.8f, 0.8f);
+              }
             item.Add(icon);
-
-            // Actor name
             var nameLabel = new Label(actor.ActorName ?? "Unnamed");
             nameLabel.style.flexGrow = 1;
             nameLabel.style.fontSize = 11;
@@ -444,13 +383,93 @@ namespace GameRuleEditor.Windows
         // ──────────────────────────────────
         //  SELECTION HIGHLIGHT
         // ──────────────────────────────────
+
+        // ──────────────────────────────────
+        // DRAG AND DROP REORDERING
+        // ──────────────────────────────────
+        
+        private bool isDraggingActor = false;
+        private Vector2 dragStartPos;
+        private VisualElement draggedItem;
+        private int draggedIndex = -1;
+
+        private void OnActorDragStart(PointerDownEvent evt, VisualElement item, int index)
+        {
+            if (evt.button != 0) return; 
+            isDraggingActor = true;
+            dragStartPos = evt.position;
+            draggedItem = item;
+            draggedIndex = index;
+            item.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnActorDragMove(PointerMoveEvent evt, VisualElement item)
+        {
+        }
+
+        private void OnActorDragEnd(EventBase evt, VisualElement item, int index)
+        {
+            if (!isDraggingActor || item != draggedItem) return;
+            
+            IPointerEvent pointerEvt = evt as IPointerEvent;
+            if (pointerEvt != null)
+                item.ReleasePointer(pointerEvt.pointerId);
+            
+            isDraggingActor = false;
+            draggedItem = null;
+
+            if (pointerEvt == null) return;
+            
+            float diffY = pointerEvt.position.y - dragStartPos.y;
+            if (UnityEngine.Mathf.Abs(diffY) > 15f) 
+            {
+                int newIndex = draggedIndex + UnityEngine.Mathf.RoundToInt(diffY / 28f);
+                newIndex = UnityEngine.Mathf.Clamp(newIndex, 0, context.currentProject.actors.Count - 1);
+                
+                if (newIndex != draggedIndex)
+                {
+                    var actorList = context.currentProject.actors;
+                    var actorToMove = actorList[draggedIndex];
+                    actorList.RemoveAt(draggedIndex);
+                    actorList.Insert(newIndex, actorToMove);
+                    
+                    UnityEditor.EditorUtility.SetDirty(context.currentProject);
+                    
+                    if (context.selectedActorIndex == draggedIndex)
+                        context.SelectActor(newIndex);
+                    else if (draggedIndex < context.selectedActorIndex && newIndex >= context.selectedActorIndex)
+                        context.SelectActor(context.selectedActorIndex - 1);
+                    else if (draggedIndex > context.selectedActorIndex && newIndex <= context.selectedActorIndex)
+                        context.SelectActor(context.selectedActorIndex + 1);
+
+                    RefreshList();
+                }
+            }
+            evt.StopPropagation();
+        }
+        
         private void OnActorSelected(int index)
         {
             for (int i = 0; i < actorItems.Count; i++)
                 actorItems[i].RemoveFromClassList("actor-list-item--selected");
 
             if (index >= 0 && index < actorItems.Count)
+            {
                 HighlightItem(index);
+                
+                // Select in scene if exists
+                if (context?.currentProject?.actors != null && index < context.currentProject.actors.Count)
+                {
+                    var actorName = context.currentProject.actors[index].ActorName;
+                    var go = GameObject.Find(actorName);
+                    if (go != null)
+                    {
+                        Selection.activeGameObject = go;
+                        EditorGUIUtility.PingObject(go);
+                    }
+                }
+            }
         }
 
         private void HighlightItem(int index)
@@ -459,11 +478,7 @@ namespace GameRuleEditor.Windows
                 actorItems[index].AddToClassList("actor-list-item--selected");
         }
 
-        private void UpdateCount(int count)
-        {
-            if (actorCountLabel != null)
-                actorCountLabel.text = $"{count} actor{(count != 1 ? "s" : "")}";
-        }
+
 
         // ──────────────────────────────────
         //  PROJECT ACTIONS
@@ -516,53 +531,6 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        private void OnImportJson()
-        {
-            string jsonPath = EditorUtility.OpenFilePanel("Import JSON",
-                Application.dataPath + "/Resources/Games", "json");
-            if (string.IsNullOrEmpty(jsonPath)) return;
-
-            controller.ImportJsonAsProject(jsonPath);
-            Rebuild();
-        }
-
-        private void OnExportJson()
-        {
-            if (context?.currentProject == null) return;
-            string path = EditorUtility.SaveFilePanel("Export to JSON",
-                Application.dataPath + "/Resources/Games",
-                context.currentProject.projectName + ".json", "json");
-            if (!string.IsNullOrEmpty(path))
-            {
-                controller.SaveProjectToJson(path);
-                EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
-            }
-        }
-
-        private void OnCloseProject()
-        {
-            if (context == null) return;
-            context.currentProject = null;
-            context.CloseInspector();
-            Rebuild();
-        }
-
-        private void OnSaveProject()
-        {
-            if (context?.currentProject != null)
-            {
-                EditorUtility.SetDirty(context.currentProject);
-                AssetDatabase.SaveAssets();
-                Debug.Log("Project saved");
-            }
-        }
-
-        private void OnGenerateScene()
-        {
-            if (context?.currentProject == null || controller == null) return;
-            controller.GenerateScene();
-        }
-
         private void Rebuild()
         {
             BuildUI();
@@ -606,3 +574,5 @@ namespace GameRuleEditor.Windows
         }
     }
 }
+
+

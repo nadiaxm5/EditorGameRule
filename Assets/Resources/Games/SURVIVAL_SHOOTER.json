@@ -23,11 +23,13 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         ""
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         ""
                     ],
@@ -67,6 +69,7 @@
             ],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)",
                         "Edit(#CameraPosition.x,this.x)",
@@ -74,6 +77,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Keyboard(RightArrow,press)"
                     ],
@@ -83,6 +87,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Keyboard(LeftArrow,press)"
                     ],
@@ -92,6 +97,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Keyboard(UpArrow,press)"
                     ],
@@ -101,6 +107,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Keyboard(DownArrow,press)"
                     ],
@@ -110,6 +117,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
                     ],
@@ -118,6 +126,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(Hellephant)"
                     ],
@@ -127,6 +136,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(ZomBear)"
                     ],
@@ -136,6 +146,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(ZomBunny)"
                     ],
@@ -145,6 +156,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -156,6 +168,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health==this.lastHealth)"
                     ],
@@ -164,6 +177,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health<this.lastHealth)"
                     ],
@@ -173,6 +187,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Touch(press,false)"
                     ],
@@ -185,6 +200,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -193,6 +209,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health>0)"
                     ],
@@ -201,6 +218,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health<=0)"
                     ],
@@ -226,12 +244,14 @@
             ],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -241,6 +261,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -251,6 +272,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -261,6 +283,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
@@ -269,6 +292,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -294,12 +318,14 @@
             ],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -309,6 +335,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -319,6 +346,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -329,6 +357,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
@@ -337,6 +366,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -362,12 +392,14 @@
             ],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -377,6 +409,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -387,6 +420,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -397,6 +431,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
@@ -405,6 +440,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -424,6 +460,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "When": [
                         "Timer(5)"
                     ],
@@ -443,6 +480,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "When": [
                         "Timer(2)"
                     ],
@@ -462,6 +500,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "When": [
                         "Timer(3)"
                     ],
@@ -478,6 +517,7 @@
             "Tag": "",
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Animate(Death)",
                         "PlaySound(HellephantDeath)",
@@ -485,6 +525,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Timer(1)"
                     ],
@@ -504,6 +545,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Animate(Death)",
                         "PlaySound(ZomBearDeath)",
@@ -519,6 +561,7 @@
             "Tag": "",
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Animate(Death)",
                         "PlaySound(ZomBunnyDeath)",
@@ -526,6 +569,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Timer(1)"
                     ],
@@ -549,11 +593,13 @@
             ],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Move(this.speed,0,this.ry,0)"
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)"
                     ],
@@ -570,6 +616,7 @@
             "Tag": "",
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Edit(this.x,Player.x)",
                         "Edit(this.y,Player.y)",
@@ -586,6 +633,7 @@
             "Tag": "",
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Delete(this)"
                     ]
@@ -608,6 +656,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
+                    "Name": "",
                     "Do": [
                         "Edit(this.sliderValue,Player.health)",
                         "Edit(this.text,#Score)"
@@ -622,6 +671,7 @@
             "Tag": "",
             "Script": [
                 {
+                    "Name": "",
                     "When": [
                         "Timer(2)"
                     ],
@@ -630,6 +680,7 @@
                     ]
                 },
                 {
+                    "Name": "",
                     "When": [
                         "Timer(3)"
                     ],
@@ -639,6 +690,12 @@
                     ]
                 }
             ]
+        },
+        {
+            "ActorName": "NewActor",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Untagged"
         }
     ]
 }

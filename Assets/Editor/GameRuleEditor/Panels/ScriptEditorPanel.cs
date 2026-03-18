@@ -19,6 +19,8 @@ namespace GameRuleEditor.Panels
         private VisualElement rulesContainer;
         private VisualElement noSelectionContainer;
         private Label actorNameLabel;
+        
+        private HashSet<SentenceJson> collapsedRules = new HashSet<SentenceJson>();
 
         public ScriptEditorPanel(EditorContext editorContext, ProjectController projectController)
         {
@@ -178,19 +180,73 @@ namespace GameRuleEditor.Panels
             container.AddToClassList("panel-section");
             container.style.marginBottom = 15;
 
+            var contentContainer = new VisualElement();
+            bool isCollapsed = collapsedRules.Contains(rule);
+            contentContainer.style.display = isCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
+
+            var headerRow = new VisualElement();
+            headerRow.style.flexDirection = FlexDirection.Row;
+            headerRow.style.alignItems = Align.Center;
+            headerRow.style.marginBottom = 10;
+            
+            var toggleBtn = new Button();
+            toggleBtn.text = isCollapsed ? "▶" : "▼";
+            toggleBtn.style.width = 24;
+            toggleBtn.style.fontSize = 14;
+            toggleBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            toggleBtn.style.backgroundColor = Color.clear;
+            toggleBtn.style.borderTopWidth = 0;
+            toggleBtn.style.borderBottomWidth = 0;
+            toggleBtn.style.borderLeftWidth = 0;
+            toggleBtn.style.borderRightWidth = 0;
+            toggleBtn.clicked += () =>
+            {
+                if (collapsedRules.Contains(rule))
+                {
+                    collapsedRules.Remove(rule);
+                    contentContainer.style.display = DisplayStyle.Flex;
+                    toggleBtn.text = "▼";
+                }
+                else
+                {
+                    collapsedRules.Add(rule);
+                    contentContainer.style.display = DisplayStyle.None;
+                    toggleBtn.text = "▶";
+                }
+            };
+            headerRow.Add(toggleBtn);
+
             // Header with rule number and actions
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.SpaceBetween;
             header.style.alignItems = Align.Center;
-            header.style.marginBottom = 10;
+            header.style.flexGrow = 1;
 
             bool hasCondition = rule.When != null && rule.When.Count > 0;
 
-            var titleLabel = new Label(hasCondition ? $"Rule {ruleIndex + 1}" : $"Unconditional Rule {ruleIndex + 1}");
-            titleLabel.style.fontSize = 14;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(titleLabel);
+            string defaultName = hasCondition ? $"Rule {ruleIndex + 1}" : $"Unconditional Rule {ruleIndex + 1}";
+            string currentName = string.IsNullOrEmpty(rule.Name) ? defaultName : rule.Name;
+
+            var titleField = new TextField();
+            titleField.value = currentName;
+            titleField.style.fontSize = 14;
+            titleField.style.unityFontStyleAndWeight = FontStyle.Bold;
+            titleField.style.backgroundColor = Color.clear;
+            titleField.style.borderTopWidth = 0;
+            titleField.style.borderBottomWidth = 0;
+            titleField.style.borderLeftWidth = 0;
+            titleField.style.borderRightWidth = 0;
+            titleField.style.flexGrow = 1;
+            titleField.style.marginRight = 10;
+            
+            titleField.RegisterValueChangedCallback(evt =>
+            {
+                rule.Name = evt.newValue;
+                EditorUtility.SetDirty(context.currentProject);
+            });
+            
+            header.Add(titleField);
 
             var buttonContainer = new VisualElement();
             buttonContainer.style.flexDirection = FlexDirection.Row;
@@ -238,7 +294,8 @@ namespace GameRuleEditor.Panels
             buttonContainer.Add(removeBtn);
 
             header.Add(buttonContainer);
-            container.Add(header);
+            headerRow.Add(header);
+            container.Add(headerRow);
 
             // Condition builder
             if (hasCondition)
@@ -260,7 +317,7 @@ namespace GameRuleEditor.Panels
                 {
                     controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
                 };
-                container.Add(conditionBuilder);
+                contentContainer.Add(conditionBuilder);
             }
             else
             {
@@ -273,7 +330,7 @@ namespace GameRuleEditor.Panels
                 addConditionBtn.AddToClassList("button-primary");
                 addConditionBtn.style.marginBottom = 10;
                 addConditionBtn.style.alignSelf = Align.FlexStart;
-                container.Add(addConditionBtn);
+                contentContainer.Add(addConditionBtn);
             }
 
             // Action builder
@@ -287,7 +344,9 @@ namespace GameRuleEditor.Panels
                 controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
             };
             actionBuilder.style.marginTop = 10;
-            container.Add(actionBuilder);
+            contentContainer.Add(actionBuilder);
+
+            container.Add(contentContainer);
 
             return container;
         }

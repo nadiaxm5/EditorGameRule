@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -19,7 +19,7 @@ namespace GameRuleEditor.Panels
         private TextField actorNameField;
 
         private ObjectField prefabPicker;
-        private TextField tagField;
+        private UnityEditor.UIElements.TagField tagField;
         private Toggle activeToggle;
 
         private VisualElement propertiesContainer;
@@ -58,6 +58,7 @@ namespace GameRuleEditor.Panels
 
         private void OnActorSelected(int _) => UpdateUI();
 
+        
         private void CreateUI()
         {
             // No Selection View
@@ -68,7 +69,7 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = Color.gray } });
             Add(noSelectionContainer);
 
-            // Content View (Usando mainContainer)
+            // Content View
             mainContainer = new VisualElement();
             mainContainer.style.flexGrow = 1;
             mainContainer.style.display = DisplayStyle.None;
@@ -84,22 +85,56 @@ namespace GameRuleEditor.Panels
             header.style.marginBottom = 15;
             scrollView.Add(header);
 
-            var basicSection = CreateSection("Basic Properties");
-            scrollView.Add(basicSection);
+            // ─── Top Row ───
+            var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10, paddingLeft = 4 } };
 
-            // Name (native binding - undo handled automatically via SerializedProperty)
-            actorNameField = new TextField("Name:");
-            basicSection.Add(actorNameField);
+            // Active (Toggle)
+            activeToggle = new Toggle();
+            activeToggle.tooltip = "Active";
+            activeToggle.style.marginRight = 5;
+            topRow.Add(activeToggle);
 
-            // Prefab Picker
-            var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 5 } };
-            prefabRow.Add(new Label("Prefab:") { style = { minWidth = 150 } });
+            // Prefab Icon color picker
+            var iconContainer = new VisualElement { style = { width = 24, height = 24, marginRight = 5 } };
+            var iconImage = new Image { image = EditorGUIUtility.IconContent("Prefab Icon").image, style = { width = 20, height = 20, alignSelf = Align.Center, marginTop = 2 } };
+            iconImage.name = "PrefabColorImage";
+            iconContainer.Add(iconImage);
+
+            var iconColorField = new ColorField { style = { position = Position.Absolute, top = 0, left = 0, right = 0, bottom = 0, opacity = 0.01f } };
+            iconColorField.showAlpha = false;
+            iconColorField.showEyeDropper = false;
+            iconColorField.RegisterValueChangedCallback(evt => {
+                if (context.SelectedActor == null) return;
+                string hex = "#" + ColorUtility.ToHtmlStringRGB(evt.newValue);
+                context.SelectedActor.IconColorHex = hex;
+                iconImage.tintColor = evt.newValue;
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged(); 
+                controller.SyncDataToScene(context.SelectedActor);
+            });
+            iconContainer.Add(iconColorField);
+            topRow.Add(iconContainer);
+
+            // Actor Name (No Label)
+            actorNameField = new TextField();
+            actorNameField.style.flexGrow = 1;
+            actorNameField.style.marginRight = 10;
+            topRow.Add(actorNameField);
+
+            // Tag Dropdown (TagField provides native tag drop down including 'Add Tag...')
+            tagField = new TagField("");
+            tagField.style.width = 120;
+            topRow.Add(tagField);
+
+            scrollView.Add(topRow);
+
+            // ─── Prefab Selection ───
+            var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
+            prefabRow.Add(new Label("Prefab:") { style = { width = 80, unityTextAlign = TextAnchor.MiddleLeft } });
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
-
-                // Deshacer manual porque ObjectField no se enlaza directamente a un SerializedProperty (string), y necesitamos convertir GameObject -> prefab name (string).
                 Undo.RecordObject(context.currentProject, "Change Prefab");
                 context.SelectedActor.PrefabName = evt.newValue == null ? "Empty" : evt.newValue.name;
                 EditorUtility.SetDirty(context.currentProject);
@@ -107,102 +142,84 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
             prefabRow.Add(prefabPicker);
-            basicSection.Add(prefabRow);
+            scrollView.Add(prefabRow);
 
-            // Tag (native binding - undo handled automatically via SerializedProperty)
-            tagField = new TextField("Tag:");
-            basicSection.Add(tagField);
-
-            // Active (native binding - undo handled automatically via SerializedProperty)
-            activeToggle = new Toggle("Active:");
-            basicSection.Add(activeToggle);
-
-            // Transform
-            var transformSection = CreateSection("Transform");
+            // ─── Transform (Collapsible) ───
+            var transformSection = new Foldout { text = "Transform", value = true };
+            transformSection.style.unityFontStyleAndWeight = FontStyle.Bold;
+            transformSection.style.marginBottom = 10;
             scrollView.Add(transformSection);
 
-            CreateOverrideableVector3(transformSection, "Position", "Position");
-            CreateOverrideableVector3(transformSection, "Rotation", "Rotation");
-            CreateOverrideableVector3(transformSection, "Scale", "Scale");
-            CreateOverrideableVector3(transformSection, "Size (Target)", "Size");
+            var transformContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            transformSection.Add(transformContainer);
 
-            // Custom Properties
-            var propsSection = CreateSection("Custom Properties");
+            CreateOverrideableVector3(transformContainer, "Position", "Position");
+            CreateOverrideableVector3(transformContainer, "Rotation", "Rotation");
+            CreateOverrideableVector3(transformContainer, "Scale", "Scale");
+            // Size removed as per instruction
+
+            // Custom Properties (Collapsible)
+            var propsSection = new Foldout { text = "Properties", value = true };
+            propsSection.style.unityFontStyleAndWeight = FontStyle.Bold;
+            propsSection.style.marginBottom = 10;
             scrollView.Add(propsSection);
 
-            var addPropBtn = new Button(() => ShowAddPropertyDialog()) { text = "+ Add Property" };
-            addPropBtn.AddToClassList("button-primary");
-            propsSection.Add(addPropBtn);
-
-            propertiesContainer = new VisualElement();
+            propertiesContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
             propsSection.Add(propertiesContainer);
         }
 
         #region UI Construction Helpers
 
-        private VisualElement CreateSection(string title)
-        {
-            var section = new VisualElement();
-            section.AddToClassList("panel-section");
-            section.Add(new Label(title) { style = { fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 8 } });
-            return section;
-        }
-
         private void CreateOverrideableVector3(VisualElement parent, string labelText, string propertyKey)
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
-
-            var label = new Label(labelText) { style = { minWidth = 140 } };
+            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } }; // Not bold by default
             row.Add(label);
 
             var field = new Vector3Field { style = { flexGrow = 1 } };
             field.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
-
-                // Deshacer manual porque Vector3Field no se enlaza directamente a un SerializedProperty (float[]), y necesitamos convertir Vector3 -> float[].
-                Undo.RecordObject(context.currentProject, $"Change {propertyKey}");
-
-                var vec = evt.newValue;
-                float[] arr = new float[] { vec.x, vec.y, vec.z };
-
+                Undo.RecordObject(context.currentProject, "Change " + propertyKey);
+                float[] arr = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                
                 var actor = context.SelectedActor;
-                switch (propertyKey)
-                {
+                switch (propertyKey) {
                     case "Position": actor.Position = arr; break;
                     case "Rotation": actor.Rotation = arr; break;
                     case "Scale": actor.Scale = arr; break;
-                    case "Size": actor.Size = arr; break;
-                    case "Velocity": actor.Velocity = arr; break;
-                    case "AngularVelocity": actor.AngularVelocity = arr; break;
                 }
-
+                
                 EditorUtility.SetDirty(context.currentProject);
-                controller.SyncDataToScene(actor);
-                context.NotifyProjectChanged();
+                controller.SyncDataToScene(context.SelectedActor);
+                
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
             });
-            row.Add(field);
 
+            var btn = new Button(() =>
+            {
+                if (context.selectedActorIndex < 0) return;
+                Undo.RecordObject(context.currentProject, "Revert " + propertyKey);
+                var actor = context.SelectedActor;
+                switch (propertyKey) {
+                    case "Position": actor.Position = null; break;
+                    case "Rotation": actor.Rotation = null; break;
+                    case "Scale": actor.Scale = null; break;
+                }
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(context.SelectedActor);
+                UpdateUI(); 
+            }) { text = "Revert" };
+            btn.style.width = 50;
+
+            row.Add(field);
+            row.Add(btn);
             parent.Add(row);
 
-            // Store references
             rows[propertyKey] = new PropertyRow { container = row, field = field, label = label };
         }
 
-        private void CreateScalarField(VisualElement parent, string labelText, System.Action<float> setter)
-        {
-            var field = new FloatField(labelText);
-            field.style.marginBottom = 5;
-            field.RegisterValueChangedCallback(evt =>
-            {
-                if (context.selectedActorIndex >= 0)
-                    controller.UpdateActorProperty(context.selectedActorIndex, () => setter(evt.newValue), "Edit Scalar");
-            });
-            parent.Add(field);
-            field.name = labelText;
-        }
-
-        #endregion UI Construction Helpers
+        #endregion
 
         private void UpdateUI()
         {
@@ -211,9 +228,7 @@ namespace GameRuleEditor.Panels
             {
                 noSelectionContainer.style.display = DisplayStyle.Flex;
                 mainContainer.style.display = DisplayStyle.None;
-                // Desvincular campos para evitar mostrar datos obsoletos si no hay selección
                 actorNameField.Unbind();
-                tagField.Unbind();
                 activeToggle.Unbind();
                 return;
             }
@@ -221,37 +236,39 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.display = DisplayStyle.None;
             mainContainer.style.display = DisplayStyle.Flex;
 
-            // --- Native Data Binding for direct 1:1 type fields ---
-            // Esto es lo del bindeo pero ha sido un poco curioso de implementar (lo ha hecho el agente) ya que he tenido que idear
-            // la arquitectura híbrido de las dos cosas (SerializedProperty + manual) para poder usar el sistema de undo automático 
-            // de Unity en la medida de lo posible, pero sin que el hecho de que algunos campos no sean directamente bindables (como 
-            // el prefab o los vectores) impida que podamos usarlo para los campos simples. La clave ha sido usar un SerializedObject 
-            // temporal para hacer el bind de los campos simples, y luego manejar manualmente los campos complejos con callbacks personalizados 
-            // donde hacemos el Undo.RecordObject y marcamos dirty manualmente. De esta forma conseguimos lo mejor de ambos mundos: bindeo directo 
-            // con undo automático para lo que se puede, y manejo manual con undo para lo que no se puede bindear directamente.
             var so = new SerializedObject(context.currentProject);
             var actorProp = so.FindProperty("actors").GetArrayElementAtIndex(context.selectedActorIndex);
+
             actorNameField.BindProperty(actorProp.FindPropertyRelative("ActorName"));
-            tagField.BindProperty(actorProp.FindPropertyRelative("Tag"));
             activeToggle.BindProperty(actorProp.FindPropertyRelative("Active"));
+
+            // Refresh TagField directly
+            tagField.SetValueWithoutNotify(actor.Tag ?? "Untagged");
+            tagField.RegisterValueChangedCallback(evt => {
+                actor.Tag = evt.newValue;
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(context.SelectedActor);
+            });
+
+            // Set Icon color
+            var iconImage = this.Q<Image>("PrefabColorImage");
+            if (iconImage != null) {
+                Color c = new Color(0.8f, 0.8f, 0.8f);
+                if (!string.IsNullOrEmpty(actor.IconColorHex) && ColorUtility.TryParseHtmlString(actor.IconColorHex, out c)) {
+                    iconImage.tintColor = c;
+                } else {
+                    iconImage.tintColor = new Color(0.8f, 0.8f, 0.8f);
+                }
+            }
 
             // Prefab Loading
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + (actor.PrefabName ?? ""));
             prefabPicker.SetValueWithoutNotify(prefab);
 
-            // Check Overrides vs Prefab defaults
+            // Vector overrides
             UpdateVectorRow("Position", actor.Position, prefab?.transform.position ?? Vector3.zero);
             UpdateVectorRow("Rotation", actor.Rotation, prefab?.transform.eulerAngles ?? Vector3.zero);
             UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
-            UpdateVectorRow("Size", actor.Size, Vector3.zero);
-            UpdateVectorRow("Velocity", actor.Velocity, Vector3.zero);
-            UpdateVectorRow("AngularVelocity", actor.AngularVelocity, Vector3.zero);
-
-            // Scalars
-            this.Q<FloatField>("Density (Mass)")?.SetValueWithoutNotify(actor.Density);
-            this.Q<FloatField>("Friction")?.SetValueWithoutNotify(actor.Friction);
-            this.Q<FloatField>("Bounciness")?.SetValueWithoutNotify(actor.Bounciness);
-            this.Q<FloatField>("Drag")?.SetValueWithoutNotify(actor.Drag);
 
             UpdatePropertiesList();
         }
@@ -263,7 +280,6 @@ namespace GameRuleEditor.Panels
             var vecField = (Vector3Field)row.field;
 
             bool isOverridden = (actorData != null && actorData.Length >= 3);
-
             if (isOverridden)
             {
                 vecField.SetValueWithoutNotify(new Vector3(actorData[0], actorData[1], actorData[2]));
@@ -280,76 +296,136 @@ namespace GameRuleEditor.Panels
         {
             propertiesContainer.Clear();
             var actor = context.SelectedActor;
-            if (actor?.Properties == null || actor.Properties.Count == 0)
+            
+            if (actor != null && actor.Properties != null)
             {
-                propertiesContainer.Add(new Label("No custom properties") { style = { color = Color.gray, fontSize = 10, marginTop = 5 } });
-                return;
-            }
-
-            for (int i = 0; i < actor.Properties.Count; i++)
-            {
-                int idx = i;
-                var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 5 } };
-                row.Add(new Label(actor.Properties[i]) { style = { flexGrow = 1, fontSize = 11 } });
-
-                var btn = new Button(() => controller.RemoveActorProperty(context.selectedActorIndex, idx)) { text = "X" };
-                btn.AddToClassList("button-danger");
-                btn.style.width = 20;
-                row.Add(btn);
-
-                propertiesContainer.Add(row);
-            }
-        }
-
-        private void ShowAddPropertyDialog()
-        {
-            if (context.selectedActorIndex < 0) return;
-            var dialog = ScriptableObject.CreateInstance<AddPropertyDialog>();
-            dialog.ShowModal(p => { if (!string.IsNullOrEmpty(p)) controller.AddActorProperty(context.selectedActorIndex, p); });
-        }
-    }
-
-    public class AddPropertyDialog : EditorWindow
-    {
-        private System.Action<string> callback;
-        private string propertyName = "";
-        private float propertyValue = 0f;
-
-        public void ShowModal(System.Action<string> onComplete)
-        {
-            callback = onComplete;
-            titleContent = new GUIContent("Add Property");
-            minSize = new Vector2(300, 120);
-            maxSize = new Vector2(300, 120);
-
-            var main = EditorGUIUtility.GetMainWindowPosition();
-            var pos = position;
-            pos.center = main.center;
-            position = pos;
-
-            ShowModal();
-        }
-
-        private void OnGUI()
-        {
-            GUILayout.Space(10);
-            GUILayout.Label("Property Definition", EditorStyles.boldLabel);
-            GUILayout.Space(5);
-            propertyName = EditorGUILayout.TextField("Name:", propertyName);
-            propertyValue = EditorGUILayout.FloatField("Value:", propertyValue);
-            GUILayout.Space(10);
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Cancel", GUILayout.Width(80))) Close();
-            if (GUILayout.Button("Add", GUILayout.Width(80)))
-            {
-                if (!string.IsNullOrEmpty(propertyName))
+                for (int i = 0; i < actor.Properties.Count; i++)
                 {
-                    callback?.Invoke($"{propertyName}={propertyValue}");
-                    Close();
+                    int idx = i;
+                    string p = actor.Properties[i];
+                    string[] parts = p.Split('=');
+                    string pName = parts[0];
+                    string pVal = parts.Length > 1 ? parts[1] : "";
+
+                    var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 0, marginTop = 0, alignItems = Align.Center } };
+                    
+                    // Drag setup
+                    row.RegisterCallback<PointerDownEvent>(evt => OnPropDragStart(evt, row, idx));
+                    row.RegisterCallback<PointerMoveEvent>(evt => OnPropDragMove(evt, row));
+                    row.RegisterCallback<PointerUpEvent>(evt => OnPropDragEnd(evt, row, idx));
+                    row.RegisterCallback<PointerCaptureOutEvent>(evt => OnPropDragEnd(evt, row, idx));
+
+                    // Drag Handle (Icon or Label)
+                    var handle = new Label("≡") { style = { fontSize = 16, width = 16, unityTextAlign = TextAnchor.MiddleCenter, color = Color.gray, cursor = new UnityEngine.UIElements.Cursor() } };
+                    row.Add(handle);
+
+                    // Name Field
+                    var nameField = new TextField { value = pName, style = { flexGrow = 1, marginRight = 5 } };
+                    nameField.RegisterValueChangedCallback(evt => {
+                        UpdateActorProp(idx, evt.newValue, pVal); 
+                        pName = evt.newValue;
+                    });
+                    row.Add(nameField);
+
+                    // Value Field
+                    var valField = new TextField { value = pVal, style = { width = 60, marginRight = 5 } };
+                    valField.RegisterValueChangedCallback(evt => {
+                        UpdateActorProp(idx, pName, evt.newValue);
+                        pVal = evt.newValue;
+                    });
+                    row.Add(valField);
+
+                    var btn = new Button(() => {
+                        controller.RemoveActorProperty(context.selectedActorIndex, idx);
+                        UpdatePropertiesList();
+                    }) { text = "X" };
+                    btn.AddToClassList("button-danger");
+                    btn.style.width = 20;
+                    row.Add(btn);
+
+                    propertiesContainer.Add(row);
                 }
             }
-            GUILayout.EndHorizontal();
+
+            // ADD PROPERTY BUTTON at the bottom
+            var addPropBtn = new Button(() => {
+                if (actor.Properties == null) actor.Properties = new List<string>();
+                actor.Properties.Add("NewProp=0");
+                EditorUtility.SetDirty(context.currentProject);
+                UpdatePropertiesList();
+            }) { text = "+ Add Property" };
+            addPropBtn.style.marginTop = 10;
+            addPropBtn.style.paddingTop = 4;
+            addPropBtn.style.paddingBottom = 4;
+            addPropBtn.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            propertiesContainer.Add(addPropBtn);
+        }
+
+        private void UpdateActorProp(int index, string newName, string newVal)
+        {
+            if (context.SelectedActor != null && context.SelectedActor.Properties != null && index < context.SelectedActor.Properties.Count)
+            {
+                context.SelectedActor.Properties[index] = $"{newName}={newVal}";
+                EditorUtility.SetDirty(context.currentProject);
+            }
+        }
+
+        // ─── Drag and Drop Logic for Properties ───
+        private bool isDraggingProp = false;
+        private Vector2 dragStartPosProp;
+        private VisualElement draggedPropItem;
+        private int draggedPropIndex = -1;
+
+        private void OnPropDragStart(PointerDownEvent evt, VisualElement item, int index)
+        {
+            if (evt.button != 0) return;
+            // Only drag if clicking the handle area (left side)
+            if (evt.localPosition.x > 20) return; 
+            
+            isDraggingProp = true;
+            dragStartPosProp = evt.position;
+            draggedPropItem = item;
+            draggedPropIndex = index;
+            item.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnPropDragMove(PointerMoveEvent evt, VisualElement item)
+        {
+        }
+
+        private void OnPropDragEnd(EventBase evt, VisualElement item, int index)
+        {
+            if (!isDraggingProp || item != draggedPropItem) return;
+            
+            IPointerEvent pointerEvt = evt as IPointerEvent;
+            if (pointerEvt != null)
+                item.ReleasePointer(pointerEvt.pointerId);
+            
+            isDraggingProp = false;
+            draggedPropItem = null;
+
+            if (pointerEvt == null) return;
+            
+            float diffY = pointerEvt.position.y - dragStartPosProp.y;
+            if (UnityEngine.Mathf.Abs(diffY) > 15f) 
+            {
+                var actor = context.SelectedActor;
+                // row height is roughly 24
+                int newIndex = draggedPropIndex + UnityEngine.Mathf.RoundToInt(diffY / 24f);
+                newIndex = UnityEngine.Mathf.Clamp(newIndex, 0, actor.Properties.Count - 1);
+                
+                if (newIndex != draggedPropIndex)
+                {
+                    var propToMove = actor.Properties[draggedPropIndex];
+                    actor.Properties.RemoveAt(draggedPropIndex);
+                    actor.Properties.Insert(newIndex, propToMove);
+                    
+                    UnityEditor.EditorUtility.SetDirty(context.currentProject);
+                    UpdatePropertiesList();
+                }
+            }
+            evt.StopPropagation();
         }
     }
 }
