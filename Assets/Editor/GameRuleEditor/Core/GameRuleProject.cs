@@ -194,8 +194,8 @@ namespace GameRuleEditor.Core
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
 
             // --- SANITIZE & DEFAULTS ---
-            // Si el JSON importado no tenía estos campos, JsonUtility los deja null.
-            // Aquí asignamos los valores por defecto.
+            // Si el JSON importado no tenï¿½a estos campos, JsonUtility los deja null.
+            // Aquï¿½ asignamos los valores por defecto.
 
             if (sceneData.ScreenResolution == null || sceneData.ScreenResolution.Length < 2)
                 sceneData.ScreenResolution = new float[] { 1920, 1080 };

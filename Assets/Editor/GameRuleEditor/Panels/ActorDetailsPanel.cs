@@ -19,7 +19,7 @@ namespace GameRuleEditor.Panels
         private TextField actorNameField;
 
         private ObjectField prefabPicker;
-        private UnityEditor.UIElements.TagField tagField;
+        private DropdownField tagField;
         private Toggle activeToggle;
 
         private VisualElement propertiesContainer;
@@ -121,10 +121,14 @@ namespace GameRuleEditor.Panels
             actorNameField.style.marginRight = 10;
             topRow.Add(actorNameField);
 
-            // Tag Dropdown (TagField provides native tag drop down including 'Add Tag...')
-            tagField = new TagField("");
+            // Tag container for dropdown and Add logic
+            var tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+            
+            tagField = new DropdownField();
             tagField.style.width = 120;
-            topRow.Add(tagField);
+            tagContainer.Add(tagField);
+            
+            topRow.Add(tagContainer);
 
             scrollView.Add(topRow);
 
@@ -243,12 +247,12 @@ namespace GameRuleEditor.Panels
             activeToggle.BindProperty(actorProp.FindPropertyRelative("Active"));
 
             // Refresh TagField directly
+            tagField.UnregisterValueChangedCallback(OnTagFieldValueChanged);
+            var choicesList = new List<string>(UnityEditorInternal.InternalEditorUtility.tags);
+            choicesList.Add("Add Custom Tag...");
+            tagField.choices = choicesList;
             tagField.SetValueWithoutNotify(actor.Tag ?? "Untagged");
-            tagField.RegisterValueChangedCallback(evt => {
-                actor.Tag = evt.newValue;
-                EditorUtility.SetDirty(context.currentProject);
-                controller.SyncDataToScene(context.SelectedActor);
-            });
+            tagField.RegisterValueChangedCallback(OnTagFieldValueChanged);
 
             // Set Icon color
             var iconImage = this.Q<Image>("PrefabColorImage");
@@ -271,6 +275,62 @@ namespace GameRuleEditor.Panels
             UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
 
             UpdatePropertiesList();
+        }
+
+        private void OnTagFieldValueChanged(ChangeEvent<string> evt)
+        {
+            if (evt.newValue == "Add Custom Tag...")
+            {
+                var tagContainer = tagField.parent;
+                var textField = new TextField { value = "", style = { width = 120 } };
+                tagContainer.Remove(tagField);
+                tagContainer.Add(textField);
+                
+                textField.schedule.Execute(() => textField.Focus()).StartingIn(10);
+                
+                void FinishTagAddition() {
+                    string newTag = textField.value.Trim();
+                    if (!string.IsNullOrEmpty(newTag) && newTag != "Add Custom Tag...") {
+                        bool tagExists = false;
+                        foreach (string t in UnityEditorInternal.InternalEditorUtility.tags) {
+                            if (t == newTag) { tagExists = true; break; }
+                        }
+                        if (!tagExists) {
+                            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+                            SerializedProperty tagsProp = tagManager.FindProperty("tags");
+                            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
+                            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = newTag;
+                            tagManager.ApplyModifiedProperties();
+                        }
+                        if (context.SelectedActor != null) {
+                            context.SelectedActor.Tag = newTag;
+                            EditorUtility.SetDirty(context.currentProject);
+                            controller.SyncDataToScene(context.SelectedActor);
+                        }
+                    }
+                    
+                    if (tagContainer.Contains(textField)) tagContainer.Remove(textField);
+                    if (!tagContainer.Contains(tagField)) tagContainer.Add(tagField);
+                    
+                    UpdateUI();
+                }
+
+                textField.RegisterCallback<BlurEvent>(e => FinishTagAddition());
+                textField.RegisterCallback<KeyDownEvent>(e => {
+                    if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape) {
+                        if (e.keyCode == KeyCode.Escape) textField.value = "";
+                        FinishTagAddition();
+                    }
+                });
+                return;
+            }
+
+            if (context.SelectedActor != null)
+            {
+                context.SelectedActor.Tag = evt.newValue;
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(context.SelectedActor);
+            }
         }
 
         private void UpdateVectorRow(string key, float[] actorData, Vector3 prefabDefault)

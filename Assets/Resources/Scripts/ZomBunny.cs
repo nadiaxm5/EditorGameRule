@@ -66,5 +66,7 @@ public class ZomBunny : MonoBehaviour {
         TagCollisions["Hellephant"] = new HashSet<GameObject>();
         TagCollisions["Bullet"] = new HashSet<GameObject>();
         TagCollisions["ZomBear"] = new HashSet<GameObject>();
+        TagCollisions["jugador"] = new HashSet<GameObject>();
+        TagCollisions["fjh bnsadjhf"] = new HashSet<GameObject>();
     }
 }

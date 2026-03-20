@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
-  m_Name: SURVIVAL_SHOOTER 1
+  m_Name: SURVIVAL_SHOOTER 2
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
   projectName: SURVIVAL_SHOOTER
   sceneData:
@@ -889,14 +889,11 @@ MonoBehaviour:
         - LoadScene()
     CustomVariables:
     - name: Score
-      type: vector3
+      type: float
       intValue: 0
       floatValue: 0
       boolValue: 0
-      arrayValue:
-      - 0
-      - 0
-      - 0
+      arrayValue: []
   actors:
   - ActorName: LightingReflection
     Active: 1
@@ -959,91 +956,6 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script: []
-  - ActorName: Hellephant
-    Active: 0
-    PrefabName: Hellephant
-    Tag: Hellephant
-    IconColorHex: 
-    Position:
-    - -3.0381298
-    - 0.035427637
-    - -16.268959
-    Rotation:
-    - 0
-    - 158.36176
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties:
-    - name: 
-      type: 
-      intValue: 0
-      floatValue: 0
-      boolValue: 0
-      arrayValue: []
-    - name: 
-      type: 
-      intValue: 0
-      floatValue: 0
-      boolValue: 0
-      arrayValue: []
-    - name: 
-      type: 
-      intValue: 0
-      floatValue: 0
-      boolValue: 0
-      arrayValue: []
-    - name: 
-      type: 
-      intValue: 0
-      floatValue: 0
-      boolValue: 0
-      arrayValue: []
-    Script:
-    - Name: 
-      When: []
-      Do:
-      - Edit(this.moving,1)
-      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-    - Name: 
-      When:
-      - Compare(Player.health<0)
-      Do:
-      - Edit(this.moving,0)
-      - Edit(this.speed,0)
-    - Name: 
-      When:
-      - Collision(Bullet)
-      Do:
-      - Edit(this.health,this.health-Bullet.damage)
-      - PlaySound(HellephantHurt)
-      - PlayParticles(HitParticles)
-    - Name: 
-      When:
-      - Compare(this.health<=0)
-      Do:
-      - Edit(#Score,#Score+50)
-      - Spawn(HellephantDead,this)
-      - Delete(this)
-    - Name: 
-      When:
-      - NOT Check(this.moving)
-      Do:
-      - Animate(Idle)
-    - Name: 
-      When:
-      - Check(this.moving)
-      Do:
-      - Animate(Move)
   - ActorName: Player
     Active: 1
     PrefabName: Player
@@ -1054,7 +966,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -1070,58 +982,55 @@ MonoBehaviour:
     Drag: 0
     Properties:
     - name: 
-      type: int
-      intValue: 0
-      floatValue: 0
-      boolValue: 0
-      arrayValue:
-      - 0
-      - 0
-      - 0
-    - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
       arrayValue: []
     - name: 
-      type: int
+      type: 
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: 
+      type: 
       intValue: 0
       floatValue: 0
       boolValue: 0
@@ -1224,6 +1133,91 @@ MonoBehaviour:
       - NOT Check(this.moving) AND Compare(this.health<=0)
       Do:
       - Animate(Death)
+  - ActorName: Hellephant
+    Active: 0
+    PrefabName: Hellephant
+    Tag: Hellephant
+    IconColorHex: 
+    Position:
+    - -3.0381298
+    - 0.035427637
+    - -16.268959
+    Rotation:
+    - 0
+    - 158.36176
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - name: 
+      type: 
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: 
+      type: 
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: 
+      type: 
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    - name: 
+      type: 
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.moving,1)
+      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+    - Name: 
+      When:
+      - Compare(Player.health<0)
+      Do:
+      - Edit(this.moving,0)
+      - Edit(this.speed,0)
+    - Name: 
+      When:
+      - Collision(Bullet)
+      Do:
+      - Edit(this.health,this.health-Bullet.damage)
+      - PlaySound(HellephantHurt)
+      - PlayParticles(HitParticles)
+    - Name: 
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(#Score,#Score+50)
+      - Spawn(HellephantDead,this)
+      - Delete(this)
+    - Name: 
+      When:
+      - NOT Check(this.moving)
+      Do:
+      - Animate(Idle)
+    - Name: 
+      When:
+      - Check(this.moving)
+      Do:
+      - Animate(Move)
   - ActorName: ZomBear
     Active: 0
     PrefabName: ZomBear
@@ -1690,7 +1684,7 @@ MonoBehaviour:
     Tag: 
     IconColorHex: 
     Position:
-    - 522.8333
+    - 467.83334
     - 408.5
     - 0
     Rotation:

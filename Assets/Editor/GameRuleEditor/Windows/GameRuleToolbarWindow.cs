@@ -87,6 +87,8 @@ namespace GameRuleEditor.Windows
             }
         }
 
+        // ...existing code...
+
         private void BuildUI()
         {
             var root = rootVisualElement;
@@ -105,7 +107,11 @@ namespace GameRuleEditor.Windows
             toolbar.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f); // #1a1a1a
             toolbar.style.flexShrink = 0;
 
-            // Project menu
+            // Grupo izquierda (se queda igual)
+            var leftGroup = new VisualElement();
+            leftGroup.style.flexDirection = FlexDirection.Row;
+            leftGroup.style.alignItems = Align.Center;
+
             var projectMenu = new ToolbarMenu();
             projectMenu.text = "Project";
             projectMenu.menu.AppendAction("New Project", a => OnNewProject());
@@ -115,36 +121,48 @@ namespace GameRuleEditor.Windows
             projectMenu.menu.AppendAction("Export to JSON", a => OnExportJson());
             projectMenu.menu.AppendSeparator();
             projectMenu.menu.AppendAction("Close Project", a => OnCloseProject());
-            toolbar.Add(projectMenu);
+            leftGroup.Add(projectMenu);
 
-            toolbar.Add(new ToolbarSpacer());
+            // Grupo centro (antes estaba a la derecha)
+            var middleGroup = new VisualElement();
+            middleGroup.style.flexDirection = FlexDirection.Row;
+            middleGroup.style.alignItems = Align.Center;
+            middleGroup.style.justifyContent = Justify.Center;
+            middleGroup.style.flexGrow = 1;
 
-            // Project name
+            var rightSpacer = new VisualElement();
+            rightSpacer.style.flexShrink = 0;
+            rightSpacer.style.width = 0;
+
             projectNameLabel = new Label(context?.currentProject?.projectName ?? "No Project");
             projectNameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
-            projectNameLabel.style.flexGrow = 1;
             projectNameLabel.style.overflow = Overflow.Hidden;
             projectNameLabel.style.textOverflow = TextOverflow.Ellipsis;
             projectNameLabel.style.fontSize = 11;
             projectNameLabel.style.color = new Color(0.61f, 0.64f, 0.69f); // #9ca3af
-            toolbar.Add(projectNameLabel);
+            projectNameLabel.style.maxWidth = 220;
+            projectNameLabel.style.marginRight = 8;
+            leftGroup.Add(projectNameLabel);
 
-            // Undo / Redo
             var undoBtn = new ToolbarButton(() => Undo.PerformUndo()) { text = "\u21A9" };
             undoBtn.tooltip = "Undo (Ctrl+Z)";
             undoBtn.style.fontSize = 14;
-            undoBtn.style.width = 28;
-            toolbar.Add(undoBtn);
+            undoBtn.style.width = 35;
+            middleGroup.Add(undoBtn);
 
             var redoBtn = new ToolbarButton(() => Undo.PerformRedo()) { text = "\u21AA" };
             redoBtn.tooltip = "Redo (Ctrl+Shift+Z)";
             redoBtn.style.fontSize = 14;
-            redoBtn.style.width = 28;
-            toolbar.Add(redoBtn);
+            redoBtn.style.width = 35;
+            middleGroup.Add(redoBtn);
 
-            toolbar.Add(new ToolbarSpacer());
+            playBtn = new ToolbarButton(OnPlayButton);
+            playBtn.style.fontSize = 20;
+            playBtn.style.width = 35;
+            playBtn.style.marginLeft = 6;
+            UpdatePlayButtonUI();
+            middleGroup.Add(playBtn);
 
-            // Scene Settings button
             var sceneSettingsBtn = new ToolbarButton(() =>
             {
                 if (context != null)
@@ -156,23 +174,28 @@ namespace GameRuleEditor.Windows
             { text = "\u2699" };
             sceneSettingsBtn.tooltip = "Scene Settings";
             sceneSettingsBtn.style.fontSize = 14;
-            sceneSettingsBtn.style.width = 28;
-            toolbar.Add(sceneSettingsBtn);
+            sceneSettingsBtn.style.width = 35;
+            sceneSettingsBtn.style.marginLeft = 6;
+            middleGroup.Add(sceneSettingsBtn);
 
-                        // Play / Stop
-            playBtn = new ToolbarButton(OnPlayButton);
-            playBtn.style.fontSize = 11;
-            playBtn.style.width = 28;
-            UpdatePlayButtonUI();
-            toolbar.Add(playBtn);
-
-            // Save
             var saveBtn = new ToolbarButton(OnSaveProject) { text = "Save" };
             saveBtn.style.fontSize = 11;
-            toolbar.Add(saveBtn);
+            saveBtn.style.marginLeft = 6;
+            middleGroup.Add(saveBtn);
+
+            toolbar.Add(leftGroup);
+            toolbar.Add(middleGroup);
+            toolbar.Add(rightSpacer);
+
+            leftGroup.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                rightSpacer.style.width = leftGroup.resolvedStyle.width;
+            });
 
             root.Add(toolbar);
         }
+
+// ...existing code...
 
         private void Rebuild()
         {

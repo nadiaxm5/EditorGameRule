@@ -315,6 +315,25 @@ namespace GameRuleEditor.Panels
 
         #region UI Helpers
 
+        private Foldout CreateSection(string title)
+        {
+            var section = new Foldout();
+            section.text = title;
+            section.value = true; // Empieza extendido por defecto
+            section.AddToClassList("panel-section");
+            
+            // Buscar la etiqueta del título (que es parte del Toggle interno de Foldout) para aplicarle estilo
+            var titleLabel = section.Q<Label>();
+            if (titleLabel != null)
+            {
+                titleLabel.style.fontSize = 14;
+                titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+                titleLabel.style.marginBottom = 8;
+            }
+            
+            return section;
+        }
+/*
         private VisualElement CreateSection(string title)
         {
             var section = new VisualElement();
@@ -326,7 +345,7 @@ namespace GameRuleEditor.Panels
             section.Add(titleLabel);
             return section;
         }
-
+*/
         private TextField CreateTextField(VisualElement parent, string label)
         {
             var field = new TextField(label);
@@ -504,7 +523,7 @@ namespace GameRuleEditor.Panels
                     item.Add(nameField);
 
                     // Desplegable de tipo
-                    string currentTypeStr = customVar.type.ToLower();
+                    string currentTypeStr = customVar.type?.ToLower() ?? "int";
                     string matchType = variableTypes.Find(t => t.ToLower() == currentTypeStr) ?? "Int";
 
                     var typeDropdown = new PopupField<string>(variableTypes, variableTypes.IndexOf(matchType)) { name = "VarType", style = { width = 80, marginRight = 5 } };
@@ -612,9 +631,10 @@ namespace GameRuleEditor.Panels
 
                     var nameField = row.Q<TextField>("VarName");
                     if (nameField != null && nameField.value != customVar.name)
-                        nameField.SetValueWithoutNotify(customVar.name);
+                        nameField.SetValueWithoutNotify(customVar.name ?? "");
 
-                    switch (customVar.type.ToLower())
+                    string safeType = customVar.type?.ToLower() ?? "int";
+                    switch (safeType)
                     {
                         case "int":
                             var intF = row.Q<IntegerField>("VarValue");

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class Player : MonoBehaviour {
     public bool Active = true;
-    public float speed=5f;
+    public float health=100.0f;
     public float rotSpeed=360f;
     public float lastHealth=100.0f;
-    public float health=100.0f;
+    public float speed=5f;
     public float offsetCam=7f;
     public float offsetX=0.28f;
     public float offsetY=0.3f;
@@ -99,7 +99,7 @@ public class Player : MonoBehaviour {
             TagCollisions[other.tag].Remove(other.gameObject);
     }
     void Awake() {
-        propertyList = Utils.CreateProperties("speed=5;rotSpeed=360;lastHealth=100.0;health=100.0;offsetCam=7;offsetX=0.28;offsetY=0.3;offsetZ=0.7;moving=0");
+        propertyList = Utils.CreateProperties("health=100.0;rotSpeed=360;lastHealth=100.0;speed=5;offsetCam=7;offsetX=0.28;offsetY=0.3;offsetZ=0.7;moving=0");
         TagCollisions["Untagged"] = new HashSet<GameObject>();
         TagCollisions["Respawn"] = new HashSet<GameObject>();
         TagCollisions["Finish"] = new HashSet<GameObject>();
@@ -114,5 +114,7 @@ public class Player : MonoBehaviour {
         TagCollisions["Hellephant"] = new HashSet<GameObject>();
         TagCollisions["Bullet"] = new HashSet<GameObject>();
         TagCollisions["ZomBear"] = new HashSet<GameObject>();
+        TagCollisions["jugador"] = new HashSet<GameObject>();
+        TagCollisions["fjh bnsadjhf"] = new HashSet<GameObject>();
     }
 }
