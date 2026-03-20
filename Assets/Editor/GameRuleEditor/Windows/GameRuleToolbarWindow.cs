@@ -282,7 +282,18 @@ namespace GameRuleEditor.Windows
             {
                 EditorUtility.SetDirty(context.currentProject);
                 AssetDatabase.SaveAssets();
-                Debug.Log("Project saved");
+
+                string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
+                if (!Directory.Exists(gamesFolder))
+                    Directory.CreateDirectory(gamesFolder);
+
+                string jsonPath = Path.Combine(gamesFolder, context.currentProject.projectName + ".json");
+                if (controller == null)
+                    controller = GameRuleLayoutManager.GetOrCreateController(context);
+
+                controller.SaveProjectToJson(jsonPath);
+                AssetDatabase.Refresh();
+                Debug.Log($"Project saved and JSON exported: {jsonPath}");
             }
         }
 

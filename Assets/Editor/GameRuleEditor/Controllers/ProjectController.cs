@@ -465,6 +465,19 @@ namespace GameRuleEditor.Controllers
             GameObject obj = GameObject.Find(actor.ActorName);
             if (obj == null) return;
 
+            if (!string.IsNullOrEmpty(actor.Tag) && obj.tag != actor.Tag)
+            {
+                EnsureTagExists(actor.Tag);
+                try
+                {
+                    obj.tag = actor.Tag;
+                }
+                catch (UnityException)
+                {
+                    // Ignore invalid/missing tags in TagManager to avoid breaking editor sync.
+                }
+            }
+
             if (actor.Position != null && actor.Position.Length >= 3)
                 obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
 
@@ -482,10 +495,26 @@ namespace GameRuleEditor.Controllers
             GameObject obj = GameObject.Find(actor.ActorName);
             if (obj == null) return false;
 
-            if (!obj.transform.hasChanged) return false;
-
             bool changed = false;
             bool Diff(float a, float b) => Mathf.Abs(a - b) > 0.001f;
+
+            // Tag can change without affecting transform.hasChanged.
+            if (!string.IsNullOrEmpty(obj.tag) && actor.Tag != obj.tag)
+            {
+                actor.Tag = obj.tag;
+                changed = true;
+            }
+
+            if (!obj.transform.hasChanged)
+            {
+                if (changed)
+                {
+                    EditorUtility.SetDirty(context.currentProject);
+                    context.NotifyProjectChanged();
+                }
+
+                return changed;
+            }
 
             // Position Check
             Vector3 pos = obj.transform.position;
@@ -523,6 +552,25 @@ namespace GameRuleEditor.Controllers
             }
 
             return changed;
+        }
+
+        private static void EnsureTagExists(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag)) return;
+
+            foreach (string existing in UnityEditorInternal.InternalEditorUtility.tags)
+            {
+                if (existing == tag)
+                    return;
+            }
+
+            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty tagsProp = tagManager.FindProperty("tags");
+            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
+            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = tag;
+            tagManager.ApplyModifiedProperties();
+            tagManager.Update();
+            AssetDatabase.SaveAssets();
         }
 
         #endregion Actor Operations

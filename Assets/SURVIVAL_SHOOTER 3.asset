@@ -110,13 +110,13 @@ MonoBehaviour:
       Active: 1
       PrefabName: Player
       Tag: Player
-      IconColorHex: '#FF0000'
+      IconColorHex: '#86FF00'
       Position:
       - 0
       - 0
       - 0
       Rotation:
-      - 0
+      - -0
       - 0
       - 0
       Scale:
@@ -845,13 +845,13 @@ MonoBehaviour:
     Active: 1
     PrefabName: Player
     Tag: Player
-    IconColorHex: '#FF0000'
+    IconColorHex: '#86FF00'
     Position:
     - 0
     - 0
     - 0
     Rotation:
-    - 0
+    - -0
     - 0
     - 0
     Scale:

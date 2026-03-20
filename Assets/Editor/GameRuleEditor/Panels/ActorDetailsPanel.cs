@@ -303,9 +303,11 @@ namespace GameRuleEditor.Panels
                             tagManager.ApplyModifiedProperties();
                         }
                         if (context.SelectedActor != null) {
+                            Undo.RecordObject(context.currentProject, "Change Tag");
                             context.SelectedActor.Tag = newTag;
                             EditorUtility.SetDirty(context.currentProject);
                             controller.SyncDataToScene(context.SelectedActor);
+                            context.NotifyProjectChanged();
                         }
                     }
                     
@@ -327,9 +329,11 @@ namespace GameRuleEditor.Panels
 
             if (context.SelectedActor != null)
             {
+                Undo.RecordObject(context.currentProject, "Change Tag");
                 context.SelectedActor.Tag = evt.newValue;
                 EditorUtility.SetDirty(context.currentProject);
                 controller.SyncDataToScene(context.SelectedActor);
+                context.NotifyProjectChanged();
             }
         }
 
