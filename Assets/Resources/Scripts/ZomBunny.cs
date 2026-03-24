@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class ZomBunny : MonoBehaviour {
     public bool Active = false;
-    public float speed=4f;
-    public float health=100f;
     public float damage=0.15f;
+    public float health=100f;
+    public float speed=4f;
     public float moving=0f;
     public Dictionary<string, float> propertyList = new Dictionary<string, float>();
     private Dictionary<string, float> timers = new Dictionary<string, float>();
@@ -51,7 +51,7 @@ public class ZomBunny : MonoBehaviour {
             TagCollisions[other.tag].Remove(other.gameObject);
     }
     void Awake() {
-        propertyList = Utils.CreateProperties("speed=4;health=100;damage=0.15;moving=0");
+        propertyList = Utils.CreateProperties("damage=0.15;health=100;speed=4;moving=0");
         TagCollisions["Untagged"] = new HashSet<GameObject>();
         TagCollisions["Respawn"] = new HashSet<GameObject>();
         TagCollisions["Finish"] = new HashSet<GameObject>();

@@ -167,8 +167,7 @@ namespace GameRuleEditor.Windows
             {
                 if (context != null)
                 {
-                    context.ToggleScenePropsInspector();
-                    GameRuleInspectorWindow.EnsureVisible(context, controller);
+                    GameRuleSceneWindow.EnsureVisible(context, controller);
                 }
             })
             { text = "\u2699" };

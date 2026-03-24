@@ -64,12 +64,19 @@ namespace GameRuleEditor.Windows
             hierarchyWindow.minSize = new Vector2(256, 300);
             hierarchyWindow.Init(context, controller);
 
-            // 2. Open Inspector window (docked next to Unity's Inspector)
-            var inspectorWindow = EditorWindow.GetWindow<GameRuleInspectorWindow>(
-                "Inspector", false, typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow"));
-            inspectorWindow.minSize = new Vector2(320, 300);
-            inspectorWindow.Init(context, controller);
+            // 2. Open Inspector window (docked next to Unity's Inspector), 
+            var sceneWin = EditorWindow.GetWindow<GameRuleSceneWindow>("Scene Settings", false, typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow"));
+            sceneWin.minSize = new Vector2(320, 300);
+            sceneWin.Init(context, controller);
 
+            var propsWin = EditorWindow.GetWindow<GameRulePropertiesWindow>("Properties", false, typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow"));
+            propsWin.minSize = new Vector2(320, 300);
+            propsWin.Init(context, controller);
+
+            var rulesWin = EditorWindow.GetWindow<GameRuleRulesWindow>("Rules", false, typeof(Editor).Assembly.GetType("UnityEditor.SceneView"));
+            rulesWin.minSize = new Vector2(400, 300);
+            rulesWin.Init(context, controller);
+            
             // If no project loaded, show modal dialog
             if (context.currentProject == null)
             {

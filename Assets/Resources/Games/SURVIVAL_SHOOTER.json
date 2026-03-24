@@ -18,7 +18,7 @@
             "Active": true,
             "PrefabName": "LightingReflection",
             "Tag": "Untagged",
-            "IconColorHex": "#FF0F12",
+            "IconColorHex": "#FFFFFF",
             "Position": [0.0, 0.6000000238418579, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
@@ -55,16 +55,16 @@
             "Active": true,
             "PrefabName": "Player",
             "Tag": "Player",
-            "IconColorHex": "#86FF00",
+            "IconColorHex": "#FFFFFF",
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "Properties": [
-                "health=100.0",
-                "rotSpeed=360",
-                "lastHealth=100.0",
-                "speed=5",
                 "offsetCam=7",
+                "rotSpeed=360",
+                "health=100.0",
+                "speed=5",
+                "lastHealth=100.0",
                 "offsetX=0.28",
                 "offsetY=0.3",
                 "offsetZ=0.7",
@@ -317,9 +317,9 @@
             "Scale": [1.0, 1.0, 1.0],
             "Properties": [
                 "speed=3",
-                "health=200",
                 "damage=0.2",
-                "moving=0"
+                "moving=0",
+                "health=200"
             ],
             "Script": [
                 {
@@ -391,9 +391,9 @@
             "Rotation": [0.0, 141.91790771484376, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "Properties": [
-                "speed=4",
-                "health=100",
                 "damage=0.15",
+                "health=100",
+                "speed=4",
                 "moving=0"
             ],
             "Script": [
@@ -460,7 +460,7 @@
             "ActorName": "HellephantSpawner",
             "Active": true,
             "PrefabName": "HellephantSpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 32.0],
             "Rotation": [0.0, 230.0, 0.0],
@@ -481,7 +481,7 @@
             "ActorName": "ZomBearSpawner",
             "Active": true,
             "PrefabName": "ZomBearSpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [22.5, 0.0, 15.0],
             "Rotation": [0.0, 240.0, 0.0],
@@ -502,7 +502,7 @@
             "ActorName": "ZomBunnySpawner",
             "Active": true,
             "PrefabName": "ZomBunnySpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [-20.5, 0.0, 12.5],
             "Rotation": [0.0, 130.0, 0.0],
@@ -523,8 +523,11 @@
             "ActorName": "HellephantDead",
             "Active": false,
             "PrefabName": "HellephantDead",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
                     "Name": "",
@@ -549,7 +552,7 @@
             "ActorName": "ZomBearDead",
             "Active": false,
             "PrefabName": "ZomBearDead",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
@@ -569,8 +572,11 @@
             "ActorName": "ZomBunnyDead",
             "Active": false,
             "PrefabName": "ZomBunnyDead",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
                     "Name": "",
@@ -598,7 +604,7 @@
             "Tag": "Bullet",
             "IconColorHex": "",
             "Position": [3.4745335578918459, 0.3661762475967407, 10.446494102478028],
-            "Rotation": [0.06195583939552307, 4.987424373626709, 0.0004497317422647029],
+            "Rotation": [0.06195584684610367, 4.987424373626709, 0.00044973180047236383],
             "Scale": [0.15000000596046449, 0.15000000596046449, 0.15000000596046449],
             "Properties": [
                 "speed=50",
@@ -626,8 +632,11 @@
             "ActorName": "ShotLight",
             "Active": false,
             "PrefabName": "ShotLight",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
                     "Name": "",
@@ -644,7 +653,7 @@
             "ActorName": "Laser",
             "Active": false,
             "PrefabName": "Laser",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Script": [
                 {
@@ -659,16 +668,19 @@
             "ActorName": "DamageCanvas",
             "Active": false,
             "PrefabName": "DamageCanvas",
-            "Tag": "",
-            "IconColorHex": ""
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [0.0, 0.0, 0.0]
         },
         {
             "ActorName": "HUDCanvas",
             "Active": true,
             "PrefabName": "HUDCanvas",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
-            "Position": [467.8333435058594, 408.5, 0.0],
+            "Position": [507.5, 408.5, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
@@ -685,7 +697,7 @@
             "ActorName": "GameOver",
             "Active": false,
             "PrefabName": "GameOver",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Script": [
                 {

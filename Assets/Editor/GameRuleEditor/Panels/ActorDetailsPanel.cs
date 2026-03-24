@@ -21,6 +21,7 @@ namespace GameRuleEditor.Panels
         private ObjectField prefabPicker;
         private DropdownField tagField;
         private Toggle activeToggle;
+        private bool suppressActiveToggleCallback;
 
         private VisualElement propertiesContainer;
 
@@ -88,11 +89,6 @@ namespace GameRuleEditor.Panels
             // ─── Top Row ───
             var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10, paddingLeft = 4 } };
 
-            // Active (Toggle)
-            activeToggle = new Toggle();
-            activeToggle.tooltip = "Active";
-            activeToggle.style.marginRight = 5;
-            topRow.Add(activeToggle);
 
             // Prefab Icon color picker
             var iconContainer = new VisualElement { style = { width = 24, height = 24, marginRight = 5 } };
@@ -115,6 +111,16 @@ namespace GameRuleEditor.Panels
             iconContainer.Add(iconColorField);
             topRow.Add(iconContainer);
 
+
+            // Active (Toggle)
+            activeToggle = new Toggle();
+            activeToggle.tooltip = "Active";
+            activeToggle.style.marginRight = 5;
+            activeToggle.RegisterValueChangedCallback(OnActiveToggleValueChanged);
+            topRow.Add(activeToggle);
+
+            
+
             // Actor Name (No Label)
             actorNameField = new TextField();
             actorNameField.style.flexGrow = 1;
@@ -124,6 +130,7 @@ namespace GameRuleEditor.Panels
             // Tag container for dropdown and Add logic
             var tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
             
+            tagContainer.Add(new Label("Tag") { style = { width = 20, unityTextAlign = TextAnchor.MiddleCenter } });
             tagField = new DropdownField();
             tagField.style.width = 120;
             tagContainer.Add(tagField);
@@ -134,7 +141,7 @@ namespace GameRuleEditor.Panels
 
             // ─── Prefab Selection ───
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
-            prefabRow.Add(new Label("Prefab:") { style = { width = 80, unityTextAlign = TextAnchor.MiddleLeft } });
+            prefabRow.Add(new Label("Prefab") { style = { width = 40, unityTextAlign = TextAnchor.MiddleCenter } });
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
@@ -152,7 +159,22 @@ namespace GameRuleEditor.Panels
             var transformSection = new Foldout { text = "Transform", value = true };
             transformSection.style.unityFontStyleAndWeight = FontStyle.Bold;
             transformSection.style.marginBottom = 10;
+            
+            // Add Transform icon
+            var transformIcon = new Image { image = EditorGUIUtility.IconContent("Transform Icon").image, style = { width = 16, height = 16, marginRight = 4 } };
+            transformSection.Insert(0, transformIcon);
+
+            var headerLabel = transformSection.Q<Label>();
+
+            // 2. Insertamos el icono en el contenedor padre del Label, justo en la misma posición 
+            // que ocupa el texto actualmente. Esto desplazará el texto hacia la derecha.
+            if (headerLabel != null)
+            {
+                headerLabel.parent.Insert(headerLabel.parent.IndexOf(headerLabel), transformIcon);
+            }
+
             scrollView.Add(transformSection);
+            
 
             var transformContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
             transformSection.Add(transformContainer);
@@ -199,7 +221,7 @@ namespace GameRuleEditor.Panels
                 
                 label.style.unityFontStyleAndWeight = FontStyle.Bold;
             });
-
+/*
             var btn = new Button(() =>
             {
                 if (context.selectedActorIndex < 0) return;
@@ -215,9 +237,9 @@ namespace GameRuleEditor.Panels
                 UpdateUI(); 
             }) { text = "Revert" };
             btn.style.width = 50;
-
+*/
             row.Add(field);
-            row.Add(btn);
+         //   row.Add(btn);
             parent.Add(row);
 
             rows[propertyKey] = new PropertyRow { container = row, field = field, label = label };
@@ -244,7 +266,9 @@ namespace GameRuleEditor.Panels
             var actorProp = so.FindProperty("actors").GetArrayElementAtIndex(context.selectedActorIndex);
 
             actorNameField.BindProperty(actorProp.FindPropertyRelative("ActorName"));
-            activeToggle.BindProperty(actorProp.FindPropertyRelative("Active"));
+            suppressActiveToggleCallback = true;
+            activeToggle.SetValueWithoutNotify(actor.Active);
+            suppressActiveToggleCallback = false;
 
             // Refresh TagField directly
             tagField.UnregisterValueChangedCallback(OnTagFieldValueChanged);
@@ -275,6 +299,17 @@ namespace GameRuleEditor.Panels
             UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
 
             UpdatePropertiesList();
+        }
+
+        private void OnActiveToggleValueChanged(ChangeEvent<bool> evt)
+        {
+            if (suppressActiveToggleCallback || context.selectedActorIndex < 0 || context.SelectedActor == null)
+                return;
+
+            controller.UpdateActorProperty(
+                context.selectedActorIndex,
+                () => context.SelectedActor.Active = evt.newValue,
+                "Toggle Actor Active");
         }
 
         private void OnTagFieldValueChanged(ChangeEvent<string> evt)
@@ -440,6 +475,10 @@ namespace GameRuleEditor.Panels
         private VisualElement draggedPropItem;
         private int draggedPropIndex = -1;
 
+        private VisualElement dragSpacer;
+
+
+
         private void OnPropDragStart(PointerDownEvent evt, VisualElement item, int index)
         {
             if (evt.button != 0) return;
@@ -450,12 +489,33 @@ namespace GameRuleEditor.Panels
             dragStartPosProp = evt.position;
             draggedPropItem = item;
             draggedPropIndex = index;
+
+            dragSpacer = new VisualElement();
+            dragSpacer.style.height = item.layout.height; // Copia la altura (aprox 24)
+            item.parent.Insert(index, dragSpacer); // Mantiene el hueco abierto
+
+            // Sacamos el item del layout normal y lo traemos al frente
+            item.style.position = Position.Absolute;
+            item.style.top = item.layout.y;   // Lo mantenemos donde estaba visualmente
+            item.style.left = item.layout.x;
+            item.style.width = item.layout.width; // Evita que se encoja
+            item.BringToFront(); 
+
             item.CapturePointer(evt.pointerId);
             evt.StopPropagation();
+            
+
         }
 
         private void OnPropDragMove(PointerMoveEvent evt, VisualElement item)
         {
+            if (!isDraggingProp || item != draggedPropItem) return;
+
+            float diffY = evt.position.y - dragStartPosProp.y;
+            if (UnityEngine.Mathf.Abs(diffY) > 5f)
+            {
+                item.transform.position = new Vector3(0f, diffY, 0f);
+            }
         }
 
         private void OnPropDragEnd(EventBase evt, VisualElement item, int index)
@@ -468,6 +528,19 @@ namespace GameRuleEditor.Panels
             
             isDraggingProp = false;
             draggedPropItem = null;
+            item.transform.position = Vector3.zero;
+            item.style.position = StyleKeyword.Null; // Revierte el Absolute
+            item.style.top = StyleKeyword.Null;
+            item.style.left = StyleKeyword.Null;
+            item.style.width = StyleKeyword.Null;
+
+            // Borramos el espaciador
+            if (dragSpacer != null && dragSpacer.parent != null)
+            {
+                dragSpacer.parent.Remove(dragSpacer);
+                dragSpacer = null;
+            }
+            // ----------------------------------------------------
 
             if (pointerEvt == null) return;
             
@@ -475,7 +548,6 @@ namespace GameRuleEditor.Panels
             if (UnityEngine.Mathf.Abs(diffY) > 15f) 
             {
                 var actor = context.SelectedActor;
-                // row height is roughly 24
                 int newIndex = draggedPropIndex + UnityEngine.Mathf.RoundToInt(diffY / 24f);
                 newIndex = UnityEngine.Mathf.Clamp(newIndex, 0, actor.Properties.Count - 1);
                 
@@ -488,7 +560,18 @@ namespace GameRuleEditor.Panels
                     UnityEditor.EditorUtility.SetDirty(context.currentProject);
                     UpdatePropertiesList();
                 }
+                else
+                {
+                    // Si el índice no cambió, lo reinsertamos visualmente en su sitio original
+                    item.parent.Insert(draggedPropIndex, item);
+                }
             }
+            else
+            {
+                // Si no se arrastró lo suficiente (>15f), lo devolvemos a su lugar
+                item.parent.Insert(draggedPropIndex, item);
+            }
+            
             evt.StopPropagation();
         }
     }

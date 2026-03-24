@@ -462,8 +462,11 @@ namespace GameRuleEditor.Controllers
         public void SyncDataToScene(ActorJson actor)
         {
             if (actor == null) return;
-            GameObject obj = GameObject.Find(actor.ActorName);
+            GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return;
+
+            if (obj.activeSelf != actor.Active)
+                obj.SetActive(actor.Active);
 
             if (!string.IsNullOrEmpty(actor.Tag) && obj.tag != actor.Tag)
             {
@@ -492,7 +495,7 @@ namespace GameRuleEditor.Controllers
         public bool SyncSceneToData(ActorJson actor)
         {
             if (actor == null) return false;
-            GameObject obj = GameObject.Find(actor.ActorName);
+            GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return false;
 
             bool changed = false;
@@ -502,6 +505,12 @@ namespace GameRuleEditor.Controllers
             if (!string.IsNullOrEmpty(obj.tag) && actor.Tag != obj.tag)
             {
                 actor.Tag = obj.tag;
+                changed = true;
+            }
+
+            if (actor.Active != obj.activeSelf)
+            {
+                actor.Active = obj.activeSelf;
                 changed = true;
             }
 
@@ -571,6 +580,31 @@ namespace GameRuleEditor.Controllers
             tagManager.ApplyModifiedProperties();
             tagManager.Update();
             AssetDatabase.SaveAssets();
+        }
+
+        private static GameObject FindSceneObjectByName(string objectName)
+        {
+            if (string.IsNullOrWhiteSpace(objectName))
+                return null;
+
+            var activeOnly = GameObject.Find(objectName);
+            if (activeOnly != null)
+                return activeOnly;
+
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            for (int i = 0; i < allObjects.Length; i++)
+            {
+                var go = allObjects[i];
+                if (go == null || go.name != objectName)
+                    continue;
+
+                if (!go.scene.IsValid() || EditorUtility.IsPersistent(go))
+                    continue;
+
+                return go;
+            }
+
+            return null;
         }
 
         #endregion Actor Operations

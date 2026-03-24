@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public class ZomBear : MonoBehaviour {
     public bool Active = false;
     public float speed=3f;
-    public float health=200f;
     public float damage=0.2f;
     public float moving=0f;
+    public float health=200f;
     public Dictionary<string, float> propertyList = new Dictionary<string, float>();
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void FixedUpdate(){
@@ -51,7 +51,7 @@ public class ZomBear : MonoBehaviour {
             TagCollisions[other.tag].Remove(other.gameObject);
     }
     void Awake() {
-        propertyList = Utils.CreateProperties("speed=3;health=200;damage=0.2;moving=0");
+        propertyList = Utils.CreateProperties("speed=3;damage=0.2;moving=0;health=200");
         TagCollisions["Untagged"] = new HashSet<GameObject>();
         TagCollisions["Respawn"] = new HashSet<GameObject>();
         TagCollisions["Finish"] = new HashSet<GameObject>();

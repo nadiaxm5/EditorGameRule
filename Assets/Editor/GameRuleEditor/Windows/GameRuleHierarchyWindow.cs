@@ -177,13 +177,13 @@ namespace GameRuleEditor.Windows
             header.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
             header.style.justifyContent = Justify.Center;
             header.style.paddingLeft = 8;
-            
+   /*         
             var label = new Label("Cast");
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             label.style.fontSize = 12;
             label.style.color = new Color(0.898f, 0.906f, 0.922f);
             header.Add(label);
-            
+            */
             root.Add(header);
         }
 
@@ -269,7 +269,7 @@ namespace GameRuleEditor.Windows
             item.AddToClassList("actor-list-item");
             item.style.flexDirection = FlexDirection.Row;
             item.style.alignItems = Align.Center;
-            item.style.height = 28;
+            item.style.height = 15;
             item.style.paddingLeft = 8;
             item.style.paddingRight = 4;
             item.style.marginLeft = 2;
@@ -281,11 +281,14 @@ namespace GameRuleEditor.Windows
             item.style.borderBottomLeftRadius = 4;
             item.style.borderBottomRightRadius = 4;
 
+            // Apply opacity based on active state
+            UpdateItemOpacity(item, actor);
+
             // Click → select actor
             item.RegisterCallback<MouseDownEvent>(evt =>
             {
-                if (evt.button == 0) // Left click
-                    context.SelectActor(index);
+            if (evt.button == 0) // Left click
+                context.SelectActor(index);
             });
             item.RegisterCallback<PointerDownEvent>(evt => OnActorDragStart(evt, item, index));
             item.RegisterCallback<PointerMoveEvent>(evt => OnActorDragMove(evt, item));
@@ -299,13 +302,14 @@ namespace GameRuleEditor.Windows
             icon.style.height = 16;
             icon.style.marginRight = 4;
               
-              Color iconColor = new Color(0.8f, 0.8f, 0.8f);
-              if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
-                  icon.tintColor = iconColor;
-              } else {
-                  icon.tintColor = new Color(0.8f, 0.8f, 0.8f);
-              }
+            Color iconColor = new Color(0.8f, 0.8f, 0.8f);
+            if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
+            icon.tintColor = iconColor;
+            } else {
+            icon.tintColor = new Color(0.8f, 0.8f, 0.8f);
+            }
             item.Add(icon);
+            
             var nameLabel = new Label(actor.ActorName ?? "Unnamed");
             nameLabel.style.flexGrow = 1;
             nameLabel.style.fontSize = 11;
@@ -333,6 +337,11 @@ namespace GameRuleEditor.Windows
             return item;
         }
 
+        private void UpdateItemOpacity(VisualElement item, ActorJson actor)
+        {
+            item.style.opacity = actor.Active ? 1f : 0.5f;
+        }
+
         private void ShowActorContextMenu(int actorIndex)
         {
             var actor = context.currentProject.actors[actorIndex];
@@ -340,14 +349,14 @@ namespace GameRuleEditor.Windows
 
             menu.AddItem(new GUIContent("Properties"), false, () =>
             {
-                context.OpenActorPropsInspector(actorIndex);
-                GameRuleInspectorWindow.EnsureVisible(context, controller);
+                context.SelectActor(actorIndex);
+                GameRulePropertiesWindow.EnsureVisible(context, controller);
             });
 
             menu.AddItem(new GUIContent("Rules"), false, () =>
             {
-                context.OpenActorRulesInspector(actorIndex);
-                GameRuleInspectorWindow.EnsureVisible(context, controller);
+                context.SelectActor(actorIndex);
+                GameRuleRulesWindow.EnsureVisible(context, controller);
             });
 
             menu.AddSeparator("");
@@ -405,8 +414,17 @@ namespace GameRuleEditor.Windows
         }
 
         private void OnActorDragMove(PointerMoveEvent evt, VisualElement item)
-        {
-        }
+        {            
+            if (!isDraggingActor || item != draggedItem) return;
+
+            
+
+            float diffY = evt.position.y - dragStartPos.y;
+            if (UnityEngine.Mathf.Abs(diffY) > 5f)
+            {
+                item.transform.position = new Vector3(0f, diffY, 0f);
+            }
+        }   
 
         private void OnActorDragEnd(EventBase evt, VisualElement item, int index)
         {
@@ -418,6 +436,8 @@ namespace GameRuleEditor.Windows
             
             isDraggingActor = false;
             draggedItem = null;
+            // Ensure visual offset from drag preview is cleared.
+            item.transform.position = Vector3.zero;
 
             if (pointerEvt == null) return;
             
@@ -452,23 +472,25 @@ namespace GameRuleEditor.Windows
         private void OnActorSelected(int index)
         {
             for (int i = 0; i < actorItems.Count; i++)
-                actorItems[i].RemoveFromClassList("actor-list-item--selected");
+            actorItems[i].RemoveFromClassList("actor-list-item--selected");
 
             if (index >= 0 && index < actorItems.Count)
             {
-                HighlightItem(index);
+            HighlightItem(index);
+            
+            // Select in scene if exists (including inactive objects)
+            if (context?.currentProject?.actors != null && index < context.currentProject.actors.Count)
+            {
+                var actorName = context.currentProject.actors[index].ActorName;
+                var go = Resources.FindObjectsOfTypeAll<GameObject>()
+                .FirstOrDefault(g => g.name == actorName && !EditorUtility.IsPersistent(g));
                 
-                // Select in scene if exists
-                if (context?.currentProject?.actors != null && index < context.currentProject.actors.Count)
+                if (go != null)
                 {
-                    var actorName = context.currentProject.actors[index].ActorName;
-                    var go = GameObject.Find(actorName);
-                    if (go != null)
-                    {
-                        Selection.activeGameObject = go;
-                        EditorGUIUtility.PingObject(go);
-                    }
+                Selection.activeGameObject = go;
+                EditorGUIUtility.PingObject(go);
                 }
+            }
             }
         }
 

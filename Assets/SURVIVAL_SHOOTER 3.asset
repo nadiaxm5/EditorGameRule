@@ -49,7 +49,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: LightingReflection
       Tag: Untagged
-      IconColorHex: '#FF0F12'
+      IconColorHex: '#FFFFFF'
       Position:
       - 0
       - 0.6
@@ -110,7 +110,7 @@ MonoBehaviour:
       Active: 1
       PrefabName: Player
       Tag: Player
-      IconColorHex: '#86FF00'
+      IconColorHex: '#FFFFFF'
       Position:
       - 0
       - 0
@@ -131,11 +131,11 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties:
-      - health=100.0
-      - rotSpeed=360
-      - lastHealth=100.0
-      - speed=5
       - offsetCam=7
+      - rotSpeed=360
+      - health=100.0
+      - speed=5
+      - lastHealth=100.0
       - offsetX=0.28
       - offsetY=0.3
       - offsetZ=0.7
@@ -329,9 +329,9 @@ MonoBehaviour:
       Drag: 0
       Properties:
       - speed=3
-      - health=200
       - damage=0.2
       - moving=0
+      - health=200
       Script:
       - Name: 
         When: []
@@ -393,9 +393,9 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties:
-      - speed=4
-      - health=100
       - damage=0.15
+      - health=100
+      - speed=4
       - moving=0
       Script:
       - Name: 
@@ -436,7 +436,7 @@ MonoBehaviour:
     - ActorName: HellephantSpawner
       Active: 1
       PrefabName: HellephantSpawner
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position:
       - 0
@@ -467,7 +467,7 @@ MonoBehaviour:
     - ActorName: ZomBearSpawner
       Active: 1
       PrefabName: ZomBearSpawner
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position:
       - 22.5
@@ -498,7 +498,7 @@ MonoBehaviour:
     - ActorName: ZomBunnySpawner
       Active: 1
       PrefabName: ZomBunnySpawner
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position:
       - -20.5
@@ -529,11 +529,20 @@ MonoBehaviour:
     - ActorName: HellephantDead
       Active: 0
       PrefabName: HellephantDead
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -557,7 +566,7 @@ MonoBehaviour:
     - ActorName: ZomBearDead
       Active: 0
       PrefabName: ZomBearDead
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position:
       - 0
@@ -589,11 +598,20 @@ MonoBehaviour:
     - ActorName: ZomBunnyDead
       Active: 0
       PrefabName: ZomBunnyDead
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -624,9 +642,9 @@ MonoBehaviour:
       - 0.36617625
       - 10.446494
       Rotation:
-      - 0.06195584
+      - 0.061955847
       - 4.9874244
-      - 0.00044973174
+      - 0.0004497318
       Scale:
       - 0.15
       - 0.15
@@ -654,11 +672,20 @@ MonoBehaviour:
     - ActorName: ShotLight
       Active: 0
       PrefabName: ShotLight
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -678,7 +705,7 @@ MonoBehaviour:
     - ActorName: Laser
       Active: 0
       PrefabName: Laser
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position: []
       Rotation: []
@@ -699,11 +726,20 @@ MonoBehaviour:
     - ActorName: DamageCanvas
       Active: 0
       PrefabName: DamageCanvas
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 0
+      - 0
+      - 0
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -716,10 +752,10 @@ MonoBehaviour:
     - ActorName: HUDCanvas
       Active: 1
       PrefabName: HUDCanvas
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position:
-      - 467.83334
+      - 507.5
       - 408.5
       - 0
       Rotation:
@@ -747,7 +783,7 @@ MonoBehaviour:
     - ActorName: GameOver
       Active: 0
       PrefabName: GameOver
-      Tag: 
+      Tag: Untagged
       IconColorHex: 
       Position: []
       Rotation: []
@@ -784,7 +820,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: LightingReflection
     Tag: Untagged
-    IconColorHex: '#FF0F12'
+    IconColorHex: '#FFFFFF'
     Position:
     - 0
     - 0.6
@@ -845,7 +881,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: Player
     Tag: Player
-    IconColorHex: '#86FF00'
+    IconColorHex: '#1BFF00'
     Position:
     - 0
     - 0
@@ -866,11 +902,11 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - health=100.0
-    - rotSpeed=360
-    - lastHealth=100.0
-    - speed=5
     - offsetCam=7
+    - rotSpeed=360
+    - health=100.0
+    - speed=5
+    - lastHealth=100.0
     - offsetX=0.28
     - offsetY=0.3
     - offsetZ=0.7
@@ -1064,9 +1100,9 @@ MonoBehaviour:
     Drag: 0
     Properties:
     - speed=3
-    - health=200
     - damage=0.2
     - moving=0
+    - health=200
     Script:
     - Name: 
       When: []
@@ -1128,9 +1164,9 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - speed=4
-    - health=100
     - damage=0.15
+    - health=100
+    - speed=4
     - moving=0
     Script:
     - Name: 
@@ -1171,7 +1207,7 @@ MonoBehaviour:
   - ActorName: HellephantSpawner
     Active: 1
     PrefabName: HellephantSpawner
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
     - 0
@@ -1202,7 +1238,7 @@ MonoBehaviour:
   - ActorName: ZomBearSpawner
     Active: 1
     PrefabName: ZomBearSpawner
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
     - 22.5
@@ -1233,7 +1269,7 @@ MonoBehaviour:
   - ActorName: ZomBunnySpawner
     Active: 1
     PrefabName: ZomBunnySpawner
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
     - -20.5
@@ -1264,11 +1300,20 @@ MonoBehaviour:
   - ActorName: HellephantDead
     Active: 0
     PrefabName: HellephantDead
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1292,7 +1337,7 @@ MonoBehaviour:
   - ActorName: ZomBearDead
     Active: 0
     PrefabName: ZomBearDead
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
     - 0
@@ -1324,11 +1369,20 @@ MonoBehaviour:
   - ActorName: ZomBunnyDead
     Active: 0
     PrefabName: ZomBunnyDead
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1359,9 +1413,9 @@ MonoBehaviour:
     - 0.36617625
     - 10.446494
     Rotation:
-    - 0.06195584
+    - 0.061955847
     - 4.9874244
-    - 0.00044973174
+    - 0.0004497318
     Scale:
     - 0.15
     - 0.15
@@ -1389,11 +1443,20 @@ MonoBehaviour:
   - ActorName: ShotLight
     Active: 0
     PrefabName: ShotLight
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1413,7 +1476,7 @@ MonoBehaviour:
   - ActorName: Laser
     Active: 0
     PrefabName: Laser
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position: []
     Rotation: []
@@ -1434,11 +1497,20 @@ MonoBehaviour:
   - ActorName: DamageCanvas
     Active: 0
     PrefabName: DamageCanvas
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 0
+    - 0
+    - 0
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1451,10 +1523,10 @@ MonoBehaviour:
   - ActorName: HUDCanvas
     Active: 1
     PrefabName: HUDCanvas
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
-    - 467.83334
+    - 507.5
     - 408.5
     - 0
     Rotation:
@@ -1482,7 +1554,7 @@ MonoBehaviour:
   - ActorName: GameOver
     Active: 0
     PrefabName: GameOver
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position: []
     Rotation: []
