@@ -89,5 +89,11 @@ namespace GameRuleEditor.Windows
             if (context != null)
                 contentContainer.Add(new SceneSettingsPanel(context, controller));
         }
+
+        private void ARtoggle()
+        {
+            // Aquí puedes agregar la lógica para mostrar u ocultar el panel de AR
+            // Por ejemplo, podrías tener una variable booleana que controle la visibilidad del panel
+        }
     }
 }

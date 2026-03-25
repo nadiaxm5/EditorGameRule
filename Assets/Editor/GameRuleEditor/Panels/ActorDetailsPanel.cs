@@ -17,6 +17,7 @@ namespace GameRuleEditor.Panels
         private VisualElement noSelectionContainer;
 
         private TextField actorNameField;
+        private bool suppressActorNameCallback;
 
         private ObjectField prefabPicker;
         private DropdownField tagField;
@@ -125,6 +126,8 @@ namespace GameRuleEditor.Panels
             actorNameField = new TextField();
             actorNameField.style.flexGrow = 1;
             actorNameField.style.marginRight = 10;
+            actorNameField.RegisterValueChangedCallback(OnActorNameFieldValueChanged);
+            actorNameField.RegisterCallback<FocusOutEvent>(OnActorNameFieldFocusOut);
             topRow.Add(actorNameField);
 
             // Tag container for dropdown and Add logic
@@ -262,10 +265,9 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.display = DisplayStyle.None;
             mainContainer.style.display = DisplayStyle.Flex;
 
-            var so = new SerializedObject(context.currentProject);
-            var actorProp = so.FindProperty("actors").GetArrayElementAtIndex(context.selectedActorIndex);
-
-            actorNameField.BindProperty(actorProp.FindPropertyRelative("ActorName"));
+            suppressActorNameCallback = true;
+            actorNameField.SetValueWithoutNotify(actor.ActorName ?? "Unnamed");
+            suppressActorNameCallback = false;
             suppressActiveToggleCallback = true;
             activeToggle.SetValueWithoutNotify(actor.Active);
             suppressActiveToggleCallback = false;
@@ -310,6 +312,90 @@ namespace GameRuleEditor.Panels
                 context.selectedActorIndex,
                 () => context.SelectedActor.Active = evt.newValue,
                 "Toggle Actor Active");
+        }
+
+        private void OnActorNameFieldValueChanged(ChangeEvent<string> evt)
+        {
+            if (suppressActorNameCallback || context.selectedActorIndex < 0 || context.SelectedActor == null)
+                return;
+
+            string requestedName = (evt.newValue ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(requestedName))
+            {
+                // Allow temporary empty text while editing; normalize on focus out.
+                return;
+            }
+
+            string oldName = context.SelectedActor.ActorName ?? "Unnamed";
+            string uniqueName = GetUniqueActorName(requestedName, context.selectedActorIndex);
+            if (uniqueName == oldName)
+                return;
+
+            controller.UpdateActorProperty(
+                context.selectedActorIndex,
+                () =>
+                {
+                    context.SelectedActor.ActorName = uniqueName;
+                    RenameSceneObject(oldName, uniqueName);
+                },
+                "Rename Actor");
+
+            context.NotifyActorListChanged();
+
+            if (uniqueName != requestedName)
+            {
+                suppressActorNameCallback = true;
+                actorNameField.SetValueWithoutNotify(uniqueName);
+                suppressActorNameCallback = false;
+            }
+        }
+
+        private void OnActorNameFieldFocusOut(FocusOutEvent evt)
+        {
+            if (context.selectedActorIndex < 0 || context.SelectedActor == null)
+                return;
+
+            string currentText = (actorNameField.value ?? string.Empty).Trim();
+            if (!string.IsNullOrEmpty(currentText))
+                return;
+
+            suppressActorNameCallback = true;
+            actorNameField.SetValueWithoutNotify(context.SelectedActor.ActorName ?? "Unnamed");
+            suppressActorNameCallback = false;
+        }
+
+        private string GetUniqueActorName(string baseName, int currentActorIndex)
+        {
+            string candidate = baseName;
+            int suffix = 1;
+
+            while (context.currentProject.actors.Exists(a => a != context.currentProject.actors[currentActorIndex] && a.ActorName == candidate))
+            {
+                candidate = $"{baseName}_{suffix}";
+                suffix++;
+            }
+
+            return candidate;
+        }
+
+        private void RenameSceneObject(string oldName, string newName)
+        {
+            if (string.IsNullOrEmpty(oldName) || string.IsNullOrEmpty(newName) || oldName == newName)
+                return;
+
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            for (int i = 0; i < allObjects.Length; i++)
+            {
+                var go = allObjects[i];
+                if (go == null || go.name != oldName)
+                    continue;
+
+                if (!go.scene.IsValid() || EditorUtility.IsPersistent(go))
+                    continue;
+
+                go.name = newName;
+                return;
+            }
         }
 
         private void OnTagFieldValueChanged(ChangeEvent<string> evt)
