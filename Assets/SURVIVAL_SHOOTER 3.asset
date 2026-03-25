@@ -881,7 +881,7 @@ MonoBehaviour:
     Active: 1
     PrefabName: Player
     Tag: Player
-    IconColorHex: '#1BFF00'
+    IconColorHex: '#FFFFFF'
     Position:
     - 0
     - 0
@@ -902,12 +902,12 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - offsetCam=7
     - rotSpeed=360
     - health=100.0
     - speed=5
     - lastHealth=100.0
     - offsetX=0.28
+    - offsetCam=7
     - offsetY=0.3
     - offsetZ=0.7
     - moving=0

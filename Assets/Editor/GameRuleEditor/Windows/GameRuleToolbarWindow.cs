@@ -87,7 +87,7 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        // ...existing code...
+        
 
         private void BuildUI()
         {
@@ -194,8 +194,6 @@ namespace GameRuleEditor.Windows
             root.Add(toolbar);
         }
 
-// ...existing code...
-
         private void Rebuild()
         {
             if (projectNameLabel != null)
@@ -296,7 +294,7 @@ namespace GameRuleEditor.Windows
             }
         }
 
-                private void OnPlayButton()
+        private void OnPlayButton()
         {
             if (EditorApplication.isPlaying)
             {
