@@ -523,9 +523,19 @@ namespace GameRuleEditor.Panels
                     var btn = new Button(() => {
                         controller.RemoveActorProperty(context.selectedActorIndex, idx);
                         UpdatePropertiesList();
-                    }) { text = "X" };
+                    }) { text = string.Empty };
                     btn.AddToClassList("button-danger");
-                    btn.style.width = 20;
+                    btn.style.width = 22;
+                    btn.style.height = 20;
+
+                    var trashImage = new Image();
+                    trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
+                    trashImage.style.width = 12;
+                    trashImage.style.height = 12;
+                    trashImage.style.alignSelf = Align.Center;
+                    trashImage.style.unityBackgroundImageTintColor = Color.white;
+                    btn.Add(trashImage);
+
                     row.Add(btn);
 
                     propertiesContainer.Add(row);

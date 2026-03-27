@@ -633,8 +633,44 @@ namespace GameRuleEditor.Controllers
 
             SentenceJson newRule = new SentenceJson
             {
+                Name = $"Rule {actor.Script.Count + 1}",
                 When = hasCondition ? new List<string> { "" } : new List<string>(),
                 Do = new List<string> { "" }
+            };
+
+            actor.Script.Add(newRule);
+
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+
+            context.SelectScript(actor.Script.Count - 1);
+        }
+
+        /// <summary>
+        /// Adds a new empty rule to an actor's script
+        /// </summary>
+        public void AddEmptyRule(int actorIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Empty Rule");
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null)
+            {
+                actor.Script = new List<SentenceJson>();
+            }
+
+            SentenceJson newRule = new SentenceJson
+            {
+                Name = $"Rule {actor.Script.Count + 1}",
+                When = new List<string>(),
+                Do = new List<string>()
             };
 
             actor.Script.Add(newRule);
@@ -743,6 +779,41 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
+        /// Moves a rule to a target index
+        /// </summary>
+        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                fromIndex < 0 ||
+                fromIndex >= actor.Script.Count ||
+                toIndex < 0 ||
+                toIndex >= actor.Script.Count ||
+                fromIndex == toIndex)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Move Rule");
+
+            SentenceJson moved = actor.Script[fromIndex];
+            actor.Script.RemoveAt(fromIndex);
+            toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
+            actor.Script.Insert(toIndex, moved);
+
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            context.SelectScript(toIndex);
+        }
+
+        /// <summary>
         /// Duplicates a rule
         /// </summary>
         public void DuplicateRule(int actorIndex, int ruleIndex)
@@ -767,6 +838,7 @@ namespace GameRuleEditor.Controllers
             SentenceJson original = actor.Script[ruleIndex];
             SentenceJson duplicate = new SentenceJson
             {
+                Name = string.IsNullOrEmpty(original.Name) ? "Rule (Copy)" : $"{original.Name} (Copy)",
                 When = new List<string>(original.When),
                 Do = new List<string>(original.Do)
             };
@@ -826,6 +898,32 @@ namespace GameRuleEditor.Controllers
 
             Undo.RecordObject(context.currentProject, "Add Rule Condition");
             actor.Script[ruleIndex].When = new List<string> { "" };
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Adds an action to a rule that has no actions yet
+        /// </summary>
+        public void AddRuleAction(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Rule Action");
+            actor.Script[ruleIndex].Do = new List<string> { "" };
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }

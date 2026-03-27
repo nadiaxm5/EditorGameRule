@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
@@ -12,59 +13,112 @@ namespace GameRuleEditor.CustomControls
     {
         private EditorContext context;
         private PopupField<string> typeDropdown;
-        private Label operatorLabel;
+        private Label negationIcon;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
+        private List<string> dropdownTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
         public System.Action OnChanged;
         public System.Action OnRemove;
-        private bool isOperator = false;
+        private bool isNegated;
+        private string selectedConditionType;
+        private string joinOperatorBefore;
 
-        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string specificType = null)
+        public string JoinOperatorBefore => joinOperatorBefore;
+
+        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null)
         {
             context = ctx;
             availableTypes = conditionTypes;
+            dropdownTypes = new List<string> { "Negate" };
+            dropdownTypes.AddRange(conditionTypes);
             style.flexDirection = FlexDirection.Row; style.marginBottom = 5;
+            style.flexShrink = 0;
             style.borderTopLeftRadius = 3; style.borderTopRightRadius = 3;
             style.borderBottomLeftRadius = 3; style.borderBottomRightRadius = 3;
             style.paddingTop = 5; style.paddingBottom = 5; style.paddingLeft = 5; style.paddingRight = 5;
             style.alignItems = Align.Center;
-            CreateUI(specificType);
+            CreateUI(joinOperatorBefore);
         }
 
-        private void CreateUI(string specificType)
+        private void CreateUI(string joinOperatorBefore)
         {
-            isOperator = (specificType == "AND" || specificType == "OR" || specificType == "NOT");
-            if (isOperator)
+            style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            SetJoinOperator(joinOperatorBefore);
+
+            negationIcon = new Label("!");
+            negationIcon.style.width = 16;
+            negationIcon.style.marginRight = 4;
+            negationIcon.style.unityTextAlign = TextAnchor.MiddleCenter;
+            negationIcon.style.unityFontStyleAndWeight = FontStyle.Bold;
+            negationIcon.style.color = new Color(0.95f, 0.2f, 0.2f);
+            Add(negationIcon);
+
+            selectedConditionType = availableTypes.Count > 0 ? availableTypes[0] : "Compare";
+            typeDropdown = new PopupField<string>(dropdownTypes, selectedConditionType) { style = { width = 110 } };
+            typeDropdown.style.flexShrink = 0;
+            typeDropdown.RegisterValueChangedCallback(evt =>
             {
-                style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
-                style.borderLeftColor = new Color(0.8f, 0.6f, 0.2f); style.borderLeftWidth = 3;
-                operatorLabel = new Label(specificType) { style = { unityFontStyleAndWeight = FontStyle.Bold, width = 50, unityTextAlign = TextAnchor.MiddleCenter, color = new Color(1f, 0.9f, 0.7f) } };
-                Add(operatorLabel);
-            }
-            else
-            {
-                style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-                typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 90 } };
-                if (!string.IsNullOrEmpty(specificType) && availableTypes.Contains(specificType)) typeDropdown.SetValueWithoutNotify(specificType);
-                typeDropdown.RegisterValueChangedCallback(evt => { UpdateParameterFields(true); OnChanged?.Invoke(); });
-                Add(typeDropdown);
-                parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, alignItems = Align.Center } };
-                Add(parametersContainer);
-                UpdateParameterFields(false);
-            }
+                if (evt.newValue == "Negate")
+                {
+                    isNegated = !isNegated;
+                    UpdateNegationIcon();
+                    typeDropdown.SetValueWithoutNotify(selectedConditionType);
+                    OnChanged?.Invoke();
+                    return;
+                }
+
+                selectedConditionType = evt.newValue;
+                UpdateParameterFields(true);
+            });
+            Add(typeDropdown);
+
+            parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, alignItems = Align.Center } };
+            parametersContainer.style.flexShrink = 0;
+            Add(parametersContainer);
+
             Add(new VisualElement() { style = { flexGrow = 1 } });
-            var removeBtn = new Button(() => OnRemove?.Invoke()) { text = "X" };
-            removeBtn.AddToClassList("button-danger"); removeBtn.style.width = 20;
+            var removeBtn = new Button(() => OnRemove?.Invoke()) { text = string.Empty };
+            removeBtn.AddToClassList("button-danger");
+            removeBtn.style.width = 22;
+            removeBtn.style.height = 20;
+
+            var trashImage = new Image();
+            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
+            trashImage.style.width = 12;
+            trashImage.style.height = 12;
+            trashImage.style.alignSelf = Align.Center;
+            trashImage.style.unityBackgroundImageTintColor = Color.white;
+            removeBtn.Add(trashImage);
+
             Add(removeBtn);
+
+            UpdateNegationIcon();
+            UpdateParameterFields(false);
+        }
+
+        public void SetJoinOperator(string joinOperator)
+        {
+            joinOperatorBefore = string.IsNullOrEmpty(joinOperator) ? null : joinOperator;
+        }
+
+        public void SetNegated(bool negated)
+        {
+            isNegated = negated;
+            UpdateNegationIcon();
+        }
+
+        private void UpdateNegationIcon()
+        {
+            negationIcon.style.display = isNegated ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         public void SetFromSource(string token)
         {
-            if (isOperator) return;
             var result = GameRuleParser.ParseFunction(token);
             if (availableTypes.Contains(result.Name))
             {
+                selectedConditionType = result.Name;
                 typeDropdown.SetValueWithoutNotify(result.Name);
                 UpdateParameterFields(false);
                 FillFieldsFromParams(result.Name, result.Params);
@@ -73,10 +127,9 @@ namespace GameRuleEditor.CustomControls
 
         private void UpdateParameterFields(bool notifyChange = true)
         {
-            if (isOperator) return;
             parametersContainer.Clear();
             inputElements.Clear();
-            string type = typeDropdown.value;
+            string type = selectedConditionType;
 
             switch (type)
             {
@@ -138,23 +191,64 @@ namespace GameRuleEditor.CustomControls
 
         private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false)
         {
-            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 40 } };
-            var field = new TextField() { style = { flexGrow = 1 } };
-            var label = new Label(placeholder) { style = { fontSize = 8, color = new Color(0.6f, 0.6f, 0.6f), position = Position.Absolute, left = 2, top = 2 }, pickingMode = PickingMode.Ignore };
-            field.Add(label);
-            field.RegisterValueChangedCallback(evt => { label.style.display = string.IsNullOrEmpty(evt.newValue) ? DisplayStyle.Flex : DisplayStyle.None; OnChanged?.Invoke(); });
+            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 140, alignItems = Align.Center } };
+            container.style.flexShrink = 0;
+
+            container.Add(CreateFieldTag(placeholder));
+
+            var field = new TextField() { style = { flexGrow = 1, minWidth = 110 } };
+            field.style.flexShrink = 0;
+            field.isReadOnly = false;
+            field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
             container.Add(field);
 
             if (showPicker)
             {
-                var pickBtn = new Button(() =>
+                var pickBtn = CreatePickerButton(() =>
                 {
                     GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly);
-                })
-                { text = "°", style = { width = 18, height = 18, fontSize = 10, marginLeft = 0 } };
+                });
                 container.Add(pickBtn);
             }
             parametersContainer.Add(container); inputElements.Add(field);
+        }
+
+        private VisualElement CreateFieldTag(string text)
+        {
+            var tag = new Label(text);
+            tag.style.fontSize = 9;
+            tag.style.unityFontStyleAndWeight = FontStyle.Bold;
+            tag.style.color = new Color(0.85f, 0.85f, 0.85f);
+            tag.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+            tag.style.borderTopLeftRadius = 3;
+            tag.style.borderTopRightRadius = 3;
+            tag.style.borderBottomLeftRadius = 3;
+            tag.style.borderBottomRightRadius = 3;
+            tag.style.paddingLeft = 6;
+            tag.style.paddingRight = 6;
+            tag.style.paddingTop = 1;
+            tag.style.paddingBottom = 1;
+            tag.style.marginRight = 4;
+            tag.style.minWidth = 62;
+            tag.style.unityTextAlign = TextAnchor.MiddleCenter;
+            return tag;
+        }
+
+        private Button CreatePickerButton(System.Action onClick)
+        {
+            var pickBtn = new Button(onClick) { text = "" };
+            pickBtn.AddToClassList(ObjectField.selectorUssClassName);
+            pickBtn.style.width = 20;
+            pickBtn.style.height = 20;
+            pickBtn.style.marginLeft = 2;
+            pickBtn.style.flexShrink = 0;
+
+            var selectorImage = new VisualElement();
+            selectorImage.AddToClassList("unity-object-field__selector-image");
+            pickBtn.Add(selectorImage);
+            pickBtn.tooltip = "Pick value";
+
+            return pickBtn;
         }
 
         private void FillFieldsFromParams(string type, List<string> p)
@@ -185,14 +279,15 @@ namespace GameRuleEditor.CustomControls
 
         public string GetString()
         {
-            if (isOperator) return operatorLabel.text;
-            string type = typeDropdown.value;
+            string type = selectedConditionType;
             List<string> parts = new List<string>();
+            string conditionText;
 
             if (type == "Compare")
             {
                 string v1 = ((TextField)inputElements[0]).value; string op = ((PopupField<string>)inputElements[1]).value; string v2 = ((TextField)inputElements[2]).value;
-                return $"Compare({v1} {op} {v2})";
+                conditionText = $"Compare({v1} {op} {v2})";
+                return isNegated ? $"NOT {conditionText}" : conditionText;
             }
             foreach (var el in inputElements)
             {
@@ -200,7 +295,8 @@ namespace GameRuleEditor.CustomControls
                 else if (el is PopupField<string> pf) parts.Add(pf.value);
                 else if (el is Toggle tg) parts.Add(tg.value.ToString().ToLower());
             }
-            return $"{type}({string.Join(",", parts)})";
+            conditionText = $"{type}({string.Join(",", parts)})";
+            return isNegated ? $"NOT {conditionText}" : conditionText;
         }
     }
 }
