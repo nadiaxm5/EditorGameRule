@@ -75,3 +75,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 /Assets/StreamingAssets
 /Assets/Plugins/x86_64
+
+/.claude/
+CLAUDE.md

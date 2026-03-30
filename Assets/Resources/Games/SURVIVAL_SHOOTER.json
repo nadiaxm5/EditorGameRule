@@ -25,6 +25,9 @@
             "Script": [
                 {
                     "Name": "Rule 1",
+                    "When": [
+                        "NOT Compare( < ) AND Compare( < )"
+                    ],
                     "Do": [
                         ""
                     ]
@@ -51,10 +54,19 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": ""
+                    "Name": "Rule 1",
+                    "When": [
+                        ""
+                    ],
+                    "Do": [
+                        ""
+                    ]
                 },
                 {
-                    "Name": ""
+                    "Name": "Rule 2",
+                    "Do": [
+                        ""
+                    ]
                 }
             ]
         },
@@ -75,14 +87,14 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -92,7 +104,7 @@
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -103,7 +115,7 @@
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -114,7 +126,7 @@
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
@@ -123,7 +135,7 @@
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -305,21 +317,21 @@
             ],
             "Script": [
                 {
-                    "Name": "Moving?",
-                    "When": [
-                        "NOT Check(this.moving) AND Compare(this.health > 0) AND Compare( < )"
-                    ],
-                    "Do": [
-                        "Animate(Idle)"
-                    ]
-                },
-                {
                     "Name": "Rule 2",
                     "When": [
                         "Compare(this.health==this.lastHealth)"
                     ],
                     "Do": [
                         "Edit(DamageCanvas.Active,0)"
+                    ]
+                },
+                {
+                    "Name": "Moving?",
+                    "When": [
+                        "NOT Check(this.moving) AND Compare(this.health > 0) AND Compare( < )"
+                    ],
+                    "Do": [
+                        "Animate(Idle)"
                     ]
                 },
                 {
@@ -608,7 +620,7 @@
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "Animate(Death)",
                         "PlaySound(ZomBunnyDeath)",
@@ -616,7 +628,7 @@
                     ]
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Timer(1)"
                     ],

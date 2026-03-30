@@ -241,6 +241,7 @@ namespace GameRuleEditor.Core
                         }
                     }
                     if (actor.Properties == null) actor.Properties = new List<string>();
+                    if (actor.Components == null) actor.Components = new List<ActorComponentMeta>();
                 }
             }
             else

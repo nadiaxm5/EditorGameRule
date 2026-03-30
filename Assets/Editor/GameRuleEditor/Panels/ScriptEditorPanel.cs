@@ -15,11 +15,13 @@ namespace GameRuleEditor.Panels
     {
         private EditorContext context;
         private ProjectController controller;
+        private string groupId;
+        private string groupName;
 
         private VisualElement rulesContainer;
         private VisualElement noSelectionContainer;
         private Label actorNameLabel;
-        
+
         private HashSet<SentenceJson> collapsedRules = new HashSet<SentenceJson>();
         private HashSet<SentenceJson> initializedRules = new HashSet<SentenceJson>();
 
@@ -29,10 +31,15 @@ namespace GameRuleEditor.Panels
         private int draggedRuleIndex = -1;
         private VisualElement ruleDragSpacer;
 
-        public ScriptEditorPanel(EditorContext editorContext, ProjectController projectController)
+        // Abs indices of rules currently visible (respects groupId filter)
+        private List<int> visibleAbsIndices = new List<int>();
+
+        public ScriptEditorPanel(EditorContext editorContext, ProjectController projectController, string groupId = null, string groupName = null)
         {
             context = editorContext;
             controller = projectController;
+            this.groupId = groupId;
+            this.groupName = groupName;
 
             style.flexGrow = 1;
             AddToClassList("panel-container");
@@ -154,7 +161,9 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.display = DisplayStyle.None;
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
-            actorNameLabel.text = $"Script Rules for: {actor.ActorName}";
+            actorNameLabel.text = groupName != null
+                ? $"Rules [{groupName}] for: {actor.ActorName}"
+                : $"Script Rules for: {actor.ActorName}";
 
             UpdateRulesList();
         }
@@ -162,9 +171,21 @@ namespace GameRuleEditor.Panels
         private void UpdateRulesList()
         {
             rulesContainer.Clear();
+            visibleAbsIndices.Clear();
 
             var actor = context.SelectedActor;
-            if (actor?.Script == null || actor.Script.Count == 0)
+            if (actor?.Script != null)
+            {
+                for (int i = 0; i < actor.Script.Count; i++)
+                {
+                    var rule = actor.Script[i];
+                    if (groupId != null && rule.groupId != groupId)
+                        continue;
+                    visibleAbsIndices.Add(i);
+                }
+            }
+
+            if (visibleAbsIndices.Count == 0)
             {
                 var emptyLabel = new Label("No rules defined. Add a rule to get started.");
                 emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
@@ -175,12 +196,9 @@ namespace GameRuleEditor.Panels
                 return;
             }
 
-            for (int i = 0; i < actor.Script.Count; i++)
+            foreach (int absIdx in visibleAbsIndices)
             {
-                int ruleIndex = i;
-                var rule = actor.Script[i];
-
-                var ruleElement = CreateRuleElement(rule, ruleIndex);
+                var ruleElement = CreateRuleElement(actor.Script[absIdx], absIdx);
                 rulesContainer.Add(ruleElement);
             }
         }
@@ -417,7 +435,13 @@ namespace GameRuleEditor.Panels
             var actor = context.SelectedActor;
             if (actor?.Script != null && actor.Script.Count > 0)
             {
-                collapsedRules.Add(actor.Script[actor.Script.Count - 1]);
+                var newRule = actor.Script[actor.Script.Count - 1];
+                if (!string.IsNullOrEmpty(groupId))
+                {
+                    newRule.groupId = groupId;
+                    EditorUtility.SetDirty(context.currentProject);
+                }
+                collapsedRules.Add(newRule);
             }
 
             UpdateRulesList();
@@ -542,16 +566,16 @@ namespace GameRuleEditor.Panels
             ruleContainer.style.left = StyleKeyword.Null;
             ruleContainer.style.width = StyleKeyword.Null;
 
-            // Read spacer position to determine target index
-            int newIndex = originalIndex;
+            // Read spacer position to determine target visual index
+            int newVisualIndex = -1;
             if (ruleDragSpacer != null && ruleDragSpacer.parent != null)
             {
-                newIndex = 0;
+                newVisualIndex = 0;
                 foreach (var child in rulesContainer.Children())
                 {
                     if (child == ruleDragSpacer) break;
                     if (child == ruleContainer) continue;
-                    newIndex++;
+                    newVisualIndex++;
                 }
                 ruleDragSpacer.parent.Remove(ruleDragSpacer);
                 ruleDragSpacer = null;
@@ -564,34 +588,68 @@ namespace GameRuleEditor.Panels
                 return;
             }
 
-            // Perform the move using the controller
             var actor = context.SelectedActor;
-            if (actor?.Script == null || actor.Script.Count <= 1)
+            if (actor?.Script == null || actor.Script.Count <= 1 || newVisualIndex < 0)
             {
                 UpdateRulesList();
                 evt.StopPropagation();
                 return;
             }
 
-            // newIndex from the spacer is exactly the index we want to insert at
-            // in the POST-REMOVAL list, which matches ProjectController's logic perfectly.
-            int clampedNewIndex = Mathf.Clamp(newIndex, 0, actor.Script.Count - 1);
+            int toAbsIndex;
+            if (groupId == null)
+            {
+                // No filter — visual index == abs post-removal index
+                toAbsIndex = Mathf.Clamp(newVisualIndex, 0, actor.Script.Count - 1);
+            }
+            else
+            {
+                // Build visible abs indices excluding the dragged item (post-removal visible list)
+                var postRemovalVisible = new List<int>();
+                foreach (int absIdx in visibleAbsIndices)
+                {
+                    if (absIdx != originalIndex)
+                        postRemovalVisible.Add(absIdx);
+                }
 
-            if (originalIndex >= 0 && originalIndex < actor.Script.Count && 
-                originalIndex != clampedNewIndex)
+                if (postRemovalVisible.Count == 0)
+                {
+                    UpdateRulesList();
+                    evt.StopPropagation();
+                    return;
+                }
+
+                int clampedVisual = Mathf.Clamp(newVisualIndex, 0, postRemovalVisible.Count);
+                if (clampedVisual < postRemovalVisible.Count)
+                {
+                    // Insert before postRemovalVisible[clampedVisual] in the post-removal abs list
+                    int absRef = postRemovalVisible[clampedVisual];
+                    toAbsIndex = absRef > originalIndex ? absRef - 1 : absRef;
+                }
+                else
+                {
+                    // Insert after the last visible item in the group
+                    int absRef = postRemovalVisible[postRemovalVisible.Count - 1];
+                    int postRemovalAbsOfLast = absRef > originalIndex ? absRef - 1 : absRef;
+                    toAbsIndex = postRemovalAbsOfLast + 1;
+                }
+                toAbsIndex = Mathf.Clamp(toAbsIndex, 0, actor.Script.Count - 1);
+            }
+
+            if (originalIndex >= 0 && originalIndex < actor.Script.Count &&
+                originalIndex != toAbsIndex)
             {
                 // Force blur to prevent focus guard in UpdateUI from cancelling the redraw
                 var focused = this.focusController?.focusedElement;
                 if (focused != null) focused.Blur();
 
-                controller.MoveRuleToIndex(context.selectedActorIndex, originalIndex, clampedNewIndex);
-                
+                controller.MoveRuleToIndex(context.selectedActorIndex, originalIndex, toAbsIndex);
+
                 // Manually force an update in case FocusGuard killed the controller's update
                 UpdateRulesList();
             }
             else
             {
-                // In case it didn't move, just refresh visuals
                 UpdateRulesList();
             }
 

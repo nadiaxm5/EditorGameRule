@@ -12,11 +12,15 @@ namespace GameRuleEditor.Windows
         private EditorContext context;
         private ProjectController controller;
         private Label titleLabel;
+        private string currentGroupId;
+        private string currentGroupName;
 
-        public static GameRuleRulesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl)
+        public static GameRuleRulesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl, string groupId = null, string groupName = null)
         {
             var window = GetWindow<GameRuleRulesWindow>("Rules", false);
             window.minSize = new Vector2(400, 300);
+            window.currentGroupId = groupId;
+            window.currentGroupName = groupName;
             window.Init(ctx, ctrl);
             window.Show();
             window.Focus();
@@ -27,7 +31,7 @@ namespace GameRuleEditor.Windows
         {
             context = ctx; controller = ctrl;
             BuildUI();
-            
+
             // Suscribirse para actualizar el título dinámicamente
             context.OnActorSelected += OnActorSelected;
         }
@@ -49,8 +53,10 @@ namespace GameRuleEditor.Windows
 
         private void OnActorSelected(int index)
         {
-            if (titleLabel != null && context?.SelectedActor != null)
-                titleLabel.text = $"Rules — {context.SelectedActor.ActorName}";
+            // Clear group filter when the user switches actors
+            currentGroupId = null;
+            currentGroupName = null;
+            BuildUI();
         }
 
         private void BuildUI()
@@ -78,7 +84,10 @@ namespace GameRuleEditor.Windows
             headerContainer.style.flexShrink = 0;
 
             string actorName = context?.SelectedActor?.ActorName ?? "Actor";
-            titleLabel = new Label($"Rules — {actorName}");
+            string titleText = currentGroupName != null
+                ? $"Rules [{currentGroupName}] — {actorName}"
+                : $"Rules — {actorName}";
+            titleLabel = new Label(titleText);
             titleLabel.style.fontSize = 12;
             titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             titleLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
@@ -105,7 +114,7 @@ namespace GameRuleEditor.Windows
             root.Add(contentContainer);
 
             if (context != null)
-                contentContainer.Add(new ScriptEditorPanel(context, controller));
+                contentContainer.Add(new ScriptEditorPanel(context, controller, currentGroupId, currentGroupName));
         }
     }
 }
