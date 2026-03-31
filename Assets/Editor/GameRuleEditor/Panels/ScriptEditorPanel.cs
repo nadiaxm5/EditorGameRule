@@ -25,6 +25,8 @@ namespace GameRuleEditor.Panels
         private HashSet<SentenceJson> collapsedRules = new HashSet<SentenceJson>();
         private HashSet<SentenceJson> initializedRules = new HashSet<SentenceJson>();
 
+        private static HashSet<string> dismissedInfoBoxGroups = new HashSet<string>();
+
         private bool isDraggingRule;
         private Vector2 dragStartPosRule;
         private VisualElement draggedRuleItem;
@@ -109,16 +111,46 @@ namespace GameRuleEditor.Panels
             scrollView.Add(addRuleRow);
 
             // Info box
+            string infoBoxKey = groupId ?? "";
             var infoBox = new VisualElement();
             infoBox.AddToClassList("help-box");
             infoBox.style.marginBottom = 15;
+            infoBox.style.flexDirection = FlexDirection.Row;
+            infoBox.style.alignItems = Align.FlexStart;
+            infoBox.style.display = dismissedInfoBoxGroups.Contains(infoBoxKey)
+                ? DisplayStyle.None
+                : DisplayStyle.Flex;
 
             var infoText = new Label(
                 "Rules are evaluated every frame. Conditional rules (when-do) execute only when their conditions are met. " +
                 "Unconditional rules (do) execute every frame."
             );
             infoText.style.whiteSpace = WhiteSpace.Normal;
+            infoText.style.flexGrow = 1;
             infoBox.Add(infoText);
+
+            var closeInfoBtn = new Button(() =>
+            {
+                dismissedInfoBoxGroups.Add(infoBoxKey);
+                infoBox.style.display = DisplayStyle.None;
+            });
+            closeInfoBtn.text = "\u00d7";
+            closeInfoBtn.style.width = 18;
+            closeInfoBtn.style.height = 18;
+            closeInfoBtn.style.paddingLeft = 0;
+            closeInfoBtn.style.paddingRight = 0;
+            closeInfoBtn.style.paddingTop = 0;
+            closeInfoBtn.style.paddingBottom = 0;
+            closeInfoBtn.style.marginLeft = 6;
+            closeInfoBtn.style.flexShrink = 0;
+            closeInfoBtn.style.unityTextAlign = TextAnchor.MiddleCenter;
+            closeInfoBtn.style.backgroundColor = Color.clear;
+            closeInfoBtn.style.borderTopWidth = 0;
+            closeInfoBtn.style.borderBottomWidth = 0;
+            closeInfoBtn.style.borderLeftWidth = 0;
+            closeInfoBtn.style.borderRightWidth = 0;
+            closeInfoBtn.style.color = new Color(0.7f, 0.7f, 0.7f);
+            infoBox.Add(closeInfoBtn);
 
             scrollView.Add(infoBox);
 
@@ -271,6 +303,21 @@ namespace GameRuleEditor.Panels
                 titleField.labelElement.style.display = DisplayStyle.None;
             }
 
+                titleField.RegisterCallback<GeometryChangedEvent>(evt =>
+                {
+                    // Buscamos cualquier elemento de texto interno real (TextElement)
+                    var innerTexts = titleField.Query<TextElement>().ToList();
+                    foreach (var txt in innerTexts)
+                    {
+                        // Ignoramos la etiqueta oculta (Label) y nos quedamos con el Input real
+                        if (!txt.ClassListContains("unity-label"))
+                        {
+                            txt.style.paddingLeft = 4; // Damos aire por la izquierda
+                            txt.style.overflow = Overflow.Visible; // EVITA QUE SE RECORTE LA NEGRITA
+                        }
+                    }
+                });
+
             titleField.RegisterValueChangedCallback(evt =>
             {
                 rule.Name = evt.newValue;
@@ -335,13 +382,14 @@ namespace GameRuleEditor.Panels
                         "Cancel"))
                     {
                         controller.RemoveRule(context.selectedActorIndex, ruleIndex);
+                        UpdateRulesList();
                     }
                 });
                 removeIconBtn.text = string.Empty;
                 removeIconBtn.tooltip = "Remove Rule";
                 removeIconBtn.AddToClassList("button-danger");
-                removeIconBtn.style.width = 22;
-                removeIconBtn.style.height = 20;
+                removeIconBtn.style.width = 28;
+                removeIconBtn.style.height = 26;
                 removeIconBtn.style.marginLeft = 4;
                 removeIconBtn.style.paddingLeft = 0;
                 removeIconBtn.style.paddingRight = 0;
@@ -349,8 +397,8 @@ namespace GameRuleEditor.Panels
 
                 var trashImage = new Image();
                 trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                trashImage.style.width = 12;
-                trashImage.style.height = 12;
+                trashImage.style.width = 16;
+                trashImage.style.height = 16;
                 trashImage.style.alignSelf = Align.Center;
                 trashImage.style.unityBackgroundImageTintColor = Color.white;
                 removeIconBtn.Add(trashImage);

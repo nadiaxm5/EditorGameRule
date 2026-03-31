@@ -67,12 +67,12 @@ namespace GameRuleEditor.CustomControls
 
             var removeBtn = new Button(() => OnRemove?.Invoke()) { text = string.Empty };
             removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 22; removeBtn.style.height = 20;
+            removeBtn.style.width = 28; removeBtn.style.height = 26;
 
             var trashImage = new Image();
             trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-            trashImage.style.width = 12;
-            trashImage.style.height = 12;
+            trashImage.style.width = 16;
+            trashImage.style.height = 16;
             trashImage.style.alignSelf = Align.Center;
             trashImage.style.unityBackgroundImageTintColor = Color.white;
             removeBtn.Add(trashImage);

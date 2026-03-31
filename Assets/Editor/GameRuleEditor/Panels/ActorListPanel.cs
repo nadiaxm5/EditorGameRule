@@ -33,6 +33,14 @@ namespace GameRuleEditor.Panels
             context.OnActorListChanged += UpdateUI;
             context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
+
+            RegisterCallback<DetachFromPanelEvent>(evt =>
+            {
+                context.OnProjectLoaded -= UpdateUI;
+                context.OnActorListChanged -= UpdateUI;
+                context.OnActorSelected -= OnActorSelected;
+                context.OnProjectChanged -= UpdateUI;
+            });
         }
 
         private void CreateUI()
@@ -224,12 +232,5 @@ namespace GameRuleEditor.Panels
                 countLabel.text = $"{count} actor{(count != 1 ? "s" : "")} in project";
         }
 
-        ~ActorListPanel()
-        {
-            context.OnProjectLoaded -= UpdateUI;
-            context.OnActorListChanged -= UpdateUI;
-            context.OnActorSelected -= OnActorSelected;
-            context.OnProjectChanged -= UpdateUI;
-        }
     }
 }

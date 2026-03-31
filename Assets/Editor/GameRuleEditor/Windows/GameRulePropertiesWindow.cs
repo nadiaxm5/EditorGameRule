@@ -25,20 +25,21 @@ namespace GameRuleEditor.Windows
 
         public void Init(EditorContext ctx, ProjectController ctrl)
         {
+            if (context != null) context.OnActorSelected -= OnActorSelected;
             context = ctx; controller = ctrl;
-            BuildUI();
-            
-            // Suscribirse para actualizar el título dinámicamente si cambia el actor
             context.OnActorSelected += OnActorSelected;
+            BuildUI();
         }
 
         private void OnEnable()
         {
             if (context == null) context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
             if (context != null && controller == null) controller = GameRuleLayoutManager.GetOrCreateController(context);
-            if (context != null) {
-                BuildUI();
+            if (context != null)
+            {
+                context.OnActorSelected -= OnActorSelected;
                 context.OnActorSelected += OnActorSelected;
+                BuildUI();
             }
         }
 

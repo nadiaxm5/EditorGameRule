@@ -49,6 +49,10 @@ namespace GameRuleEditor.Panels
         private int draggedCompIndex = -1;
         private VisualElement compDragSpacer;
 
+        // ── Component foldout state ──
+        private HashSet<ActorComponentMeta> collapsedComponents = new HashSet<ActorComponentMeta>();
+        private HashSet<ActorComponentMeta> initializedComponents = new HashSet<ActorComponentMeta>();
+
         public ActorDetailsPanel(EditorContext editorContext, ProjectController projectController)
         {
             context = editorContext;
@@ -335,7 +339,20 @@ namespace GameRuleEditor.Panels
         /// </summary>
         private Foldout BuildComponentShell(ActorComponentMeta comp, int compIndex, System.Action onRemove, bool renameable = false)
         {
-            var foldout = new Foldout { value = true };
+            if (!initializedComponents.Contains(comp))
+            {
+                initializedComponents.Add(comp);
+                collapsedComponents.Add(comp);
+            }
+            bool isCollapsed = collapsedComponents.Contains(comp);
+            var foldout = new Foldout { value = !isCollapsed };
+            foldout.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                    collapsedComponents.Remove(comp);
+                else
+                    collapsedComponents.Add(comp);
+            });
             foldout.style.unityFontStyleAndWeight = FontStyle.Bold;
             foldout.style.marginBottom = 10;
             foldout.style.backgroundColor = new Color(0.18f, 0.18f, 0.20f);
@@ -378,7 +395,7 @@ namespace GameRuleEditor.Panels
             {
                 var nameField = new TextField { value = comp.name };
                 nameField.style.flexGrow = 1;
-                nameField.style.marginLeft = 4;
+                nameField.style.marginLeft = 0;
                 nameField.style.marginRight = 4;
                 nameField.style.unityFontStyleAndWeight = FontStyle.Bold;
                 nameField.style.backgroundColor = Color.clear;
@@ -386,7 +403,25 @@ namespace GameRuleEditor.Panels
                 nameField.style.borderBottomWidth = 0;
                 nameField.style.borderLeftWidth = 0;
                 nameField.style.borderRightWidth = 0;
+                nameField.style.unityTextAlign = TextAnchor.MiddleLeft;
                 HideTextFieldLabel(nameField);
+
+                nameField.RegisterCallback<GeometryChangedEvent>(evt =>
+                {
+                    // Buscamos cualquier elemento de texto interno real (TextElement)
+                    var innerTexts = nameField.Query<TextElement>().ToList();
+                    foreach (var txt in innerTexts)
+                    {
+                        // Ignoramos la etiqueta oculta (Label) y nos quedamos con el Input real
+                        if (!txt.ClassListContains("unity-label"))
+                        {
+                            txt.style.paddingLeft = 4; // Damos aire por la izquierda
+                            txt.style.overflow = Overflow.Visible; // EVITA QUE SE RECORTE LA NEGRITA
+                        }
+                    }
+                });
+
+                
                 nameField.RegisterValueChangedCallback(evt =>
                 {
                     Undo.RecordObject(context.currentProject, "Rename Component");
@@ -491,12 +526,12 @@ namespace GameRuleEditor.Panels
                         RebuildPropertiesList(content);
                     }) { text = string.Empty };
                     delBtn.AddToClassList("button-danger");
-                    delBtn.style.width = 22;
-                    delBtn.style.height = 20;
+                    delBtn.style.width = 28;
+                    delBtn.style.height = 26;
                     var trashImg = new Image();
                     trashImg.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                    trashImg.style.width = 12;
-                    trashImg.style.height = 12;
+                    trashImg.style.width = 16;
+                    trashImg.style.height = 16;
                     trashImg.style.alignSelf = Align.Center;
                     trashImg.style.unityBackgroundImageTintColor = Color.white;
                     delBtn.Add(trashImg);

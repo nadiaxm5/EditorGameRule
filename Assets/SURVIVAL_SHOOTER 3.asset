@@ -1029,14 +1029,14 @@ MonoBehaviour:
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: 
+      groupId: g10dbdd79
     - Name: Rule 2
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: 
+      groupId: g10dbdd79
     - Name: Rule 3
       When:
       - Collision(Bullet)
@@ -1044,7 +1044,7 @@ MonoBehaviour:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(HellephantHurt)
       - PlayParticles(HitParticles)
-      groupId: 
+      groupId: g10dbdd79
     - Name: Rule 4
       When:
       - Compare(this.health<=0)
@@ -1052,26 +1052,26 @@ MonoBehaviour:
       - Edit(#Score,#Score+50)
       - Spawn(HellephantDead,this)
       - Delete(this)
-      groupId: 
+      groupId: g10dbdd79
     - Name: Rule 5
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: 
+      groupId: g10dbdd79
     - Name: Rule 6
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: 
+      groupId: g10dbdd79
     Components:
     - type: Properties
       name: Properties
       id: 
     - type: Rules
       name: Rules
-      id: 
+      id: g10dbdd79
   - ActorName: ZomBear
     Active: 0
     PrefabName: ZomBear
@@ -1102,48 +1102,54 @@ MonoBehaviour:
     - moving=0
     - health=200
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: 
-    - Name: 
+      groupId: gfc8e201b
+    - Name: Rule 2
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: 
-    - Name: 
+      groupId: gfc8e201b
+    - Name: Rule 3
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBearHurt)
       - PlayParticles(HitParticles)
-      groupId: 
-    - Name: 
+      groupId: gfc8e201b
+    - Name: Rule 4
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBearDead,this)
       - Delete(this)
-      groupId: 
-    - Name: 
+      groupId: gfc8e201b
+    - Name: Rule 5
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: 
-    - Name: 
+      groupId: gfc8e201b
+    - Name: Rule 6
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: 
-    Components: []
+      groupId: gfc8e201b
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: gfc8e201b
   - ActorName: ZomBunny
     Active: 0
     PrefabName: ZomBunny
@@ -1174,48 +1180,54 @@ MonoBehaviour:
     - speed=4
     - moving=0
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: 
-    - Name: 
+      groupId: gc9d1b9e6
+    - Name: Rule 2
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: 
-    - Name: 
+      groupId: gc9d1b9e6
+    - Name: Rule 3
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBunnyHurt)
       - PlayParticles(HitParticles)
-      groupId: 
-    - Name: 
+      groupId: gc9d1b9e6
+    - Name: Rule 4
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBunnyDead,this)
       - Delete(this)
-      groupId: 
-    - Name: 
+      groupId: gc9d1b9e6
+    - Name: Rule 5
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: 
-    - Name: 
+      groupId: gc9d1b9e6
+    - Name: Rule 6
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: 
-    Components: []
+      groupId: gc9d1b9e6
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: gc9d1b9e6
   - ActorName: Player
     Active: 1
     PrefabName: Player
@@ -1411,18 +1423,21 @@ MonoBehaviour:
     - Name: A
       When: []
       Do: []
-      groupId: 
+      groupId: gff4d0c34
     - Name: B
       When: []
       Do: []
-      groupId: 
+      groupId: gff4d0c34
     - Name: C
       When:
       - Timer(5)
       Do:
       - Spawn(Hellephant,this)
-      groupId: 
-    Components: []
+      groupId: gff4d0c34
+    Components:
+    - type: Rules
+      name: Rules
+      id: gff4d0c34
   - ActorName: ZomBearSpawner
     Active: 1
     PrefabName: ZomBearSpawner
@@ -1485,13 +1500,16 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When:
       - Timer(3)
       Do:
       - Spawn(ZomBunny,this)
-      groupId: 
-    Components: []
+      groupId: gcb506d6b
+    Components:
+    - type: Rules
+      name: Rules
+      id: gcb506d6b
   - ActorName: HellephantDead
     Active: 0
     PrefabName: HellephantDead
@@ -1518,20 +1536,23 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Animate(Death)
       - PlaySound(HellephantDeath)
       - PlayParticles(DeathParticles)
-      groupId: 
-    - Name: 
+      groupId: gc6f90387
+    - Name: Rule 2
       When:
       - Timer(1)
       Do:
       - Delete(this)
-      groupId: 
-    Components: []
+      groupId: gc6f90387
+    Components:
+    - type: Rules
+      name: Rules
+      id: gc6f90387
   - ActorName: ZomBearDead
     Active: 0
     PrefabName: ZomBearDead
@@ -1637,18 +1658,24 @@ MonoBehaviour:
     - speed=50
     - damage=500000
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Move(this.speed,0,this.ry,0)
-      groupId: 
-    - Name: 
+      groupId: g074a58f0
+    - Name: Rule 2
       When:
       - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
       Do:
       - Delete(this)
-      groupId: 
-    Components: []
+      groupId: g074a58f0
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g074a58f0
   - ActorName: ShotLight
     Active: 0
     PrefabName: ShotLight
@@ -1675,15 +1702,18 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(this.x,Player.x)
       - Edit(this.y,Player.y)
       - Edit(this.z,Player.z)
       - Edit(this.Active,0)
-      groupId: 
-    Components: []
+      groupId: g913c1fed
+    Components:
+    - type: Rules
+      name: Rules
+      id: g913c1fed
   - ActorName: Laser
     Active: 0
     PrefabName: Laser
@@ -1763,13 +1793,16 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(this.sliderValue,Player.health)
       - Edit(this.text,#Score)
-      groupId: 
-    Components: []
+      groupId: ga79c93e2
+    Components:
+    - type: Rules
+      name: Rules
+      id: ga79c93e2
   - ActorName: GameOver
     Active: 0
     PrefabName: GameOver
@@ -1833,19 +1866,7 @@ MonoBehaviour:
     - NewProp=0
     - NewProp=0
     Script:
-    - Name: Rule 1
-      When: []
-      Do: []
-      groupId: g62c4e000
-    - Name: Rule 2
-      When: []
-      Do: []
-      groupId: g62c4e000
     - Name: Rule 3
-      When: []
-      Do: []
-      groupId: g62c4e000
-    - Name: Rule 4
       When: []
       Do: []
       groupId: g62c4e000
@@ -1853,21 +1874,19 @@ MonoBehaviour:
       When: []
       Do: []
       groupId: g62c4e000
-    - Name: Rule 6
+    - Name: Rule 4
       When: []
       Do: []
-      groupId: g9eb2e03c
-    - Name: Rule 7
-      When: []
-      Do: []
-      groupId: g9eb2e03c
+      groupId: g62c4e000
     - Name: Rule 8
       When: []
       Do: []
       groupId: g9eb2e03c
     - Name: Rule 9
-      When: []
-      Do: []
+      When:
+      - 
+      Do:
+      - 
       groupId: g9eb2e03c
     - Name: Rule 10
       When: []
