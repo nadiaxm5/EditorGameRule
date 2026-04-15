@@ -49,19 +49,13 @@ MonoBehaviour:
       Active: 1
       PrefabName: LightingReflection
       Tag: Untagged
-      IconColorHex: '#FFFFFF'
+      IconColorHex: 
       Position:
       - 0
       - 0.6
       - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -71,12 +65,12 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - Name: Rule 1
+      - Name: 
         When: []
         Do:
         - 
         groupId: 
-      - Name: Rule 2
+      - Name: 
         When:
         - 
         Do:
@@ -88,18 +82,9 @@ MonoBehaviour:
       PrefabName: Environment
       Tag: Obstacle
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -108,15 +93,7 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script:
-      - Name: 
-        When: []
-        Do: []
-        groupId: 
-      - Name: 
-        When: []
-        Do: []
-        groupId: 
+      Script: []
       Components: []
     - ActorName: Hellephant
       Active: 0
@@ -124,17 +101,14 @@ MonoBehaviour:
       Tag: Hellephant
       IconColorHex: 
       Position:
-      - -3.0381298
-      - 0.035427637
-      - -16.268959
+      - -3.0381
+      - 0.0354
+      - -16.269
       Rotation:
       - 0
-      - 158.36176
+      - 158.3618
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -196,17 +170,14 @@ MonoBehaviour:
       Tag: ZomBear
       IconColorHex: 
       Position:
-      - 9.400304
-      - 0.08061561
-      - 9.104917
+      - 9.4003
+      - 0.0806
+      - 9.1049
       Rotation:
       - 0
-      - 156.19412
+      - 156.1941
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -268,17 +239,14 @@ MonoBehaviour:
       Tag: ZomBunny
       IconColorHex: 
       Position:
-      - -10.433114
-      - 0.013660904
-      - -0.12613936
+      - -10.4331
+      - 0.0137
+      - -0.1261
       Rotation:
       - 0
-      - 141.91791
+      - 141.9179
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -338,19 +306,10 @@ MonoBehaviour:
       Active: 1
       PrefabName: Player
       Tag: Player
-      IconColorHex: '#FFFFFF'
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -369,74 +328,74 @@ MonoBehaviour:
       - offsetZ=0.7
       - moving=0
       Script:
-      - Name: Moving?
+      - Name: 
         When:
         - NOT Check(this.moving) AND Compare(this.health > 0) AND Compare( < )
         Do:
         - Animate(Idle)
         groupId: 
-      - Name: Rule 2
+      - Name: 
         When:
         - Compare(this.health==this.lastHealth)
         Do:
         - Edit(DamageCanvas.Active,0)
         groupId: 
-      - Name: c
+      - Name: 
         When:
         - Keyboard(RightArrow,press)
         Do:
         - Move(this.speed, 0, 90, 0)
         - Edit(this.moving,1)
         groupId: 
-      - Name: Rule 4
+      - Name: 
         When:
         - Keyboard(DownArrow,press)
         Do:
         - Move(this.speed, 0, 180, 0)
         - Edit(this.moving,1)
         groupId: 
-      - Name: Rule 5
+      - Name: 
         When:
         - Collision(Hellephant)
         Do:
         - Edit(this.health,this.health-Hellephant.damage)
         - PlaySound(PlayerHurt)
         groupId: 
-      - Name: Rule 6
+      - Name: 
         When:
         - Collision(ZomBear)
         Do:
         - Edit(this.health,this.health-ZomBear.damage)
         - PlaySound(PlayerHurt)
         groupId: 
-      - Name: Rule 7
+      - Name: 
         When:
         - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
           OR Keyboard(DownArrow,up)
         Do:
         - Edit(this.moving,0)
         groupId: 
-      - Name: Rule 8
+      - Name: 
         When:
         - Collision(ZomBunny)
         Do:
         - Edit(this.health,this.health-ZomBunny.damage)
         - PlaySound(PlayerHurt)
         groupId: 
-      - Name: Rule 9
+      - Name: 
         When:
         - Keyboard(UpArrow,press)
         Do:
         - Move(this.speed, 0, 0, 0)
         - Edit(this.moving,1)
         groupId: 
-      - Name: Rule 10
+      - Name: 
         When:
         - Check(this.moving)
         Do:
         - Animate(Move)
         groupId: 
-      - Name: Rule 11
+      - Name: 
         When:
         - Compare(this.health<=0)
         Do:
@@ -445,27 +404,27 @@ MonoBehaviour:
         - Edit(this.moving,0)
         - Edit(this.speed,0)
         groupId: 
-      - Name: Rule 12
+      - Name: 
         When: []
         Do:
         - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
         - Edit(#CameraPosition.x,this.x)
         - Edit(#CameraPosition.z,this.z-this.offsetCam)
         groupId: 
-      - Name: Rule 13
+      - Name: 
         When:
         - NOT Check(this.moving) AND Compare(this.health<=0)
         Do:
         - Animate(Death)
         groupId: 
-      - Name: Rule 14
+      - Name: 
         When:
         - Compare(this.health<this.lastHealth)
         Do:
         - Edit(DamageCanvas.Active,1)
         - Edit(this.lastHealth,this.health)
         groupId: 
-      - Name: Rule 15
+      - Name: 
         When:
         - Touch(press,false)
         Do:
@@ -475,20 +434,20 @@ MonoBehaviour:
         - PlaySound(PlayerGunShot)
         - PlayParticles(GunBarrelEnd)
         groupId: 
-      - Name: Rule 16
+      - Name: 
         When:
         - Keyboard(LeftArrow,press)
         Do:
         - Move(this.speed, 0, -90, 0)
         - Edit(this.moving,1)
         groupId: 
-      - Name: Rule 17
+      - Name: 
         When:
         - 
         Do:
         - 
         groupId: 
-      - Name: Rule 18
+      - Name: 
         When:
         - NOT Compare( < ) OR Compare( < ) AND Compare( < )
         Do: []
@@ -507,10 +466,7 @@ MonoBehaviour:
       - 0
       - 230
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -520,15 +476,15 @@ MonoBehaviour:
       Drag: 0
       Properties: []
       Script:
-      - Name: A
+      - Name: 
         When: []
         Do: []
         groupId: 
-      - Name: B
+      - Name: 
         When: []
         Do: []
         groupId: 
-      - Name: C
+      - Name: 
         When:
         - Timer(5)
         Do:
@@ -548,10 +504,7 @@ MonoBehaviour:
       - 0
       - 240
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -581,10 +534,7 @@ MonoBehaviour:
       - 0
       - 130
       - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -606,18 +556,9 @@ MonoBehaviour:
       PrefabName: HellephantDead
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -646,18 +587,9 @@ MonoBehaviour:
       PrefabName: ZomBearDead
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -680,18 +612,9 @@ MonoBehaviour:
       PrefabName: ZomBunnyDead
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -721,13 +644,13 @@ MonoBehaviour:
       Tag: Bullet
       IconColorHex: 
       Position:
-      - 3.4745336
-      - 0.36617625
-      - 10.446494
+      - 3.4745
+      - 0.3662
+      - 10.4465
       Rotation:
-      - 0.061955847
-      - 4.9874244
-      - 0.0004497318
+      - 0.062
+      - 4.9874
+      - 0.0004
       Scale:
       - 0.15
       - 0.15
@@ -760,18 +683,9 @@ MonoBehaviour:
       PrefabName: ShotLight
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Position: []
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -818,14 +732,8 @@ MonoBehaviour:
       PrefabName: DamageCanvas
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
+      Position: []
+      Rotation: []
       Scale:
       - 0
       - 0
@@ -849,14 +757,8 @@ MonoBehaviour:
       - 549.5
       - 443
       - 0
-      Rotation:
-      - 0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
+      Rotation: []
+      Scale: []
       Size: []
       Velocity: []
       AngularVelocity: []
@@ -864,7 +766,8 @@ MonoBehaviour:
       Friction: 0
       Bounciness: 0
       Drag: 0
-      Properties: []
+      Properties:
+      - sliderValue=0
       Script:
       - Name: 
         When: []
@@ -878,14 +781,8 @@ MonoBehaviour:
       PrefabName: GameOver
       Tag: Untagged
       IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
+      Position: []
+      Rotation: []
       Scale:
       - 0
       - 0
@@ -913,6 +810,45 @@ MonoBehaviour:
         - LoadScene()
         groupId: 
       Components: []
+    - ActorName: Jeff
+      Active: 1
+      PrefabName: ZomBunny
+      Tag: Untagged
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=4
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+        groupId: gac6a44d0
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: gac6a44d0
     CustomVariables:
     - name: Score
       type: float
@@ -925,19 +861,13 @@ MonoBehaviour:
     Active: 1
     PrefabName: LightingReflection
     Tag: Untagged
-    IconColorHex: '#FFFFFF'
+    IconColorHex: 
     Position:
     - 0
     - 0.6
     - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -947,12 +877,12 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - 
       groupId: 
-    - Name: Rule 2
+    - Name: 
       When:
       - 
       Do:
@@ -964,18 +894,9 @@ MonoBehaviour:
     PrefabName: Environment
     Tag: Obstacle
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -984,15 +905,7 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties: []
-    Script:
-    - Name: 
-      When: []
-      Do: []
-      groupId: 
-    - Name: 
-      When: []
-      Do: []
-      groupId: 
+    Script: []
     Components: []
   - ActorName: Hellephant
     Active: 0
@@ -1000,17 +913,14 @@ MonoBehaviour:
     Tag: Hellephant
     IconColorHex: 
     Position:
-    - -3.0381298
-    - 0.035427637
-    - -16.268959
+    - -3.0381
+    - 0.0354
+    - -16.269
     Rotation:
     - 0
-    - 158.36176
+    - 158.3618
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1024,71 +934,62 @@ MonoBehaviour:
     - damage=0.3
     - moving=0
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: g10dbdd79
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: g10dbdd79
-    - Name: Rule 3
+      groupId: 
+    - Name: 
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(HellephantHurt)
       - PlayParticles(HitParticles)
-      groupId: g10dbdd79
-    - Name: Rule 4
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+50)
       - Spawn(HellephantDead,this)
       - Delete(this)
-      groupId: g10dbdd79
-    - Name: Rule 5
+      groupId: 
+    - Name: 
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: g10dbdd79
-    - Name: Rule 6
+      groupId: 
+    - Name: 
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: g10dbdd79
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: g10dbdd79
+      groupId: 
+    Components: []
   - ActorName: ZomBear
     Active: 0
     PrefabName: ZomBear
     Tag: ZomBear
     IconColorHex: 
     Position:
-    - 9.400304
-    - 0.08061561
-    - 9.104917
+    - 9.4003
+    - 0.0806
+    - 9.1049
     Rotation:
     - 0
-    - 156.19412
+    - 156.1941
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1102,71 +1003,62 @@ MonoBehaviour:
     - moving=0
     - health=200
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: gfc8e201b
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: gfc8e201b
-    - Name: Rule 3
+      groupId: 
+    - Name: 
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBearHurt)
       - PlayParticles(HitParticles)
-      groupId: gfc8e201b
-    - Name: Rule 4
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBearDead,this)
       - Delete(this)
-      groupId: gfc8e201b
-    - Name: Rule 5
+      groupId: 
+    - Name: 
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: gfc8e201b
-    - Name: Rule 6
+      groupId: 
+    - Name: 
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: gfc8e201b
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: gfc8e201b
+      groupId: 
+    Components: []
   - ActorName: ZomBunny
     Active: 0
     PrefabName: ZomBunny
     Tag: ZomBunny
     IconColorHex: 
     Position:
-    - -10.433114
-    - 0.013660904
-    - -0.12613936
+    - -10.4331
+    - 0.0137
+    - -0.1261
     Rotation:
     - 0
-    - 141.91791
+    - 141.9179
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1180,71 +1072,56 @@ MonoBehaviour:
     - speed=4
     - moving=0
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: gc9d1b9e6
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: gc9d1b9e6
-    - Name: Rule 3
+      groupId: 
+    - Name: 
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(ZomBunnyHurt)
       - PlayParticles(HitParticles)
-      groupId: gc9d1b9e6
-    - Name: Rule 4
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+10)
       - Spawn(ZomBunnyDead,this)
       - Delete(this)
-      groupId: gc9d1b9e6
-    - Name: Rule 5
+      groupId: 
+    - Name: 
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: gc9d1b9e6
-    - Name: Rule 6
+      groupId: 
+    - Name: 
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: gc9d1b9e6
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: gc9d1b9e6
+      groupId: 
+    Components: []
   - ActorName: Player
     Active: 1
     PrefabName: Player
     Tag: Player
-    IconColorHex: '#FFFFFF'
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1263,74 +1140,74 @@ MonoBehaviour:
     - offsetZ=0.7
     - moving=0
     Script:
-    - Name: Moving?
+    - Name: 
       When:
       - NOT Check(this.moving) AND Compare(this.health > 0) AND Compare( < )
       Do:
       - Animate(Idle)
-      groupId: gc708b10e
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health==this.lastHealth)
       Do:
       - Edit(DamageCanvas.Active,0)
-      groupId: gc708b10e
-    - Name: c
+      groupId: 
+    - Name: 
       When:
       - Keyboard(RightArrow,press)
       Do:
       - Move(this.speed, 0, 90, 0)
       - Edit(this.moving,1)
-      groupId: gc708b10e
-    - Name: Rule 4
+      groupId: 
+    - Name: 
       When:
       - Keyboard(DownArrow,press)
       Do:
       - Move(this.speed, 0, 180, 0)
       - Edit(this.moving,1)
-      groupId: gc708b10e
-    - Name: Rule 5
+      groupId: 
+    - Name: 
       When:
       - Collision(Hellephant)
       Do:
       - Edit(this.health,this.health-Hellephant.damage)
       - PlaySound(PlayerHurt)
-      groupId: gc708b10e
-    - Name: Rule 6
+      groupId: 
+    - Name: 
       When:
       - Collision(ZomBear)
       Do:
       - Edit(this.health,this.health-ZomBear.damage)
       - PlaySound(PlayerHurt)
-      groupId: gc708b10e
-    - Name: Rule 7
+      groupId: 
+    - Name: 
       When:
       - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
         OR Keyboard(DownArrow,up)
       Do:
       - Edit(this.moving,0)
-      groupId: gc708b10e
-    - Name: Rule 8
+      groupId: 
+    - Name: 
       When:
       - Collision(ZomBunny)
       Do:
       - Edit(this.health,this.health-ZomBunny.damage)
       - PlaySound(PlayerHurt)
-      groupId: gc708b10e
-    - Name: Rule 9
+      groupId: 
+    - Name: 
       When:
       - Keyboard(UpArrow,press)
       Do:
       - Move(this.speed, 0, 0, 0)
       - Edit(this.moving,1)
-      groupId: gc708b10e
-    - Name: Rule 10
+      groupId: 
+    - Name: 
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: gc708b10e
-    - Name: Rule 11
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health<=0)
       Do:
@@ -1338,28 +1215,28 @@ MonoBehaviour:
       - PlaySound(PlayerDeath)
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: gc708b10e
-    - Name: Rule 12
+      groupId: 
+    - Name: 
       When: []
       Do:
       - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
       - Edit(#CameraPosition.x,this.x)
       - Edit(#CameraPosition.z,this.z-this.offsetCam)
-      groupId: gc708b10e
-    - Name: Rule 13
+      groupId: 
+    - Name: 
       When:
       - NOT Check(this.moving) AND Compare(this.health<=0)
       Do:
       - Animate(Death)
-      groupId: gc708b10e
-    - Name: Rule 14
+      groupId: 
+    - Name: 
       When:
       - Compare(this.health<this.lastHealth)
       Do:
       - Edit(DamageCanvas.Active,1)
       - Edit(this.lastHealth,this.health)
-      groupId: gc708b10e
-    - Name: Rule 15
+      groupId: 
+    - Name: 
       When:
       - Touch(press,false)
       Do:
@@ -1368,32 +1245,26 @@ MonoBehaviour:
       - Edit(ShotLight.Active,1)
       - PlaySound(PlayerGunShot)
       - PlayParticles(GunBarrelEnd)
-      groupId: gc708b10e
-    - Name: Rule 16
+      groupId: 
+    - Name: 
       When:
       - Keyboard(LeftArrow,press)
       Do:
       - Move(this.speed, 0, -90, 0)
       - Edit(this.moving,1)
-      groupId: gc708b10e
-    - Name: Rule 17
+      groupId: 
+    - Name: 
       When:
       - 
       Do:
       - 
-      groupId: gc708b10e
-    - Name: Rule 18
+      groupId: 
+    - Name: 
       When:
       - NOT Compare( < ) OR Compare( < ) AND Compare( < )
       Do: []
-      groupId: gc708b10e
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: gc708b10e
+      groupId: 
+    Components: []
   - ActorName: HellephantSpawner
     Active: 1
     PrefabName: HellephantSpawner
@@ -1407,10 +1278,7 @@ MonoBehaviour:
     - 0
     - 230
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1420,24 +1288,21 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: A
+    - Name: 
       When: []
       Do: []
-      groupId: gff4d0c34
-    - Name: B
+      groupId: 
+    - Name: 
       When: []
       Do: []
-      groupId: gff4d0c34
-    - Name: C
+      groupId: 
+    - Name: 
       When:
       - Timer(5)
       Do:
       - Spawn(Hellephant,this)
-      groupId: gff4d0c34
-    Components:
-    - type: Rules
-      name: Rules
-      id: gff4d0c34
+      groupId: 
+    Components: []
   - ActorName: ZomBearSpawner
     Active: 1
     PrefabName: ZomBearSpawner
@@ -1451,10 +1316,7 @@ MonoBehaviour:
     - 0
     - 240
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1464,16 +1326,13 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When:
       - Timer(2)
       Do:
       - Spawn(ZomBear,this)
-      groupId: g09f00df4
-    Components:
-    - type: Rules
-      name: Rules
-      id: g09f00df4
+      groupId: 
+    Components: []
   - ActorName: ZomBunnySpawner
     Active: 1
     PrefabName: ZomBunnySpawner
@@ -1487,10 +1346,7 @@ MonoBehaviour:
     - 0
     - 130
     - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1500,33 +1356,21 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When:
       - Timer(3)
       Do:
       - Spawn(ZomBunny,this)
-      groupId: gcb506d6b
-    Components:
-    - type: Rules
-      name: Rules
-      id: gcb506d6b
+      groupId: 
+    Components: []
   - ActorName: HellephantDead
     Active: 0
     PrefabName: HellephantDead
     Tag: Untagged
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1536,40 +1380,28 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Animate(Death)
       - PlaySound(HellephantDeath)
       - PlayParticles(DeathParticles)
-      groupId: gc6f90387
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Timer(1)
       Do:
       - Delete(this)
-      groupId: gc6f90387
-    Components:
-    - type: Rules
-      name: Rules
-      id: gc6f90387
+      groupId: 
+    Components: []
   - ActorName: ZomBearDead
     Active: 0
     PrefabName: ZomBearDead
     Tag: Untagged
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1579,34 +1411,22 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Animate(Death)
       - PlaySound(ZomBearDeath)
       - PlayParticles(DeathParticles)
-      groupId: g24bcd787
-    Components:
-    - type: Rules
-      name: Rules
-      id: g24bcd787
+      groupId: 
+    Components: []
   - ActorName: ZomBunnyDead
     Active: 0
     PrefabName: ZomBunnyDead
     Tag: Untagged
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1636,13 +1456,13 @@ MonoBehaviour:
     Tag: Bullet
     IconColorHex: 
     Position:
-    - 3.4745336
-    - 0.36617625
-    - 10.446494
+    - 3.4745
+    - 0.3662
+    - 10.4465
     Rotation:
-    - 0.061955847
-    - 4.9874244
-    - 0.0004497318
+    - 0.062
+    - 4.9874
+    - 0.0004
     Scale:
     - 0.15
     - 0.15
@@ -1658,41 +1478,26 @@ MonoBehaviour:
     - speed=50
     - damage=500000
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Move(this.speed,0,this.ry,0)
-      groupId: g074a58f0
-    - Name: Rule 2
+      groupId: 
+    - Name: 
       When:
       - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
       Do:
       - Delete(this)
-      groupId: g074a58f0
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: g074a58f0
+      groupId: 
+    Components: []
   - ActorName: ShotLight
     Active: 0
     PrefabName: ShotLight
     Tag: Untagged
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
+    Position: []
+    Rotation: []
+    Scale: []
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1702,18 +1507,15 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Edit(this.x,Player.x)
       - Edit(this.y,Player.y)
       - Edit(this.z,Player.z)
       - Edit(this.Active,0)
-      groupId: g913c1fed
-    Components:
-    - type: Rules
-      name: Rules
-      id: g913c1fed
+      groupId: 
+    Components: []
   - ActorName: Laser
     Active: 0
     PrefabName: Laser
@@ -1731,28 +1533,19 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
+    - Name: 
       When: []
       Do:
       - Delete(this)
-      groupId: gcf4cd268
-    Components:
-    - type: Rules
-      name: Rules
-      id: gcf4cd268
+      groupId: 
+    Components: []
   - ActorName: DamageCanvas
     Active: 0
     PrefabName: DamageCanvas
     Tag: Untagged
     IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
+    Position: []
+    Rotation: []
     Scale:
     - 0
     - 0
@@ -1776,14 +1569,36 @@ MonoBehaviour:
     - 549.5
     - 443
     - 0
-    Rotation:
-    - 0
-    - 0
-    - 0
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - sliderValue=0
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.sliderValue,Player.health)
+      - Edit(this.text,#Score)
+      groupId: 
+    Components: []
+  - ActorName: GameOver
+    Active: 0
+    PrefabName: GameOver
+    Tag: Untagged
+    IconColorHex: 
+    Position: []
+    Rotation: []
     Scale:
-    - 1
-    - 1
-    - 1
+    - 0
+    - 0
+    - 0
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1793,19 +1608,23 @@ MonoBehaviour:
     Drag: 0
     Properties: []
     Script:
-    - Name: Rule 1
-      When: []
+    - Name: 
+      When:
+      - Timer(2)
       Do:
-      - Edit(this.sliderValue,Player.health)
-      - Edit(this.text,#Score)
-      groupId: ga79c93e2
-    Components:
-    - type: Rules
-      name: Rules
-      id: ga79c93e2
-  - ActorName: GameOver
-    Active: 0
-    PrefabName: GameOver
+      - Animate(GameOver)
+      groupId: 
+    - Name: 
+      When:
+      - Timer(3)
+      Do:
+      - Edit(#Score,0)
+      - LoadScene()
+      groupId: 
+    Components: []
+  - ActorName: Jeff
+    Active: 1
+    PrefabName: ZomBunny
     Tag: Untagged
     IconColorHex: 
     Position:
@@ -1817,43 +1636,9 @@ MonoBehaviour:
     - 0
     - 0
     Scale:
-    - 0
-    - 0
-    - 0
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties: []
-    Script:
-    - Name: Rule 1
-      When:
-      - Timer(2)
-      Do:
-      - Animate(GameOver)
-      groupId: gcfb970db
-    - Name: Rule 2
-      When:
-      - Timer(3)
-      Do:
-      - Edit(#Score,0)
-      - LoadScene()
-      groupId: gcfb970db
-    Components:
-    - type: Rules
-      name: Rules
-      id: gcfb970db
-  - ActorName: NewActor
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    - 1
+    - 1
+    - 1
     Size: []
     Velocity: []
     AngularVelocity: []
@@ -1862,43 +1647,17 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - NewProp=0
-    - NewProp=0
-    - NewProp=0
+    - speed=4
     Script:
-    - Name: Rule 3
+    - Name: Rule 1
       When: []
-      Do: []
-      groupId: g62c4e000
-    - Name: Rule 5
-      When: []
-      Do: []
-      groupId: g62c4e000
-    - Name: Rule 4
-      When: []
-      Do: []
-      groupId: g62c4e000
-    - Name: Rule 8
-      When: []
-      Do: []
-      groupId: g9eb2e03c
-    - Name: Rule 9
-      When:
-      - 
       Do:
-      - 
-      groupId: g9eb2e03c
-    - Name: Rule 10
-      When: []
-      Do: []
-      groupId: g9eb2e03c
+      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+      groupId: gac6a44d0
     Components:
     - type: Properties
       name: Properties
       id: 
     - type: Rules
-      name: Rules 2
-      id: g9eb2e03c
-    - type: Rules
-      name: Movimiento
-      id: g62c4e000
+      name: Rules
+      id: gac6a44d0

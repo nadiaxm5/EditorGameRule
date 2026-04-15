@@ -1,0 +1,26 @@
+{
+    "ActorName": "<string>",
+    "PrefabName": "<string>",
+    "Tag": "<string>",
+    "Active": "<bool>",
+    "Position": ["<float>", "<float>", "<float>"],
+    "Rotation": ["<float>", "<float>", "<float>"],
+    "Scale": ["<float>", "<float>", "<float>"],
+    "Drag": "<float>",
+    "Friction": "<float>",
+    "Velocity": ["<float>", "<float>", "<float>"],
+    "AngularVelocity": ["<float>", "<float>", "<float>"],
+    "Properties": [
+        "<propertyName>=<value>"
+    ],
+    "Script": [
+        {
+            "When": ["<condition1>", "<condition2>"],
+            "Do": ["<action1>", "<action2>"]
+        },
+        {
+            "When": ["<condition>"],
+            "Do": ["<action>"]
+        }
+    ]
+}
