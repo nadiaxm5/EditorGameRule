@@ -7,14 +7,14 @@ public class GameManager : MonoBehaviour
     private Light sunLight;
     private AudioSource audioSource;
 
-    public string GameName = "JHON_LEMON";
+    public string GameName = "TANKS";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(-9.8f, 5.6f, -8.8f);
-    public Vector3 CameraRotation = new Vector3(45f, 0f, 0f);
-    public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
-    public Vector3 SunRotation = new Vector3(30f, 20f, 0f);
-    public Color SunColor = new Color32(225, 240, 250, 255);
-    public Color SunAmbientColor = new Color32(170, 180, 200, 255);
+    public Vector3 CameraPosition = new Vector3(-12f, 20f, 5f);
+    public Vector3 CameraRotation = new Vector3(50f, 60f, 0f);
+    public Vector3 SunPosition = new Vector3(0f, 10f, 0f);
+    public Vector3 SunRotation = new Vector3(54.3f, -26.2f, 10.5f);
+    public Color SunColor = new Color32(255, 200, 100, 255);
+    public Color SunAmbientColor = new Color32(180, 180, 180, 255);
     public Color BackgroundColor = new Color32(0, 0, 0, 255);
     public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
     public string SoundTrack

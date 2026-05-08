@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0006a05f1531364e978c582786f6f14, type: 3}
   m_Name: EditorContext
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.EditorContext
-  currentProject: {fileID: 11400000, guid: 597837bdb202d6746b7b28468d022ec7, type: 2}
-  selectedActorIndex: -1
+  currentProject: {fileID: 11400000, guid: e566ea25174f7224ca4cc2bbc380e6d9, type: 2}
+  selectedActorIndex: 1
   selectedScriptIndex: -1
   _activeInspectorMode: 2
