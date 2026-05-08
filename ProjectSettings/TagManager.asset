@@ -13,6 +13,8 @@ TagManager:
   - ZomBear
   - jugador
   - fjh bnsadjhf
+  - Enemy
+  - End
   layers:
   - Default
   - TransparentFX
