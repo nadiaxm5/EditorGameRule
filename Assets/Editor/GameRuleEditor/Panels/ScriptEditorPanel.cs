@@ -40,8 +40,12 @@ namespace GameRuleEditor.Panels
         {
             context = editorContext;
             controller = projectController;
-            this.groupId = groupId;
-            this.groupName = groupName;
+
+            // Unity serializes a null string as "" when it saves the owning window across a domain
+            // reload (entering Play). Normalizing here keeps "no group filter" as a single value:
+            // otherwise an empty groupId is treated as a real filter and matches no rule at all.
+            this.groupId = string.IsNullOrEmpty(groupId) ? null : groupId;
+            this.groupName = string.IsNullOrEmpty(groupName) ? null : groupName;
 
             style.flexGrow = 1;
             AddToClassList("panel-container");

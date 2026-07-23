@@ -12,8 +12,11 @@ namespace GameRuleEditor.Windows
         private EditorContext context;
         private ProjectController controller;
         private Label titleLabel;
-        private string currentGroupId;
-        private string currentGroupName;
+
+        // [SerializeField] so an open group filter survives entering Play. Unity writes null strings
+        // back as "", so both are normalized to null in OnEnable — see NormalizeGroupFilter.
+        [SerializeField] private string currentGroupId;
+        [SerializeField] private string currentGroupName;
 
         public static GameRuleRulesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl, string groupId = null, string groupName = null)
         {
@@ -21,6 +24,7 @@ namespace GameRuleEditor.Windows
             window.minSize = new Vector2(400, 300);
             window.currentGroupId = groupId;
             window.currentGroupName = groupName;
+            window.NormalizeGroupFilter();
             window.Init(ctx, ctrl);
             window.Show();
             window.Focus();
@@ -36,8 +40,20 @@ namespace GameRuleEditor.Windows
             context.OnActorSelected += OnActorSelected;
         }
 
+        /// <summary>
+        /// A domain reload turns a null filter into "". Left as-is, the empty id would be taken for a
+        /// real group and no rule would match it, so the window looks empty until the actor is reselected.
+        /// </summary>
+        private void NormalizeGroupFilter()
+        {
+            if (string.IsNullOrEmpty(currentGroupId)) currentGroupId = null;
+            if (string.IsNullOrEmpty(currentGroupName)) currentGroupName = null;
+        }
+
         private void OnEnable()
         {
+            NormalizeGroupFilter();
+
             if (context == null) context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
             if (context != null && controller == null) controller = GameRuleLayoutManager.GetOrCreateController(context);
             if (context != null) {

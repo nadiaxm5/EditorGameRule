@@ -14,12 +14,12 @@ public class Player : MonoBehaviour {
     void Update(){
         if(Condition.Keyboard("D","press")){
             Action.Move("5","0","90","0",gameObject,scopeList);
-            Action.Animate("",gameObject);
+            Action.Animate("Move",gameObject);
         }
     }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
-        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Collision(Enemy);Compare(this.Health < 100);Delete();Keyboard(D,press);Move(5,0,90,0);Animate()");
+        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Collision(Enemy);Compare(this.Health < 100);Delete();Keyboard(D,press);Move(5,0,90,0);Animate(Move)");
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
     }

@@ -77,7 +77,7 @@ MonoBehaviour:
         - Keyboard(D,press)
         Do:
         - Move(5,0,90,0)
-        - Animate()
+        - Animate(Move)
         groupId: gf4a79539
       - Name: Rule 2
         When:
@@ -188,7 +188,7 @@ MonoBehaviour:
       - Keyboard(D,press)
       Do:
       - Move(5,0,90,0)
-      - Animate()
+      - Animate(Move)
       groupId: gf4a79539
     - Name: Rule 2
       When:
