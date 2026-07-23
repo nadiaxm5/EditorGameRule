@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditorInternal;
+using GameRuleEditor.Core;
 
 public static class Scripts
 {
@@ -205,14 +206,22 @@ public static class Scripts
         string name = element.Substring(0, init);
         string command = name;
         string rest = element.Substring(init + 1, end - init - 1);
-        string[] parameters = rest.Split(new string[] { "," }, StringSplitOptions.None);
+        List<string> parameters = rest.Split(new string[] { "," }, StringSplitOptions.None).ToList();
+
+        // A parameter left empty in the editor — or missing in a hand-written JSON — would reach
+        // the runtime as "" and blow up the expression parser. Fill it with the same default the
+        // editor shows for that slot (ActionDefaults is the shared table).
+        while (parameters.Count < ActionDefaults.ParameterCount(name)) parameters.Add(string.Empty);
+        for (int i = 0; i < parameters.Count; i++)
+            parameters[i] = ActionDefaults.Fill(name, i, parameters[i]);
+
         command += "(";
         int counter = 0;
         foreach (string s in parameters)
         {
             counter++;
             command += "\"" + s + "\"";
-            if (parameters.Length != counter) command += ",";
+            if (parameters.Count != counter) command += ",";
         }
         if (name == "Compare" || name == "Edit" || name == "Check") command += ",scopeList)";
         else if (name == "Move" || name == "MoveTo" || name == "NavigateTo" || name == "RotateTo" || name == "Rotate" || name == "Push" || name == "PushTo" || name == "Torque") command += ",gameObject,scopeList)";
@@ -226,7 +235,7 @@ public static class Scripts
             command = $"Spawn(\"{prefab}\", gameObject";
 
             List<string> extraParams = new List<string>();
-            for (int i = 2; i < parameters.Length; i++)
+            for (int i = 2; i < parameters.Count; i++)
                 extraParams.Add($"\"{parameters[i].Trim()}\"");
 
             while (extraParams.Count < 6)

@@ -71,11 +71,20 @@ MonoBehaviour:
       Drag: 0
       Properties:
       - Health=100
-      Script: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Keyboard(D,press)
+        Do:
+        - Move(5,0,90,0)
+        groupId: gf4a79539
       Components:
       - type: Properties
         name: Properties
         id: 
+      - type: Rules
+        name: Rules
+        id: gf4a79539
     - ActorName: Enemy
       Active: 1
       PrefabName: ZomBunny
@@ -101,8 +110,16 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties: []
-      Script: []
-      Components: []
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - NavigateTo(5,Player.x,Player.y,Player.z)
+        groupId: g428cd050
+      Components:
+      - type: Rules
+        name: Rules
+        id: g428cd050
     - ActorName: Environment
       Active: 1
       PrefabName: Environment
@@ -158,24 +175,33 @@ MonoBehaviour:
     Drag: 0
     Properties:
     - Health=100
-    Script: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Keyboard(D,press)
+      Do:
+      - Move(5,0,90,0)
+      groupId: gf4a79539
     Components:
     - type: Properties
       name: Properties
       id: 
+    - type: Rules
+      name: Rules
+      id: gf4a79539
   - ActorName: Enemy
     Active: 1
     PrefabName: ZomBunny
     Tag: Enemy
     IconColorHex: 
     Position:
-    - 0
-    - 0
-    - 0
+    - -0.42671797
+    - -0.0109241605
+    - -0.002819635
     Rotation:
     - -0
-    - 0
-    - 0
+    - 1.2878609
+    - -0
     Scale:
     - 1
     - 1
@@ -188,8 +214,16 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties: []
-    Script: []
-    Components: []
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - NavigateTo(5,Player.x,Player.y,Player.z)
+      groupId: g428cd050
+    Components:
+    - type: Rules
+      name: Rules
+      id: g428cd050
   - ActorName: Environment
     Active: 1
     PrefabName: Environment

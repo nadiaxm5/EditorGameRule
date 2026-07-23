@@ -26,8 +26,11 @@
             "Script": [
                 {
                     "Name": "Rule 1",
+                    "When": [
+                        "Keyboard(D,press)"
+                    ],
                     "Do": [
-                        "Move(5,0,0,0)"
+                        "Move(5,0,90,0)"
                     ],
                     "groupId": "gf4a79539"
                 }
@@ -53,7 +56,23 @@
             "IconColorHex": "",
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
-            "Scale": [1.0, 1.0, 1.0]
+            "Scale": [1.0, 1.0, 1.0],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "Do": [
+                        "NavigateTo(5,Player.x,Player.y,Player.z)"
+                    ],
+                    "groupId": "g428cd050"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g428cd050"
+                }
+            ]
         },
         {
             "ActorName": "Environment",

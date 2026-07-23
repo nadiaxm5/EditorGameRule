@@ -15,6 +15,9 @@ namespace GameRuleEditor.CustomControls
         private List<string> availableTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
 
+        /// <summary>Value used for a field the user leaves empty (numeric params default to "0").</summary>
+        private Dictionary<VisualElement, string> inputDefaults = new Dictionary<VisualElement, string>();
+
         public System.Action OnChanged;
         public System.Action OnRemove;
         public System.Action OnMoveUp;
@@ -44,7 +47,7 @@ namespace GameRuleEditor.CustomControls
                 {
                     if (inputElements[i] is TextField tf)
                     {
-                        tf.SetValueWithoutNotify(result.Params[i]);
+                        tf.SetValueWithoutNotify(ValueOrDefault(tf, result.Params[i]));
                     }
                 }
             }
@@ -87,6 +90,7 @@ namespace GameRuleEditor.CustomControls
         {
             parametersContainer.Clear();
             inputElements.Clear();
+            inputDefaults.Clear();
             string type = typeDropdown.value;
 
             switch (type)
@@ -108,7 +112,7 @@ namespace GameRuleEditor.CustomControls
                 case "MoveTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
                 case "NavigateTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
 
-                case "Rotate": AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+                case "Rotate": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
                 case "RotateTo": AddParameterField("Speed", true); AddParameterField("DX", true); AddParameterField("DY", true); AddParameterField("DZ", true); AddParameterField("PivotX", true); AddParameterField("PivotY", true); AddParameterField("PivotZ", true); break;
                 case "Torque": AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
 
@@ -120,6 +124,9 @@ namespace GameRuleEditor.CustomControls
         // Standard Text + Picker Button
         private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false, bool actorsOnly = false)
         {
+            // Value assumed when the field is left blank, so the user doesn't have to type it.
+            string emptyDefault = ActionDefaults.Get(typeDropdown.value, inputElements.Count);
+
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 140, alignItems = Align.Center } };
             container.style.flexShrink = 0;
             container.style.marginBottom = 4;
@@ -130,6 +137,19 @@ namespace GameRuleEditor.CustomControls
             field.style.flexShrink = 0;
             field.isReadOnly = false;
             field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
+
+            if (emptyDefault != null)
+            {
+                inputDefaults[field] = emptyDefault;
+                field.SetValueWithoutNotify(emptyDefault);
+
+                // Clearing the field falls back to the default instead of leaving it blank.
+                field.RegisterCallback<FocusOutEvent>(evt =>
+                {
+                    if (string.IsNullOrWhiteSpace(field.value)) field.value = emptyDefault;
+                });
+            }
+
             container.Add(field);
 
             if (showPicker)
@@ -210,13 +230,20 @@ namespace GameRuleEditor.CustomControls
             return pickBtn;
         }
 
+        /// <summary>Falls back to the field's default when the user left it empty.</summary>
+        private string ValueOrDefault(VisualElement field, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value)) return value;
+            return inputDefaults.TryGetValue(field, out string fallback) ? fallback : value;
+        }
+
         public string GetActionString()
         {
             string type = typeDropdown.value;
             List<string> parameters = new List<string>();
             foreach (var el in inputElements)
             {
-                if (el is TextField tf) parameters.Add(tf.value);
+                if (el is TextField tf) parameters.Add(ValueOrDefault(tf, tf.value));
             }
             if (parameters.Count == 0) return $"{type}()";
             return $"{type}({string.Join(",", parameters)})";
