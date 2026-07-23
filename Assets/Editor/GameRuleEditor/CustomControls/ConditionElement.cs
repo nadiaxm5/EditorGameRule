@@ -251,14 +251,27 @@ namespace GameRuleEditor.CustomControls
             return pickBtn;
         }
 
+        /// <summary>
+        /// Drops comparison operators stuck to the edges of an operand. An operand never legitimately
+        /// starts or ends with one; they only appear in rules saved while the split was going wrong.
+        /// </summary>
+        private static string StripOperators(string operand)
+        {
+            return operand.Trim().Trim('<', '>', '=', '!').Trim();
+        }
+
         private void FillFieldsFromParams(string type, List<string> p)
         {
             if (p == null || p.Count == 0) return;
             if (type == "Compare")
             {
                 string fullExpr = p[0];
-                var match = Regex.Match(fullExpr, @"(.+?)\s*(<=|>=|==|!=|<|>)\s*(.+)");
-                if (match.Success) { ((TextField)inputElements[0]).value = match.Groups[1].Value.Trim(); ((PopupField<string>)inputElements[1]).value = match.Groups[2].Value.Trim(); ((TextField)inputElements[2]).value = match.Groups[3].Value.Trim(); }
+
+                // Both operands are optional: a half-written rule reads "this.Health <" (or just "<"),
+                // and requiring text on either side made the whole string fall into Value 1, which
+                // then duplicated the operator on every rebuild.
+                var match = Regex.Match(fullExpr, @"^(.*?)\s*(<=|>=|==|!=|<|>)\s*(.*)$");
+                if (match.Success) { ((TextField)inputElements[0]).value = StripOperators(match.Groups[1].Value); ((PopupField<string>)inputElements[1]).value = match.Groups[2].Value.Trim(); ((TextField)inputElements[2]).value = StripOperators(match.Groups[3].Value); }
                 else { ((TextField)inputElements[0]).value = fullExpr; }
             }
             else if (type == "Touch")

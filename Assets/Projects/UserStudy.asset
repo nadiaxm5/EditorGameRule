@@ -19,11 +19,11 @@ MonoBehaviour:
     - 1920
     - 1080
     CameraPosition:
-    - 0
-    - 1
-    - -10
+    - 3.7
+    - 4.52
+    - -8.7
     CameraRotation:
-    - 0
+    - 17.4
     - 0
     - 0
     SunPosition:
@@ -70,13 +70,20 @@ MonoBehaviour:
       Bounciness: 0
       Drag: 0
       Properties:
-      - Health=100
+      - Health=50
       Script:
       - Name: Rule 1
         When:
         - Keyboard(D,press)
         Do:
         - Move(5,0,90,0)
+        - Animate()
+        groupId: gf4a79539
+      - Name: Rule 2
+        When:
+        - Collision(Enemy) AND Compare(this.Health < 100)
+        Do:
+        - Delete()
         groupId: gf4a79539
       Components:
       - type: Properties
@@ -91,12 +98,12 @@ MonoBehaviour:
       Tag: Enemy
       IconColorHex: 
       Position:
-      - 0
-      - 0
-      - 0
+      - 0.11
+      - -0.0109241605
+      - 5.71
       Rotation:
       - -0
-      - 0
+      - 1.2878609
       - 0
       Scale:
       - 1
@@ -174,13 +181,20 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0
     Properties:
-    - Health=100
+    - Health=50
     Script:
     - Name: Rule 1
       When:
       - Keyboard(D,press)
       Do:
       - Move(5,0,90,0)
+      - Animate()
+      groupId: gf4a79539
+    - Name: Rule 2
+      When:
+      - Collision(Enemy) AND Compare(this.Health < 100)
+      Do:
+      - Delete()
       groupId: gf4a79539
     Components:
     - type: Properties
@@ -195,13 +209,13 @@ MonoBehaviour:
     Tag: Enemy
     IconColorHex: 
     Position:
-    - -0.42671797
+    - 0.11
     - -0.0109241605
-    - -0.002819635
+    - 5.71
     Rotation:
     - -0
     - 1.2878609
-    - -0
+    - 0
     Scale:
     - 1
     - 1

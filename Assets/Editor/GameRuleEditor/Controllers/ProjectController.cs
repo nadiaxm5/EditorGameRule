@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
 
@@ -235,6 +236,42 @@ namespace GameRuleEditor.Controllers
             context.currentProject.sceneData.CustomVariables.RemoveAt(index);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Pushes the camera settings onto the scene camera (a child of GameManager).
+        /// Without this the GameManager script only applies them on Play, so edits made in
+        /// Scene Settings are invisible while working in the editor.
+        /// </summary>
+        public void SyncCameraToScene()
+        {
+            if (context.currentProject == null) return;
+
+            Camera camera = FindSceneCamera();
+            if (camera == null) return;
+
+            var scene = context.currentProject.sceneData;
+            Undo.RecordObject(camera.transform, "Change Camera Transform");
+
+            if (scene.CameraPosition != null && scene.CameraPosition.Length >= 3)
+                camera.transform.position = new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]);
+
+            if (scene.CameraRotation != null && scene.CameraRotation.Length >= 3)
+                camera.transform.eulerAngles = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
+
+            EditorSceneManager.MarkSceneDirty(camera.gameObject.scene);
+        }
+
+        /// <summary>
+        /// The camera the generated GameManager drives — the same lookup it does at runtime
+        /// (<c>GetComponentInChildren&lt;Camera&gt;</c>). Null when the scene has not been generated yet.
+        /// </summary>
+        private static Camera FindSceneCamera()
+        {
+            GameObject gameManager = FindSceneObjectByName("GameManager");
+            if (gameManager == null) return null;
+
+            return gameManager.GetComponentInChildren<Camera>(true);
         }
 
         #endregion Scene Settings Operations

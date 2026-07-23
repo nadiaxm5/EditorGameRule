@@ -1,8 +1,8 @@
 {
     "GameName": "UserStudy",
     "ScreenResolution": [1920, 1080],
-    "CameraPosition": [0, 1, -10],
-    "CameraRotation": [0, 0, 0],
+    "CameraPosition": [3.7, 4.52, -8.7],
+    "CameraRotation": [17.4, 0, 0],
     "SunPosition": [0, 3, 0],
     "SunRotation": [50, -30, 0],
     "SunColor": [255, 255, 255],
@@ -21,7 +21,7 @@
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "Properties": [
-                "Health=100"
+                "Health=50"
             ],
             "Script": [
                 {
@@ -30,7 +30,18 @@
                         "Keyboard(D,press)"
                     ],
                     "Do": [
-                        "Move(5,0,90,0)"
+                        "Move(5,0,90,0)",
+                        "Animate()"
+                    ],
+                    "groupId": "gf4a79539"
+                },
+                {
+                    "Name": "Rule 2",
+                    "When": [
+                        "Collision(Enemy) AND Compare(this.Health < 100)"
+                    ],
+                    "Do": [
+                        "Delete()"
                     ],
                     "groupId": "gf4a79539"
                 }
@@ -54,8 +65,8 @@
             "PrefabName": "ZomBunny",
             "Tag": "Enemy",
             "IconColorHex": "",
-            "Position": [0.0, 0.0, 0.0],
-            "Rotation": [0.0, 0.0, 0.0],
+            "Position": [0.10999999940395355, -0.010924160480499268, 5.710000038146973],
+            "Rotation": [0.0, 1.2878608703613282, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {

@@ -132,6 +132,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Camera Position");
                 context.currentProject.sceneData.CameraPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                controller.SyncCameraToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -143,6 +144,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Camera Rotation");
                 context.currentProject.sceneData.CameraRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                controller.SyncCameraToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
