@@ -11,6 +11,9 @@ namespace GameRuleEditor.Panels
 {
     public class ActorDetailsPanel : VisualElement
     {
+        /// <summary>Only prefabs directly inside this folder can be assigned to an actor.</summary>
+        private const string PrefabsFolder = "Assets/Resources/Prefabs";
+
         private EditorContext context;
         private ProjectController controller;
 
@@ -153,15 +156,31 @@ namespace GameRuleEditor.Panels
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
             prefabRow.Add(new Label("Prefab") { style = { width = 40, unityTextAlign = TextAnchor.MiddleCenter } });
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
+            prefabPicker.tooltip = "Only prefabs inside " + PrefabsFolder;
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
+
+                // Safety net: never accept anything that is not a prefab from PrefabsFolder (e.g. a model dropped in).
+                if (evt.newValue != null && !IsSelectablePrefab(evt.newValue as GameObject))
+                {
+                    prefabPicker.SetValueWithoutNotify(evt.previousValue);
+                    return;
+                }
+
                 Undo.RecordObject(context.currentProject, "Change Prefab");
                 context.SelectedActor.PrefabName = evt.newValue == null ? "Empty" : evt.newValue.name;
                 EditorUtility.SetDirty(context.currentProject);
                 controller.SyncDataToScene(context.SelectedActor);
                 context.NotifyProjectChanged();
             });
+
+            // Replace Unity's object picker (which also lists models) with a menu of prefabs only,
+            // and reject drags of anything outside PrefabsFolder.
+            prefabPicker.RegisterCallback<PointerDownEvent>(OnPrefabPickerPointerDown, TrickleDown.TrickleDown);
+            prefabPicker.RegisterCallback<MouseDownEvent>(OnPrefabPickerMouseDown, TrickleDown.TrickleDown);
+            prefabPicker.RegisterCallback<DragUpdatedEvent>(OnPrefabPickerDragUpdated, TrickleDown.TrickleDown);
+            prefabPicker.RegisterCallback<DragPerformEvent>(OnPrefabPickerDragPerform, TrickleDown.TrickleDown);
             prefabRow.Add(prefabPicker);
             scrollView.Add(prefabRow);
 
@@ -889,6 +908,112 @@ namespace GameRuleEditor.Panels
 
             RebuildComponents();
             evt.StopPropagation();
+        }
+
+        // ──────────────────────────────────
+        //  PREFAB PICKER (prefabs only)
+        // ──────────────────────────────────
+        private void OnPrefabPickerPointerDown(PointerDownEvent evt)
+        {
+            if (!IsSelectorButton(evt.target as VisualElement)) return;
+            evt.StopImmediatePropagation();
+            evt.StopPropagation();
+            ShowPrefabMenu();
+        }
+
+        private void OnPrefabPickerMouseDown(MouseDownEvent evt)
+        {
+            if (!IsSelectorButton(evt.target as VisualElement)) return;
+            evt.StopImmediatePropagation();
+            evt.StopPropagation();
+        }
+
+        private void OnPrefabPickerDragUpdated(DragUpdatedEvent evt)
+        {
+            if (IsValidPrefabDrag()) return;
+            DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+            evt.StopImmediatePropagation();
+            evt.StopPropagation();
+        }
+
+        private void OnPrefabPickerDragPerform(DragPerformEvent evt)
+        {
+            if (IsValidPrefabDrag()) return;
+            evt.StopImmediatePropagation();
+            evt.StopPropagation();
+        }
+
+        /// <summary>True when the element is the ObjectField's picker button (or a child of it).</summary>
+        private static bool IsSelectorButton(VisualElement element)
+        {
+            while (element != null)
+            {
+                if (element.ClassListContains(ObjectField.selectorUssClassName)) return true;
+                if (element.ClassListContains(ObjectField.ussClassName)) return false;
+                element = element.parent;
+            }
+            return false;
+        }
+
+        private void ShowPrefabMenu()
+        {
+            if (context.selectedActorIndex < 0) return;
+
+            string currentName = context.SelectedActor.PrefabName;
+            var menu = new GenericMenu();
+
+            menu.AddItem(new GUIContent("None"), string.IsNullOrEmpty(currentName), () => prefabPicker.value = null);
+            menu.AddSeparator("");
+
+            var prefabs = LoadSelectablePrefabs();
+            if (prefabs.Count == 0)
+            {
+                menu.AddDisabledItem(new GUIContent("No prefabs in " + PrefabsFolder));
+            }
+            else
+            {
+                foreach (var prefab in prefabs)
+                {
+                    var picked = prefab;
+                    menu.AddItem(new GUIContent(picked.name), picked.name == currentName, () => prefabPicker.value = picked);
+                }
+            }
+
+            menu.DropDown(prefabPicker.worldBound);
+        }
+
+        private static List<GameObject> LoadSelectablePrefabs()
+        {
+            var prefabs = new List<GameObject>();
+            if (!AssetDatabase.IsValidFolder(PrefabsFolder)) return prefabs;
+
+            foreach (var guid in AssetDatabase.FindAssets("t:Prefab", new[] { PrefabsFolder }))
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+                if (IsSelectablePrefab(prefab)) prefabs.Add(prefab);
+            }
+
+            prefabs.Sort((a, b) => EditorUtility.NaturalCompare(a.name, b.name));
+            return prefabs;
+        }
+
+        /// <summary>A .prefab asset stored directly in PrefabsFolder — models (.fbx) and nested folders are excluded.</summary>
+        private static bool IsSelectablePrefab(GameObject go)
+        {
+            if (go == null) return false;
+
+            string path = AssetDatabase.GetAssetPath(go);
+            if (string.IsNullOrEmpty(path)) return false;
+            if (!path.EndsWith(".prefab", System.StringComparison.OrdinalIgnoreCase)) return false;
+
+            string folder = System.IO.Path.GetDirectoryName(path);
+            return folder != null && folder.Replace('\\', '/') == PrefabsFolder;
+        }
+
+        private static bool IsValidPrefabDrag()
+        {
+            var dragged = DragAndDrop.objectReferences;
+            return dragged.Length == 1 && IsSelectablePrefab(dragged[0] as GameObject);
         }
 
         // ──────────────────────────────────

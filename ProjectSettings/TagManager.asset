@@ -4,15 +4,10 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Obstacle
+  - Enemy
   - ZomBunny
-  - NuevoTag
-  - OtroTag
   - Hellephant
-  - Bullet
-  - ZomBear
-  - jugador
-  - fjh bnsadjhf
+  - Obstacle
   layers:
   - Default
   - TransparentFX

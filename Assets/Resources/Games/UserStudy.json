@@ -1,0 +1,59 @@
+{
+    "GameName": "UserStudy",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [0, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "Player",
+            "Active": true,
+            "PrefabName": "Player",
+            "Tag": "Player",
+            "IconColorHex": "",
+            "Position": [0.3915737271308899, 0.0, -0.00002418600706732832],
+            "Rotation": [
+                -8.796259276522278e-10,
+                0.002701783087104559,
+                -2.0739384873087048e-14
+            ],
+            "Scale": [1.0, 1.0, 1.0],
+            "Properties": [
+                "Health=100"
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Properties",
+                    "id": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Enemy",
+            "Active": true,
+            "PrefabName": "ZomBunny",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [-0.40842628479003909, 0.0833333358168602, 0.0000029802322387695314],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0]
+        },
+        {
+            "ActorName": "Floor",
+            "Active": true,
+            "PrefabName": "Floor",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Position": [-7.7393999099731449, 0.0, -1.4364900588989258],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [19.003000259399415, 19.003000259399415, 19.003000259399415]
+        }
+    ]
+}

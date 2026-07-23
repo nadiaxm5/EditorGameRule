@@ -1,16 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Player : MonoBehaviour {
+public class Enemy : MonoBehaviour {
     public bool Active = true;
-    public float Health=100f;
-    public Dictionary<string, float> propertyList = new Dictionary<string, float>();
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void Start() {
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
-    }
-    void Awake() {
-        propertyList = Utils.CreateProperties("Health=100");
     }
 }
