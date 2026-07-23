@@ -15,6 +15,7 @@ namespace GameRuleEditor.CustomControls
         private VisualElement actionsContainer;
         private Label previewLabel;
         private EditorContext context;
+        private bool suppressActionsChanged;
 
         public System.Action<List<string>> OnActionsChanged;
 
@@ -100,7 +101,7 @@ namespace GameRuleEditor.CustomControls
                 actionElement.SetFromSource(actionString);
             }
 
-            //actionElement.OnChanged += UpdatePreview;
+            actionElement.OnChanged += UpdatePreview;
             actionElement.OnRemove += () => RemoveAction(actionElement);
             actionElement.OnMoveUp += () => MoveActionUp(actionElement);
             actionElement.OnMoveDown += () => MoveActionDown(actionElement);
@@ -108,11 +109,14 @@ namespace GameRuleEditor.CustomControls
             actions.Add(actionElement);
             actionsContainer.Add(actionElement);
 
-            //UpdatePreview();
+            UpdatePreview();
         }
 
         private void RemoveAction(ActionElement element)
-        { actions.Remove(element); actionsContainer.Remove(element); //UpdatePreview();
+        {
+            actions.Remove(element);
+            actionsContainer.Remove(element);
+            UpdatePreview();
         }
 
         private void MoveActionUp(ActionElement element)
@@ -121,7 +125,7 @@ namespace GameRuleEditor.CustomControls
             if (index <= 0) return;
             actions.RemoveAt(index); actions.Insert(index - 1, element);
             actionsContainer.Remove(element); actionsContainer.Insert(index - 1, element);
-            //UpdatePreview();
+            UpdatePreview();
         }
 
         private void MoveActionDown(ActionElement element)
@@ -130,13 +134,22 @@ namespace GameRuleEditor.CustomControls
             if (index < 0 || index >= actions.Count - 1) return;
             actions.RemoveAt(index); actions.Insert(index + 1, element);
             actionsContainer.Remove(element); actionsContainer.Insert(index + 1, element);
-            //UpdatePreview();
+            UpdatePreview();
         }
 
         private void UpdatePreview()
         {
             List<string> actionStrings = BuildActionStrings();
-            previewLabel.text = actionStrings.Count == 0 ? "(no actions)" : string.Join(", ", actionStrings);
+            if (previewLabel != null)
+            {
+                previewLabel.text = actionStrings.Count == 0 ? "(no actions)" : string.Join(", ", actionStrings);
+            }
+
+            if (suppressActionsChanged)
+            {
+                return;
+            }
+
             OnActionsChanged?.Invoke(actionStrings);
         }
 
@@ -151,21 +164,27 @@ namespace GameRuleEditor.CustomControls
             return result;
         }
 
+        /// <summary>
+        /// Loads actions from the data model. Does not notify OnActionsChanged:
+        /// this is data flowing into the UI, not an edit made by the user.
+        /// </summary>
         public void SetActions(List<string> actionStrings)
         {
+            suppressActionsChanged = true;
+
             foreach (var action in actions) actionsContainer.Remove(action);
             actions.Clear();
 
-            if (actionStrings == null || actionStrings.Count == 0)
+            if (actionStrings != null)
             {
-                //UpdatePreview();
-                return;
+                foreach (var actionStr in actionStrings)
+                {
+                    AddAction(actionStr);
+                }
             }
 
-            foreach (var actionStr in actionStrings)
-            {
-                AddAction(actionStr);
-            }
+            UpdatePreview();
+            suppressActionsChanged = false;
         }
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Floor : MonoBehaviour {
+public class Environment : MonoBehaviour {
     public bool Active = true;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     void Start() {
