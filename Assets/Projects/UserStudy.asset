@@ -45,53 +45,6 @@ MonoBehaviour:
     Mouse: []
     MouseWorld: []
     Cast:
-    - ActorName: Player
-      Active: 1
-      PrefabName: Player
-      Tag: Player
-      IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties:
-      - Health=50
-      Script:
-      - Name: Rule 1
-        When:
-        - Keyboard(D,press)
-        Do:
-        - Move(5,0,90,0)
-        - Animate(Move)
-        groupId: gf4a79539
-      - Name: Rule 2
-        When:
-        - Collision(Enemy) AND Compare(this.Health < 100)
-        Do:
-        - Delete()
-        groupId: gf4a79539
-      Components:
-      - type: Properties
-        name: Properties
-        id: 
-      - type: Rules
-        name: Rules
-        id: gf4a79539
     - ActorName: Enemy
       Active: 1
       PrefabName: ZomBunny
@@ -121,7 +74,7 @@ MonoBehaviour:
       - Name: Rule 1
         When: []
         Do:
-        - NavigateTo(5,Player.x,Player.y,Player.z)
+        - NavigateTo(5,this.x,this.y,this.z)
         groupId: g428cd050
       Components:
       - type: Rules
@@ -156,53 +109,6 @@ MonoBehaviour:
       Components: []
     CustomVariables: []
   actors:
-  - ActorName: Player
-    Active: 1
-    PrefabName: Player
-    Tag: Player
-    IconColorHex: 
-    Position:
-    - 0
-    - 0
-    - 0
-    Rotation:
-    - -0
-    - 0
-    - 0
-    Scale:
-    - 1
-    - 1
-    - 1
-    Size: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    Properties:
-    - Health=50
-    Script:
-    - Name: Rule 1
-      When:
-      - Keyboard(D,press)
-      Do:
-      - Move(5,0,90,0)
-      - Animate(Move)
-      groupId: gf4a79539
-    - Name: Rule 2
-      When:
-      - Collision(Enemy) AND Compare(this.Health < 100)
-      Do:
-      - Delete()
-      groupId: gf4a79539
-    Components:
-    - type: Properties
-      name: Properties
-      id: 
-    - type: Rules
-      name: Rules
-      id: gf4a79539
   - ActorName: Enemy
     Active: 1
     PrefabName: ZomBunny
@@ -232,7 +138,7 @@ MonoBehaviour:
     - Name: Rule 1
       When: []
       Do:
-      - NavigateTo(5,Player.x,Player.y,Player.z)
+      - NavigateTo(5,this.x,this.y,this.z)
       groupId: g428cd050
     Components:
     - type: Rules
