@@ -74,7 +74,7 @@ MonoBehaviour:
       - Name: Rule 1
         When: []
         Do:
-        - NavigateTo(5,Player.x,Player.y,Player.z)
+        - NavigateTo(5,this.x,this.y,this.z)
         groupId: g428cd050
       Components:
       - type: Rules
@@ -110,53 +110,6 @@ MonoBehaviour:
       - type: Rules
         name: Rules
         id: g24f729b4
-    - ActorName: Player
-      Active: 1
-      PrefabName: Player
-      Tag: Player
-      IconColorHex: 
-      Position:
-      - 0
-      - 0
-      - 0
-      Rotation:
-      - -0
-      - 0
-      - 0
-      Scale:
-      - 1
-      - 1
-      - 1
-      Size: []
-      Velocity: []
-      AngularVelocity: []
-      Density: 0
-      Friction: 0
-      Bounciness: 0
-      Drag: 0
-      Properties:
-      - Health=50
-      Script:
-      - Name: Rule 1
-        When:
-        - Collision(Enemy) AND Compare(this.Health < 100)
-        Do:
-        - Delete()
-        groupId: g4a6ae4fe
-      - Name: Rule 2
-        When:
-        - Keyboard(D,press)
-        Do:
-        - Move(5,0,90,0)
-        - Animate(Move)
-        groupId: g4a6ae4fe
-      Components:
-      - type: Properties
-        name: Properties
-        id: 
-      - type: Rules
-        name: Rules
-        id: g4a6ae4fe
     CustomVariables: []
   actors:
   - ActorName: Enemy
