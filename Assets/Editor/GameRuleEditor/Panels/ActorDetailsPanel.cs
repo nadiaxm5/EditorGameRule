@@ -65,10 +65,17 @@ namespace GameRuleEditor.Panels
             AddToClassList("panel-container");
 
             CreateUI();
-            UpdateUI();
 
-            context.OnActorSelected += OnActorSelected;
-            context.OnProjectChanged += UpdateUI;
+            // Subscribe on attach (not in the constructor): a docked window can detach and reattach
+            // this panel, and a constructor-only subscription would be dropped on the first detach
+            // and never restored, leaving the panel frozen on whatever actor it last showed.
+            // Refreshing on attach also catches up on any selection missed while detached.
+            RegisterCallback<AttachToPanelEvent>(evt =>
+            {
+                context.OnActorSelected += OnActorSelected;
+                context.OnProjectChanged += UpdateUI;
+                UpdateUI();
+            });
 
             RegisterCallback<DetachFromPanelEvent>(evt =>
             {

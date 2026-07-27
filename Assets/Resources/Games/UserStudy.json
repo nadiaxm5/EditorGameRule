@@ -45,7 +45,14 @@
             "IconColorHex": "",
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
-            "Scale": [1.0, 1.0, 1.0]
+            "Scale": [1.0, 1.0, 1.0],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g24f729b4"
+                }
+            ]
         }
     ]
 }

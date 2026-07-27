@@ -77,11 +77,15 @@ namespace GameRuleEditor.Windows
             {
                 if (context?.currentProject != null && controller != null)
                 {
-                    // Check if the scene is already generated (same name + GameManager exists)
+                    // Check if the scene is already generated (same name + GameManager exists).
+                    // Also require every actor to have a GameObject in the scene: adding an actor only
+                    // touches project data, so without this an actor added after generation would be
+                    // missing on Play (the scene is not regenerated).
                     var currentScene = EditorSceneManager.GetActiveScene();
                     bool sceneAlreadyGenerated =
                         currentScene.name == context.currentProject.projectName
-                        && GameObject.Find("GameManager") != null;
+                        && GameObject.Find("GameManager") != null
+                        && AllActorsPresentInScene();
 
                     if (sceneAlreadyGenerated)
                     {
@@ -684,6 +688,23 @@ namespace GameRuleEditor.Windows
             Selection.activeGameObject = go;
             SceneView.FrameLastActiveSceneView();
             EditorGUIUtility.PingObject(go);
+        }
+
+        /// <summary>
+        /// True when every actor in the project has a matching GameObject in the open scene.
+        /// A false result means the scene is stale (e.g. an actor was added) and must be regenerated.
+        /// </summary>
+        private bool AllActorsPresentInScene()
+        {
+            var actors = context?.currentProject?.actors;
+            if (actors == null) return true;
+
+            for (int i = 0; i < actors.Count; i++)
+            {
+                if (FindActorGameObject(i) == null)
+                    return false;
+            }
+            return true;
         }
 
         private GameObject FindActorGameObject(int actorIndex)

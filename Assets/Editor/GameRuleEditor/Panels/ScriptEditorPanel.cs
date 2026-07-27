@@ -171,6 +171,17 @@ namespace GameRuleEditor.Panels
             UpdateUI();
         }
 
+        /// <summary>
+        /// Blurs whatever text field currently holds focus. Structural buttons (add condition/action)
+        /// call this first: otherwise a lingering text-field focus makes the UpdateUI rebuild guard
+        /// skip the refresh, so the edit is saved but not shown until the actor is reselected.
+        /// </summary>
+        private void CommitFocusedField()
+        {
+            if (focusController?.focusedElement is VisualElement focused && !(focused is Button))
+                focused.Blur();
+        }
+
         private void UpdateUI()
         {
             var actor = context.SelectedActor;
@@ -441,6 +452,7 @@ namespace GameRuleEditor.Panels
             {
                 var addConditionBtn = new Button(() =>
                 {
+                    CommitFocusedField();
                     controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
                 });
                 addConditionBtn.text = "+ Add Condition";
@@ -465,6 +477,7 @@ namespace GameRuleEditor.Panels
             {
                 var addActionBtn = new Button(() =>
                 {
+                    CommitFocusedField();
                     controller.AddRuleAction(context.selectedActorIndex, ruleIndex);
                 });
                 addActionBtn.text = "+ Add Action";
@@ -482,17 +495,14 @@ namespace GameRuleEditor.Panels
             if (context.selectedActorIndex < 0)
                 return;
 
-            controller.AddEmptyRule(context.selectedActorIndex);
+            // Tagging happens inside the controller (before it notifies) so the Properties panel's
+            // rule counts rebuild with the correct group instead of a momentary null.
+            controller.AddEmptyRule(context.selectedActorIndex, groupId);
 
             var actor = context.SelectedActor;
             if (actor?.Script != null && actor.Script.Count > 0)
             {
                 var newRule = actor.Script[actor.Script.Count - 1];
-                if (!string.IsNullOrEmpty(groupId))
-                {
-                    newRule.groupId = groupId;
-                    EditorUtility.SetDirty(context.currentProject);
-                }
                 collapsedRules.Add(newRule);
             }
 

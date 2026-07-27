@@ -36,7 +36,10 @@ namespace GameRuleEditor.Windows
             context = ctx; controller = ctrl;
             BuildUI();
 
-            // Suscribirse para actualizar el título dinámicamente
+            // Suscribirse para actualizar el título dinámicamente.
+            // Unsubscribe first: Init runs on every EnsureVisible and OnEnable also subscribes,
+            // so without this the handler would accumulate and rebuild the UI several times.
+            context.OnActorSelected -= OnActorSelected;
             context.OnActorSelected += OnActorSelected;
         }
 

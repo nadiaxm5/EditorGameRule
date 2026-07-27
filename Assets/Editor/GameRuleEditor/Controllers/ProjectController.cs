@@ -684,9 +684,11 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
-        /// Adds a new empty rule to an actor's script
+        /// Adds a new empty rule to an actor's script. When a groupId is given the rule is tagged
+        /// before notifying, so every listener (e.g. the Properties panel's rule counts) sees the
+        /// final group on the first rebuild instead of a momentary null.
         /// </summary>
-        public void AddEmptyRule(int actorIndex)
+        public void AddEmptyRule(int actorIndex, string groupId = null)
         {
             if (context.currentProject == null ||
                 actorIndex < 0 ||
@@ -707,7 +709,8 @@ namespace GameRuleEditor.Controllers
             {
                 Name = $"Rule {actor.Script.Count + 1}",
                 When = new List<string>(),
-                Do = new List<string>()
+                Do = new List<string>(),
+                groupId = string.IsNullOrEmpty(groupId) ? null : groupId
             };
 
             actor.Script.Add(newRule);
