@@ -41,7 +41,10 @@ public static class Condition
 
     public static bool Keyboard(string key, string keyMode)
     {
-        var k = (Key)Enum.Parse(typeof(Key), key);
+        // Case-insensitive so "d" and "D" both resolve to Key.D (the Key enum members are PascalCase).
+        // TryParse also avoids throwing every frame when the key name is invalid.
+        if (!Enum.TryParse(key?.Trim(), ignoreCase: true, out Key k))
+            return false;
 
         switch (keyMode)
         {

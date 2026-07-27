@@ -171,17 +171,6 @@ namespace GameRuleEditor.Panels
             UpdateUI();
         }
 
-        /// <summary>
-        /// Blurs whatever text field currently holds focus. Structural buttons (add condition/action)
-        /// call this first: otherwise a lingering text-field focus makes the UpdateUI rebuild guard
-        /// skip the refresh, so the edit is saved but not shown until the actor is reselected.
-        /// </summary>
-        private void CommitFocusedField()
-        {
-            if (focusController?.focusedElement is VisualElement focused && !(focused is Button))
-                focused.Blur();
-        }
-
         private void UpdateUI()
         {
             var actor = context.SelectedActor;
@@ -452,8 +441,11 @@ namespace GameRuleEditor.Panels
             {
                 var addConditionBtn = new Button(() =>
                 {
-                    CommitFocusedField();
                     controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
+                    // Rebuild directly instead of relying on the NotifyProjectChanged → UpdateUI path:
+                    // the focus guard there can skip the refresh (a just-clicked foldout/field may still
+                    // read as focused), which left the new condition invisible until the actor was reselected.
+                    UpdateRulesList();
                 });
                 addConditionBtn.text = "+ Add Condition";
                 addConditionBtn.AddToClassList("button-primary");
@@ -477,8 +469,10 @@ namespace GameRuleEditor.Panels
             {
                 var addActionBtn = new Button(() =>
                 {
-                    CommitFocusedField();
                     controller.AddRuleAction(context.selectedActorIndex, ruleIndex);
+                    // Rebuild directly (see Add Condition above): the guarded UpdateUI path can skip the
+                    // refresh right after adding a rule, leaving the new action invisible until reselection.
+                    UpdateRulesList();
                 });
                 addActionBtn.text = "+ Add Action";
                 addActionBtn.AddToClassList("button-success");
