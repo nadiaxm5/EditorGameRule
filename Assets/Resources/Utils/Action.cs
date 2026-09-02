@@ -61,6 +61,11 @@ public static class Action
             if (scriptType.GetField("propertyList")?.GetValue(script) is Dictionary<string, float> props)
                 foreach (var (prop, val) in props)
                     scriptType.GetField(prop)?.SetValue(script, val);
+
+            // Runtime-spawned actors are appended to the deterministic order after
+            // the current scheduler pass, preserving spawn order.
+            if (script is IGameRuleActor spawnedActor)
+                ActorScheduler.RegisterSpawned(spawnedActor);
         }
 
         if (newObj.TryGetComponent(out LineRenderer lr))
@@ -207,6 +212,12 @@ public static class Action
     public static void Delete(GameObject me)
     {
         Utils.RemoveFromCollisions(me);
+
+        // Keep the actor set fixed during the current scheduler pass. The entry
+        // is removed when the pass finishes; Unity destroys the object afterwards.
+        if (me.TryGetComponent(out IGameRuleActor actor))
+            ActorScheduler.Unregister(actor);
+
         Object.Destroy(me);
     }
 

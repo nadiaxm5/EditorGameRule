@@ -1,11 +1,16 @@
 using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-100)]
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     private Camera mainCamera;
     private Light sunLight;
     private AudioSource audioSource;
+
+    private static readonly string[] ActorOrder = new string[] { "Enemy", "Environment" };
 
     public string GameName = "UserStudy";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
@@ -40,7 +45,10 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
         else
+        {
             Destroy(gameObject);
+            return;
+        }
         
         mainCamera = GetComponentInChildren<Camera>();
         sunLight = GetComponentInChildren<Light>();
@@ -49,22 +57,34 @@ public class GameManager : MonoBehaviour
         ApplyCameraSettings();
         ApplySunSettings();
         ApplyGlobalSettings();
+        
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        ActorScheduler.Build(ActorOrder);
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ActorScheduler.Build(ActorOrder);
     }
 
     void Update()
     {
         UpdateRuntimeVariables();
+        ActorScheduler.RunUpdate();
     }
 
     void FixedUpdate()
     {
         UpdateMousePosition();
-        ApplySunSettings();
-    }
-
-    void LateUpdate()
-    {
+        ActorScheduler.RunFixedUpdate();
         ApplyCameraSettings();
+        ApplySunSettings();
     }
 
     private void UpdateRuntimeVariables()

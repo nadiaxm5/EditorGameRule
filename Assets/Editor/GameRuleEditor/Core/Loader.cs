@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -33,6 +34,10 @@ public static class Loader
             scene.Cast = new List<ActorJson>();
         }
 
+        // Preserve the descriptor order as the canonical actor evaluation order.
+        // Scene instantiation reverses Cast below, but scheduler order must not be reversed.
+        List<string> declarationOrder = scene.Cast.Select(actor => actor.ActorName).ToList();
+
         scene.Cast.Reverse();
         var newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
         newScene.name = scene.GameName;
@@ -57,7 +62,7 @@ public static class Loader
         // Load
         CreateTags(scene.Cast);
         LoadPrefabs(scene.Cast);
-        LoadScripts(scene);
+        LoadScripts(scene, declarationOrder);
     }
 
     public static void CreateTags(List<ActorJson> actorList)
@@ -142,19 +147,20 @@ public static class Loader
                 }
             }
 
-            // Apply active state (must be last — deactivating hides components)
-            obj.SetActive(actor.Active);
+            // Do not deactivate actors here. Generated actor scripts apply Active in Start.
+            // This lets every actor run Awake and lets GameManager register the complete
+            // declaration-ordered actor set before inactive actors disable themselves.
         }
         AssetDatabase.Refresh();
     }
 
-    private static void LoadScripts(SceneJson scene)
+    private static void LoadScripts(SceneJson scene, List<string> declarationOrder)
     {
         if (Directory.Exists("Assets/Resources/Scripts/"))
             Directory.Delete("Assets/Resources/Scripts/", true);
         Directory.CreateDirectory("Assets/Resources/Scripts/");
 
-        Scripts.CreateGameManager(scene);
+        Scripts.CreateGameManager(scene, declarationOrder);
         Scripts.Create(scene.Cast);
 
         // Save a flag indicating we need to attach scripts after compilation finishes
