@@ -1,0 +1,483 @@
+{
+    "GameName": "TANKS",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [-12, 20, 5],
+    "CameraRotation": [50, 60, 0],
+    "SunPosition": [0, 10, 0],
+    "SunRotation": [54.3, -26.2, 10.5],
+    "SunColor": [255, 200, 100],
+    "SunAmbientColor": [180, 180, 180],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "LevelArt",
+            "Active": true,
+            "PrefabName": "LevelArt",
+            "Tag": "Obstacle",
+            "IconColorHex": ""
+        },
+        {
+            "ActorName": "BlueTank",
+            "Active": true,
+            "PrefabName": "BlueTank",
+            "Tag": "BlueTank",
+            "IconColorHex": "",
+            "Position": [-3.0, 0.0, 30.0],
+            "Rotation": [0.0, 180.0, 0.0],
+            "Velocity": [10.0, 0.0, 10.0],
+            "AngularVelocity": [0.0, 90.0, 0.0],.6000000238418579,.20000000298023225,
+            "Properties": [
+                "speed=10",
+                "angularSpeed=90",
+                "health=100",
+                "offsetY=1.7",
+                "offsetZ=1.35",
+                "maxAim=200",
+                "currentAim=0"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(D,press)"
+                    ],
+                    "Do": [
+                        "Rotate(this.angularSpeed,this.rx,this.ry,this.rz)",
+                        "PlayParticles(DustTrail)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(A,press)"
+                    ],
+                    "Do": [
+                        "Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)",
+                        "PlayParticles(DustTrail)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(W,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,this.ry,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(S,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,this.ry+180,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(Shell)"
+                    ],
+                    "Do": [
+                        "Edit(this.health,this.health-Shell.damage)",
+                        "PushTo(-300,RedTank.x,RedTank.y,RedTank.z)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.health<=0)"
+                    ],
+                    "Do": [
+                        "Edit(RedWin.Active,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(Space,press)"
+                    ],
+                    "Do": [
+                        "Edit(this.currentAim,this.currentAim+1)",
+                        "PlaySound(ShotCharging)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.currentAim>=this.maxAim)"
+                    ],
+                    "Do": [
+                        "Edit(this.currentAim,this.maxAim)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(Space,up)"
+                    ],
+                    "Do": [
+                        "Spawn(Shell,this,0,this.offsetY,this.offsetZ)",
+                        "Edit(this.currentAim,0)",
+                        "PlaySound(ShotFiring)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "RedTank",
+            "Active": true,
+            "PrefabName": "RedTank",
+            "Tag": "RedTank",
+            "IconColorHex": "",
+            "Position": [13.0, 0.0, -5.0],
+            "Rotation": [0.0, 0.0, 0.0],.6000000238418579,.20000000298023225,
+            "Properties": [
+                "speed=10",
+                "angularSpeed=90",
+                "health=100",
+                "offsetY=1.7",
+                "offsetZ=1.35",
+                "maxAim=200",
+                "currentAim=0"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(RightArrow,press)"
+                    ],
+                    "Do": [
+                        "Rotate(this.angularSpeed,this.rx,this.ry,this.rz)",
+                        "PlayParticles(DustTrail)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(LeftArrow,press)"
+                    ],
+                    "Do": [
+                        "Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)",
+                        "PlayParticles(DustTrail)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(UpArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,this.ry,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(DownArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,this.ry+180,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(Shell)"
+                    ],
+                    "Do": [
+                        "Edit(this.health,this.health-Shell.damage)",
+                        "PushTo(-300,BlueTank.x,BlueTank.y,BlueTank.z)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.health<=0)"
+                    ],
+                    "Do": [
+                        "Edit(BlueWin.Active,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(Enter,press)"
+                    ],
+                    "Do": [
+                        "Edit(this.currentAim,this.currentAim+1)",
+                        "PlaySound(ShotCharging)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.currentAim>=this.maxAim)"
+                    ],
+                    "Do": [
+                        "Edit(this.currentAim,this.maxAim)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(Enter,up)"
+                    ],
+                    "Do": [
+                        "Spawn(Shell,this,0,this.offsetY,this.offsetZ)",
+                        "Edit(this.currentAim,0)",
+                        "PlaySound(ShotFiring)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Shell",
+            "Active": false,
+            "PrefabName": "Shell",
+            "Tag": "Shell",
+            "IconColorHex": "",
+            "Properties": [
+                "speed=15",
+                "damage=50"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Move(this.speed,0,this.ry,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(BlueTank)"
+                    ],
+                    "Do": [
+                        "Spawn(ShellExplosion,this)",
+                        "Delete(this)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(RedTank)"
+                    ],
+                    "Do": [
+                        "Spawn(ShellExplosion,this)",
+                        "Delete(this)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(Obstacle)"
+                    ],
+                    "Do": [
+                        "Spawn(ShellExplosion,this)",
+                        "Delete(this)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "ShellExplosion",
+            "Active": false,
+            "PrefabName": "ShellExplosion",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "PlayParticles(ShellExplosion)",
+                        "PlaySound(ShellExplosion)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Timer(0.5)"
+                    ],
+                    "Do": [
+                        "Delete(this)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "BlueAim",
+            "Active": true,
+            "PrefabName": "BlueAim",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(this.x,BlueTank.x)",
+                        "Edit(this.y,BlueTank.y)",
+                        "Edit(this.z,BlueTank.z)",
+                        "Edit(this.ry,BlueTank.ry)",
+                        "Edit(this.sliderValue,BlueTank.currentAim)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "RedAim",
+            "Active": true,
+            "PrefabName": "RedAim",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(this.x,RedTank.x)",
+                        "Edit(this.y,RedTank.y)",
+                        "Edit(this.z,RedTank.z)",
+                        "Edit(this.ry,RedTank.ry)",
+                        "Edit(this.sliderValue,RedTank.currentAim)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "RedHealth",
+            "Active": true,
+            "PrefabName": "RedHealth",
+            "Tag": "",
+            "IconColorHex": "",
+            "Properties": [
+                "offsetY=0.05"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(this.x,RedTank.x)",
+                        "Edit(this.y,RedTank.y+this.offsetY)",
+                        "Edit(this.z,RedTank.z)",
+                        "Edit(this.ry,RedTank.ry)",
+                        "Edit(this.sliderValue,RedTank.health)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "BlueHealth",
+            "Active": true,
+            "PrefabName": "BlueHealth",
+            "Tag": "",
+            "IconColorHex": "",
+            "Properties": [
+                "offsetY=0.05"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(this.x,BlueTank.x)",
+                        "Edit(this.y,BlueTank.y+this.offsetY)",
+                        "Edit(this.z,BlueTank.z)",
+                        "Edit(this.ry,BlueTank.ry)",
+                        "Edit(this.sliderValue,BlueTank.health)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "BlueWin",
+            "Active": false,
+            "PrefabName": "BlueWin",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Timer(1)"
+                    ],
+                    "Do": [
+                        "LoadScene()"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "RedWin",
+            "Active": false,
+            "PrefabName": "RedWin",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Timer(1)"
+                    ],
+                    "Do": [
+                        "LoadScene()"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "CameraManager",
+            "Active": true,
+            "PrefabName": "CameraManager",
+            "Tag": "",
+            "IconColorHex": "",
+            "Properties": [
+                "despX=15",
+                "offsetY=15",
+                "offsetZ=10"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(#CameraPosition.x,(BlueTank.x+RedTank.x)/2 - this.despX)",
+                        "Edit(#CameraPosition.y,this.offsetY + (abs(BlueTank.x-RedTank.x)+abs(BlueTank.z-RedTank.z))/3)",
+                        "Edit(#CameraPosition.z,(BlueTank.z+RedTank.z)/2 - this.offsetZ)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        }
+    ]
+}

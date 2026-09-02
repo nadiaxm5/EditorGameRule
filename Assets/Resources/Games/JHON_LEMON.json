@@ -1,0 +1,413 @@
+{
+    "GameName": "JHON_LEMON",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [-9.8, 5.6, -8.8],
+    "CameraRotation": [45, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [30, 20, 0],
+    "SunColor": [225, 240, 250],
+    "SunAmbientColor": [170, 180, 200],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "House",
+            "Active": true,
+            "PrefabName": "Level",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0]
+        },
+        {
+            "ActorName": "End",
+            "Active": true,
+            "PrefabName": "GameEnding",
+            "Tag": "End",
+            "IconColorHex": "",
+            "Position": [18.0, 1.0, 1.5]
+        },
+        {
+            "ActorName": "Won",
+            "Active": false,
+            "PrefabName": "Won",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Timer(1)"
+                    ],
+                    "Do": [
+                        "QuitGame()"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Caught",
+            "Active": false,
+            "PrefabName": "Caught",
+            "Tag": "",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "",
+                    "When": [
+                        "Timer(1)"
+                    ],
+                    "Do": [
+                        "LoadScene()"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "John",
+            "Active": true,
+            "PrefabName": "JohnLemon",
+            "Tag": "",
+            "IconColorHex": "",
+            "Position": [-9.800000190734864, 0.0, -3.200000047683716],
+            "Properties": [
+                "speed=1",
+                "offset=5.6",
+                "moving=0"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "Edit(#CameraPosition.x,this.x)",
+                        "Edit(#CameraPosition.z,this.z-this.offset)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(RightArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,90,0)",
+                        "Edit(this.ry,90)",
+                        "Edit(this.moving,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(LeftArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,-90,0)",
+                        "Edit(this.ry,-90)",
+                        "Edit(this.moving,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(UpArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,0,0)",
+                        "Edit(this.ry,0)",
+                        "Edit(this.moving,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(DownArrow,press)"
+                    ],
+                    "Do": [
+                        "Move(this.speed,0,180,0)",
+                        "Edit(this.ry,180)",
+                        "Edit(this.moving,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
+                    ],
+                    "Do": [
+                        "Edit(this.moving,0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(Enemy)"
+                    ],
+                    "Do": [
+                        "Edit(Caught.Active,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Collision(End)"
+                    ],
+                    "Do": [
+                        "Edit(Won.Active,1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "NOT Check(this.moving)"
+                    ],
+                    "Do": [
+                        "Animate(John_Idle)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Check(this.moving)"
+                    ],
+                    "Do": [
+                        "Animate(John_Walk)",
+                        "PlaySound(Footsteps)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Gargoyle1",
+            "Active": true,
+            "PrefabName": "Gargoyle",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [-2.5999999046325685, 0.0, -8.5],
+            "Rotation": [0.0, 30.0, 0.0]
+        },
+        {
+            "ActorName": "Gargoyle2",
+            "Active": true,
+            "PrefabName": "Gargoyle",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [1.5, 0.0, 10.649999618530274],
+            "Rotation": [0.0, 218.0, 0.0]
+        },
+        {
+            "ActorName": "Ghost1",
+            "Active": true,
+            "PrefabName": "Ghost",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [-5.5, 0.0, -4.5],
+            "Properties": [
+                "speed=1.0",
+                "zTarget=6.4",
+                "z0=-4.5",
+                "z1=6.4"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "NavigateTo(this.speed,this.x,this.y,this.zTarget)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z>=this.z1)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<=this.z0)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z1)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Ghost2",
+            "Active": true,
+            "PrefabName": "Ghost",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [0.8999999761581421, 0.0, -3.5],
+            "Properties": [
+                "speed=1.0",
+                "zTarget=7.6",
+                "z0=-3.5",
+                "z1=7.6"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "NavigateTo(this.speed,this.x,this.y,this.zTarget)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z>=this.z1)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<=this.z0)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z1)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Ghost3",
+            "Active": true,
+            "PrefabName": "Ghost",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [3.299999952316284, 0.0, 5.800000190734863],
+            "Properties": [
+                "delta=0.5",
+                "speed=1.0",
+                "xTarget=3.2",
+                "zTarget=12.3",
+                "x0=3.2",
+                "x1=6.5",
+                "z0=5.7",
+                "z1=12.3"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "NavigateTo(this.speed,this.xTarget,this.y,this.zTarget)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z1+this.delta) AND Compare(this.z>this.z1-this.delta) AND Compare(this.x<this.x0+this.delta) AND Compare(this.x>this.x0-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.xTarget,this.x1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z1+this.delta) AND Compare(this.z>this.z1-this.delta) AND Compare(this.x<this.x1+this.delta) AND Compare(this.x>this.x1-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z0+this.delta) AND Compare(this.z>this.z0-this.delta) AND Compare(this.x<this.x1+this.delta) AND Compare(this.x>this.x1-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.xTarget,this.x0)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z0+this.delta) AND Compare(this.z>this.z0-this.delta) AND Compare(this.x<this.x0+this.delta) AND Compare(this.x>this.x0-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.zTarget,this.z1)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "Ghost4",
+            "Active": true,
+            "PrefabName": "Ghost",
+            "Tag": "Enemy",
+            "IconColorHex": "",
+            "Position": [3.200000047683716, 0.0, -5.0],
+            "Properties": [
+                "delta=0.5",
+                "speed=1.0",
+                "xTarget=7.4",
+                "zTarget=-2.0",
+                "x0=3.2",
+                "x1=7.4",
+                "z0=-5",
+                "z1=-2"
+            ],
+            "Script": [
+                {
+                    "Name": "",
+                    "Do": [
+                        "NavigateTo(this.speed,this.xTarget,this.y,this.zTarget)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z0+this.delta) AND Compare(this.z>this.z0-this.delta) AND Compare(this.x<this.x0+this.delta) AND Compare(this.x>this.x0-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.xTarget,this.x1)",
+                        "Edit(this.zTarget,this.z1)"
+                    ],
+                    "groupId": ""
+                },
+                {
+                    "Name": "",
+                    "When": [
+                        "Compare(this.z<this.z1+this.delta) AND Compare(this.z>this.z1-this.delta) AND Compare(this.x<this.x1+this.delta) AND Compare(this.x>this.x1-this.delta)"
+                    ],
+                    "Do": [
+                        "Edit(this.xTarget,this.x0)",
+                        "Edit(this.zTarget,this.z0)"
+                    ],
+                    "groupId": ""
+                }
+            ]
+        }
+    ]
+}

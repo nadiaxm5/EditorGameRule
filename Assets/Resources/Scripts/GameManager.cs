@@ -10,16 +10,16 @@ public class GameManager : MonoBehaviour
     private Light sunLight;
     private AudioSource audioSource;
 
-    private static readonly string[] ActorOrder = new string[] { "Enemy", "Environment" };
+    private static readonly string[] ActorOrder = new string[] { "House", "End", "Won", "Caught", "John", "Gargoyle1", "Gargoyle2", "Ghost1", "Ghost2", "Ghost3", "Ghost4" };
 
-    public string GameName = "UserStudy";
+    public string GameName = "JHON_LEMON";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(3.7f, 4.52f, -8.7f);
-    public Vector3 CameraRotation = new Vector3(17.4f, 0f, 0f);
+    public Vector3 CameraPosition = new Vector3(-9.8f, 5.6f, -8.8f);
+    public Vector3 CameraRotation = new Vector3(45f, 0f, 0f);
     public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
-    public Vector3 SunRotation = new Vector3(50f, -30f, 0f);
-    public Color SunColor = new Color32(255, 255, 255, 255);
-    public Color SunAmbientColor = new Color32(128, 128, 128, 255);
+    public Vector3 SunRotation = new Vector3(30f, 20f, 0f);
+    public Color SunColor = new Color32(225, 240, 250, 255);
+    public Color SunAmbientColor = new Color32(170, 180, 200, 255);
     public Color BackgroundColor = new Color32(0, 0, 0, 255);
     public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
     public string SoundTrack

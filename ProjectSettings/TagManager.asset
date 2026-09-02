@@ -8,6 +8,9 @@ TagManager:
   - ZomBunny
   - Hellephant
   - Obstacle
+  - Bullet
+  - ZomBear
+  - End
   layers:
   - Default
   - TransparentFX
