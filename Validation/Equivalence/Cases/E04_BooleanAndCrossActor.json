@@ -1,0 +1,24 @@
+{
+  "GameName": "E04_BooleanAndCrossActor",
+  "CustomVariables": [
+    { "name": "Alarm", "type": "bool", "boolValue": false }
+  ],
+  "Cast": [
+    {
+      "ActorName": "ObserverActor",
+      "PrefabName": "Cube",
+      "Properties": ["flag=1"],
+      "Script": [
+        {
+          "When": ["NOT Check(#Alarm) AND Compare(TargetActor.health>0)"],
+          "Do": ["Edit(TargetActor.health,TargetActor.health-1)"]
+        }
+      ]
+    },
+    {
+      "ActorName": "TargetActor",
+      "PrefabName": "Cube",
+      "Properties": ["health=10"]
+    }
+  ]
+}

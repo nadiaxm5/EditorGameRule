@@ -1,0 +1,16 @@
+{
+  "GameName": "E02_InputAndMovement",
+  "Cast": [
+    {
+      "ActorName": "InputActor",
+      "PrefabName": "Cube",
+      "Properties": ["speed=3"],
+      "Script": [
+        {
+          "When": ["Keyboard(W,press) OR Touch(tap,true)"],
+          "Do": ["Move(this.speed,0,0,0)", "MoveTo(this.speed,10,0,5)"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "GameName": "E05_NavigationAndRotation",
+  "Cast": [
+    {
+      "ActorName": "NavigatorActor",
+      "PrefabName": "Cube",
+      "Properties": ["speed=2", "angularSpeed=90"],
+      "Script": [
+        {
+          "When": ["Compare(TargetActor.Active==1)"],
+          "Do": [
+            "NavigateTo(this.speed,TargetActor.x,TargetActor.y,TargetActor.z)",
+            "Rotate(this.angularSpeed,0,1,0)",
+            "RotateTo(this.angularSpeed,0,0,1,this.x,this.y,this.z)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "TargetActor",
+      "PrefabName": "Cube",
+      "Position": [5, 0, 5]
+    }
+  ]
+}

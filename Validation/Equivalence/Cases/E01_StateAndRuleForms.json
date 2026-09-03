@@ -1,0 +1,22 @@
+{
+  "GameName": "E01_StateAndRuleForms",
+  "CustomVariables": [
+    { "name": "GlobalCounter", "type": "float", "floatValue": 0.0 }
+  ],
+  "Cast": [
+    {
+      "ActorName": "StateActor",
+      "PrefabName": "Cube",
+      "Properties": ["value=1", "flag=1"],
+      "Script": [
+        {
+          "When": ["Compare(this.value>=1) AND Check(this.flag)"],
+          "Do": ["Edit(this.value,this.value+1)", "Edit(#GlobalCounter,#GlobalCounter+1)"]
+        },
+        {
+          "Do": ["Edit(this.flag,1)"]
+        }
+      ]
+    }
+  ]
+}

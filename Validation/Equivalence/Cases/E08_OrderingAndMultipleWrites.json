@@ -1,0 +1,30 @@
+{
+  "GameName": "E08_OrderingAndMultipleWrites",
+  "CustomVariables": [
+    { "name": "SharedValue", "type": "float", "floatValue": 0.0 }
+  ],
+  "Cast": [
+    {
+      "ActorName": "FirstActor",
+      "PrefabName": "Cube",
+      "Script": [
+        {
+          "Do": ["Edit(#SharedValue,1)", "Edit(#SharedValue,2)"]
+        },
+        {
+          "Do": ["Edit(#SharedValue,3)"]
+        }
+      ]
+    },
+    {
+      "ActorName": "SecondActor",
+      "PrefabName": "Cube",
+      "Script": [
+        {
+          "When": ["Compare(#SharedValue==3)"],
+          "Do": ["Edit(#SharedValue,4)"]
+        }
+      ]
+    }
+  ]
+}
