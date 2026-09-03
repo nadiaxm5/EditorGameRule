@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class LevelArt : MonoBehaviour, IGameRuleActor {
+public class End : MonoBehaviour, IGameRuleActor {
     public bool Active = true;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){

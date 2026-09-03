@@ -1,0 +1,1481 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: SURVIVAL_SHOOTER 2
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: SURVIVAL_SHOOTER
+  sceneData:
+    GameName: SURVIVAL_SHOOTER
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - 0
+    - 6
+    - -7
+    CameraRotation:
+    - 30
+    - 0
+    - 0
+    SunPosition:
+    - 3.3899
+    - 10.902
+    - -5.8255
+    SunRotation:
+    - 22.704
+    - 65.875
+    - -175.012
+    SunColor: c3b8ff
+    SunAmbientColor: aab4c8
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: LightingReflection
+      Active: 1
+      PrefabName: LightingReflection
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+      Components: []
+    - ActorName: Environment
+      Active: 1
+      PrefabName: Environment
+      Tag: Obstacle
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+      Components: []
+    - ActorName: Player
+      Active: 1
+      PrefabName: Player
+      Tag: Player
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=5
+      - rotSpeed=360
+      - lastHealth=100.0
+      - health=100.0
+      - offsetCam=7
+      - offsetX=0.28
+      - offsetY=0.3
+      - offsetZ=0.7
+      - moving=0
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
+        - Edit(#CameraPosition.x,this.x)
+        - Edit(#CameraPosition.z,this.z-this.offsetCam)
+        groupId: 
+      - Name: 
+        When:
+        - Keyboard(RightArrow,press)
+        Do:
+        - Move(this.speed, 0, 90, 0)
+        - Edit(this.moving,1)
+        groupId: 
+      - Name: 
+        When:
+        - Keyboard(LeftArrow,press)
+        Do:
+        - Move(this.speed, 0, -90, 0)
+        - Edit(this.moving,1)
+        groupId: 
+      - Name: 
+        When:
+        - Keyboard(UpArrow,press)
+        Do:
+        - Move(this.speed, 0, 0, 0)
+        - Edit(this.moving,1)
+        groupId: 
+      - Name: 
+        When:
+        - Keyboard(DownArrow,press)
+        Do:
+        - Move(this.speed, 0, 180, 0)
+        - Edit(this.moving,1)
+        groupId: 
+      - Name: 
+        When:
+        - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
+          OR Keyboard(DownArrow,up)
+        Do:
+        - Edit(this.moving,0)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(Hellephant)
+        Do:
+        - Edit(this.health,this.health-Hellephant.damage)
+        - PlaySound(PlayerHurt)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(ZomBear)
+        Do:
+        - Edit(this.health,this.health-ZomBear.damage)
+        - PlaySound(PlayerHurt)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(ZomBunny)
+        Do:
+        - Edit(this.health,this.health-ZomBunny.damage)
+        - PlaySound(PlayerHurt)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(GameOver.Active,1)
+        - PlaySound(PlayerDeath)
+        - Edit(this.moving,0)
+        - Edit(this.speed,0)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health==this.lastHealth)
+        Do:
+        - Edit(DamageCanvas.Active,0)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health<this.lastHealth)
+        Do:
+        - Edit(DamageCanvas.Active,1)
+        - Edit(this.lastHealth,this.health)
+        groupId: 
+      - Name: 
+        When:
+        - Touch(press,false)
+        Do:
+        - Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ)
+        - Spawn(Laser,this,this.offsetX,this.offsetY,this.offsetZ)
+        - Edit(ShotLight.Active,1)
+        - PlaySound(PlayerGunShot)
+        - PlayParticles(GunBarrelEnd)
+        groupId: 
+      - Name: 
+        When:
+        - Check(this.moving)
+        Do:
+        - Animate(Move)
+        groupId: 
+      - Name: 
+        When:
+        - NOT Check(this.moving) AND Compare(this.health>0)
+        Do:
+        - Animate(Idle)
+        groupId: 
+      - Name: 
+        When:
+        - NOT Check(this.moving) AND Compare(this.health<=0)
+        Do:
+        - Animate(Death)
+        groupId: 
+      Components: []
+    - ActorName: Hellephant
+      Active: 0
+      PrefabName: Hellephant
+      Tag: Hellephant
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 32
+      Rotation:
+      - 0
+      - -130
+      - 0
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=2
+      - health=300
+      - damage=0.3
+      - moving=0
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Edit(this.moving,1)
+        - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(Player.health<0)
+        Do:
+        - Edit(this.moving,0)
+        - Edit(this.speed,0)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(Bullet)
+        Do:
+        - Edit(this.health,this.health-Bullet.damage)
+        - PlaySound(HellephantHurt)
+        - PlayParticles(HitParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(#Score,#Score+50)
+        - Spawn(HellephantDead,this)
+        - Delete(this)
+        groupId: 
+      - Name: 
+        When:
+        - NOT Check(this.moving)
+        Do:
+        - Animate(Idle)
+        groupId: 
+      - Name: 
+        When:
+        - Check(this.moving)
+        Do:
+        - Animate(Move)
+        groupId: 
+      Components: []
+    - ActorName: ZomBear
+      Active: 0
+      PrefabName: ZomBear
+      Tag: ZomBear
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=3
+      - health=200
+      - damage=0.2
+      - moving=0
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Edit(this.moving,1)
+        - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(Player.health<0)
+        Do:
+        - Edit(this.moving,0)
+        - Edit(this.speed,0)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(Bullet)
+        Do:
+        - Edit(this.health,this.health-Bullet.damage)
+        - PlaySound(ZomBearHurt)
+        - PlayParticles(HitParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(#Score,#Score+10)
+        - Spawn(ZomBearDead,this)
+        - Delete(this)
+        groupId: 
+      - Name: 
+        When:
+        - NOT Check(this.moving)
+        Do:
+        - Animate(Idle)
+        groupId: 
+      - Name: 
+        When:
+        - Check(this.moving)
+        Do:
+        - Animate(Move)
+        groupId: 
+      Components: []
+    - ActorName: ZomBunny
+      Active: 0
+      PrefabName: ZomBunny
+      Tag: ZomBunny
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=4
+      - health=100
+      - damage=0.15
+      - moving=0
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Edit(this.moving,1)
+        - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(Player.health<0)
+        Do:
+        - Edit(this.moving,0)
+        - Edit(this.speed,0)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(Bullet)
+        Do:
+        - Edit(this.health,this.health-Bullet.damage)
+        - PlaySound(ZomBunnyHurt)
+        - PlayParticles(HitParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(#Score,#Score+10)
+        - Spawn(ZomBunnyDead,this)
+        - Delete(this)
+        groupId: 
+      - Name: 
+        When:
+        - NOT Check(this.moving)
+        Do:
+        - Animate(Idle)
+        groupId: 
+      - Name: 
+        When:
+        - Check(this.moving)
+        Do:
+        - Animate(Move)
+        groupId: 
+      Components: []
+    - ActorName: HellephantSpawner
+      Active: 1
+      PrefabName: HellephantSpawner
+      Tag: 
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 32
+      Rotation:
+      - 0
+      - -130
+      - 0
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When:
+        - Timer(5)
+        Do:
+        - Spawn(Hellephant,this)
+        groupId: 
+      Components: []
+    - ActorName: ZomBearSpawner
+      Active: 1
+      PrefabName: ZomBearSpawner
+      Tag: 
+      IconColorHex: 
+      Position:
+      - 22.5
+      - 0
+      - 15
+      Rotation:
+      - 0
+      - -120
+      - 0
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When:
+        - Timer(2)
+        Do:
+        - Spawn(ZomBear,this)
+        groupId: 
+      Components: []
+    - ActorName: ZomBunnySpawner
+      Active: 1
+      PrefabName: ZomBunnySpawner
+      Tag: 
+      IconColorHex: 
+      Position:
+      - -20.5
+      - 0
+      - 12.5
+      Rotation:
+      - 0
+      - 130
+      - 0
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When:
+        - Timer(3)
+        Do:
+        - Spawn(ZomBunny,this)
+        groupId: 
+      Components: []
+    - ActorName: HellephantDead
+      Active: 0
+      PrefabName: HellephantDead
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Animate(Death)
+        - PlaySound(HellephantDeath)
+        - PlayParticles(DeathParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Timer(1)
+        Do:
+        - Delete(this)
+        groupId: 
+      Components: []
+    - ActorName: ZomBearDead
+      Active: 0
+      PrefabName: ZomBearDead
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Animate(Death)
+        - PlaySound(ZomBearDeath)
+        - PlayParticles(DeathParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Timer(1)
+        Do:
+        - Delete(this)
+        groupId: 
+      Components: []
+    - ActorName: ZomBunnyDead
+      Active: 0
+      PrefabName: ZomBunnyDead
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Animate(Death)
+        - PlaySound(ZomBunnyDeath)
+        - PlayParticles(DeathParticles)
+        groupId: 
+      - Name: 
+        When:
+        - Timer(1)
+        Do:
+        - Delete(this)
+        groupId: 
+      Components: []
+    - ActorName: Bullet
+      Active: 0
+      PrefabName: Bullet
+      Tag: Bullet
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale:
+      - 0.05
+      - 0.05
+      - 0.05
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=50
+      - damage=5
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Move(this.speed,0,this.ry,0)
+        groupId: 
+      - Name: 
+        When:
+        - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
+        Do:
+        - Delete(this)
+        groupId: 
+      Components: []
+    - ActorName: ShotLight
+      Active: 0
+      PrefabName: ShotLight
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Edit(this.x,Player.x)
+        - Edit(this.y,Player.y)
+        - Edit(this.z,Player.z)
+        - Edit(this.Active,0)
+        groupId: 
+      Components: []
+    - ActorName: Laser
+      Active: 0
+      PrefabName: Laser
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Delete(this)
+        groupId: 
+      Components: []
+    - ActorName: DamageCanvas
+      Active: 0
+      PrefabName: DamageCanvas
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+      Components: []
+    - ActorName: HUDCanvas
+      Active: 1
+      PrefabName: HUDCanvas
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When: []
+        Do:
+        - Edit(this.sliderValue,Player.health)
+        - Edit(this.text,#Score)
+        groupId: 
+      Components: []
+    - ActorName: GameOver
+      Active: 0
+      PrefabName: GameOver
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: 
+        When:
+        - Timer(2)
+        Do:
+        - Animate(GameOver)
+        groupId: 
+      - Name: 
+        When:
+        - Timer(3)
+        Do:
+        - Edit(#Score,0)
+        - LoadScene()
+        groupId: 
+      Components: []
+    CustomVariables:
+    - name: Score
+      type: float
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+  actors:
+  - ActorName: LightingReflection
+    Active: 1
+    PrefabName: LightingReflection
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+    Components: []
+  - ActorName: Environment
+    Active: 1
+    PrefabName: Environment
+    Tag: Obstacle
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+    Components: []
+  - ActorName: Player
+    Active: 1
+    PrefabName: Player
+    Tag: Player
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=5
+    - rotSpeed=360
+    - lastHealth=100.0
+    - health=100.0
+    - offsetCam=7
+    - offsetX=0.28
+    - offsetY=0.3
+    - offsetZ=0.7
+    - moving=0
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)
+      - Edit(#CameraPosition.x,this.x)
+      - Edit(#CameraPosition.z,this.z-this.offsetCam)
+      groupId: 
+    - Name: 
+      When:
+      - Keyboard(RightArrow,press)
+      Do:
+      - Move(this.speed, 0, 90, 0)
+      - Edit(this.moving,1)
+      groupId: 
+    - Name: 
+      When:
+      - Keyboard(LeftArrow,press)
+      Do:
+      - Move(this.speed, 0, -90, 0)
+      - Edit(this.moving,1)
+      groupId: 
+    - Name: 
+      When:
+      - Keyboard(UpArrow,press)
+      Do:
+      - Move(this.speed, 0, 0, 0)
+      - Edit(this.moving,1)
+      groupId: 
+    - Name: 
+      When:
+      - Keyboard(DownArrow,press)
+      Do:
+      - Move(this.speed, 0, 180, 0)
+      - Edit(this.moving,1)
+      groupId: 
+    - Name: 
+      When:
+      - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
+        OR Keyboard(DownArrow,up)
+      Do:
+      - Edit(this.moving,0)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(Hellephant)
+      Do:
+      - Edit(this.health,this.health-Hellephant.damage)
+      - PlaySound(PlayerHurt)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(ZomBear)
+      Do:
+      - Edit(this.health,this.health-ZomBear.damage)
+      - PlaySound(PlayerHurt)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(ZomBunny)
+      Do:
+      - Edit(this.health,this.health-ZomBunny.damage)
+      - PlaySound(PlayerHurt)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(GameOver.Active,1)
+      - PlaySound(PlayerDeath)
+      - Edit(this.moving,0)
+      - Edit(this.speed,0)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health==this.lastHealth)
+      Do:
+      - Edit(DamageCanvas.Active,0)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health<this.lastHealth)
+      Do:
+      - Edit(DamageCanvas.Active,1)
+      - Edit(this.lastHealth,this.health)
+      groupId: 
+    - Name: 
+      When:
+      - Touch(press,false)
+      Do:
+      - Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ)
+      - Spawn(Laser,this,this.offsetX,this.offsetY,this.offsetZ)
+      - Edit(ShotLight.Active,1)
+      - PlaySound(PlayerGunShot)
+      - PlayParticles(GunBarrelEnd)
+      groupId: 
+    - Name: 
+      When:
+      - Check(this.moving)
+      Do:
+      - Animate(Move)
+      groupId: 
+    - Name: 
+      When:
+      - NOT Check(this.moving) AND Compare(this.health>0)
+      Do:
+      - Animate(Idle)
+      groupId: 
+    - Name: 
+      When:
+      - NOT Check(this.moving) AND Compare(this.health<=0)
+      Do:
+      - Animate(Death)
+      groupId: 
+    Components: []
+  - ActorName: Hellephant
+    Active: 0
+    PrefabName: Hellephant
+    Tag: Hellephant
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 32
+    Rotation:
+    - 0
+    - -130
+    - 0
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=2
+    - health=300
+    - damage=0.3
+    - moving=0
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.moving,1)
+      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(Player.health<0)
+      Do:
+      - Edit(this.moving,0)
+      - Edit(this.speed,0)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(Bullet)
+      Do:
+      - Edit(this.health,this.health-Bullet.damage)
+      - PlaySound(HellephantHurt)
+      - PlayParticles(HitParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(#Score,#Score+50)
+      - Spawn(HellephantDead,this)
+      - Delete(this)
+      groupId: 
+    - Name: 
+      When:
+      - NOT Check(this.moving)
+      Do:
+      - Animate(Idle)
+      groupId: 
+    - Name: 
+      When:
+      - Check(this.moving)
+      Do:
+      - Animate(Move)
+      groupId: 
+    Components: []
+  - ActorName: ZomBear
+    Active: 0
+    PrefabName: ZomBear
+    Tag: ZomBear
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=3
+    - health=200
+    - damage=0.2
+    - moving=0
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.moving,1)
+      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(Player.health<0)
+      Do:
+      - Edit(this.moving,0)
+      - Edit(this.speed,0)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(Bullet)
+      Do:
+      - Edit(this.health,this.health-Bullet.damage)
+      - PlaySound(ZomBearHurt)
+      - PlayParticles(HitParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(#Score,#Score+10)
+      - Spawn(ZomBearDead,this)
+      - Delete(this)
+      groupId: 
+    - Name: 
+      When:
+      - NOT Check(this.moving)
+      Do:
+      - Animate(Idle)
+      groupId: 
+    - Name: 
+      When:
+      - Check(this.moving)
+      Do:
+      - Animate(Move)
+      groupId: 
+    Components: []
+  - ActorName: ZomBunny
+    Active: 0
+    PrefabName: ZomBunny
+    Tag: ZomBunny
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=4
+    - health=100
+    - damage=0.15
+    - moving=0
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.moving,1)
+      - NavigateTo(this.speed,Player.x,Player.y,Player.z)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(Player.health<0)
+      Do:
+      - Edit(this.moving,0)
+      - Edit(this.speed,0)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(Bullet)
+      Do:
+      - Edit(this.health,this.health-Bullet.damage)
+      - PlaySound(ZomBunnyHurt)
+      - PlayParticles(HitParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(#Score,#Score+10)
+      - Spawn(ZomBunnyDead,this)
+      - Delete(this)
+      groupId: 
+    - Name: 
+      When:
+      - NOT Check(this.moving)
+      Do:
+      - Animate(Idle)
+      groupId: 
+    - Name: 
+      When:
+      - Check(this.moving)
+      Do:
+      - Animate(Move)
+      groupId: 
+    Components: []
+  - ActorName: HellephantSpawner
+    Active: 1
+    PrefabName: HellephantSpawner
+    Tag: 
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 32
+    Rotation:
+    - 0
+    - -130
+    - 0
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When:
+      - Timer(5)
+      Do:
+      - Spawn(Hellephant,this)
+      groupId: 
+    Components: []
+  - ActorName: ZomBearSpawner
+    Active: 1
+    PrefabName: ZomBearSpawner
+    Tag: 
+    IconColorHex: 
+    Position:
+    - 22.5
+    - 0
+    - 15
+    Rotation:
+    - 0
+    - -120
+    - 0
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When:
+      - Timer(2)
+      Do:
+      - Spawn(ZomBear,this)
+      groupId: 
+    Components: []
+  - ActorName: ZomBunnySpawner
+    Active: 1
+    PrefabName: ZomBunnySpawner
+    Tag: 
+    IconColorHex: 
+    Position:
+    - -20.5
+    - 0
+    - 12.5
+    Rotation:
+    - 0
+    - 130
+    - 0
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When:
+      - Timer(3)
+      Do:
+      - Spawn(ZomBunny,this)
+      groupId: 
+    Components: []
+  - ActorName: HellephantDead
+    Active: 0
+    PrefabName: HellephantDead
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Animate(Death)
+      - PlaySound(HellephantDeath)
+      - PlayParticles(DeathParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Timer(1)
+      Do:
+      - Delete(this)
+      groupId: 
+    Components: []
+  - ActorName: ZomBearDead
+    Active: 0
+    PrefabName: ZomBearDead
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Animate(Death)
+      - PlaySound(ZomBearDeath)
+      - PlayParticles(DeathParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Timer(1)
+      Do:
+      - Delete(this)
+      groupId: 
+    Components: []
+  - ActorName: ZomBunnyDead
+    Active: 0
+    PrefabName: ZomBunnyDead
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Animate(Death)
+      - PlaySound(ZomBunnyDeath)
+      - PlayParticles(DeathParticles)
+      groupId: 
+    - Name: 
+      When:
+      - Timer(1)
+      Do:
+      - Delete(this)
+      groupId: 
+    Components: []
+  - ActorName: Bullet
+    Active: 0
+    PrefabName: Bullet
+    Tag: Bullet
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale:
+    - 0.05
+    - 0.05
+    - 0.05
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=50
+    - damage=5
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Move(this.speed,0,this.ry,0)
+      groupId: 
+    - Name: 
+      When:
+      - Collision(Hellephant) OR Collision(ZomBear) OR Collision(ZomBunny) OR Collision(Obstacle)
+      Do:
+      - Delete(this)
+      groupId: 
+    Components: []
+  - ActorName: ShotLight
+    Active: 0
+    PrefabName: ShotLight
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.x,Player.x)
+      - Edit(this.y,Player.y)
+      - Edit(this.z,Player.z)
+      - Edit(this.Active,0)
+      groupId: 
+    Components: []
+  - ActorName: Laser
+    Active: 0
+    PrefabName: Laser
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Delete(this)
+      groupId: 
+    Components: []
+  - ActorName: DamageCanvas
+    Active: 0
+    PrefabName: DamageCanvas
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+    Components: []
+  - ActorName: HUDCanvas
+    Active: 1
+    PrefabName: HUDCanvas
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When: []
+      Do:
+      - Edit(this.sliderValue,Player.health)
+      - Edit(this.text,#Score)
+      groupId: 
+    Components: []
+  - ActorName: GameOver
+    Active: 0
+    PrefabName: GameOver
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: 
+      When:
+      - Timer(2)
+      Do:
+      - Animate(GameOver)
+      groupId: 
+    - Name: 
+      When:
+      - Timer(3)
+      Do:
+      - Edit(#Score,0)
+      - LoadScene()
+      groupId: 
+    Components: []
