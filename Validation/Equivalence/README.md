@@ -90,4 +90,4 @@ After the Unity suite has generated the inspectable evidence, its manifest can b
 python Validation/Equivalence/Scripts/verify_evidence.py
 ```
 
-This command fails if an indexed artifact is missing or if its byte count or SHA-256 digest has changed, and it also reports files that are present but absent from the manifest.
+This command fails if an indexed artifact is missing or if its byte count or SHA-256 digest has changed. It also reports unindexed files and cross-checks the manifest digest, artifact count, overall result, and paired representation hashes against the machine-readable report.

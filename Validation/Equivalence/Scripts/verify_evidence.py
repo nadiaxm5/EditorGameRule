@@ -68,6 +68,29 @@ def main() -> int:
     for relative in sorted(actual_paths - indexed_paths):
         failures.append(f"Unindexed artifact: {relative}")
 
+    report_path = evidence_directory.parent / "equivalence-report.json"
+    if report_path.is_file():
+        with report_path.open("r", encoding="utf-8") as handle:
+            report: dict[str, Any] = json.load(handle)
+        evidence_summary = report.get("evidence", {})
+        actual_manifest_sha256 = file_sha256(manifest_path)
+        if evidence_summary.get("manifestSha256") != actual_manifest_sha256:
+            failures.append("Manifest SHA-256 does not match the machine-readable report")
+        if evidence_summary.get("artifactCount") != len(artifacts):
+            failures.append("Manifest artifact count does not match the machine-readable report")
+        if manifest.get("overallPass") != report.get("overallPass"):
+            failures.append("Overall result differs between the manifest and report")
+
+        hash_pairs = (
+            ("canonicalJson", "sourceCanonicalSha256", "outputCanonicalSha256"),
+            ("parsedAst", "sourceParsedAstSha256", "outputParsedAstSha256"),
+            ("generatedCSharp", "sourceGeneratedCSharpSha256", "outputGeneratedCSharpSha256"),
+        )
+        for result in report.get("controlledCases", []) + report.get("integrationCases", []):
+            for check, source_hash, output_hash in hash_pairs:
+                if result.get(check) and result.get(source_hash) != result.get(output_hash):
+                    failures.append(f"Paired {check} hashes differ for {result.get('name')}")
+
     if failures:
         print("Evidence verification: FAIL")
         for failure in failures:

@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+Validation/Equivalence/Cases/*.json text eol=lf
+Validation/Equivalence/Results/** text eol=lf
+Validation/Equivalence/Scripts/*.py text eol=lf

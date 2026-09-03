@@ -127,12 +127,12 @@ namespace GameRuleValidation
 
             File.WriteAllText(
                 Path.Combine(resultsDirectory, "equivalence-report.json"),
-                JsonConvert.SerializeObject(report, Formatting.Indented),
+                NormalizeLineEndings(JsonConvert.SerializeObject(report, Formatting.Indented)),
                 new UTF8Encoding(false));
 
             File.WriteAllText(
                 Path.Combine(resultsDirectory, "equivalence-report.md"),
-                BuildMarkdownReport(report),
+                NormalizeLineEndings(BuildMarkdownReport(report)),
                 new UTF8Encoding(false));
 
             return report;
@@ -664,7 +664,7 @@ namespace GameRuleValidation
                 });
             }
 
-            string manifestJson = JsonConvert.SerializeObject(manifest, Formatting.Indented);
+            string manifestJson = NormalizeLineEndings(JsonConvert.SerializeObject(manifest, Formatting.Indented));
             WriteEvidenceText(evidenceDirectory, "evidence-manifest.json", manifestJson);
             return new EvidenceSummary
             {
@@ -677,8 +677,13 @@ namespace GameRuleValidation
 
         private static string NormalizeCSharp(string source)
         {
-            return string.Join("\n", source.Replace("\r\n", "\n").Replace('\r', '\n')
+            return string.Join("\n", NormalizeLineEndings(source)
                 .Split('\n').Select(line => line.TrimEnd())).Trim();
+        }
+
+        private static string NormalizeLineEndings(string value)
+        {
+            return (value ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n');
         }
 
         private static GameRuleProject ImportTemporary(string json)
@@ -791,7 +796,7 @@ namespace GameRuleValidation
                     }
                 }
             }
-            return builder.ToString();
+            return NormalizeLineEndings(builder.ToString());
         }
 
         private static void AppendFunctionNode(StringBuilder builder, string kind, string source)

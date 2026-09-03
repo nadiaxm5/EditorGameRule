@@ -42,13 +42,13 @@
     },
     {
       "path": "controlled/E01_StateAndRuleForms/parsed-input.ast.txt",
-      "bytes": 412,
-      "sha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b"
+      "bytes": 395,
+      "sha256": "e00a0ab476463e32d82944b629cd30e45bdae846d0004558da76ef2b78e566db"
     },
     {
       "path": "controlled/E01_StateAndRuleForms/parsed-studio-export.ast.txt",
-      "bytes": 412,
-      "sha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b"
+      "bytes": 395,
+      "sha256": "e00a0ab476463e32d82944b629cd30e45bdae846d0004558da76ef2b78e566db"
     },
     {
       "path": "controlled/E02_InputAndMovement/canonical-input.json",
@@ -87,13 +87,13 @@
     },
     {
       "path": "controlled/E02_InputAndMovement/parsed-input.ast.txt",
-      "bytes": 287,
-      "sha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536"
+      "bytes": 275,
+      "sha256": "550035b73ff5994ffe93775fa123c5a801ccc2c250d1e60aeb83dde4a35fb90d"
     },
     {
       "path": "controlled/E02_InputAndMovement/parsed-studio-export.ast.txt",
-      "bytes": 287,
-      "sha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536"
+      "bytes": 275,
+      "sha256": "550035b73ff5994ffe93775fa123c5a801ccc2c250d1e60aeb83dde4a35fb90d"
     },
     {
       "path": "controlled/E03_EventsAndMedia/canonical-input.json",
@@ -132,13 +132,13 @@
     },
     {
       "path": "controlled/E03_EventsAndMedia/parsed-input.ast.txt",
-      "bytes": 284,
-      "sha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107"
+      "bytes": 271,
+      "sha256": "d4e01c106011f35a2ef460cf03ae472af7e2e79d9bd5c81574b2d8fde485ab94"
     },
     {
       "path": "controlled/E03_EventsAndMedia/parsed-studio-export.ast.txt",
-      "bytes": 284,
-      "sha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107"
+      "bytes": 271,
+      "sha256": "d4e01c106011f35a2ef460cf03ae472af7e2e79d9bd5c81574b2d8fde485ab94"
     },
     {
       "path": "controlled/E04_BooleanAndCrossActor/canonical-input.json",
@@ -187,13 +187,13 @@
     },
     {
       "path": "controlled/E04_BooleanAndCrossActor/parsed-input.ast.txt",
-      "bytes": 356,
-      "sha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da"
+      "bytes": 342,
+      "sha256": "19be314dc7245b4c596fe0aade123b4f3c7cbd64350db7f3de6e83b5c0cf9382"
     },
     {
       "path": "controlled/E04_BooleanAndCrossActor/parsed-studio-export.ast.txt",
-      "bytes": 356,
-      "sha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da"
+      "bytes": 342,
+      "sha256": "19be314dc7245b4c596fe0aade123b4f3c7cbd64350db7f3de6e83b5c0cf9382"
     },
     {
       "path": "controlled/E05_NavigationAndRotation/canonical-input.json",
@@ -242,13 +242,13 @@
     },
     {
       "path": "controlled/E05_NavigationAndRotation/parsed-input.ast.txt",
-      "bytes": 475,
-      "sha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754"
+      "bytes": 461,
+      "sha256": "b1e810d7bd4c49c2a5162a580f4929fbb4a7b56f91907e77b673d7ed86843f76"
     },
     {
       "path": "controlled/E05_NavigationAndRotation/parsed-studio-export.ast.txt",
-      "bytes": 475,
-      "sha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754"
+      "bytes": 461,
+      "sha256": "b1e810d7bd4c49c2a5162a580f4929fbb4a7b56f91907e77b673d7ed86843f76"
     },
     {
       "path": "controlled/E06_PhysicsActions/canonical-input.json",
@@ -297,13 +297,13 @@
     },
     {
       "path": "controlled/E06_PhysicsActions/parsed-input.ast.txt",
-      "bytes": 364,
-      "sha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137"
+      "bytes": 351,
+      "sha256": "182dc4f42f07374d638d2c57417052508a2229c3a0a70653ecdaed1f7c43563c"
     },
     {
       "path": "controlled/E06_PhysicsActions/parsed-studio-export.ast.txt",
-      "bytes": 364,
-      "sha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137"
+      "bytes": 351,
+      "sha256": "182dc4f42f07374d638d2c57417052508a2229c3a0a70653ecdaed1f7c43563c"
     },
     {
       "path": "controlled/E07_ActorLifecycle/canonical-input.json",
@@ -352,13 +352,13 @@
     },
     {
       "path": "controlled/E07_ActorLifecycle/parsed-input.ast.txt",
-      "bytes": 302,
-      "sha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508"
+      "bytes": 289,
+      "sha256": "270fa9cbfdcc5457313dbab0a04971401d8ee7e7c9272af3587edcb475d0eedf"
     },
     {
       "path": "controlled/E07_ActorLifecycle/parsed-studio-export.ast.txt",
-      "bytes": 302,
-      "sha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508"
+      "bytes": 289,
+      "sha256": "270fa9cbfdcc5457313dbab0a04971401d8ee7e7c9272af3587edcb475d0eedf"
     },
     {
       "path": "controlled/E08_OrderingAndMultipleWrites/canonical-input.json",
@@ -407,13 +407,13 @@
     },
     {
       "path": "controlled/E08_OrderingAndMultipleWrites/parsed-input.ast.txt",
-      "bytes": 408,
-      "sha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753"
+      "bytes": 391,
+      "sha256": "05600b5634ee4ef89ff08fee6417a142d296b8f1bfeee5ed6aac11a258142819"
     },
     {
       "path": "controlled/E08_OrderingAndMultipleWrites/parsed-studio-export.ast.txt",
-      "bytes": 408,
-      "sha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753"
+      "bytes": 391,
+      "sha256": "05600b5634ee4ef89ff08fee6417a142d296b8f1bfeee5ed6aac11a258142819"
     },
     {
       "path": "integration/John_Lemon/canonical-manual-first-export.json",
@@ -567,13 +567,13 @@
     },
     {
       "path": "integration/John_Lemon/parsed-manual.ast.txt",
-      "bytes": 5486,
-      "sha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e"
+      "bytes": 5260,
+      "sha256": "56385239c0d5872536caf427f2e16c93322e7ca12b318c4dfa77dfbc31be7b2c"
     },
     {
       "path": "integration/John_Lemon/parsed-studio.ast.txt",
-      "bytes": 5486,
-      "sha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e"
+      "bytes": 5260,
+      "sha256": "56385239c0d5872536caf427f2e16c93322e7ca12b318c4dfa77dfbc31be7b2c"
     },
     {
       "path": "integration/Survival_Shooter/canonical-manual-first-export.json",
@@ -797,13 +797,13 @@
     },
     {
       "path": "integration/Survival_Shooter/parsed-manual.ast.txt",
-      "bytes": 8954,
-      "sha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4"
+      "bytes": 8570,
+      "sha256": "47f8adee9c7fb5b06cca66ae077c0c5bb29ef603f24c93f1f978ac7db6755ec3"
     },
     {
       "path": "integration/Survival_Shooter/parsed-studio.ast.txt",
-      "bytes": 8954,
-      "sha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4"
+      "bytes": 8570,
+      "sha256": "47f8adee9c7fb5b06cca66ae077c0c5bb29ef603f24c93f1f978ac7db6755ec3"
     },
     {
       "path": "integration/Tanks/canonical-manual-first-export.json",
@@ -967,13 +967,13 @@
     },
     {
       "path": "integration/Tanks/parsed-manual.ast.txt",
-      "bytes": 6249,
-      "sha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970"
+      "bytes": 6006,
+      "sha256": "65c9833bf9a9cb99fe7f868cd0f7a47800bf47b87aa00019e91341853e68c6e2"
     },
     {
       "path": "integration/Tanks/parsed-studio.ast.txt",
-      "bytes": 6249,
-      "sha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970"
+      "bytes": 6006,
+      "sha256": "65c9833bf9a9cb99fe7f868cd0f7a47800bf47b87aa00019e91341853e68c6e2"
     }
   ]
 }
