@@ -1,0 +1,1 @@
+{"Cast":[{"ActorName":"PhysicsActor","PrefabName":"Cube","Properties":["force=10"],"Script":[{"Do":["Push(this.force,0,1,0)","PushTo(this.force,TargetActor.x,TargetActor.y,TargetActor.z)","Torque(0,1,0)"],"When":["Collision(Obstacle)"]}]},{"ActorName":"TargetActor","Position":[3,0,3],"PrefabName":"Cube"}],"GameName":"E06_PhysicsActions"}

@@ -1,0 +1,226 @@
+GAME "JHON_LEMON"
+ACTOR 0 "House" "Level" "" 1
+ACTOR 1 "End" "GameEnding" "End" 1
+ACTOR 2 "Won" "Won" "" 0
+RULE 0
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "QuitGame" ""
+ACTOR 3 "Caught" "Caught" "" 0
+RULE 0
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "LoadScene" ""
+ACTOR 4 "John" "JohnLemon" "" 1
+PROPERTY 0 "speed=1"
+PROPERTY 1 "offset=5.6"
+PROPERTY 2 "moving=0"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "#CameraPosition.x" "this.x"
+ACTION_INDEX 1
+ACTION "Edit" "#CameraPosition.z" "this.z-this.offset"
+RULE 1
+WHEN
+CONDITION "Keyboard" "RightArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "90" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.ry" "90"
+ACTION_INDEX 2
+ACTION "Edit" "this.moving" "1"
+RULE 2
+WHEN
+CONDITION "Keyboard" "LeftArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "-90" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.ry" "-90"
+ACTION_INDEX 2
+ACTION "Edit" "this.moving" "1"
+RULE 3
+WHEN
+CONDITION "Keyboard" "UpArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "0" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.ry" "0"
+ACTION_INDEX 2
+ACTION "Edit" "this.moving" "1"
+RULE 4
+WHEN
+CONDITION "Keyboard" "DownArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "180" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.ry" "180"
+ACTION_INDEX 2
+ACTION "Edit" "this.moving" "1"
+RULE 5
+WHEN
+CONDITION "Keyboard" "RightArrow" "up"
+OP OR
+CONDITION "Keyboard" "LeftArrow" "up"
+OP OR
+CONDITION "Keyboard" "UpArrow" "up"
+OP OR
+CONDITION "Keyboard" "DownArrow" "up"
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "0"
+RULE 6
+WHEN
+CONDITION "Collision" "Enemy"
+ACTION_INDEX 0
+ACTION "Edit" "Caught.Active" "1"
+RULE 7
+WHEN
+CONDITION "Collision" "End"
+ACTION_INDEX 0
+ACTION "Edit" "Won.Active" "1"
+RULE 8
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "John_Idle"
+RULE 9
+WHEN
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "John_Walk"
+ACTION_INDEX 1
+ACTION "PlaySound" "Footsteps"
+ACTOR 5 "Gargoyle1" "Gargoyle" "Enemy" 1
+ACTOR 6 "Gargoyle2" "Gargoyle" "Enemy" 1
+ACTOR 7 "Ghost1" "Ghost" "Enemy" 1
+PROPERTY 0 "speed=1.0"
+PROPERTY 1 "zTarget=6.4"
+PROPERTY 2 "z0=-4.5"
+PROPERTY 3 "z1=6.4"
+RULE 0
+ACTION_INDEX 0
+ACTION "NavigateTo" "this.speed" "this.x" "this.y" "this.zTarget"
+RULE 1
+WHEN
+CONDITION "Compare" "this.z>=this.z1"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z0"
+RULE 2
+WHEN
+CONDITION "Compare" "this.z<=this.z0"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z1"
+ACTOR 8 "Ghost2" "Ghost" "Enemy" 1
+PROPERTY 0 "speed=1.0"
+PROPERTY 1 "zTarget=7.6"
+PROPERTY 2 "z0=-3.5"
+PROPERTY 3 "z1=7.6"
+RULE 0
+ACTION_INDEX 0
+ACTION "NavigateTo" "this.speed" "this.x" "this.y" "this.zTarget"
+RULE 1
+WHEN
+CONDITION "Compare" "this.z>=this.z1"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z0"
+RULE 2
+WHEN
+CONDITION "Compare" "this.z<=this.z0"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z1"
+ACTOR 9 "Ghost3" "Ghost" "Enemy" 1
+PROPERTY 0 "delta=0.5"
+PROPERTY 1 "speed=1.0"
+PROPERTY 2 "xTarget=3.2"
+PROPERTY 3 "zTarget=12.3"
+PROPERTY 4 "x0=3.2"
+PROPERTY 5 "x1=6.5"
+PROPERTY 6 "z0=5.7"
+PROPERTY 7 "z1=12.3"
+RULE 0
+ACTION_INDEX 0
+ACTION "NavigateTo" "this.speed" "this.xTarget" "this.y" "this.zTarget"
+RULE 1
+WHEN
+CONDITION "Compare" "this.z<this.z1+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z1-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x0+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x0-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.xTarget" "this.x1"
+RULE 2
+WHEN
+CONDITION "Compare" "this.z<this.z1+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z1-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x1+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x1-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z0"
+RULE 3
+WHEN
+CONDITION "Compare" "this.z<this.z0+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z0-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x1+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x1-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.xTarget" "this.x0"
+RULE 4
+WHEN
+CONDITION "Compare" "this.z<this.z0+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z0-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x0+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x0-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.zTarget" "this.z1"
+ACTOR 10 "Ghost4" "Ghost" "Enemy" 1
+PROPERTY 0 "delta=0.5"
+PROPERTY 1 "speed=1.0"
+PROPERTY 2 "xTarget=7.4"
+PROPERTY 3 "zTarget=-2.0"
+PROPERTY 4 "x0=3.2"
+PROPERTY 5 "x1=7.4"
+PROPERTY 6 "z0=-5"
+PROPERTY 7 "z1=-2"
+RULE 0
+ACTION_INDEX 0
+ACTION "NavigateTo" "this.speed" "this.xTarget" "this.y" "this.zTarget"
+RULE 1
+WHEN
+CONDITION "Compare" "this.z<this.z0+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z0-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x0+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x0-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.xTarget" "this.x1"
+ACTION_INDEX 1
+ACTION "Edit" "this.zTarget" "this.z1"
+RULE 2
+WHEN
+CONDITION "Compare" "this.z<this.z1+this.delta"
+OP AND
+CONDITION "Compare" "this.z>this.z1-this.delta"
+OP AND
+CONDITION "Compare" "this.x<this.x1+this.delta"
+OP AND
+CONDITION "Compare" "this.x>this.x1-this.delta"
+ACTION_INDEX 0
+ACTION "Edit" "this.xTarget" "this.x0"
+ACTION_INDEX 1
+ACTION "Edit" "this.zTarget" "this.z0"

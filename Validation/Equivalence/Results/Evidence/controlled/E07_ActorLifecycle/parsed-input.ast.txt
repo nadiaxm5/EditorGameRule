@@ -1,0 +1,13 @@
+GAME "E07_ActorLifecycle"
+ACTOR 0 "SpawnerActor" "Cube" "" 1
+RULE 0
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "Spawn" "SpawnedActor" "this" "1" "0" "0" "0" "0" "0"
+ACTOR 1 "SpawnedActor" "Cube" "" 0
+RULE 0
+WHEN
+CONDITION "Compare" "this.Active==1"
+ACTION_INDEX 0
+ACTION "Delete" ""

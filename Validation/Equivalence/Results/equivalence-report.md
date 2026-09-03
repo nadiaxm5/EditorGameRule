@@ -3,7 +3,7 @@
 - Result: **PASS**
 - Unity: `6000.3.1f1` (expected `6000.3.1f1`)
 - Source revision: `c58f222091dbb642797006045ded9c226309fc3f`
-- Generated: `2026-09-03T11:16:20.2902103Z`
+- Generated: `2026-09-03T11:40:52.3498271Z`
 
 ## Controlled cases
 
@@ -42,3 +42,10 @@
 - Conditional and unconditional rules: Pass
 - Local, global, and cross-actor references: Pass
 - Coverage result: **Pass**
+
+## Inspectable evidence
+
+- Directory: `Validation/Equivalence/Results/Evidence`
+- Manifest: `Validation/Equivalence/Results/Evidence/evidence-manifest.json`
+- Indexed artifacts: 194
+- Manifest SHA-256: `3f4cf4aa02d0c058fe5ae04fc1e171147b9678e135b900f7a10b5f054ba42a94`

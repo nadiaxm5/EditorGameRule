@@ -1,0 +1,1 @@
+{"Cast":[{"ActorName":"MediaActor","PrefabName":"Cube","Script":[{"Do":["Animate(Hit)","PlaySound(HitSound)","PlayParticles(HitParticles)"],"When":["Collision(Enemy) OR Timer(2)"]}],"Tag":"Player"}],"GameName":"E03_EventsAndMedia"}

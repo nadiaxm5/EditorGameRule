@@ -1,0 +1,17 @@
+GAME "E08_OrderingAndMultipleWrites"
+GLOBAL "SharedValue" "float" 0
+ACTOR 0 "FirstActor" "Cube" "" 1
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "#SharedValue" "1"
+ACTION_INDEX 1
+ACTION "Edit" "#SharedValue" "2"
+RULE 1
+ACTION_INDEX 0
+ACTION "Edit" "#SharedValue" "3"
+ACTOR 1 "SecondActor" "Cube" "" 1
+RULE 0
+WHEN
+CONDITION "Compare" "#SharedValue==3"
+ACTION_INDEX 0
+ACTION "Edit" "#SharedValue" "4"

@@ -1,0 +1,17 @@
+GAME "E01_StateAndRuleForms"
+GLOBAL "GlobalCounter" "float" 0
+ACTOR 0 "StateActor" "Cube" "" 1
+PROPERTY 0 "value=1"
+PROPERTY 1 "flag=1"
+RULE 0
+WHEN
+CONDITION "Compare" "this.value>=1"
+OP AND
+CONDITION "Check" "this.flag"
+ACTION_INDEX 0
+ACTION "Edit" "this.value" "this.value+1"
+ACTION_INDEX 1
+ACTION "Edit" "#GlobalCounter" "#GlobalCounter+1"
+RULE 1
+ACTION_INDEX 0
+ACTION "Edit" "this.flag" "1"

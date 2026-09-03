@@ -1,5 +1,5 @@
 {
-  "generatedUtc": "2026-09-03T11:16:20.2902103Z",
+  "generatedUtc": "2026-09-03T11:40:52.3498271Z",
   "unityVersion": "6000.3.1f1",
   "expectedUnityVersion": "6000.3.1f1",
   "sourceRevision": "c58f222091dbb642797006045ded9c226309fc3f",
@@ -13,6 +13,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "ee5276bf82c1b8e6a1c9f75588c9bbf7cb65cf40ee35c5d6781f826216c58afc",
       "outputCanonicalSha256": "ee5276bf82c1b8e6a1c9f75588c9bbf7cb65cf40ee35c5d6781f826216c58afc",
+      "sourceParsedAstSha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b",
+      "outputParsedAstSha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b",
+      "sourceGeneratedCSharpSha256": "73ce9d3c5402a11e033361c1efb94d3fbd5a1b7384e6aac07539a16b500e4269",
+      "outputGeneratedCSharpSha256": "73ce9d3c5402a11e033361c1efb94d3fbd5a1b7384e6aac07539a16b500e4269",
       "errors": []
     },
     {
@@ -23,6 +27,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "9696858a86bf9b5e367ef16916e52461fef761fb6b8b91ff6a4fe744267bb186",
       "outputCanonicalSha256": "9696858a86bf9b5e367ef16916e52461fef761fb6b8b91ff6a4fe744267bb186",
+      "sourceParsedAstSha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536",
+      "outputParsedAstSha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536",
+      "sourceGeneratedCSharpSha256": "9e90dda71beb4652a8a0e883b91c52fad69ddfa92ae943f191ffea8579bdc237",
+      "outputGeneratedCSharpSha256": "9e90dda71beb4652a8a0e883b91c52fad69ddfa92ae943f191ffea8579bdc237",
       "errors": []
     },
     {
@@ -33,6 +41,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "10796e11e9ac2805ea3de2f36e999a1425300b6d8e499b3944629fe31bd8ebd5",
       "outputCanonicalSha256": "10796e11e9ac2805ea3de2f36e999a1425300b6d8e499b3944629fe31bd8ebd5",
+      "sourceParsedAstSha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107",
+      "outputParsedAstSha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107",
+      "sourceGeneratedCSharpSha256": "8eda026b419502ed97e371d15a7b741efbc404558cffd0cdd21757a1ca9e9ba3",
+      "outputGeneratedCSharpSha256": "8eda026b419502ed97e371d15a7b741efbc404558cffd0cdd21757a1ca9e9ba3",
       "errors": []
     },
     {
@@ -43,6 +55,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "098533d85754390c861e60f131e7421a9c3af019bc97dd0dd202aee908aed922",
       "outputCanonicalSha256": "098533d85754390c861e60f131e7421a9c3af019bc97dd0dd202aee908aed922",
+      "sourceParsedAstSha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da",
+      "outputParsedAstSha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da",
+      "sourceGeneratedCSharpSha256": "a1efb021caf4a3f3e34015846640d4fec140031ded06f86946e8a7a902fe4c3e",
+      "outputGeneratedCSharpSha256": "a1efb021caf4a3f3e34015846640d4fec140031ded06f86946e8a7a902fe4c3e",
       "errors": []
     },
     {
@@ -53,6 +69,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "4310f4f5ee53b15dada6ed8d31377dc7f4507a0a7b180251973a6bc6914d5d6d",
       "outputCanonicalSha256": "4310f4f5ee53b15dada6ed8d31377dc7f4507a0a7b180251973a6bc6914d5d6d",
+      "sourceParsedAstSha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754",
+      "outputParsedAstSha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754",
+      "sourceGeneratedCSharpSha256": "98c511714394b5f89fc35296da6ed40c4e0a7b53139aa4d907bf8c5a2fb6677d",
+      "outputGeneratedCSharpSha256": "98c511714394b5f89fc35296da6ed40c4e0a7b53139aa4d907bf8c5a2fb6677d",
       "errors": []
     },
     {
@@ -63,6 +83,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "c7ddf0f2a96a8f2adab776e09116df87d53568e1aaadd1865966e9dd3b7c31d5",
       "outputCanonicalSha256": "c7ddf0f2a96a8f2adab776e09116df87d53568e1aaadd1865966e9dd3b7c31d5",
+      "sourceParsedAstSha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137",
+      "outputParsedAstSha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137",
+      "sourceGeneratedCSharpSha256": "bb10b582d2debbe7ce8f891fc00cad82665120f62eca024d04d3479d241a5e58",
+      "outputGeneratedCSharpSha256": "bb10b582d2debbe7ce8f891fc00cad82665120f62eca024d04d3479d241a5e58",
       "errors": []
     },
     {
@@ -73,6 +97,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "02e4e7748a055bcb9ccf70ab37aaa3215c10287032ca1d4ba120f80fa5782fb6",
       "outputCanonicalSha256": "02e4e7748a055bcb9ccf70ab37aaa3215c10287032ca1d4ba120f80fa5782fb6",
+      "sourceParsedAstSha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508",
+      "outputParsedAstSha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508",
+      "sourceGeneratedCSharpSha256": "e1c43b5bd45e45170f4414393b9bcf8ff948af58b7f0ece92ebd5a5b531a2093",
+      "outputGeneratedCSharpSha256": "e1c43b5bd45e45170f4414393b9bcf8ff948af58b7f0ece92ebd5a5b531a2093",
       "errors": []
     },
     {
@@ -83,6 +111,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "8b52e21b8f94f0e4d3a8506bf790dd652d726d545dd0d6cf86ae8f3368109ff6",
       "outputCanonicalSha256": "8b52e21b8f94f0e4d3a8506bf790dd652d726d545dd0d6cf86ae8f3368109ff6",
+      "sourceParsedAstSha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753",
+      "outputParsedAstSha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753",
+      "sourceGeneratedCSharpSha256": "83d79f280b31355288a85345d39d88e3f60f0afa2dbcf1f8ec8834070e4ba828",
+      "outputGeneratedCSharpSha256": "83d79f280b31355288a85345d39d88e3f60f0afa2dbcf1f8ec8834070e4ba828",
       "errors": []
     }
   ],
@@ -95,6 +127,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1",
       "outputCanonicalSha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1",
+      "sourceParsedAstSha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970",
+      "outputParsedAstSha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970",
+      "sourceGeneratedCSharpSha256": "1f17b657b851698143983c55b68ea7d4dbfd443d8f27ee318dcf162e0fc4b960",
+      "outputGeneratedCSharpSha256": "1f17b657b851698143983c55b68ea7d4dbfd443d8f27ee318dcf162e0fc4b960",
       "errors": []
     },
     {
@@ -105,6 +141,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561",
       "outputCanonicalSha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561",
+      "sourceParsedAstSha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4",
+      "outputParsedAstSha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4",
+      "sourceGeneratedCSharpSha256": "dcf49c48ebf4555bf2a027b98e2047ea934aee2ea7c04f069fd18e02377c2735",
+      "outputGeneratedCSharpSha256": "dcf49c48ebf4555bf2a027b98e2047ea934aee2ea7c04f069fd18e02377c2735",
       "errors": []
     },
     {
@@ -115,6 +155,10 @@
       "roundTrip": true,
       "sourceCanonicalSha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94",
       "outputCanonicalSha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94",
+      "sourceParsedAstSha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e",
+      "outputParsedAstSha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e",
+      "sourceGeneratedCSharpSha256": "26aa18549c3ea99d1d2f89780c0aeaca904c5b1645a23bb79a70e8d0b2badb6d",
+      "outputGeneratedCSharpSha256": "26aa18549c3ea99d1d2f89780c0aeaca904c5b1645a23bb79a70e8d0b2badb6d",
       "errors": []
     }
   ],
@@ -172,5 +216,11 @@
       "detail": "Spawned actors began on the next pass; removed actors were excluded from the next pass."
     }
   ],
+  "evidence": {
+    "directory": "Validation/Equivalence/Results/Evidence",
+    "manifest": "Validation/Equivalence/Results/Evidence/evidence-manifest.json",
+    "artifactCount": 194,
+    "manifestSha256": "3f4cf4aa02d0c058fe5ae04fc1e171147b9678e135b900f7a10b5f054ba42a94"
+  },
   "runnerErrors": []
 }

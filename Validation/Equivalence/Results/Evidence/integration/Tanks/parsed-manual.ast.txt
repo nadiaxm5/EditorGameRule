@@ -1,0 +1,243 @@
+GAME "TANKS"
+ACTOR 0 "LevelArt" "LevelArt" "Obstacle" 1
+ACTOR 1 "BlueTank" "BlueTank" "BlueTank" 1
+PROPERTY 0 "speed=10"
+PROPERTY 1 "angularSpeed=90"
+PROPERTY 2 "health=100"
+PROPERTY 3 "offsetY=1.7"
+PROPERTY 4 "offsetZ=1.35"
+PROPERTY 5 "maxAim=200"
+PROPERTY 6 "currentAim=0"
+RULE 0
+WHEN
+CONDITION "Keyboard" "D" "press"
+ACTION_INDEX 0
+ACTION "Rotate" "this.angularSpeed" "this.rx" "this.ry" "this.rz"
+ACTION_INDEX 1
+ACTION "PlayParticles" "DustTrail"
+RULE 1
+WHEN
+CONDITION "Keyboard" "A" "press"
+ACTION_INDEX 0
+ACTION "Rotate" "-this.angularSpeed" "this.rx" "this.ry" "this.rz"
+ACTION_INDEX 1
+ACTION "PlayParticles" "DustTrail"
+RULE 2
+WHEN
+CONDITION "Keyboard" "W" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry" "0"
+RULE 3
+WHEN
+CONDITION "Keyboard" "S" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry+180" "0"
+RULE 4
+WHEN
+CONDITION "Collision" "Shell"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Shell.damage"
+ACTION_INDEX 1
+ACTION "PushTo" "-300" "RedTank.x" "RedTank.y" "RedTank.z"
+RULE 5
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "RedWin.Active" "1"
+RULE 6
+WHEN
+CONDITION "Keyboard" "Space" "press"
+ACTION_INDEX 0
+ACTION "Edit" "this.currentAim" "this.currentAim+1"
+ACTION_INDEX 1
+ACTION "PlaySound" "ShotCharging"
+RULE 7
+WHEN
+CONDITION "Compare" "this.currentAim>=this.maxAim"
+ACTION_INDEX 0
+ACTION "Edit" "this.currentAim" "this.maxAim"
+RULE 8
+WHEN
+CONDITION "Keyboard" "Space" "up"
+ACTION_INDEX 0
+ACTION "Spawn" "Shell" "this" "0" "this.offsetY" "this.offsetZ"
+ACTION_INDEX 1
+ACTION "Edit" "this.currentAim" "0"
+ACTION_INDEX 2
+ACTION "PlaySound" "ShotFiring"
+ACTOR 2 "RedTank" "RedTank" "RedTank" 1
+PROPERTY 0 "speed=10"
+PROPERTY 1 "angularSpeed=90"
+PROPERTY 2 "health=100"
+PROPERTY 3 "offsetY=1.7"
+PROPERTY 4 "offsetZ=1.35"
+PROPERTY 5 "maxAim=200"
+PROPERTY 6 "currentAim=0"
+RULE 0
+WHEN
+CONDITION "Keyboard" "RightArrow" "press"
+ACTION_INDEX 0
+ACTION "Rotate" "this.angularSpeed" "this.rx" "this.ry" "this.rz"
+ACTION_INDEX 1
+ACTION "PlayParticles" "DustTrail"
+RULE 1
+WHEN
+CONDITION "Keyboard" "LeftArrow" "press"
+ACTION_INDEX 0
+ACTION "Rotate" "-this.angularSpeed" "this.rx" "this.ry" "this.rz"
+ACTION_INDEX 1
+ACTION "PlayParticles" "DustTrail"
+RULE 2
+WHEN
+CONDITION "Keyboard" "UpArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry" "0"
+RULE 3
+WHEN
+CONDITION "Keyboard" "DownArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry+180" "0"
+RULE 4
+WHEN
+CONDITION "Collision" "Shell"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Shell.damage"
+ACTION_INDEX 1
+ACTION "PushTo" "-300" "BlueTank.x" "BlueTank.y" "BlueTank.z"
+RULE 5
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "BlueWin.Active" "1"
+RULE 6
+WHEN
+CONDITION "Keyboard" "Enter" "press"
+ACTION_INDEX 0
+ACTION "Edit" "this.currentAim" "this.currentAim+1"
+ACTION_INDEX 1
+ACTION "PlaySound" "ShotCharging"
+RULE 7
+WHEN
+CONDITION "Compare" "this.currentAim>=this.maxAim"
+ACTION_INDEX 0
+ACTION "Edit" "this.currentAim" "this.maxAim"
+RULE 8
+WHEN
+CONDITION "Keyboard" "Enter" "up"
+ACTION_INDEX 0
+ACTION "Spawn" "Shell" "this" "0" "this.offsetY" "this.offsetZ"
+ACTION_INDEX 1
+ACTION "Edit" "this.currentAim" "0"
+ACTION_INDEX 2
+ACTION "PlaySound" "ShotFiring"
+ACTOR 3 "Shell" "Shell" "Shell" 0
+PROPERTY 0 "speed=15"
+PROPERTY 1 "damage=50"
+RULE 0
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry" "0"
+RULE 1
+WHEN
+CONDITION "Collision" "BlueTank"
+ACTION_INDEX 0
+ACTION "Spawn" "ShellExplosion" "this"
+ACTION_INDEX 1
+ACTION "Delete" "this"
+RULE 2
+WHEN
+CONDITION "Collision" "RedTank"
+ACTION_INDEX 0
+ACTION "Spawn" "ShellExplosion" "this"
+ACTION_INDEX 1
+ACTION "Delete" "this"
+RULE 3
+WHEN
+CONDITION "Collision" "Obstacle"
+ACTION_INDEX 0
+ACTION "Spawn" "ShellExplosion" "this"
+ACTION_INDEX 1
+ACTION "Delete" "this"
+ACTOR 4 "ShellExplosion" "ShellExplosion" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "PlayParticles" "ShellExplosion"
+ACTION_INDEX 1
+ACTION "PlaySound" "ShellExplosion"
+RULE 1
+WHEN
+CONDITION "Timer" "0.5"
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 5 "BlueAim" "BlueAim" "" 1
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.x" "BlueTank.x"
+ACTION_INDEX 1
+ACTION "Edit" "this.y" "BlueTank.y"
+ACTION_INDEX 2
+ACTION "Edit" "this.z" "BlueTank.z"
+ACTION_INDEX 3
+ACTION "Edit" "this.ry" "BlueTank.ry"
+ACTION_INDEX 4
+ACTION "Edit" "this.sliderValue" "BlueTank.currentAim"
+ACTOR 6 "RedAim" "RedAim" "" 1
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.x" "RedTank.x"
+ACTION_INDEX 1
+ACTION "Edit" "this.y" "RedTank.y"
+ACTION_INDEX 2
+ACTION "Edit" "this.z" "RedTank.z"
+ACTION_INDEX 3
+ACTION "Edit" "this.ry" "RedTank.ry"
+ACTION_INDEX 4
+ACTION "Edit" "this.sliderValue" "RedTank.currentAim"
+ACTOR 7 "RedHealth" "RedHealth" "" 1
+PROPERTY 0 "offsetY=0.05"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.x" "RedTank.x"
+ACTION_INDEX 1
+ACTION "Edit" "this.y" "RedTank.y+this.offsetY"
+ACTION_INDEX 2
+ACTION "Edit" "this.z" "RedTank.z"
+ACTION_INDEX 3
+ACTION "Edit" "this.ry" "RedTank.ry"
+ACTION_INDEX 4
+ACTION "Edit" "this.sliderValue" "RedTank.health"
+ACTOR 8 "BlueHealth" "BlueHealth" "" 1
+PROPERTY 0 "offsetY=0.05"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.x" "BlueTank.x"
+ACTION_INDEX 1
+ACTION "Edit" "this.y" "BlueTank.y+this.offsetY"
+ACTION_INDEX 2
+ACTION "Edit" "this.z" "BlueTank.z"
+ACTION_INDEX 3
+ACTION "Edit" "this.ry" "BlueTank.ry"
+ACTION_INDEX 4
+ACTION "Edit" "this.sliderValue" "BlueTank.health"
+ACTOR 9 "BlueWin" "BlueWin" "" 0
+RULE 0
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "LoadScene" ""
+ACTOR 10 "RedWin" "RedWin" "" 0
+RULE 0
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "LoadScene" ""
+ACTOR 11 "CameraManager" "CameraManager" "" 1
+PROPERTY 0 "despX=15"
+PROPERTY 1 "offsetY=15"
+PROPERTY 2 "offsetZ=10"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "#CameraPosition.x" "(BlueTank.x+RedTank.x)/2 - this.despX"
+ACTION_INDEX 1
+ACTION "Edit" "#CameraPosition.y" "this.offsetY + (abs(BlueTank.x-RedTank.x)+abs(BlueTank.z-RedTank.z))/3"
+ACTION_INDEX 2
+ACTION "Edit" "#CameraPosition.z" "(BlueTank.z+RedTank.z)/2 - this.offsetZ"

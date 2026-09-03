@@ -1,0 +1,13 @@
+GAME "E03_EventsAndMedia"
+ACTOR 0 "MediaActor" "Cube" "Player" 1
+RULE 0
+WHEN
+CONDITION "Collision" "Enemy"
+OP OR
+CONDITION "Timer" "2"
+ACTION_INDEX 0
+ACTION "Animate" "Hit"
+ACTION_INDEX 1
+ACTION "PlaySound" "HitSound"
+ACTION_INDEX 2
+ACTION "PlayParticles" "HitParticles"

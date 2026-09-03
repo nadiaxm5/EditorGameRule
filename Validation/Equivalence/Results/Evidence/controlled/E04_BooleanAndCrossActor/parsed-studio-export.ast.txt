@@ -1,0 +1,14 @@
+GAME "E04_BooleanAndCrossActor"
+GLOBAL "Alarm" "bool" false
+ACTOR 0 "ObserverActor" "Cube" "" 1
+PROPERTY 0 "flag=1"
+RULE 0
+WHEN
+OP NOT
+CONDITION "Check" "#Alarm"
+OP AND
+CONDITION "Compare" "TargetActor.health>0"
+ACTION_INDEX 0
+ACTION "Edit" "TargetActor.health" "TargetActor.health-1"
+ACTOR 1 "TargetActor" "Cube" "" 1
+PROPERTY 0 "health=10"

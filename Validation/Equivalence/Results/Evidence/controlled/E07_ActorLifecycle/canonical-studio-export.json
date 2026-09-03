@@ -1,0 +1,1 @@
+{"Cast":[{"ActorName":"SpawnerActor","PrefabName":"Cube","Script":[{"Do":["Spawn(SpawnedActor,this,1,0,0,0,0,0)"],"When":["Timer(1)"]}]},{"Active":false,"ActorName":"SpawnedActor","PrefabName":"Cube","Script":[{"Do":["Delete()"],"When":["Compare(this.Active==1)"]}]}],"GameName":"E07_ActorLifecycle"}

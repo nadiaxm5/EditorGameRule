@@ -1,0 +1,13 @@
+GAME "E06_PhysicsActions"
+ACTOR 0 "PhysicsActor" "Cube" "" 1
+PROPERTY 0 "force=10"
+RULE 0
+WHEN
+CONDITION "Collision" "Obstacle"
+ACTION_INDEX 0
+ACTION "Push" "this.force" "0" "1" "0"
+ACTION_INDEX 1
+ACTION "PushTo" "this.force" "TargetActor.x" "TargetActor.y" "TargetActor.z"
+ACTION_INDEX 2
+ACTION "Torque" "0" "1" "0"
+ACTOR 1 "TargetActor" "Cube" "" 1

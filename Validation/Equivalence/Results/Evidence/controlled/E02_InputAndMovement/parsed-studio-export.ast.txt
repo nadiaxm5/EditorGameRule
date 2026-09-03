@@ -1,0 +1,12 @@
+GAME "E02_InputAndMovement"
+ACTOR 0 "InputActor" "Cube" "" 1
+PROPERTY 0 "speed=3"
+RULE 0
+WHEN
+CONDITION "Keyboard" "W" "press"
+OP OR
+CONDITION "Touch" "tap" "true"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "0" "0"
+ACTION_INDEX 1
+ACTION "MoveTo" "this.speed" "10" "0" "5"

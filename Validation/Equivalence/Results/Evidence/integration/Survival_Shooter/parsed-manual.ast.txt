@@ -1,0 +1,384 @@
+GAME "SURVIVAL_SHOOTER"
+GLOBAL "Score" "float" 0
+ACTOR 0 "LightingReflection" "LightingReflection" "" 1
+ACTOR 1 "Environment" "Environment" "Obstacle" 1
+ACTOR 2 "Player" "Player" "Player" 1
+PROPERTY 0 "speed=5"
+PROPERTY 1 "rotSpeed=360"
+PROPERTY 2 "lastHealth=100.0"
+PROPERTY 3 "health=100.0"
+PROPERTY 4 "offsetCam=7"
+PROPERTY 5 "offsetX=0.28"
+PROPERTY 6 "offsetY=0.3"
+PROPERTY 7 "offsetZ=0.7"
+PROPERTY 8 "moving=0"
+RULE 0
+ACTION_INDEX 0
+ACTION "RotateTo" "this.rotSpeed" "#MouseWorld.x" "#MouseWorld.y" "#MouseWorld.z" "this.x" "this.y" "this.z"
+ACTION_INDEX 1
+ACTION "Edit" "#CameraPosition.x" "this.x"
+ACTION_INDEX 2
+ACTION "Edit" "#CameraPosition.z" "this.z-this.offsetCam"
+RULE 1
+WHEN
+CONDITION "Keyboard" "RightArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "90" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.moving" "1"
+RULE 2
+WHEN
+CONDITION "Keyboard" "LeftArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "-90" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.moving" "1"
+RULE 3
+WHEN
+CONDITION "Keyboard" "UpArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "0" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.moving" "1"
+RULE 4
+WHEN
+CONDITION "Keyboard" "DownArrow" "press"
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "180" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.moving" "1"
+RULE 5
+WHEN
+CONDITION "Keyboard" "RightArrow" "up"
+OP OR
+CONDITION "Keyboard" "LeftArrow" "up"
+OP OR
+CONDITION "Keyboard" "UpArrow" "up"
+OP OR
+CONDITION "Keyboard" "DownArrow" "up"
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "0"
+RULE 6
+WHEN
+CONDITION "Collision" "Hellephant"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Hellephant.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "PlayerHurt"
+RULE 7
+WHEN
+CONDITION "Collision" "ZomBear"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-ZomBear.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "PlayerHurt"
+RULE 8
+WHEN
+CONDITION "Collision" "ZomBunny"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-ZomBunny.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "PlayerHurt"
+RULE 9
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "GameOver.Active" "1"
+ACTION_INDEX 1
+ACTION "PlaySound" "PlayerDeath"
+ACTION_INDEX 2
+ACTION "Edit" "this.moving" "0"
+ACTION_INDEX 3
+ACTION "Edit" "this.speed" "0"
+RULE 10
+WHEN
+CONDITION "Compare" "this.health==this.lastHealth"
+ACTION_INDEX 0
+ACTION "Edit" "DamageCanvas.Active" "0"
+RULE 11
+WHEN
+CONDITION "Compare" "this.health<this.lastHealth"
+ACTION_INDEX 0
+ACTION "Edit" "DamageCanvas.Active" "1"
+ACTION_INDEX 1
+ACTION "Edit" "this.lastHealth" "this.health"
+RULE 12
+WHEN
+CONDITION "Touch" "press" "false"
+ACTION_INDEX 0
+ACTION "Spawn" "Bullet" "this" "this.offsetX" "this.offsetY" "this.offsetZ"
+ACTION_INDEX 1
+ACTION "Spawn" "Laser" "this" "this.offsetX" "this.offsetY" "this.offsetZ"
+ACTION_INDEX 2
+ACTION "Edit" "ShotLight.Active" "1"
+ACTION_INDEX 3
+ACTION "PlaySound" "PlayerGunShot"
+ACTION_INDEX 4
+ACTION "PlayParticles" "GunBarrelEnd"
+RULE 13
+WHEN
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Move"
+RULE 14
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+OP AND
+CONDITION "Compare" "this.health>0"
+ACTION_INDEX 0
+ACTION "Animate" "Idle"
+RULE 15
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+OP AND
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Animate" "Death"
+ACTOR 3 "Hellephant" "Hellephant" "Hellephant" 0
+PROPERTY 0 "speed=2"
+PROPERTY 1 "health=300"
+PROPERTY 2 "damage=0.3"
+PROPERTY 3 "moving=0"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "1"
+ACTION_INDEX 1
+ACTION "NavigateTo" "this.speed" "Player.x" "Player.y" "Player.z"
+RULE 1
+WHEN
+CONDITION "Compare" "Player.health<0"
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.speed" "0"
+RULE 2
+WHEN
+CONDITION "Collision" "Bullet"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Bullet.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "HellephantHurt"
+ACTION_INDEX 2
+ACTION "PlayParticles" "HitParticles"
+RULE 3
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "#Score" "#Score+50"
+ACTION_INDEX 1
+ACTION "Spawn" "HellephantDead" "this"
+ACTION_INDEX 2
+ACTION "Delete" "this"
+RULE 4
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Idle"
+RULE 5
+WHEN
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Move"
+ACTOR 4 "ZomBear" "ZomBear" "ZomBear" 0
+PROPERTY 0 "speed=3"
+PROPERTY 1 "health=200"
+PROPERTY 2 "damage=0.2"
+PROPERTY 3 "moving=0"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "1"
+ACTION_INDEX 1
+ACTION "NavigateTo" "this.speed" "Player.x" "Player.y" "Player.z"
+RULE 1
+WHEN
+CONDITION "Compare" "Player.health<0"
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.speed" "0"
+RULE 2
+WHEN
+CONDITION "Collision" "Bullet"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Bullet.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "ZomBearHurt"
+ACTION_INDEX 2
+ACTION "PlayParticles" "HitParticles"
+RULE 3
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "#Score" "#Score+10"
+ACTION_INDEX 1
+ACTION "Spawn" "ZomBearDead" "this"
+ACTION_INDEX 2
+ACTION "Delete" "this"
+RULE 4
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Idle"
+RULE 5
+WHEN
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Move"
+ACTOR 5 "ZomBunny" "ZomBunny" "ZomBunny" 0
+PROPERTY 0 "speed=4"
+PROPERTY 1 "health=100"
+PROPERTY 2 "damage=0.15"
+PROPERTY 3 "moving=0"
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "1"
+ACTION_INDEX 1
+ACTION "NavigateTo" "this.speed" "Player.x" "Player.y" "Player.z"
+RULE 1
+WHEN
+CONDITION "Compare" "Player.health<0"
+ACTION_INDEX 0
+ACTION "Edit" "this.moving" "0"
+ACTION_INDEX 1
+ACTION "Edit" "this.speed" "0"
+RULE 2
+WHEN
+CONDITION "Collision" "Bullet"
+ACTION_INDEX 0
+ACTION "Edit" "this.health" "this.health-Bullet.damage"
+ACTION_INDEX 1
+ACTION "PlaySound" "ZomBunnyHurt"
+ACTION_INDEX 2
+ACTION "PlayParticles" "HitParticles"
+RULE 3
+WHEN
+CONDITION "Compare" "this.health<=0"
+ACTION_INDEX 0
+ACTION "Edit" "#Score" "#Score+10"
+ACTION_INDEX 1
+ACTION "Spawn" "ZomBunnyDead" "this"
+ACTION_INDEX 2
+ACTION "Delete" "this"
+RULE 4
+WHEN
+OP NOT
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Idle"
+RULE 5
+WHEN
+CONDITION "Check" "this.moving"
+ACTION_INDEX 0
+ACTION "Animate" "Move"
+ACTOR 6 "HellephantSpawner" "HellephantSpawner" "" 1
+RULE 0
+WHEN
+CONDITION "Timer" "5"
+ACTION_INDEX 0
+ACTION "Spawn" "Hellephant" "this"
+ACTOR 7 "ZomBearSpawner" "ZomBearSpawner" "" 1
+RULE 0
+WHEN
+CONDITION "Timer" "2"
+ACTION_INDEX 0
+ACTION "Spawn" "ZomBear" "this"
+ACTOR 8 "ZomBunnySpawner" "ZomBunnySpawner" "" 1
+RULE 0
+WHEN
+CONDITION "Timer" "3"
+ACTION_INDEX 0
+ACTION "Spawn" "ZomBunny" "this"
+ACTOR 9 "HellephantDead" "HellephantDead" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "Animate" "Death"
+ACTION_INDEX 1
+ACTION "PlaySound" "HellephantDeath"
+ACTION_INDEX 2
+ACTION "PlayParticles" "DeathParticles"
+RULE 1
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 10 "ZomBearDead" "ZomBearDead" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "Animate" "Death"
+ACTION_INDEX 1
+ACTION "PlaySound" "ZomBearDeath"
+ACTION_INDEX 2
+ACTION "PlayParticles" "DeathParticles"
+RULE 1
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 11 "ZomBunnyDead" "ZomBunnyDead" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "Animate" "Death"
+ACTION_INDEX 1
+ACTION "PlaySound" "ZomBunnyDeath"
+ACTION_INDEX 2
+ACTION "PlayParticles" "DeathParticles"
+RULE 1
+WHEN
+CONDITION "Timer" "1"
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 12 "Bullet" "Bullet" "Bullet" 0
+PROPERTY 0 "speed=50"
+PROPERTY 1 "damage=5"
+RULE 0
+ACTION_INDEX 0
+ACTION "Move" "this.speed" "0" "this.ry" "0"
+RULE 1
+WHEN
+CONDITION "Collision" "Hellephant"
+OP OR
+CONDITION "Collision" "ZomBear"
+OP OR
+CONDITION "Collision" "ZomBunny"
+OP OR
+CONDITION "Collision" "Obstacle"
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 13 "ShotLight" "ShotLight" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.x" "Player.x"
+ACTION_INDEX 1
+ACTION "Edit" "this.y" "Player.y"
+ACTION_INDEX 2
+ACTION "Edit" "this.z" "Player.z"
+ACTION_INDEX 3
+ACTION "Edit" "this.Active" "0"
+ACTOR 14 "Laser" "Laser" "" 0
+RULE 0
+ACTION_INDEX 0
+ACTION "Delete" "this"
+ACTOR 15 "DamageCanvas" "DamageCanvas" "" 0
+ACTOR 16 "HUDCanvas" "HUDCanvas" "" 1
+RULE 0
+ACTION_INDEX 0
+ACTION "Edit" "this.sliderValue" "Player.health"
+ACTION_INDEX 1
+ACTION "Edit" "this.text" "#Score"
+ACTOR 17 "GameOver" "GameOver" "" 0
+RULE 0
+WHEN
+CONDITION "Timer" "2"
+ACTION_INDEX 0
+ACTION "Animate" "GameOver"
+RULE 1
+WHEN
+CONDITION "Timer" "3"
+ACTION_INDEX 0
+ACTION "Edit" "#Score" "0"
+ACTION_INDEX 1
+ACTION "LoadScene" ""

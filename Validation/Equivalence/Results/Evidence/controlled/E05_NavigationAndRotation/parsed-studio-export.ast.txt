@@ -1,0 +1,14 @@
+GAME "E05_NavigationAndRotation"
+ACTOR 0 "NavigatorActor" "Cube" "" 1
+PROPERTY 0 "speed=2"
+PROPERTY 1 "angularSpeed=90"
+RULE 0
+WHEN
+CONDITION "Compare" "TargetActor.Active==1"
+ACTION_INDEX 0
+ACTION "NavigateTo" "this.speed" "TargetActor.x" "TargetActor.y" "TargetActor.z"
+ACTION_INDEX 1
+ACTION "Rotate" "this.angularSpeed" "0" "1" "0"
+ACTION_INDEX 2
+ACTION "RotateTo" "this.angularSpeed" "0" "0" "1" "this.x" "this.y" "this.z"
+ACTOR 1 "TargetActor" "Cube" "" 1

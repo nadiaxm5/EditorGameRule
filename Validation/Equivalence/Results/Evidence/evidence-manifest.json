@@ -1,0 +1,979 @@
+{
+  "generatedUtc": "2026-09-03T11:40:52.3498271Z",
+  "unityVersion": "6000.3.1f1",
+  "expectedUnityVersion": "6000.3.1f1",
+  "sourceRevision": "c58f222091dbb642797006045ded9c226309fc3f",
+  "overallPass": true,
+  "artifacts": [
+    {
+      "path": "controlled/E01_StateAndRuleForms/canonical-input.json",
+      "bytes": 377,
+      "sha256": "ee5276bf82c1b8e6a1c9f75588c9bbf7cb65cf40ee35c5d6781f826216c58afc"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/canonical-round-trip.json",
+      "bytes": 377,
+      "sha256": "ee5276bf82c1b8e6a1c9f75588c9bbf7cb65cf40ee35c5d6781f826216c58afc"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/canonical-studio-export.json",
+      "bytes": 377,
+      "sha256": "ee5276bf82c1b8e6a1c9f75588c9bbf7cb65cf40ee35c5d6781f826216c58afc"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/csharp-input/GameManager.cs",
+      "bytes": 4260,
+      "sha256": "28b8a8034281685f2fee6940ee33dc1154ad89398d7d49f6c890e4674d376c69"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/csharp-input/StateActor.cs",
+      "bytes": 1249,
+      "sha256": "d7fca3d9981b5f8a87d13b820b90c10b74e989d90914fa1f75421a86b7989686"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/csharp-studio-export/GameManager.cs",
+      "bytes": 4260,
+      "sha256": "28b8a8034281685f2fee6940ee33dc1154ad89398d7d49f6c890e4674d376c69"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/csharp-studio-export/StateActor.cs",
+      "bytes": 1249,
+      "sha256": "d7fca3d9981b5f8a87d13b820b90c10b74e989d90914fa1f75421a86b7989686"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/parsed-input.ast.txt",
+      "bytes": 412,
+      "sha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b"
+    },
+    {
+      "path": "controlled/E01_StateAndRuleForms/parsed-studio-export.ast.txt",
+      "bytes": 412,
+      "sha256": "fdefc04395ed726c526e144c3f060806189e279462260478e6b35a3cbcc4073b"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/canonical-input.json",
+      "bytes": 237,
+      "sha256": "9696858a86bf9b5e367ef16916e52461fef761fb6b8b91ff6a4fe744267bb186"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/canonical-round-trip.json",
+      "bytes": 237,
+      "sha256": "9696858a86bf9b5e367ef16916e52461fef761fb6b8b91ff6a4fe744267bb186"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/canonical-studio-export.json",
+      "bytes": 237,
+      "sha256": "9696858a86bf9b5e367ef16916e52461fef761fb6b8b91ff6a4fe744267bb186"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/csharp-input/GameManager.cs",
+      "bytes": 4191,
+      "sha256": "e129ad9aa23bfc79b6f0c839e770699204bc4f6ce51f62ea8e814b5fafc089bb"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/csharp-input/InputActor.cs",
+      "bytes": 1101,
+      "sha256": "57031e2734e4472a5038e487d1104af848041aa34ac50301d0950e384c70cbe3"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/csharp-studio-export/GameManager.cs",
+      "bytes": 4191,
+      "sha256": "e129ad9aa23bfc79b6f0c839e770699204bc4f6ce51f62ea8e814b5fafc089bb"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/csharp-studio-export/InputActor.cs",
+      "bytes": 1101,
+      "sha256": "57031e2734e4472a5038e487d1104af848041aa34ac50301d0950e384c70cbe3"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/parsed-input.ast.txt",
+      "bytes": 287,
+      "sha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536"
+    },
+    {
+      "path": "controlled/E02_InputAndMovement/parsed-studio-export.ast.txt",
+      "bytes": 287,
+      "sha256": "8b0c99ad3699f715bfae5a3acf19a20b7af896ef0df430a90b2e814030866536"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/canonical-input.json",
+      "bytes": 231,
+      "sha256": "10796e11e9ac2805ea3de2f36e999a1425300b6d8e499b3944629fe31bd8ebd5"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/canonical-round-trip.json",
+      "bytes": 231,
+      "sha256": "10796e11e9ac2805ea3de2f36e999a1425300b6d8e499b3944629fe31bd8ebd5"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/canonical-studio-export.json",
+      "bytes": 231,
+      "sha256": "10796e11e9ac2805ea3de2f36e999a1425300b6d8e499b3944629fe31bd8ebd5"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/csharp-input/GameManager.cs",
+      "bytes": 4189,
+      "sha256": "27430665324b22f7d4433ecae1661474657bfa3653f1b6f99769d33f41fa36ce"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/csharp-input/MediaActor.cs",
+      "bytes": 2257,
+      "sha256": "4cc61ad6de1ed95d3292537676c5d17ce5c1857f715c156f375ebaf11100a584"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/csharp-studio-export/GameManager.cs",
+      "bytes": 4189,
+      "sha256": "27430665324b22f7d4433ecae1661474657bfa3653f1b6f99769d33f41fa36ce"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/csharp-studio-export/MediaActor.cs",
+      "bytes": 2257,
+      "sha256": "4cc61ad6de1ed95d3292537676c5d17ce5c1857f715c156f375ebaf11100a584"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/parsed-input.ast.txt",
+      "bytes": 284,
+      "sha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107"
+    },
+    {
+      "path": "controlled/E03_EventsAndMedia/parsed-studio-export.ast.txt",
+      "bytes": 284,
+      "sha256": "da167d4bdfff4056b750a6df76e92ad9998bb6655fd310ba64630c86a2dfc107"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/canonical-input.json",
+      "bytes": 397,
+      "sha256": "098533d85754390c861e60f131e7421a9c3af019bc97dd0dd202aee908aed922"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/canonical-round-trip.json",
+      "bytes": 397,
+      "sha256": "098533d85754390c861e60f131e7421a9c3af019bc97dd0dd202aee908aed922"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/canonical-studio-export.json",
+      "bytes": 397,
+      "sha256": "098533d85754390c861e60f131e7421a9c3af019bc97dd0dd202aee908aed922"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-input/GameManager.cs",
+      "bytes": 4275,
+      "sha256": "7496883b396724412d083e8a0816a1b0fb73e1e6d7ccf7f808a089fe8d18e3cb"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-input/ObserverActor.cs",
+      "bytes": 1058,
+      "sha256": "6432f093086381c6b443dec0fcd543cebe9aa2db1dd7e6a4e4985e193b94f09a"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-input/TargetActor.cs",
+      "bytes": 616,
+      "sha256": "b496b28407ed3bcbee8cb72af6897172ad2b7bb0ca442a4f3f49d1541ad36c92"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-studio-export/GameManager.cs",
+      "bytes": 4275,
+      "sha256": "7496883b396724412d083e8a0816a1b0fb73e1e6d7ccf7f808a089fe8d18e3cb"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-studio-export/ObserverActor.cs",
+      "bytes": 1058,
+      "sha256": "6432f093086381c6b443dec0fcd543cebe9aa2db1dd7e6a4e4985e193b94f09a"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/csharp-studio-export/TargetActor.cs",
+      "bytes": 616,
+      "sha256": "b496b28407ed3bcbee8cb72af6897172ad2b7bb0ca442a4f3f49d1541ad36c92"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/parsed-input.ast.txt",
+      "bytes": 356,
+      "sha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da"
+    },
+    {
+      "path": "controlled/E04_BooleanAndCrossActor/parsed-studio-export.ast.txt",
+      "bytes": 356,
+      "sha256": "d165ca50612b8c19d4bbffaf66f60fdbe30a992695f7ea583974295d9c09f4da"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/canonical-input.json",
+      "bytes": 430,
+      "sha256": "4310f4f5ee53b15dada6ed8d31377dc7f4507a0a7b180251973a6bc6914d5d6d"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/canonical-round-trip.json",
+      "bytes": 430,
+      "sha256": "4310f4f5ee53b15dada6ed8d31377dc7f4507a0a7b180251973a6bc6914d5d6d"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/canonical-studio-export.json",
+      "bytes": 430,
+      "sha256": "4310f4f5ee53b15dada6ed8d31377dc7f4507a0a7b180251973a6bc6914d5d6d"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-input/GameManager.cs",
+      "bytes": 4215,
+      "sha256": "23c8e63385801527bc88df738bfb70766f29dd7cacc8fa3da4cc44d57a78a818"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-input/NavigatorActor.cs",
+      "bytes": 1391,
+      "sha256": "c1e09b5e4c8a8448a540c72700af91f7fc6f8767e79ec9f171b6f7051e82037c"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-input/TargetActor.cs",
+      "bytes": 417,
+      "sha256": "a004d04941786b7f015f0b8e42d89e1b904d97b6d6342294bffb82babc3cfdcd"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-studio-export/GameManager.cs",
+      "bytes": 4215,
+      "sha256": "23c8e63385801527bc88df738bfb70766f29dd7cacc8fa3da4cc44d57a78a818"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-studio-export/NavigatorActor.cs",
+      "bytes": 1391,
+      "sha256": "c1e09b5e4c8a8448a540c72700af91f7fc6f8767e79ec9f171b6f7051e82037c"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/csharp-studio-export/TargetActor.cs",
+      "bytes": 417,
+      "sha256": "a004d04941786b7f015f0b8e42d89e1b904d97b6d6342294bffb82babc3cfdcd"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/parsed-input.ast.txt",
+      "bytes": 475,
+      "sha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754"
+    },
+    {
+      "path": "controlled/E05_NavigationAndRotation/parsed-studio-export.ast.txt",
+      "bytes": 475,
+      "sha256": "c83572b68977f1223e406566697964bd602682bb81de318dffc644bd76a3f754"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/canonical-input.json",
+      "bytes": 339,
+      "sha256": "c7ddf0f2a96a8f2adab776e09116df87d53568e1aaadd1865966e9dd3b7c31d5"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/canonical-round-trip.json",
+      "bytes": 339,
+      "sha256": "c7ddf0f2a96a8f2adab776e09116df87d53568e1aaadd1865966e9dd3b7c31d5"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/canonical-studio-export.json",
+      "bytes": 339,
+      "sha256": "c7ddf0f2a96a8f2adab776e09116df87d53568e1aaadd1865966e9dd3b7c31d5"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-input/GameManager.cs",
+      "bytes": 4206,
+      "sha256": "34b4a421e39fa337f35187f4f5e844e856e148a4e5009270c92e285942c2402c"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-input/PhysicsActor.cs",
+      "bytes": 2513,
+      "sha256": "09ff3c2771c6e3622e98c64c56e80555ed19dc6ef82417c06dafa68c8b4745fb"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-input/TargetActor.cs",
+      "bytes": 417,
+      "sha256": "a004d04941786b7f015f0b8e42d89e1b904d97b6d6342294bffb82babc3cfdcd"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-studio-export/GameManager.cs",
+      "bytes": 4206,
+      "sha256": "34b4a421e39fa337f35187f4f5e844e856e148a4e5009270c92e285942c2402c"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-studio-export/PhysicsActor.cs",
+      "bytes": 2513,
+      "sha256": "09ff3c2771c6e3622e98c64c56e80555ed19dc6ef82417c06dafa68c8b4745fb"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/csharp-studio-export/TargetActor.cs",
+      "bytes": 417,
+      "sha256": "a004d04941786b7f015f0b8e42d89e1b904d97b6d6342294bffb82babc3cfdcd"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/parsed-input.ast.txt",
+      "bytes": 364,
+      "sha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137"
+    },
+    {
+      "path": "controlled/E06_PhysicsActions/parsed-studio-export.ast.txt",
+      "bytes": 364,
+      "sha256": "1811535d5abe639fac2111390c916d7e1536299a9b2255fd81f628b8bc837137"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/canonical-input.json",
+      "bytes": 300,
+      "sha256": "02e4e7748a055bcb9ccf70ab37aaa3215c10287032ca1d4ba120f80fa5782fb6"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/canonical-round-trip.json",
+      "bytes": 300,
+      "sha256": "02e4e7748a055bcb9ccf70ab37aaa3215c10287032ca1d4ba120f80fa5782fb6"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/canonical-studio-export.json",
+      "bytes": 300,
+      "sha256": "02e4e7748a055bcb9ccf70ab37aaa3215c10287032ca1d4ba120f80fa5782fb6"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-input/GameManager.cs",
+      "bytes": 4207,
+      "sha256": "8ddb0a48b2c695d178ef43867ff036c0e3df8bbf2acef4f22dbc6c883919a20b"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-input/SpawnedActor.cs",
+      "bytes": 721,
+      "sha256": "d2e0c3a825c0a4d79b4407097b0da1774dcc6c263a0eb467df189b83a04a7c08"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-input/SpawnerActor.cs",
+      "bytes": 775,
+      "sha256": "68beb50d9052619ffc86cd9028c644ffd414ea09ec6463ce961c8b7918a34998"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-studio-export/GameManager.cs",
+      "bytes": 4207,
+      "sha256": "8ddb0a48b2c695d178ef43867ff036c0e3df8bbf2acef4f22dbc6c883919a20b"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-studio-export/SpawnedActor.cs",
+      "bytes": 721,
+      "sha256": "d2e0c3a825c0a4d79b4407097b0da1774dcc6c263a0eb467df189b83a04a7c08"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/csharp-studio-export/SpawnerActor.cs",
+      "bytes": 775,
+      "sha256": "68beb50d9052619ffc86cd9028c644ffd414ea09ec6463ce961c8b7918a34998"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/parsed-input.ast.txt",
+      "bytes": 302,
+      "sha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508"
+    },
+    {
+      "path": "controlled/E07_ActorLifecycle/parsed-studio-export.ast.txt",
+      "bytes": 302,
+      "sha256": "3e2fb0b3c887f61de53f08ceb70b6d7c5cc1fe7271e361787c71c0a54428d508"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/canonical-input.json",
+      "bytes": 398,
+      "sha256": "8b52e21b8f94f0e4d3a8506bf790dd652d726d545dd0d6cf86ae8f3368109ff6"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/canonical-round-trip.json",
+      "bytes": 398,
+      "sha256": "8b52e21b8f94f0e4d3a8506bf790dd652d726d545dd0d6cf86ae8f3368109ff6"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/canonical-studio-export.json",
+      "bytes": 398,
+      "sha256": "8b52e21b8f94f0e4d3a8506bf790dd652d726d545dd0d6cf86ae8f3368109ff6"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-input/FirstActor.cs",
+      "bytes": 845,
+      "sha256": "f1b8b250bf9686bd02d2b8ed8208a050cb75c2d9ce4c57acb66345283ab00eef"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-input/GameManager.cs",
+      "bytes": 4281,
+      "sha256": "bd4329909e37a77a354d4aafe0428266a402cdc5b80a95930f36d68282d6f804"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-input/SecondActor.cs",
+      "bytes": 749,
+      "sha256": "e655a2f7f09866fa90109550d32fe20517fd4c94de82f3cba68dbf50e6060a57"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-studio-export/FirstActor.cs",
+      "bytes": 845,
+      "sha256": "f1b8b250bf9686bd02d2b8ed8208a050cb75c2d9ce4c57acb66345283ab00eef"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-studio-export/GameManager.cs",
+      "bytes": 4281,
+      "sha256": "bd4329909e37a77a354d4aafe0428266a402cdc5b80a95930f36d68282d6f804"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/csharp-studio-export/SecondActor.cs",
+      "bytes": 749,
+      "sha256": "e655a2f7f09866fa90109550d32fe20517fd4c94de82f3cba68dbf50e6060a57"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/parsed-input.ast.txt",
+      "bytes": 408,
+      "sha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753"
+    },
+    {
+      "path": "controlled/E08_OrderingAndMultipleWrites/parsed-studio-export.ast.txt",
+      "bytes": 408,
+      "sha256": "680b2eebe45ed5a7b169fa06128eb81c5d577e5a13cfd4b306bd0e0e3ba0a753"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-manual-first-export.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-manual-second-export.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-manual.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-studio-first-export.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-studio-second-export.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/canonical-studio.json",
+      "bytes": 4327,
+      "sha256": "6d4bacefa292b2e27df99c5235ffae84e42b93bedd7d0db62adc13965ee76e94"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Caught.cs",
+      "bytes": 682,
+      "sha256": "f0b9a6c00e16c02a7bf6f1035f487e1abefe324d913b9bfcf5657f0d0bef4261"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/End.cs",
+      "bytes": 409,
+      "sha256": "fe1999846207497399bfad631bb8e64f74c60b2cfe377af882f8a97448fe18e2"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/GameManager.cs",
+      "bytes": 4280,
+      "sha256": "236689d519fe233a3c5755eded8d644df18a508fb1fbe4af037d7021c77f76aa"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Gargoyle1.cs",
+      "bytes": 415,
+      "sha256": "e6c067f2faa5734cdd0b2232d9e85ac89ea11fa2d4c8fd2e8cdcac49b59ef9db"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Gargoyle2.cs",
+      "bytes": 415,
+      "sha256": "2802f3616128a69bd56d8b4abbf572b4d01e926735d02124330c680ac80c5ebe"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Ghost1.cs",
+      "bytes": 1418,
+      "sha256": "ad43cdab6741c2d0c5cbea56c7f7f117b02a010b1ef87d0a7d5c68b6b0e16475"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Ghost2.cs",
+      "bytes": 1418,
+      "sha256": "8265e6cbc1b1b270d25d3e94814288f33f65905393125ecb946474537c1691e2"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Ghost3.cs",
+      "bytes": 2886,
+      "sha256": "b533fc992207b4b417853266b23d49775ac846ad5ce002be8b81343a7987b67d"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Ghost4.cs",
+      "bytes": 2360,
+      "sha256": "8987a28fd62b3bdcac78fdf53c3a5feab6d386f04850c060eda387e0064c9d6b"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/House.cs",
+      "bytes": 411,
+      "sha256": "1bc8a0a7de47ba7519bf90d64e223d38fc64446f1ce44ea98075ebf5963a550e"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/John.cs",
+      "bytes": 4659,
+      "sha256": "cb7484eab898caa74296710b70b392964f573e1defa1a6714172cccc5a733d3a"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-manual/Won.cs",
+      "bytes": 677,
+      "sha256": "df4e9221047df875babc9ba35f29c9e40838419e1b2959b42c44fb90fa797463"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Caught.cs",
+      "bytes": 682,
+      "sha256": "f0b9a6c00e16c02a7bf6f1035f487e1abefe324d913b9bfcf5657f0d0bef4261"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/End.cs",
+      "bytes": 409,
+      "sha256": "fe1999846207497399bfad631bb8e64f74c60b2cfe377af882f8a97448fe18e2"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/GameManager.cs",
+      "bytes": 4280,
+      "sha256": "236689d519fe233a3c5755eded8d644df18a508fb1fbe4af037d7021c77f76aa"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Gargoyle1.cs",
+      "bytes": 415,
+      "sha256": "e6c067f2faa5734cdd0b2232d9e85ac89ea11fa2d4c8fd2e8cdcac49b59ef9db"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Gargoyle2.cs",
+      "bytes": 415,
+      "sha256": "2802f3616128a69bd56d8b4abbf572b4d01e926735d02124330c680ac80c5ebe"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Ghost1.cs",
+      "bytes": 1418,
+      "sha256": "ad43cdab6741c2d0c5cbea56c7f7f117b02a010b1ef87d0a7d5c68b6b0e16475"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Ghost2.cs",
+      "bytes": 1418,
+      "sha256": "8265e6cbc1b1b270d25d3e94814288f33f65905393125ecb946474537c1691e2"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Ghost3.cs",
+      "bytes": 2886,
+      "sha256": "b533fc992207b4b417853266b23d49775ac846ad5ce002be8b81343a7987b67d"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Ghost4.cs",
+      "bytes": 2360,
+      "sha256": "8987a28fd62b3bdcac78fdf53c3a5feab6d386f04850c060eda387e0064c9d6b"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/House.cs",
+      "bytes": 411,
+      "sha256": "1bc8a0a7de47ba7519bf90d64e223d38fc64446f1ce44ea98075ebf5963a550e"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/John.cs",
+      "bytes": 4659,
+      "sha256": "cb7484eab898caa74296710b70b392964f573e1defa1a6714172cccc5a733d3a"
+    },
+    {
+      "path": "integration/John_Lemon/csharp-studio/Won.cs",
+      "bytes": 677,
+      "sha256": "df4e9221047df875babc9ba35f29c9e40838419e1b2959b42c44fb90fa797463"
+    },
+    {
+      "path": "integration/John_Lemon/parsed-manual.ast.txt",
+      "bytes": 5486,
+      "sha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e"
+    },
+    {
+      "path": "integration/John_Lemon/parsed-studio.ast.txt",
+      "bytes": 5486,
+      "sha256": "31f83413716a87a38e7f6f698c5124363992a8b64c947159c921eaea208b975e"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-manual-first-export.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-manual-second-export.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-manual.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-studio-first-export.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-studio-second-export.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/canonical-studio.json",
+      "bytes": 6782,
+      "sha256": "d9f9de538142609bee19959c01b1c5b335567772a4a341008f07f27f6c1b6561"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/Bullet.cs",
+      "bytes": 2583,
+      "sha256": "609bf8a916622798f5a6bcc3a402cf40e9dcef80415d44855b008d74b51556ee"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/DamageCanvas.cs",
+      "bytes": 419,
+      "sha256": "7608c4fc9deaf2188a13409afc60c3fd38add41d99104f28317d0d9d475713ca"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/Environment.cs",
+      "bytes": 417,
+      "sha256": "908457fd853302eb1eb67945c6cac3a2d4fd62b3279c4891b95b8170339b731f"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/GameManager.cs",
+      "bytes": 4527,
+      "sha256": "251215116a4626bd436a5453d9fbcc668839936c6b5af5f7ce2e0908f751d3b7"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/GameOver.cs",
+      "bytes": 881,
+      "sha256": "4505751da0e38a559fe4c686f8e10b05bb2469f0072324220c0093a972bf42f3"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/HUDCanvas.cs",
+      "bytes": 784,
+      "sha256": "e68a32522309ef60b81a51692c7a64e26dc153186a86b7a829f80e03bcf27b13"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/Hellephant.cs",
+      "bytes": 3683,
+      "sha256": "afa7defba44a4fb3a554895626f5c114e50ef2bf6cad1f9d94c6bd5d3ceda73f"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/HellephantDead.cs",
+      "bytes": 961,
+      "sha256": "3364d25b1f242f55c1ba77923a61f35943c1d165b69e0d88aa34485814143b4e"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/HellephantSpawner.cs",
+      "bytes": 764,
+      "sha256": "425bce30e0c619cfbc37870eb0e58bb6eff6b342d50a2679b07150e16027e613"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/Laser.cs",
+      "bytes": 645,
+      "sha256": "f5486ac48772e40cd2fa9befe49091a5bdb46c0daa2930f58727e40ce39cfb53"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/LightingReflection.cs",
+      "bytes": 424,
+      "sha256": "b516681ee9bab18aa18570465a67ba25677dded20c67c3f3c510b1d19108ac49"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/Player.cs",
+      "bytes": 7198,
+      "sha256": "da1cbd2d0dd0a87a9000014797d49e67c8f3faa767eb517066531c828d676beb"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ShotLight.cs",
+      "bytes": 905,
+      "sha256": "e3f959deb39468ed6ad620cce135d730c737517c1cd0e736088535f6f254347e"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBear.cs",
+      "bytes": 3668,
+      "sha256": "e75113f438980a46f112c5011f306da59ed79381196502cf7569413cfd7ed558"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBearDead.cs",
+      "bytes": 952,
+      "sha256": "2642d0197bf59d8d34bdd7f81b35eb07730c0d61c885f354781c0b5e105e9df7"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBearSpawner.cs",
+      "bytes": 755,
+      "sha256": "e31364143f6c1fff12febfd2ed5e40b4fb9e20aa4fa04e9a4d4a480923a89e8a"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBunny.cs",
+      "bytes": 3675,
+      "sha256": "80ada00a2f381620bf09e7e9e492def40c3eb23605cd9f596e4ba922a2652624"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBunnyDead.cs",
+      "bytes": 955,
+      "sha256": "60c3195e70c344d24d5f728bfb5732aa516a7f16e3920ba581aecc9c2c5d9323"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-manual/ZomBunnySpawner.cs",
+      "bytes": 758,
+      "sha256": "694382205f150e373f387f69a6034530d801e24740fa564baa05beea9d64f74f"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/Bullet.cs",
+      "bytes": 2583,
+      "sha256": "609bf8a916622798f5a6bcc3a402cf40e9dcef80415d44855b008d74b51556ee"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/DamageCanvas.cs",
+      "bytes": 419,
+      "sha256": "7608c4fc9deaf2188a13409afc60c3fd38add41d99104f28317d0d9d475713ca"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/Environment.cs",
+      "bytes": 417,
+      "sha256": "908457fd853302eb1eb67945c6cac3a2d4fd62b3279c4891b95b8170339b731f"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/GameManager.cs",
+      "bytes": 4527,
+      "sha256": "251215116a4626bd436a5453d9fbcc668839936c6b5af5f7ce2e0908f751d3b7"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/GameOver.cs",
+      "bytes": 881,
+      "sha256": "4505751da0e38a559fe4c686f8e10b05bb2469f0072324220c0093a972bf42f3"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/HUDCanvas.cs",
+      "bytes": 784,
+      "sha256": "e68a32522309ef60b81a51692c7a64e26dc153186a86b7a829f80e03bcf27b13"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/Hellephant.cs",
+      "bytes": 3683,
+      "sha256": "afa7defba44a4fb3a554895626f5c114e50ef2bf6cad1f9d94c6bd5d3ceda73f"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/HellephantDead.cs",
+      "bytes": 961,
+      "sha256": "3364d25b1f242f55c1ba77923a61f35943c1d165b69e0d88aa34485814143b4e"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/HellephantSpawner.cs",
+      "bytes": 764,
+      "sha256": "425bce30e0c619cfbc37870eb0e58bb6eff6b342d50a2679b07150e16027e613"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/Laser.cs",
+      "bytes": 645,
+      "sha256": "f5486ac48772e40cd2fa9befe49091a5bdb46c0daa2930f58727e40ce39cfb53"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/LightingReflection.cs",
+      "bytes": 424,
+      "sha256": "b516681ee9bab18aa18570465a67ba25677dded20c67c3f3c510b1d19108ac49"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/Player.cs",
+      "bytes": 7198,
+      "sha256": "da1cbd2d0dd0a87a9000014797d49e67c8f3faa767eb517066531c828d676beb"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ShotLight.cs",
+      "bytes": 905,
+      "sha256": "e3f959deb39468ed6ad620cce135d730c737517c1cd0e736088535f6f254347e"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBear.cs",
+      "bytes": 3668,
+      "sha256": "e75113f438980a46f112c5011f306da59ed79381196502cf7569413cfd7ed558"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBearDead.cs",
+      "bytes": 952,
+      "sha256": "2642d0197bf59d8d34bdd7f81b35eb07730c0d61c885f354781c0b5e105e9df7"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBearSpawner.cs",
+      "bytes": 755,
+      "sha256": "e31364143f6c1fff12febfd2ed5e40b4fb9e20aa4fa04e9a4d4a480923a89e8a"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBunny.cs",
+      "bytes": 3675,
+      "sha256": "80ada00a2f381620bf09e7e9e492def40c3eb23605cd9f596e4ba922a2652624"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBunnyDead.cs",
+      "bytes": 955,
+      "sha256": "60c3195e70c344d24d5f728bfb5732aa516a7f16e3920ba581aecc9c2c5d9323"
+    },
+    {
+      "path": "integration/Survival_Shooter/csharp-studio/ZomBunnySpawner.cs",
+      "bytes": 758,
+      "sha256": "694382205f150e373f387f69a6034530d801e24740fa564baa05beea9d64f74f"
+    },
+    {
+      "path": "integration/Survival_Shooter/parsed-manual.ast.txt",
+      "bytes": 8954,
+      "sha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4"
+    },
+    {
+      "path": "integration/Survival_Shooter/parsed-studio.ast.txt",
+      "bytes": 8954,
+      "sha256": "10e409d8168aa3ecb7d9cc5528197ebfea3e93d0e667e17044c6f2b5c04618e4"
+    },
+    {
+      "path": "integration/Tanks/canonical-manual-first-export.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/canonical-manual-second-export.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/canonical-manual.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/canonical-studio-first-export.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/canonical-studio-second-export.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/canonical-studio.json",
+      "bytes": 4834,
+      "sha256": "b71a4f6d0036173c0c4541380807bddc1a13ad221ca42c119acba6ec8b4e25b1"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/BlueAim.cs",
+      "bytes": 1046,
+      "sha256": "aef1f1f3daf9100e7cb55a2f8f1ae44cfa30e31ad566542ed3eacf9fd06adb29"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/BlueHealth.cs",
+      "bytes": 1272,
+      "sha256": "5f2ea972f06b61df4be4f82d2c27c90c060e1a34fe5d1a948f2bfb27a173442c"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/BlueTank.cs",
+      "bytes": 4698,
+      "sha256": "650fb16449ba526152765c64677fa4fb2be7ff06e41fa50a226d04db076f82c5"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/BlueWin.cs",
+      "bytes": 683,
+      "sha256": "a8bb00c6ca1e5d80c0c42c7e3cd43752ef3f079b67ed15cc8563b253d85d20d3"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/CameraManager.cs",
+      "bytes": 1423,
+      "sha256": "d87992d9a0450af8b7b029237b5fc28acf052c5864df1bd920d318af5f0e313e"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/GameManager.cs",
+      "bytes": 4321,
+      "sha256": "8a5d961c4d48fb5b060a1eeb802158da3bf9571fed9ea6251a3085ea1749929e"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/LevelArt.cs",
+      "bytes": 414,
+      "sha256": "c992dac95bcbbbef7879338d33e003d88f2d2e14e5ef7c08a19fc98b4f914398"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/RedAim.cs",
+      "bytes": 1035,
+      "sha256": "10e325e54247331443eeae4c47fed117008bd15db9365f0b17abac961c6df82f"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/RedHealth.cs",
+      "bytes": 1261,
+      "sha256": "3c7b1627008f9a27bfb4912583c865b3b2e426948f0d0499790667a8745afcbe"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/RedTank.cs",
+      "bytes": 4767,
+      "sha256": "f0d6299973274076a42559edb46cf19fea2639e178360047318654c7d0bb112c"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/RedWin.cs",
+      "bytes": 682,
+      "sha256": "98775cf2fe21624bb665387a613ad8b843375b6781b49e2ecad09a519db4eb3f"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/Shell.cs",
+      "bytes": 2950,
+      "sha256": "efbcac150a2f36e5da7d6c8ba50240f33c1da955b4ad927ff1bffec7301fc979"
+    },
+    {
+      "path": "integration/Tanks/csharp-manual/ShellExplosion.cs",
+      "bytes": 900,
+      "sha256": "c137b979d8a5f16f9872628b2dc95dc4ff051f86d6673e027fcb375564c3fe9b"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/BlueAim.cs",
+      "bytes": 1046,
+      "sha256": "aef1f1f3daf9100e7cb55a2f8f1ae44cfa30e31ad566542ed3eacf9fd06adb29"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/BlueHealth.cs",
+      "bytes": 1272,
+      "sha256": "5f2ea972f06b61df4be4f82d2c27c90c060e1a34fe5d1a948f2bfb27a173442c"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/BlueTank.cs",
+      "bytes": 4698,
+      "sha256": "650fb16449ba526152765c64677fa4fb2be7ff06e41fa50a226d04db076f82c5"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/BlueWin.cs",
+      "bytes": 683,
+      "sha256": "a8bb00c6ca1e5d80c0c42c7e3cd43752ef3f079b67ed15cc8563b253d85d20d3"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/CameraManager.cs",
+      "bytes": 1423,
+      "sha256": "d87992d9a0450af8b7b029237b5fc28acf052c5864df1bd920d318af5f0e313e"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/GameManager.cs",
+      "bytes": 4321,
+      "sha256": "8a5d961c4d48fb5b060a1eeb802158da3bf9571fed9ea6251a3085ea1749929e"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/LevelArt.cs",
+      "bytes": 414,
+      "sha256": "c992dac95bcbbbef7879338d33e003d88f2d2e14e5ef7c08a19fc98b4f914398"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/RedAim.cs",
+      "bytes": 1035,
+      "sha256": "10e325e54247331443eeae4c47fed117008bd15db9365f0b17abac961c6df82f"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/RedHealth.cs",
+      "bytes": 1261,
+      "sha256": "3c7b1627008f9a27bfb4912583c865b3b2e426948f0d0499790667a8745afcbe"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/RedTank.cs",
+      "bytes": 4767,
+      "sha256": "f0d6299973274076a42559edb46cf19fea2639e178360047318654c7d0bb112c"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/RedWin.cs",
+      "bytes": 682,
+      "sha256": "98775cf2fe21624bb665387a613ad8b843375b6781b49e2ecad09a519db4eb3f"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/Shell.cs",
+      "bytes": 2950,
+      "sha256": "efbcac150a2f36e5da7d6c8ba50240f33c1da955b4ad927ff1bffec7301fc979"
+    },
+    {
+      "path": "integration/Tanks/csharp-studio/ShellExplosion.cs",
+      "bytes": 900,
+      "sha256": "c137b979d8a5f16f9872628b2dc95dc4ff051f86d6673e027fcb375564c3fe9b"
+    },
+    {
+      "path": "integration/Tanks/parsed-manual.ast.txt",
+      "bytes": 6249,
+      "sha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970"
+    },
+    {
+      "path": "integration/Tanks/parsed-studio.ast.txt",
+      "bytes": 6249,
+      "sha256": "17aaa51d5eb5f1ac1c3eca44c69f91e0f301bce579adc1af6424d706cc0a3970"
+    }
+  ]
+}
