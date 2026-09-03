@@ -66,7 +66,11 @@ The runner writes:
 
 - `Validation/Equivalence/Results/equivalence-report.json`
 - `Validation/Equivalence/Results/equivalence-report.md`
+- `Validation/Equivalence/Results/Evidence/evidence-manifest.json`
+- canonical JSON, parsed validation AST, and normalized generated C# pairs under `Validation/Equivalence/Results/Evidence`
 - `Validation/Equivalence/Results/unity-equivalence.log` when run through PowerShell
+
+The evidence directory is recreated on every run so that no artifact from an older execution can be mistaken for a current result. Controlled cases retain the canonical input, first Studio export, second round-trip export, both parsed representations, and both generated-source snapshots. Full-game pairs retain the manual and Studio canonical inputs, first and second exports, both parsed representations, and both complete generated-source snapshots. The manifest records the overall result together with the relative path, byte count, and SHA-256 digest of every retained artifact. The machine-readable report also records paired SHA-256 digests for canonical JSON, parsed representations, and generated-source snapshots.
 
 The overall result is `PASS` only when the Unity version matches exactly, all eight controlled cases pass at all four levels, all three full-game pairs pass at all four levels, formal construct coverage is complete, and all three runtime checks pass.
 
@@ -79,3 +83,11 @@ python Validation/Equivalence/Scripts/compare_json.py
 ```
 
 This independent check uses only the Python standard library and the same documented normalization policy. It does not replace the Unity-based parsed AST, generated C#, or runtime checks.
+
+After the Unity suite has generated the inspectable evidence, its manifest can be verified independently with:
+
+```bash
+python Validation/Equivalence/Scripts/verify_evidence.py
+```
+
+This command fails if an indexed artifact is missing or if its byte count or SHA-256 digest has changed, and it also reports files that are present but absent from the manifest.

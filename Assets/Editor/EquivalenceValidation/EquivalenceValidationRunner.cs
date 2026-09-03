@@ -65,7 +65,10 @@ namespace GameRuleValidation
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             string casesDirectory = Path.Combine(projectRoot, "Validation", "Equivalence", "Cases");
             string resultsDirectory = Path.Combine(projectRoot, "Validation", "Equivalence", "Results");
+            string evidenceDirectory = Path.Combine(resultsDirectory, "Evidence");
             Directory.CreateDirectory(resultsDirectory);
+            if (Directory.Exists(evidenceDirectory)) Directory.Delete(evidenceDirectory, true);
+            Directory.CreateDirectory(evidenceDirectory);
 
             var report = new ValidationReport
             {
@@ -79,7 +82,7 @@ namespace GameRuleValidation
             try
             {
                 foreach (string casePath in Directory.GetFiles(casesDirectory, "E*.json").OrderBy(path => path))
-                    report.controlledCases.Add(RunControlledCase(casePath, projectRoot));
+                    report.controlledCases.Add(RunControlledCase(casePath, projectRoot, evidenceDirectory));
 
                 string gamesDirectory = Path.Combine(Application.dataPath, "Resources", "Games");
                 foreach (IntegrationPair pair in IntegrationPairs)
@@ -88,7 +91,8 @@ namespace GameRuleValidation
                         pair.name,
                         Path.Combine(gamesDirectory, pair.manualFile),
                         Path.Combine(gamesDirectory, pair.studioFile),
-                        projectRoot));
+                        projectRoot,
+                        evidenceDirectory));
                 }
 
                 report.coverage = EvaluateCoverage(
@@ -119,6 +123,8 @@ namespace GameRuleValidation
                 report.coverage != null && report.coverage.pass &&
                 report.unityVersion == report.expectedUnityVersion;
 
+            report.evidence = WriteEvidenceManifest(evidenceDirectory, report);
+
             File.WriteAllText(
                 Path.Combine(resultsDirectory, "equivalence-report.json"),
                 JsonConvert.SerializeObject(report, Formatting.Indented),
@@ -132,10 +138,14 @@ namespace GameRuleValidation
             return report;
         }
 
-        private static DescriptorResult RunControlledCase(string sourcePath, string projectRoot)
+        private static DescriptorResult RunControlledCase(
+            string sourcePath,
+            string projectRoot,
+            string evidenceRoot)
         {
             string caseName = Path.GetFileNameWithoutExtension(sourcePath);
             var result = new DescriptorResult { name = caseName };
+            string evidenceDirectory = Path.Combine(evidenceRoot, "controlled", caseName);
             GameRuleProject sourceProject = null;
             GameRuleProject reconstructedProject = null;
 
@@ -153,17 +163,31 @@ namespace GameRuleValidation
                 string canonicalSource = CanonicalizeJson(sourceJson);
                 string canonicalFirstExport = CanonicalizeJson(firstExport);
                 string canonicalSecondExport = CanonicalizeJson(secondExport);
+                string sourceAst = BuildParsedAst(sourceProject);
+                string reconstructedAst = BuildParsedAst(reconstructedProject);
+                Dictionary<string, string> sourceCSharp = GenerateSourceSnapshot(sourceProject, projectRoot);
+                Dictionary<string, string> reconstructedCSharp = GenerateSourceSnapshot(reconstructedProject, projectRoot);
 
                 result.canonicalJson = canonicalSource == canonicalFirstExport;
-                result.parsedAst = BuildParsedAst(sourceProject) == BuildParsedAst(reconstructedProject);
-                result.generatedCSharp = GeneratedSourcesEqual(
-                    GenerateSourceSnapshot(sourceProject, projectRoot),
-                    GenerateSourceSnapshot(reconstructedProject, projectRoot));
+                result.parsedAst = sourceAst == reconstructedAst;
+                result.generatedCSharp = GeneratedSourcesEqual(sourceCSharp, reconstructedCSharp);
                 result.roundTrip =
                     canonicalFirstExport == canonicalSecondExport &&
                     SameOrderedTopology(sourceProject, reconstructedProject);
                 result.sourceCanonicalSha256 = Sha256(canonicalSource);
                 result.outputCanonicalSha256 = Sha256(canonicalFirstExport);
+                result.sourceParsedAstSha256 = Sha256(sourceAst);
+                result.outputParsedAstSha256 = Sha256(reconstructedAst);
+                result.sourceGeneratedCSharpSha256 = SourceSnapshotSha256(sourceCSharp);
+                result.outputGeneratedCSharpSha256 = SourceSnapshotSha256(reconstructedCSharp);
+
+                WriteEvidenceText(evidenceDirectory, "canonical-input.json", canonicalSource);
+                WriteEvidenceText(evidenceDirectory, "canonical-studio-export.json", canonicalFirstExport);
+                WriteEvidenceText(evidenceDirectory, "canonical-round-trip.json", canonicalSecondExport);
+                WriteEvidenceText(evidenceDirectory, "parsed-input.ast.txt", sourceAst);
+                WriteEvidenceText(evidenceDirectory, "parsed-studio-export.ast.txt", reconstructedAst);
+                WriteSourceSnapshot(evidenceDirectory, "csharp-input", sourceCSharp);
+                WriteSourceSnapshot(evidenceDirectory, "csharp-studio-export", reconstructedCSharp);
             }
             catch (Exception exception)
             {
@@ -182,9 +206,11 @@ namespace GameRuleValidation
             string name,
             string manualPath,
             string studioPath,
-            string projectRoot)
+            string projectRoot,
+            string evidenceRoot)
         {
             var result = new DescriptorResult { name = name };
+            string evidenceDirectory = Path.Combine(evidenceRoot, "integration", SafePathSegment(name));
             GameRuleProject manualProject = null;
             GameRuleProject studioProject = null;
             GameRuleProject manualRoundTrip = null;
@@ -199,11 +225,16 @@ namespace GameRuleValidation
                 RequireProject(manualProject, manualPath);
                 RequireProject(studioProject, studioPath);
 
-                result.canonicalJson = CanonicalizeJson(manualJson) == CanonicalizeJson(studioJson);
-                result.parsedAst = BuildParsedAst(manualProject) == BuildParsedAst(studioProject);
-                result.generatedCSharp = GeneratedSourcesEqual(
-                    GenerateSourceSnapshot(manualProject, projectRoot),
-                    GenerateSourceSnapshot(studioProject, projectRoot));
+                string canonicalManual = CanonicalizeJson(manualJson);
+                string canonicalStudio = CanonicalizeJson(studioJson);
+                string manualAst = BuildParsedAst(manualProject);
+                string studioAst = BuildParsedAst(studioProject);
+                Dictionary<string, string> manualCSharp = GenerateSourceSnapshot(manualProject, projectRoot);
+                Dictionary<string, string> studioCSharp = GenerateSourceSnapshot(studioProject, projectRoot);
+
+                result.canonicalJson = canonicalManual == canonicalStudio;
+                result.parsedAst = manualAst == studioAst;
+                result.generatedCSharp = GeneratedSourcesEqual(manualCSharp, studioCSharp);
 
                 string manualExport = manualProject.ExportToJson();
                 string studioExport = studioProject.ExportToJson();
@@ -212,16 +243,36 @@ namespace GameRuleValidation
                 RequireProject(manualRoundTrip, name + " manual round-trip");
                 RequireProject(studioRoundTrip, name + " Studio round-trip");
 
+                string canonicalManualExport = CanonicalizeJson(manualExport);
+                string canonicalStudioExport = CanonicalizeJson(studioExport);
+                string canonicalManualRoundTrip = CanonicalizeJson(manualRoundTrip.ExportToJson());
+                string canonicalStudioRoundTrip = CanonicalizeJson(studioRoundTrip.ExportToJson());
+
                 result.roundTrip =
-                    CanonicalizeJson(manualExport) == CanonicalizeJson(studioExport) &&
-                    CanonicalizeJson(manualExport) == CanonicalizeJson(manualRoundTrip.ExportToJson()) &&
-                    CanonicalizeJson(studioExport) == CanonicalizeJson(studioRoundTrip.ExportToJson()) &&
+                    canonicalManualExport == canonicalStudioExport &&
+                    canonicalManualExport == canonicalManualRoundTrip &&
+                    canonicalStudioExport == canonicalStudioRoundTrip &&
                     SameOrderedTopology(manualProject, studioProject) &&
                     SameOrderedTopology(manualProject, manualRoundTrip) &&
                     SameOrderedTopology(studioProject, studioRoundTrip);
 
-                result.sourceCanonicalSha256 = Sha256(CanonicalizeJson(manualJson));
-                result.outputCanonicalSha256 = Sha256(CanonicalizeJson(studioJson));
+                result.sourceCanonicalSha256 = Sha256(canonicalManual);
+                result.outputCanonicalSha256 = Sha256(canonicalStudio);
+                result.sourceParsedAstSha256 = Sha256(manualAst);
+                result.outputParsedAstSha256 = Sha256(studioAst);
+                result.sourceGeneratedCSharpSha256 = SourceSnapshotSha256(manualCSharp);
+                result.outputGeneratedCSharpSha256 = SourceSnapshotSha256(studioCSharp);
+
+                WriteEvidenceText(evidenceDirectory, "canonical-manual.json", canonicalManual);
+                WriteEvidenceText(evidenceDirectory, "canonical-studio.json", canonicalStudio);
+                WriteEvidenceText(evidenceDirectory, "canonical-manual-first-export.json", canonicalManualExport);
+                WriteEvidenceText(evidenceDirectory, "canonical-studio-first-export.json", canonicalStudioExport);
+                WriteEvidenceText(evidenceDirectory, "canonical-manual-second-export.json", canonicalManualRoundTrip);
+                WriteEvidenceText(evidenceDirectory, "canonical-studio-second-export.json", canonicalStudioRoundTrip);
+                WriteEvidenceText(evidenceDirectory, "parsed-manual.ast.txt", manualAst);
+                WriteEvidenceText(evidenceDirectory, "parsed-studio.ast.txt", studioAst);
+                WriteSourceSnapshot(evidenceDirectory, "csharp-manual", manualCSharp);
+                WriteSourceSnapshot(evidenceDirectory, "csharp-studio", studioCSharp);
             }
             catch (Exception exception)
             {
@@ -553,6 +604,77 @@ namespace GameRuleValidation
                    left.All(pair => right.TryGetValue(pair.Key, out string value) && pair.Value == value);
         }
 
+        private static string SourceSnapshotSha256(Dictionary<string, string> snapshot)
+        {
+            var builder = new StringBuilder();
+            foreach (KeyValuePair<string, string> pair in snapshot.OrderBy(item => item.Key, StringComparer.Ordinal))
+            {
+                builder.Append(pair.Key.Length).Append(':').Append(pair.Key)
+                    .Append(pair.Value.Length).Append(':').Append(pair.Value);
+            }
+            return Sha256(builder.ToString());
+        }
+
+        private static void WriteSourceSnapshot(
+            string evidenceDirectory,
+            string label,
+            Dictionary<string, string> snapshot)
+        {
+            foreach (KeyValuePair<string, string> pair in snapshot.OrderBy(item => item.Key, StringComparer.Ordinal))
+                WriteEvidenceText(evidenceDirectory, Path.Combine(label, pair.Key), pair.Value);
+        }
+
+        private static void WriteEvidenceText(string evidenceDirectory, string relativePath, string content)
+        {
+            string path = Path.Combine(evidenceDirectory, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(path) ?? evidenceDirectory);
+            File.WriteAllText(path, content, new UTF8Encoding(false));
+        }
+
+        private static string SafePathSegment(string value)
+        {
+            var invalid = new HashSet<char>(Path.GetInvalidFileNameChars());
+            return new string((value ?? string.Empty)
+                    .Select(character => invalid.Contains(character) || char.IsWhiteSpace(character) ? '_' : character)
+                    .ToArray())
+                .Trim('_');
+        }
+
+        private static EvidenceSummary WriteEvidenceManifest(
+            string evidenceDirectory,
+            ValidationReport report)
+        {
+            var manifest = new EvidenceManifest
+            {
+                generatedUtc = report.generatedUtc,
+                unityVersion = report.unityVersion,
+                expectedUnityVersion = report.expectedUnityVersion,
+                sourceRevision = report.sourceRevision,
+                overallPass = report.overallPass
+            };
+
+            foreach (string path in Directory.GetFiles(evidenceDirectory, "*", SearchOption.AllDirectories)
+                         .OrderBy(item => item, StringComparer.Ordinal))
+            {
+                manifest.artifacts.Add(new EvidenceArtifact
+                {
+                    path = RelativePath(evidenceDirectory, path).Replace('\\', '/'),
+                    bytes = new FileInfo(path).Length,
+                    sha256 = Sha256File(path)
+                });
+            }
+
+            string manifestJson = JsonConvert.SerializeObject(manifest, Formatting.Indented);
+            WriteEvidenceText(evidenceDirectory, "evidence-manifest.json", manifestJson);
+            return new EvidenceSummary
+            {
+                directory = "Validation/Equivalence/Results/Evidence",
+                manifest = "Validation/Equivalence/Results/Evidence/evidence-manifest.json",
+                artifactCount = manifest.artifacts.Count,
+                manifestSha256 = Sha256(manifestJson)
+            };
+        }
+
         private static string NormalizeCSharp(string source)
         {
             return string.Join("\n", source.Replace("\r\n", "\n").Replace('\r', '\n')
@@ -793,6 +915,16 @@ namespace GameRuleValidation
             }
         }
 
+        private static string Sha256File(string path)
+        {
+            using (SHA256 algorithm = SHA256.Create())
+            using (FileStream stream = File.OpenRead(path))
+            {
+                byte[] hash = algorithm.ComputeHash(stream);
+                return string.Concat(hash.Select(item => item.ToString("x2", CultureInfo.InvariantCulture)));
+            }
+        }
+
         private static void Require(bool condition, string message)
         {
             if (!condition) throw new InvalidOperationException(message);
@@ -835,6 +967,16 @@ namespace GameRuleValidation
                 builder.AppendLine("- Conditional and unconditional rules: " + PassFail(report.coverage.conditionalAndUnconditionalRules));
                 builder.AppendLine("- Local, global, and cross-actor references: " + PassFail(report.coverage.localGlobalAndCrossActorReferences));
                 builder.AppendLine("- Coverage result: **" + PassFail(report.coverage.pass) + "**");
+            }
+            if (report.evidence != null)
+            {
+                builder.AppendLine();
+                builder.AppendLine("## Inspectable evidence");
+                builder.AppendLine();
+                builder.AppendLine("- Directory: `" + report.evidence.directory + "`");
+                builder.AppendLine("- Manifest: `" + report.evidence.manifest + "`");
+                builder.AppendLine("- Indexed artifacts: " + report.evidence.artifactCount);
+                builder.AppendLine("- Manifest SHA-256: `" + report.evidence.manifestSha256 + "`");
             }
             if (report.runnerErrors.Count > 0)
             {
@@ -902,6 +1044,7 @@ namespace GameRuleValidation
             public List<DescriptorResult> integrationCases = new List<DescriptorResult>();
             public CoverageResult coverage;
             public List<RuntimeResult> runtimeChecks = new List<RuntimeResult>();
+            public EvidenceSummary evidence;
             public List<string> runnerErrors = new List<string>();
         }
 
@@ -915,6 +1058,10 @@ namespace GameRuleValidation
             public bool roundTrip;
             public string sourceCanonicalSha256;
             public string outputCanonicalSha256;
+            public string sourceParsedAstSha256;
+            public string outputParsedAstSha256;
+            public string sourceGeneratedCSharpSha256;
+            public string outputGeneratedCSharpSha256;
             public List<string> errors = new List<string>();
             [JsonIgnore] public bool AllPassed =>
                 canonicalJson && parsedAst && generatedCSharp && roundTrip && errors.Count == 0;
@@ -940,6 +1087,34 @@ namespace GameRuleValidation
             public string name;
             public bool pass;
             public string detail;
+        }
+
+        [Serializable]
+        private sealed class EvidenceSummary
+        {
+            public string directory;
+            public string manifest;
+            public int artifactCount;
+            public string manifestSha256;
+        }
+
+        [Serializable]
+        private sealed class EvidenceManifest
+        {
+            public string generatedUtc;
+            public string unityVersion;
+            public string expectedUnityVersion;
+            public string sourceRevision;
+            public bool overallPass;
+            public List<EvidenceArtifact> artifacts = new List<EvidenceArtifact>();
+        }
+
+        [Serializable]
+        private sealed class EvidenceArtifact
+        {
+            public string path;
+            public long bytes;
+            public string sha256;
         }
     }
 }
