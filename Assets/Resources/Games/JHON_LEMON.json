@@ -15,11 +15,8 @@
             "ActorName": "House",
             "Active": true,
             "PrefabName": "Level",
-            "Tag": "Untagged",
-            "IconColorHex": "",
-            "Position": [0.0, 0.0, 0.0],
-            "Rotation": [0.0, 0.0, 0.0],
-            "Scale": [1.0, 1.0, 1.0]
+            "Tag": "",
+            "IconColorHex": ""
         },
         {
             "ActorName": "End",

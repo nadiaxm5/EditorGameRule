@@ -64,7 +64,7 @@ namespace GameRuleEditor.Core
             rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
 
             // Remove default floats
-            string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(\.0)?,?";
+            string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(?:\.0+)?(?=\s*[,}]),?";
             rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
 
             // Manual construction

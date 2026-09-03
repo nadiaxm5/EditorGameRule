@@ -27,7 +27,9 @@
             "Position": [-3.0, 0.0, 30.0],
             "Rotation": [0.0, 180.0, 0.0],
             "Velocity": [10.0, 0.0, 10.0],
-            "AngularVelocity": [0.0, 90.0, 0.0],.6000000238418579,.20000000298023225,
+            "AngularVelocity": [0.0, 90.0, 0.0],
+            "Friction": 0.6000000238418579,
+            "Drag": 0.20000000298023225,
             "Properties": [
                 "speed=10",
                 "angularSpeed=90",
@@ -143,7 +145,9 @@
             "Tag": "RedTank",
             "IconColorHex": "",
             "Position": [13.0, 0.0, -5.0],
-            "Rotation": [0.0, 0.0, 0.0],.6000000238418579,.20000000298023225,
+            "Rotation": [0.0, 0.0, 0.0],
+            "Friction": 0.6000000238418579,
+            "Drag": 0.20000000298023225,
             "Properties": [
                 "speed=10",
                 "angularSpeed=90",
