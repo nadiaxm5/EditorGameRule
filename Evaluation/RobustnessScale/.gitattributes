@@ -1,8 +1,8 @@
 # Fixtures/tools use LF. Evidence retains the EXACT bytes emitted by Unity on Windows.
 * text eol=lf
-robustness/raw-results/** -text
-scale/raw-results/** -text
-runs/** -text
-environment.json -text
+robustness/raw-results/** -text whitespace=cr-at-eol
+scale/raw-results/** -text whitespace=cr-at-eol
+runs/** -text whitespace=cr-at-eol
+environment.json -text whitespace=cr-at-eol
 # Removing the final brace intentionally leaves the preceding newline in this one mutation.
 robustness/invalid-inputs/malformed_json.json whitespace=-blank-at-eof

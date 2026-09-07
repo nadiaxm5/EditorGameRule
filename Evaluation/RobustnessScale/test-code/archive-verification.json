@@ -1,0 +1,7 @@
+{
+  "archived_commit": "a8f8da6f01d881e77ea99df2f0273718b712d87e",
+  "artifact": "git archive HEAD Evaluation/RobustnessScale",
+  "checked_hashes": 62,
+  "failures": [],
+  "description": "Verifies committed original raw evidence bytes and fixture hashes, independently of working-tree line endings."
+}

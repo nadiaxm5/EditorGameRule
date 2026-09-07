@@ -36,7 +36,7 @@ def summarize(run_id, root=ROOT):
     for kind in ("robustness", "scale"):
         for path in sorted((root / kind / "raw-results" / run_id).glob("*.json")):
             raw.append(json.loads(path.read_text(encoding="utf-8-sig")))
-            hashes[str(path.relative_to(root))] = hashlib.sha256(path.read_bytes()).hexdigest()
+            hashes[path.relative_to(root).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
     launcher = json.loads((run / "launcher.json").read_text(encoding="utf-8-sig")) if (run / "launcher.json").exists() else {}
     # A hung process cannot write its result: preserve its last sample as a censored observation.
     sample = launcher.get("last_sample")
