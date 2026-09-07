@@ -69,6 +69,7 @@ python Evaluation/RobustnessScale/test-code/test_tools.py
 & Evaluation/RobustnessScale/test-code/run.ps1 -Unity 'C:\Program Files\Unity\Hub\Editor\6000.3.1f1\Editor\Unity.exe'
 # Copiar el identificador que imprime el launcher:
 python Evaluation/RobustnessScale/test-code/summarize.py IDENTIFICADOR_DE_EJECUCION
+python Evaluation/RobustnessScale/test-code/audit.py IDENTIFICADOR_DE_EJECUCION
 ```
 
 El launcher usa gráficos y `-executeMethod GameRuleEvaluation.RobustnessScaleEvaluation.RunCommandLine`, sin `-batchmode`, `-nographics` ni `-quit`. Inicia la ventana de forma oculta; Unity gestiona las ventanas de Editor necesarias. El propio runner sale al acabar. Las ventanas efectivamente adjuntas y su geometría se verifican; una sesión sin layout queda como timeout, no como medición visual válida.

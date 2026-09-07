@@ -1,0 +1,2 @@
+# Fixture and evidence hashes must survive checkout on Windows.
+* text eol=lf

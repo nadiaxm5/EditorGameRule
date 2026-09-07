@@ -1,0 +1,11 @@
+test_committed_fixtures_reproducible (__main__.ToolTests.test_committed_fixtures_reproducible) ... ok
+test_pending_is_not_success (__main__.ToolTests.test_pending_is_not_success) ... ok
+test_quartiles (__main__.ToolTests.test_quartiles) ... ok
+test_scale_counts_order_and_references (__main__.ToolTests.test_scale_counts_order_and_references) ... ok
+test_single_mutation (__main__.ToolTests.test_single_mutation) ... ok
+test_timeout_and_warmup_not_silently_dropped (__main__.ToolTests.test_timeout_and_warmup_not_silently_dropped) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.254s
+
+OK

@@ -1,0 +1,1034 @@
+{
+    "GameName": "GR_Eval_a1_r100",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [0, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "EvalActor000",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Properties": [
+                "Health=100"
+            ],
+            "Script": [
+                {
+                    "Name": "Rule000",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,1)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule001",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,2)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule002",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,3)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule003",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,4)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule004",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,5)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule005",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,6)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule006",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,7)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule007",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,8)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule008",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,9)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule009",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,10)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule010",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,11)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule011",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,12)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule012",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,13)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule013",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,14)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule014",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,15)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule015",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,16)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule016",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,17)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule017",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,18)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule018",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,19)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule019",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,20)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule020",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,21)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule021",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,22)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule022",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,23)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule023",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,24)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule024",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,25)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule025",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,26)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule026",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,27)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule027",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,28)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule028",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,29)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule029",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,30)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule030",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,31)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule031",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,32)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule032",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,33)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule033",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,34)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule034",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,35)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule035",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,36)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule036",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,37)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule037",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,38)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule038",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,39)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule039",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,40)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule040",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,41)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule041",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,42)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule042",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,43)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule043",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,44)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule044",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,45)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule045",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,46)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule046",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,47)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule047",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,48)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule048",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,49)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule049",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,50)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule050",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,51)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule051",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,52)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule052",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,53)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule053",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,54)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule054",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,55)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule055",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,56)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule056",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,57)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule057",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,58)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule058",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,59)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule059",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,60)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule060",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,61)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule061",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,62)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule062",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,63)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule063",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,64)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule064",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,65)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule065",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,66)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule066",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,67)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule067",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,68)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule068",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,69)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule069",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,70)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule070",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,71)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule071",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,72)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule072",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,73)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule073",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,74)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule074",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,75)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule075",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,76)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule076",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,77)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule077",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,78)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule078",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,79)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule079",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,80)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule080",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,81)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule081",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,82)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule082",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,83)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule083",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,84)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule084",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,85)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule085",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,86)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule086",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,87)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule087",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,88)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule088",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,89)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule089",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,90)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule090",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,91)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule091",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,92)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule092",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,93)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule093",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,94)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule094",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,95)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule095",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,96)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule096",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,97)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule097",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,98)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule098",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,99)"
+                    ],
+                    "groupId": "rules000"
+                },
+                {
+                    "Name": "Rule099",
+                    "When": [
+                        "Compare(this.Health > 0)"
+                    ],
+                    "Do": [
+                        "Edit(EvalActor000.Health,100)"
+                    ],
+                    "groupId": "rules000"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Evaluation rules",
+                    "id": "rules000"
+                }
+            ]
+        }
+    ]
+}

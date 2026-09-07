@@ -1,0 +1,80 @@
+{
+  "run_id": "20260907T123257879Z-a44568",
+  "started_utc": "2026-09-07T12:32:57.9001551Z",
+  "finished_utc": "2026-09-07T12:33:50.6465605Z",
+  "outcome": "process_exit",
+  "exit_code": 0,
+  "startup_timeout_seconds": 300,
+  "sample_timeout_seconds": 660,
+  "last_stage": "observation and explicit post-import Validate",
+  "last_sample": {
+    "case_id": "baseline",
+    "kind": "baseline",
+    "repetition": -1,
+    "warmup": false,
+    "input": "Evaluation/RobustnessScale/robustness/baseline/baseline.json",
+    "input_sha256": "f47df4d526b0b18e8c13440c0420654e1f4b9c8f9a5c200a00816a98ff9da993",
+    "utc": "2026-09-07T12:33:48.3441692Z",
+    "status": "running",
+    "manual_panel_check": "pending",
+    "spec": null,
+    "import_call_ms": 95.3608,
+    "read_process_persist_ms": 92.6926,
+    "hierarchy_sync_ms": 2.668199999999999,
+    "hierarchy_visual_order": [
+      "EvalActor000",
+      "EvalActor001"
+    ],
+    "visual": [
+      {
+        "actor": "EvalActor000",
+        "selected_index": 0,
+        "rules": [
+          "",
+          ""
+        ],
+        "actions": [
+          "Edit(EvalActor000.Health,1)",
+          "Edit(EvalActor000.Health,2)"
+        ],
+        "conditions": [
+          "Compare(this.Health > 0)",
+          "Compare(this.Health > 0)"
+        ],
+        "attached": true
+      },
+      {
+        "actor": "EvalActor001",
+        "selected_index": 1,
+        "rules": [
+          "",
+          ""
+        ],
+        "actions": [
+          "Edit(EvalActor001.Health,1)",
+          "Edit(EvalActor001.Health,2)"
+        ],
+        "conditions": [
+          "Compare(this.Health > 0)",
+          "Compare(this.Health > 0)"
+        ],
+        "attached": true
+      }
+    ],
+    "visual_rebuild_ms": 678.2878000000001,
+    "export_ms": 15.0739,
+    "total_ms": 790.9461,
+    "import_exception": null,
+    "export_exception": null,
+    "export_file": "baseline-baseline--1-export.json"
+  },
+  "git_commit": "c58f222091dbb642797006045ded9c226309fc3f",
+  "arguments": [
+    "-projectPath",
+    "<PROJECT>",
+    "-executeMethod",
+    "GameRuleEvaluation.RobustnessScaleEvaluation.RunCommandLine",
+    "-logFile",
+    "<PRIVATE_LOG>"
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "generator": "scale/generator/generate.py",
+  "randomness": "none",
+  "cases": [
+    {
+      "case_id": "malformed_json",
+      "invalid_category": "Parsing JSON",
+      "mutation": "Remove final root closing brace",
+      "field": "$",
+      "reason": "Invalid JSON syntax",
+      "file": "robustness/invalid-inputs/malformed_json.json"
+    },
+    {
+      "case_id": "missing_required",
+      "invalid_category": "Required field",
+      "mutation": "Remove GameName",
+      "field": "$.GameName",
+      "reason": "GameRuleProject.Validate requires a nonempty GameName; import does not call Validate",
+      "file": "robustness/invalid-inputs/missing_required.json"
+    },
+    {
+      "case_id": "missing_actor",
+      "invalid_category": "Actor reference",
+      "mutation": "EvalActor000.Health -> MissingActor.Health",
+      "field": "$.Cast[0].Script[0].Do[0]",
+      "reason": "MissingActor is absent from Cast; Edit targets an actor property",
+      "file": "robustness/invalid-inputs/missing_actor.json"
+    },
+    {
+      "case_id": "missing_property",
+      "invalid_category": "Property reference",
+      "mutation": "Health -> MissingProperty in Edit target",
+      "field": "$.Cast[0].Script[0].Do[0]",
+      "reason": "MissingProperty is neither a declared nor a built-in actor property",
+      "file": "robustness/invalid-inputs/missing_property.json"
+    },
+    {
+      "case_id": "unsupported_action",
+      "invalid_category": "Action",
+      "mutation": "Edit -> NoSuchAction",
+      "field": "$.Cast[0].Script[0].Do[0]",
+      "reason": "NoSuchAction has no public static method in Action",
+      "file": "robustness/invalid-inputs/unsupported_action.json"
+    },
+    {
+      "case_id": "invalid_parameter",
+      "invalid_category": "Parameter/type",
+      "mutation": "Numeric expression 1 -> )",
+      "field": "$.Cast[0].Script[0].Do[0]",
+      "reason": "An unmatched closing parenthesis cannot be a numeric expression for Action.Edit",
+      "file": "robustness/invalid-inputs/invalid_parameter.json"
+    }
+  ],
+  "scale": [
+    {
+      "case_id": "a10_r10",
+      "actors": 10,
+      "rules_per_actor": 10,
+      "file": "scale/descriptors/a10_r10.json"
+    },
+    {
+      "case_id": "a50_r20",
+      "actors": 50,
+      "rules_per_actor": 20,
+      "file": "scale/descriptors/a50_r20.json"
+    },
+    {
+      "case_id": "a100_r20",
+      "actors": 100,
+      "rules_per_actor": 20,
+      "file": "scale/descriptors/a100_r20.json"
+    },
+    {
+      "case_id": "a200_r20",
+      "actors": 200,
+      "rules_per_actor": 20,
+      "file": "scale/descriptors/a200_r20.json"
+    },
+    {
+      "case_id": "a1_r100",
+      "actors": 1,
+      "rules_per_actor": 100,
+      "file": "scale/descriptors/a1_r100.json"
+    }
+  ],
+  "sha256": {
+    "robustness/baseline/baseline.json": "f47df4d526b0b18e8c13440c0420654e1f4b9c8f9a5c200a00816a98ff9da993",
+    "robustness/invalid-inputs/malformed_json.json": "e46fb10df738048fde2108f8bda0c9ff77421d38a06a0af021266a7a7c2eebe9",
+    "robustness/invalid-inputs/missing_required.json": "ce1c12936e2930f1d8d2053efc9242f1bcfa7b5de41c68ff9c54d2a2a5df6cb3",
+    "robustness/invalid-inputs/missing_actor.json": "18faabfcdfa8230fa9dea0720ac9cd07d002383be328daae959be16abdf9e12a",
+    "robustness/invalid-inputs/missing_property.json": "94efe14e7cc433dc4b9026d6ef317894c3ba0d79bb0ed4c06322a8679236fb6d",
+    "robustness/invalid-inputs/unsupported_action.json": "8b122f6df9f5c402c75955b485b79a73d3274ad20cb6367dba41781a5a0000ee",
+    "robustness/invalid-inputs/invalid_parameter.json": "29805e89319d87620fcced4e3a91b95d5e667e1a5b38ddc088019e116e66e04e",
+    "scale/descriptors/a10_r10.json": "83019a356dddc9613791dc77f9ce32003e40596a77f370dfcb396ee2c248885b",
+    "scale/descriptors/a50_r20.json": "c187acf8619db58bd3c2bb3943bd2a3432a60622cbf80758ed056c6018fcd441",
+    "scale/descriptors/a100_r20.json": "127ddd7a9fd1a1ebf3b84152fbb979f4b7eca8a00ea436b920203f9e465a59b0",
+    "scale/descriptors/a200_r20.json": "a8a31a7c90bc377437d102ee1c35dc4bd356b37f405aa43ef020339f66c60b47",
+    "scale/descriptors/a1_r100.json": "d6405f3b9236ace6aff8f1213424cde77b165bd77a9c6803b8710a656cf0093b"
+  }
+}

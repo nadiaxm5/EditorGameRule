@@ -1,0 +1,269 @@
+{
+  "run_id": "20260907T123851573Z-9a66e3",
+  "provenance_errors": [],
+  "observed": 37,
+  "expected": 37,
+  "missing": [],
+  "sample_statuses": [
+    {
+      "kind": "baseline",
+      "case_id": "baseline",
+      "repetition": -1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "robustness",
+      "case_id": "invalid_parameter",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "robustness",
+      "case_id": "malformed_json",
+      "repetition": 1,
+      "status": "production_exception",
+      "correctness": false
+    },
+    {
+      "kind": "robustness",
+      "case_id": "missing_actor",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "robustness",
+      "case_id": "missing_property",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "robustness",
+      "case_id": "missing_required",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "robustness",
+      "case_id": "unsupported_action",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": false
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 0,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 2,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 3,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 4,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a100_r20",
+      "repetition": 5,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 0,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 2,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 3,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 4,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a10_r10",
+      "repetition": 5,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 0,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 2,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 3,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 4,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a1_r100",
+      "repetition": 5,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 0,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 2,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 3,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 4,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a200_r20",
+      "repetition": 5,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 0,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 1,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 2,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 3,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 4,
+      "status": "completed",
+      "correctness": true
+    },
+    {
+      "kind": "scale",
+      "case_id": "a50_r20",
+      "repetition": 5,
+      "status": "completed",
+      "correctness": true
+    }
+  ],
+  "interpretation": "Correctness=false on invalid inputs is an observation, not an audit failure. Missing observations remain pending."
+}

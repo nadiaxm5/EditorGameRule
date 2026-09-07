@@ -1,0 +1,26 @@
+{
+  "scope": "Editor startup probes before suite execution; not import or scale results",
+  "production_commit": "c58f222091dbb642797006045ded9c226309fc3f",
+  "attempts": [
+    {
+      "started_utc": "2026-09-07T12:24:02Z",
+      "mode": "batchmode, quit, sandboxed",
+      "outcome": "manually terminated the launched process after repeated licensing reconnections",
+      "exact_messages": [
+        "[Licensing::Module] Licensing is not yet initialized.",
+        "[Licensing::Module] Error: The connection with the Unity Licensing Client has been lost. Attempting to reconnect."
+      ],
+      "import_results": null
+    },
+    {
+      "started_utc": "2026-09-07T12:24:44Z",
+      "mode": "batchmode, quit, outside sandbox; earlier probe was still alive",
+      "outcome": "exit code 1; exact cause not established from retained diagnostic",
+      "exact_messages": [
+        "Exiting without the bug reporter. Application will terminate with return code 1"
+      ],
+      "import_results": null
+    }
+  ],
+  "resolution": "The earlier process was terminated; subsequent graphical suite launches succeeded. No project or license settings were changed."
+}

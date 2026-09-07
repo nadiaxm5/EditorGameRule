@@ -1,0 +1,788 @@
+{
+  "case_id": "unsupported_action",
+  "kind": "robustness",
+  "repetition": 1,
+  "warmup": false,
+  "input": "Evaluation/RobustnessScale/robustness/invalid-inputs/unsupported_action.json",
+  "input_sha256": "8b122f6df9f5c402c75955b485b79a73d3274ad20cb6367dba41781a5a0000ee",
+  "utc": "2026-09-07T12:39:06.3331990Z",
+  "status": "completed",
+  "manual_panel_check": "pending",
+  "spec": {
+    "case_id": "unsupported_action",
+    "invalid_category": "Action",
+    "mutation": "Edit -> NoSuchAction",
+    "field": "$.Cast[0].Script[0].Do[0]",
+    "reason": "NoSuchAction has no public static method in Action",
+    "file": "robustness/invalid-inputs/unsupported_action.json"
+  },
+  "before": {
+    "project_name": "GR_Eval_Baseline",
+    "actors_before_export": [
+      {
+        "ActorName": "EvalActor000",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,1)"
+            ],
+            "groupId": "rules000"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,2)"
+            ],
+            "groupId": "rules000"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules000"
+          }
+        ]
+      },
+      {
+        "ActorName": "EvalActor001",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,1)"
+            ],
+            "groupId": "rules001"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,2)"
+            ],
+            "groupId": "rules001"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules001"
+          }
+        ]
+      }
+    ],
+    "actor_order": [
+      "EvalActor000",
+      "EvalActor001"
+    ],
+    "rules_per_actor": [
+      2,
+      2
+    ],
+    "export": {
+      "GameName": "GR_Eval_Baseline",
+      "ScreenResolution": [
+        1920,
+        1080
+      ],
+      "CameraPosition": [
+        0,
+        1,
+        -10
+      ],
+      "CameraRotation": [
+        0,
+        0,
+        0
+      ],
+      "SunPosition": [
+        0,
+        3,
+        0
+      ],
+      "SunRotation": [
+        50,
+        -30,
+        0
+      ],
+      "SunColor": [
+        255,
+        255,
+        255
+      ],
+      "SunAmbientColor": [
+        128,
+        128,
+        128
+      ],
+      "BackgroundColor": [
+        0,
+        0,
+        0
+      ],
+      "Gravity": [
+        0,
+        -9.81,
+        0
+      ],
+      "CustomVariables": [],
+      "Cast": [
+        {
+          "ActorName": "EvalActor000",
+          "Active": true,
+          "PrefabName": "Empty",
+          "Tag": "Untagged",
+          "IconColorHex": "",
+          "Properties": [
+            "Health=100"
+          ],
+          "Script": [
+            {
+              "Name": "Rule000",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor000.Health,1)"
+              ],
+              "groupId": "rules000"
+            },
+            {
+              "Name": "Rule001",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor000.Health,2)"
+              ],
+              "groupId": "rules000"
+            }
+          ],
+          "Components": [
+            {
+              "type": "Rules",
+              "name": "Evaluation rules",
+              "id": "rules000"
+            }
+          ]
+        },
+        {
+          "ActorName": "EvalActor001",
+          "Active": true,
+          "PrefabName": "Empty",
+          "Tag": "Untagged",
+          "IconColorHex": "",
+          "Properties": [
+            "Health=100"
+          ],
+          "Script": [
+            {
+              "Name": "Rule000",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor001.Health,1)"
+              ],
+              "groupId": "rules001"
+            },
+            {
+              "Name": "Rule001",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor001.Health,2)"
+              ],
+              "groupId": "rules001"
+            }
+          ],
+          "Components": [
+            {
+              "type": "Rules",
+              "name": "Evaluation rules",
+              "id": "rules001"
+            }
+          ]
+        }
+      ]
+    },
+    "actors_after_export": [
+      {
+        "ActorName": "EvalActor000",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,1)"
+            ],
+            "groupId": "rules000"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,2)"
+            ],
+            "groupId": "rules000"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules000"
+          }
+        ]
+      },
+      {
+        "ActorName": "EvalActor001",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,1)"
+            ],
+            "groupId": "rules001"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,2)"
+            ],
+            "groupId": "rules001"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules001"
+          }
+        ]
+      }
+    ]
+  },
+  "import_call_ms": 36.488,
+  "read_process_persist_ms": 34.8281,
+  "hierarchy_sync_ms": 1.6599000000000004,
+  "hierarchy_visual_order": [
+    "EvalActor000",
+    "EvalActor001"
+  ],
+  "visual": [
+    {
+      "actor": "EvalActor000",
+      "selected_index": 0,
+      "rules": [
+        "Rule000",
+        "Rule001"
+      ],
+      "actions": [
+        "Edit(,)",
+        "Edit(EvalActor000.Health,2)"
+      ],
+      "conditions": [
+        "Compare(this.Health > 0)",
+        "Compare(this.Health > 0)"
+      ],
+      "attached": true
+    },
+    {
+      "actor": "EvalActor001",
+      "selected_index": 1,
+      "rules": [
+        "Rule000",
+        "Rule001"
+      ],
+      "actions": [
+        "Edit(EvalActor001.Health,1)",
+        "Edit(EvalActor001.Health,2)"
+      ],
+      "conditions": [
+        "Compare(this.Health > 0)",
+        "Compare(this.Health > 0)"
+      ],
+      "attached": true
+    }
+  ],
+  "visual_rebuild_ms": 204.8785,
+  "export_ms": 4.4765000000000006,
+  "total_ms": 245.5265,
+  "import_exception": null,
+  "export_exception": null,
+  "export_file": "robustness-unsupported_action-1-export.json",
+  "after": {
+    "project_name": "GR_Eval_Baseline",
+    "actors_before_export": [
+      {
+        "ActorName": "EvalActor000",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "NoSuchAction(EvalActor000.Health,1)"
+            ],
+            "groupId": "rules000"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,2)"
+            ],
+            "groupId": "rules000"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules000"
+          }
+        ]
+      },
+      {
+        "ActorName": "EvalActor001",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,1)"
+            ],
+            "groupId": "rules001"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,2)"
+            ],
+            "groupId": "rules001"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules001"
+          }
+        ]
+      }
+    ],
+    "actor_order": [
+      "EvalActor000",
+      "EvalActor001"
+    ],
+    "rules_per_actor": [
+      2,
+      2
+    ],
+    "export": {
+      "GameName": "GR_Eval_Baseline",
+      "ScreenResolution": [
+        1920,
+        1080
+      ],
+      "CameraPosition": [
+        0,
+        1,
+        -10
+      ],
+      "CameraRotation": [
+        0,
+        0,
+        0
+      ],
+      "SunPosition": [
+        0,
+        3,
+        0
+      ],
+      "SunRotation": [
+        50,
+        -30,
+        0
+      ],
+      "SunColor": [
+        255,
+        255,
+        255
+      ],
+      "SunAmbientColor": [
+        128,
+        128,
+        128
+      ],
+      "BackgroundColor": [
+        0,
+        0,
+        0
+      ],
+      "Gravity": [
+        0,
+        -9.81,
+        0
+      ],
+      "CustomVariables": [],
+      "Cast": [
+        {
+          "ActorName": "EvalActor000",
+          "Active": true,
+          "PrefabName": "Empty",
+          "Tag": "Untagged",
+          "IconColorHex": "",
+          "Properties": [
+            "Health=100"
+          ],
+          "Script": [
+            {
+              "Name": "Rule000",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "NoSuchAction(EvalActor000.Health,1)"
+              ],
+              "groupId": "rules000"
+            },
+            {
+              "Name": "Rule001",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor000.Health,2)"
+              ],
+              "groupId": "rules000"
+            }
+          ],
+          "Components": [
+            {
+              "type": "Rules",
+              "name": "Evaluation rules",
+              "id": "rules000"
+            }
+          ]
+        },
+        {
+          "ActorName": "EvalActor001",
+          "Active": true,
+          "PrefabName": "Empty",
+          "Tag": "Untagged",
+          "IconColorHex": "",
+          "Properties": [
+            "Health=100"
+          ],
+          "Script": [
+            {
+              "Name": "Rule000",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor001.Health,1)"
+              ],
+              "groupId": "rules001"
+            },
+            {
+              "Name": "Rule001",
+              "When": [
+                "Compare(this.Health > 0)"
+              ],
+              "Do": [
+                "Edit(EvalActor001.Health,2)"
+              ],
+              "groupId": "rules001"
+            }
+          ],
+          "Components": [
+            {
+              "type": "Rules",
+              "name": "Evaluation rules",
+              "id": "rules001"
+            }
+          ]
+        }
+      ]
+    },
+    "actors_after_export": [
+      {
+        "ActorName": "EvalActor000",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "NoSuchAction(EvalActor000.Health,1)"
+            ],
+            "groupId": "rules000"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor000.Health,2)"
+            ],
+            "groupId": "rules000"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules000"
+          }
+        ]
+      },
+      {
+        "ActorName": "EvalActor001",
+        "Active": true,
+        "PrefabName": "Empty",
+        "Tag": "Untagged",
+        "IconColorHex": "",
+        "Position": [],
+        "Rotation": [],
+        "Scale": [],
+        "Size": [],
+        "Velocity": [],
+        "AngularVelocity": [],
+        "Density": 0.0,
+        "Friction": 0.0,
+        "Bounciness": 0.0,
+        "Drag": 0.0,
+        "Properties": [
+          "Health=100"
+        ],
+        "Script": [
+          {
+            "Name": "Rule000",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,1)"
+            ],
+            "groupId": "rules001"
+          },
+          {
+            "Name": "Rule001",
+            "When": [
+              "Compare(this.Health > 0)"
+            ],
+            "Do": [
+              "Edit(EvalActor001.Health,2)"
+            ],
+            "groupId": "rules001"
+          }
+        ],
+        "Components": [
+          {
+            "type": "Rules",
+            "name": "Evaluation rules",
+            "id": "rules001"
+          }
+        ]
+      }
+    ]
+  },
+  "explicit_validation_messages": [],
+  "correctness": {
+    "all": false,
+    "exportable": true,
+    "actor_count": 2,
+    "total_rules": 4,
+    "rules_per_actor": [
+      2,
+      2
+    ],
+    "actor_order": [
+      "EvalActor000",
+      "EvalActor001"
+    ],
+    "unique_actor_identifiers": true,
+    "unique_rule_names_per_actor": true,
+    "visual_matches_model": false,
+    "hierarchy_matches_model": true,
+    "input_content_preserved": true,
+    "canonical_round_trip": true
+  },
+  "detected": false,
+  "detection_stage": "not detected during import/reconstruction",
+  "message": "",
+  "user_visible_diagnostic": "none",
+  "import_rejected": false,
+  "accepted_silently": true,
+  "acceptance": "installed; visual failure or discrepancy",
+  "unhandled_exception": false,
+  "previous_state_preserved": false,
+  "previous_asset_content_preserved": true,
+  "partial_or_inconsistent_state": true,
+  "notes": "Import detection excludes explicit Validate, oracle discrepancies and export diagnostics. Previous state means the active project AND its content; original asset checked separately. Runtime/generation not executed.",
+  "logs": [
+    {
+      "stage": "export",
+      "type": "Log",
+      "message": "Project saved to: Evaluation/RobustnessScale/runs/20260907T123851573Z-9a66e3/robustness-unsupported_action-1-export.json",
+      "stack": "UnityEngine.Debug:Log (object)\nGameRuleEditor.Core.GameRuleProject:SaveToJsonFile (string) (at Assets/Editor/GameRuleEditor/Core/GameRuleProject.cs:182)\nGameRuleEditor.Controllers.ProjectController:SaveProjectToJson (string) (at Assets/Editor/GameRuleEditor/Controllers/ProjectController.cs:114)\nGameRuleEvaluation.RobustnessScaleEvaluation/<>c__DisplayClass29_0:<Sample>b__1 () (at Assets/Editor/Evaluation/RobustnessScaleEvaluation.cs:230)\nGameRuleEvaluation.RobustnessScaleEvaluation:Attempt (System.Action) (at Assets/Editor/Evaluation/RobustnessScaleEvaluation.cs:435)\nGameRuleEvaluation.RobustnessScaleEvaluation/<Sample>d__29:MoveNext () (at Assets/Editor/Evaluation/RobustnessScaleEvaluation.cs:230)\nGameRuleEvaluation.RobustnessScaleEvaluation:Tick () (at Assets/Editor/Evaluation/RobustnessScaleEvaluation.cs:121)\nUnityEditor.EditorApplication:Internal_CallUpdateFunctions ()\n"
+    }
+  ],
+  "finished_utc": "2026-09-07T12:39:06.8541858Z"
+}

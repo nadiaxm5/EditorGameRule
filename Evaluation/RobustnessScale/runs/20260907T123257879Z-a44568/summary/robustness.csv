@@ -1,0 +1,7 @@
+case_id,invalid_category,mutation,detected,detection_stage,message,user_visible_diagnostic,import_rejected,accepted_silently,unhandled_exception,previous_state_preserved,partial_or_inconsistent_state,notes,status,acceptance,explicit_validation_messages,previous_asset_content_preserved
+malformed_json,Parsing JSON,Remove final root closing brace,,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,
+missing_required,Required field,Remove GameName,,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,
+missing_actor,Actor reference,EvalActor000.Health -> MissingActor.Health,,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,
+missing_property,Property reference,Health -> MissingProperty in Edit target,,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,
+unsupported_action,Action,Edit -> NoSuchAction,,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,
+invalid_parameter,Parameter/type,Numeric expression 1 -> ),,,,,,,,,,No completed Unity observation; no behavior inferred.,pending,,,

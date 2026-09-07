@@ -1,0 +1,558 @@
+{
+  "utc": "2026-09-07T12:39:00.3350127Z",
+  "os": "Windows 11  (10.0.26200) 64bit",
+  "cpu": "AMD Ryzen AI 9 365 w/ Radeon 880M ",
+  "logical_processors": 20,
+  "ram_mb": 31763,
+  "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "gpu_driver": "Direct3D 11.0 [level 11.1]",
+  "unity": "6000.3.1f1",
+  "packages": {
+    "com.unity.ads": {
+      "version": "4.16.4",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.androidjni": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.ai.navigation": {
+      "version": "2.0.9",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.ai": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.analytics": {
+      "version": "3.8.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.services.analytics": "1.0.4"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.collab-proxy": {
+      "version": "2.10.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.editorcoroutines": {
+      "version": "1.0.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.ext.nunit": {
+      "version": "2.0.5",
+      "depth": 2,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.feature.development": {
+      "version": "1.0.2",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.ide.visualstudio": "2.0.25",
+        "com.unity.ide.rider": "3.0.38",
+        "com.unity.editorcoroutines": "1.0.1",
+        "com.unity.performance.profile-analyzer": "1.2.4",
+        "com.unity.test-framework": "1.6.0",
+        "com.unity.testtools.codecoverage": "1.2.7"
+      }
+    },
+    "com.unity.ide.rider": {
+      "version": "3.0.38",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ext.nunit": "1.0.6"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.ide.visualstudio": {
+      "version": "2.0.25",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.31"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.inputsystem": {
+      "version": "1.17.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.multiplayer.center": {
+      "version": "1.0.1",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      }
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.2",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.performance.profile-analyzer": {
+      "version": "1.2.4",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.purchasing": {
+      "version": "4.14.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.services.core": "1.12.5",
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.services.analytics": {
+      "version": "6.1.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.services.core": "1.12.4",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.services.core": {
+      "version": "1.16.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.settings-manager": {
+      "version": "2.1.1",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.test-framework": {
+      "version": "1.6.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.ext.nunit": "2.0.3",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
+    },
+    "com.unity.testtools.codecoverage": {
+      "version": "1.2.7",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.test-framework": "1.0.16",
+        "com.unity.settings-manager": "1.0.1"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.timeline": {
+      "version": "1.8.9",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.director": "1.0.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.ugui": {
+      "version": "2.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0"
+      }
+    },
+    "com.unity.visualscripting": {
+      "version": "1.9.9",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.modules.accessibility": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.adaptiveperformance": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.subsystems": "1.0.0"
+      }
+    },
+    "com.unity.modules.ai": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.androidjni": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.animation": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.assetbundle": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.audio": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.cloth": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0"
+      }
+    },
+    "com.unity.modules.director": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.animation": "1.0.0"
+      }
+    },
+    "com.unity.modules.hierarchycore": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.imageconversion": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.imgui": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.jsonserialize": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.particlesystem": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.physics": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.physics2d": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.screencapture": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.imageconversion": "1.0.0"
+      }
+    },
+    "com.unity.modules.subsystems": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
+    },
+    "com.unity.modules.terrain": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.terrainphysics": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.terrain": "1.0.0"
+      }
+    },
+    "com.unity.modules.tilemap": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics2d": "1.0.0"
+      }
+    },
+    "com.unity.modules.ui": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.uielements": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.hierarchycore": "1.0.0",
+        "com.unity.modules.physics": "1.0.0"
+      }
+    },
+    "com.unity.modules.umbra": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.unityanalytics": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
+    },
+    "com.unity.modules.unitywebrequest": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.unitywebrequestassetbundle": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.assetbundle": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
+    },
+    "com.unity.modules.unitywebrequestaudio": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.audio": "1.0.0"
+      }
+    },
+    "com.unity.modules.unitywebrequesttexture": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0"
+      }
+    },
+    "com.unity.modules.unitywebrequestwww": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+        "com.unity.modules.unitywebrequestaudio": "1.0.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.assetbundle": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0"
+      }
+    },
+    "com.unity.modules.vectorgraphics": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0"
+      }
+    },
+    "com.unity.modules.vehicles": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0"
+      }
+    },
+    "com.unity.modules.video": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
+    },
+    "com.unity.modules.vr": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.xr": "1.0.0"
+      }
+    },
+    "com.unity.modules.wind": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.xr": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.subsystems": "1.0.0"
+      }
+    }
+  },
+  "git_commit": "5a463cc0a2af8b9131524aca5bf813e327fe32f3",
+  "git_branch": "major-revision/robustness-scale-evaluation",
+  "git_dirty": false,
+  "production_sha256": {
+    "Assets/Editor/GameRuleEditor/Controllers/ProjectController.cs": "833ec4b70aa233ac10543269d2618896dea8a2e66deeb746cf44900bdfd0e1a8",
+    "Assets/Editor/GameRuleEditor/Core/ActionDefaults.cs": "750b38e848cf4ecb346749b98b455f858f925cf80c7f243002c6d6ca7796f47f",
+    "Assets/Editor/GameRuleEditor/Core/EditorContext.cs": "c0c9da11cfd5ca1ad9fe700ce75416161420734c73a5fa5fbe46ac13e59fb9cb",
+    "Assets/Editor/GameRuleEditor/Core/GameRuleParser.cs": "d9d27fc0360ad18ad0bc5e75cb867b64ad222e49f0856fbb98e9fa8e7484de39",
+    "Assets/Editor/GameRuleEditor/Core/GameRuleProject.cs": "0d3d1a32f5845e00c07fe01b42d20cbc7a0358f9a135d0e71480074c32c3c846",
+    "Assets/Editor/GameRuleEditor/Core/Loader.cs": "c5bcb03af1f700e2bdee4c44979c48734634a2127d6211340c80d1e01b93bca6",
+    "Assets/Editor/GameRuleEditor/CustomControls/ActionBuilder.cs": "6de7368e442a62229785396936e9ce0801c55d80e54518a32d4a31851262e414",
+    "Assets/Editor/GameRuleEditor/CustomControls/ActionElement.cs": "3f9f4b834a275ba372de6160b12a832343b222f359c24a8364e22182742186d1",
+    "Assets/Editor/GameRuleEditor/CustomControls/ConditionBuilder.cs": "ce54a96a8006f9b5980e8929f32c881a6d1600b071f883360e231cb6a93c0b52",
+    "Assets/Editor/GameRuleEditor/CustomControls/ConditionElement.cs": "1e5e9d33631a88468f98a1f7da7b5dc241c72878987d95a6fcf0dcc0a0b6a484",
+    "Assets/Editor/GameRuleEditor/Panels/ActorDetailsPanel.cs": "037b97abb4c84eaef5dc38f1cb077b136ddfba9af609a7436a3057f7d2976f58",
+    "Assets/Editor/GameRuleEditor/Panels/ActorListPanel.cs": "6e188a4cf7b0c15e75b67e1ac9235b7a6795af59d0a3bbfd6cf8a37480bc504e",
+    "Assets/Editor/GameRuleEditor/Panels/SceneSettingsPanel.cs": "0097715b758997cfc85df90f4d4b8e20d35c517188ed594dc4bfc46f8d8b4472",
+    "Assets/Editor/GameRuleEditor/Panels/ScriptEditorPanel.cs": "98821553ccd8056ce86203a3422656006c71eaed5ae486465b201297426ee953",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleEditorWindow.cs": "ede19d52eca3be6c3ec2390686a0dc02a4fd5ee2718737df07487336aa29b91e",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleHierarchyWindow.cs": "dfcdfba5638515f53412513816ccb291d91104d7d98c3ffec571284d6f06be6c",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleInspectorWindow.cs": "078231715f22d5cb9b2427f7c638afca33fa0bbc8311ebcd1896e377ec07482f",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleLayoutManager.cs": "920206ab461fa2d93627ef2cb6a7e2eab36d1ec8c59a65a8a02a076716b2878f",
+    "Assets/Editor/GameRuleEditor/Windows/GameRulePropertiesWindow.cs": "9057a432c015f23fce0ac876e8a6d8244b5c3c7854a7f3f7ccff0d492c25822f",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleRulesWindow.cs": "c393ab3f7e16e165601ce61f02c0373c4b8be46337d8c2061aa04929f3f44b53",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleSceneWindow.cs": "dc2556e7de9af753b2b561d486ac246cb78ce5e3bb37e3548f409ee0c87cf994",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleToolbarWindow.cs": "5e018c63aa0fb473ac9a23f9b99138521cc8deccec48c27c849c6690595b862b",
+    "Assets/Editor/GameRuleEditor/Windows/GameRuleTopMenuActions.cs": "6522e59b14625e3176b723faaea1e771c62119f10e8b1d35f93f5e11e9b499d3",
+    "Assets/Editor/GameRuleEditor/Windows/PropertyPickerDialog.cs": "39b3e5681b30e2a5ed9859be55de2352112b3f585dd161b2c07528d1983e2a19",
+    "Assets/Editor/Scripts/LoadWindow.cs": "ac538d132ab49aa9f04a114cdaa97547dbbaa03eb5c9d843a2bf8977d0522aeb",
+    "Assets/Editor/Scripts/SceneJson.cs": "e5a07f3f3634ba8d319c08d6bbc7201f43a90724841d11b6898590934308126a",
+    "Assets/Editor/Scripts/Scripts.cs": "3988bb1d1e4ffd0d7146f11b7639c5a7f9f1906b50d516b9c6e74a0ff2386ac5",
+    "Assets/Resources/Prefabs/VFX/LightFlicker.cs": "18db756ff1c926f4e04d2df8811392873b267fb614f630cb6f56b05008b69c28",
+    "Assets/Resources/Scripts/Caught.cs": "d808bae5754247d8eec91bd5524547be0351ac34ea8630a8a340805c8ca0dfe7",
+    "Assets/Resources/Scripts/End.cs": "fc515b0079ace499ad50ad8e3a457663d210d9d71d6dfbb8340284e7d8574cd5",
+    "Assets/Resources/Scripts/GameManager.cs": "aa7dd6fc406bc0950c2e019aef981c16396e093f67526fe0fc37bd03820ba68b",
+    "Assets/Resources/Scripts/Gargoyle1.cs": "92697b5a9b89dd2ded9bcc70219af6ae4f2ea611f20a1f8818007299228492dc",
+    "Assets/Resources/Scripts/Gargoyle2.cs": "b8dd0c0cdaf1f083ece77be675c59ecb883c15dc7b2299ed6d2428cc3d21d355",
+    "Assets/Resources/Scripts/Ghost1.cs": "d47e09cf8ab23420e4f8b940b83dc68b4a21b78ba8d5357a4e37a7b23a038939",
+    "Assets/Resources/Scripts/Ghost2.cs": "b839272505249566d15f5144dbd9b66290acafdbd9e06bf1b977dc0c08165b03",
+    "Assets/Resources/Scripts/Ghost3.cs": "deaf1045fda78d61ef845f72197a87881e709f12b7f67552c570ed6e06851939",
+    "Assets/Resources/Scripts/Ghost4.cs": "3a3fbdc310ca7abe00580008ea3ed786d1a0bfdea43c0e142dec587d76f997a2",
+    "Assets/Resources/Scripts/House.cs": "31e5d2dfa82297a09e86cad3a4b5ed6c2f71d9baa03ca3755ba9ed0afad3c674",
+    "Assets/Resources/Scripts/John.cs": "8515701c69d48c217b4aa6381d8f5260c2fafcf8425658a74f1f51892a6ac2d3",
+    "Assets/Resources/Scripts/Won.cs": "0dd6e262ab9fd74706303f236b0e6d3c3b3d5e8598d4f171e876b2a6d86063da",
+    "Assets/Resources/Utils/.ExpressionParser.cs": "e46f2fd4259fd23d4d9f1abf139b2150e5edb0f6ba7376689a5aee42ced6fc78",
+    "Assets/Resources/Utils/Action.cs": "c5f9d590a3a04a04b9ef41a4a5603b12ee5131580bc317a6a920f0b4ee0bace1",
+    "Assets/Resources/Utils/Condition.cs": "5a5cf93ba4eb2c631d7ffc97af49337dcec7402c0278fa7a9628bd14c039bc24",
+    "Assets/Resources/Utils/IGameRuleActor.cs": "4071e63e5e42061d653904b1ba25aa4f63305cb2709d778371609f316f38d28a",
+    "Assets/Resources/Utils/LogicExpressionParser.cs": "2eda4f99131125bf620950a60f8e7b302f1ad93fb32a5e01c872a2e710feb164",
+    "Assets/Resources/Utils/Utils.cs": "278c19c63e87abcfc181c94b47f60119f22d81fdb878b3df5b903e9cc497969a"
+  },
+  "mode": "Edit mode",
+  "batch_mode": false,
+  "graphics": "Direct3D11",
+  "build_target": "StandaloneWindows64",
+  "development_build_setting": false,
+  "profiler_enabled": false,
+  "stopwatch_frequency": 10000000,
+  "high_resolution": true,
+  "culture": "es-ES",
+  "pixels_per_point": 1.5,
+  "layout_timeout_seconds": 15.0,
+  "sample_timeout_seconds": 600,
+  "window_rects": "Hierarchy 360x720; Rules 1000x720 points",
+  "cache_policy": "One warmup per configuration; fresh context/windows/assets each sample; OS/Unity caches retained; no forced GC",
+  "render_completion": "Attached panel, finite nonzero geometry, scheduled callback, >=3 editor updates with stable geometry; not GPU present completion",
+  "scene_generation": "not invoked; separate scene-changing pipeline"
+}
