@@ -1,0 +1,1230 @@
+{
+  "GameName": "GR_Eval_a10_r10",
+  "ScreenResolution": [
+    1920,
+    1080
+  ],
+  "CameraPosition": [
+    0,
+    1,
+    -10
+  ],
+  "CameraRotation": [
+    0,
+    0,
+    0
+  ],
+  "SunPosition": [
+    0,
+    3,
+    0
+  ],
+  "SunRotation": [
+    50,
+    -30,
+    0
+  ],
+  "SunColor": [
+    255,
+    255,
+    255
+  ],
+  "SunAmbientColor": [
+    128,
+    128,
+    128
+  ],
+  "BackgroundColor": [
+    0,
+    0,
+    0
+  ],
+  "Gravity": [
+    0,
+    -9.81,
+    0
+  ],
+  "CustomVariables": [],
+  "Cast": [
+    {
+      "ActorName": "EvalActor000",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules000"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor001",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules001"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor002",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules002"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules002",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor002.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor003",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules003"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules003",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor003.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor004",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules004"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules004",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor004.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor005",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules005"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules005",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor005.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor006",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules006"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules006",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor006.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor007",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules007"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules007",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor007.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor008",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules008"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules008",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor008.Health,10)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor009",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules009"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,2)"
+          ]
+        },
+        {
+          "Name": "Rule002",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,3)"
+          ]
+        },
+        {
+          "Name": "Rule003",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,4)"
+          ]
+        },
+        {
+          "Name": "Rule004",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,5)"
+          ]
+        },
+        {
+          "Name": "Rule005",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,6)"
+          ]
+        },
+        {
+          "Name": "Rule006",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,7)"
+          ]
+        },
+        {
+          "Name": "Rule007",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,8)"
+          ]
+        },
+        {
+          "Name": "Rule008",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,9)"
+          ]
+        },
+        {
+          "Name": "Rule009",
+          "groupId": "rules009",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor009.Health,10)"
+          ]
+        }
+      ]
+    }
+  ]
+}

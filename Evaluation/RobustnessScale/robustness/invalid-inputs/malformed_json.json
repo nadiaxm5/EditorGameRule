@@ -1,0 +1,126 @@
+{
+  "GameName": "GR_Eval_Baseline",
+  "ScreenResolution": [
+    1920,
+    1080
+  ],
+  "CameraPosition": [
+    0,
+    1,
+    -10
+  ],
+  "CameraRotation": [
+    0,
+    0,
+    0
+  ],
+  "SunPosition": [
+    0,
+    3,
+    0
+  ],
+  "SunRotation": [
+    50,
+    -30,
+    0
+  ],
+  "SunColor": [
+    255,
+    255,
+    255
+  ],
+  "SunAmbientColor": [
+    128,
+    128,
+    128
+  ],
+  "BackgroundColor": [
+    0,
+    0,
+    0
+  ],
+  "Gravity": [
+    0,
+    -9.81,
+    0
+  ],
+  "CustomVariables": [],
+  "Cast": [
+    {
+      "ActorName": "EvalActor000",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules000"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules000",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor000.Health,2)"
+          ]
+        }
+      ]
+    },
+    {
+      "ActorName": "EvalActor001",
+      "Active": true,
+      "PrefabName": "Empty",
+      "Tag": "Untagged",
+      "Properties": [
+        "Health=100"
+      ],
+      "Components": [
+        {
+          "type": "Rules",
+          "name": "Evaluation rules",
+          "id": "rules001"
+        }
+      ],
+      "Script": [
+        {
+          "Name": "Rule000",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,1)"
+          ]
+        },
+        {
+          "Name": "Rule001",
+          "groupId": "rules001",
+          "When": [
+            "Compare(this.Health > 0)"
+          ],
+          "Do": [
+            "Edit(EvalActor001.Health,2)"
+          ]
+        }
+      ]
+    }
+  ]
+
