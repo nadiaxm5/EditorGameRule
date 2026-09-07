@@ -10,6 +10,7 @@ SCREENSHOTS = {
     "manual-a1-rule099.png": "CapturaRule099",
     "manual-unsupported-action.png": "CapturaUnsupportedAction",
     "manual-a200-rule019.png": "CapturaEvalActor199Rule019",
+    "manual-a200-hierarchy.png": "CapturaEvalActor199Jerarquia",
 }
 
 
@@ -67,8 +68,6 @@ def verify(run_id):
             files.append(path)
         screenshots.append(dict(file=name, source_label=source, available=path.exists(),
                                 treatment="Original bytes; no editing" if path.exists() else None))
-    screenshots.append(dict(file="manual-a200-hierarchy.png", available=False,
-                            note="No independent image supplied; hierarchy is visible in manual-a200-rule019.png"))
     manifest_path = run / "inputs.json"
     # Preserve automatic keys and their values. Only the optional manual section is added/refreshed.
     original_manifest = manifest_path.read_bytes()
