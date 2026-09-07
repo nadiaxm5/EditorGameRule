@@ -32,10 +32,25 @@ def audit(run_id):
     expected += [("robustness", s["case_id"], 1) for s in manifest["cases"]]
     expected += [("scale", s["case_id"], rep) for s in manifest["scale"] for rep in range(6)]
     missing = [k for k in expected if k not in keys]
+    manual = manifest.get("manual_evidence", {})
+    for relative, digest in manual.get("sha256", {}).items():
+        path = ROOT / relative
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            errors.append("Manual evidence hash mismatch: " + relative)
+    manual_verification = None
+    if manual.get("verification"):
+        manual_verification = json.loads((ROOT / manual["verification"]).read_text(encoding="utf-8-sig"))
+        if not manual_verification.get("all_checks_satisfied"):
+            errors.append("Manual export verification reports unsatisfied checks")
     result = dict(run_id=run_id, provenance_errors=errors, observed=len(keys), expected=len(expected),
                   missing=missing, sample_statuses=[dict(kind=r["kind"], case_id=r["case_id"],
                   repetition=r["repetition"], status=r["status"], correctness=r.get("correctness", {}).get("all")) for r in observations],
                   interpretation="Correctness=false on invalid inputs is an observation, not an audit failure. Missing observations remain pending.")
+    if manual:
+        result["manual_evidence"] = dict(checked_hashes=len(manual.get("sha256", {})),
+                                        export_checks_satisfied=manual_verification.get("all_checks_satisfied") if manual_verification else None,
+                                        result=manual.get("result"),
+                                        interpretation="Reported manual observations complement, and do not reclassify, automatic results.")
     (run / "summary/audit.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "sample_statuses"}, indent=2))
     return 1 if errors else 0

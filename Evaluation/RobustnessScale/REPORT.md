@@ -72,7 +72,7 @@ El descriptor base también superó esas comprobaciones en la ejecución complet
 | 4 | Sí | 100 | Sí | Sí | Rule099 |
 | 5 | Sí | 100 | Sí | Sí | Rule099 |
 
-**Pendiente de inspección humana:** interacción física con ratón/teclado, calidad de dibujo, recortes/solapamientos y retrasos percibidos. La prueba programática observa callbacks, panel adjunto, geometría estable y ScrollTo; no acredita esas observaciones humanas. Procedimiento: [lista de comprobación](manual-panel-checklist.md).
+**Inspección humana ejecutada según las observaciones comunicadas por el usuario:** respuesta inmediata de ratón/teclado, dos recorridos hasta `Rule099`, plegado/desplegado y cambio temporal/restauración de nombre sin incidencias perceptibles; comprobación adicional de tres actores en 200×20. La exportación manual conserva las 100 reglas y su orden. Las importaciones inválidas desde el menú confirmaron el error rojo de parsing y los otros cinco casos aceptados e importados sin diagnóstico; estos no se califican como importaciones correctas. No se evaluó generación ni runtime. [Resultados manuales, cuatro capturas originales y verificación](runs/20260907T123851573Z-9a66e3/manual-panel-result.md); [lista de comprobación completada](manual-panel-checklist.md). Unity 6000.3.1f1, escala Windows 150 %, Edit mode, ventana no maximizada de dimensiones no registradas; fecha/hora manuales no registradas. Los tiempos percibidos no se mezclan con las mediciones automáticas anteriores.
 
 ## Ensayos previos, correcciones y limitaciones
 

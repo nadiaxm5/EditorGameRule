@@ -88,6 +88,6 @@ La suite registra entorno automáticamente. En la ejecución por menú y con cam
 - `robustness/summary` y `scale/summary`: índices hacia el resumen unido.
 - `.work`: logs privados completos y compilación temporal, ignorados por Git. Los logs Unity pueden contener rutas, hostname e identificadores de licencia; solo se versiona evidencia saneada.
 - `environment.json`, `REPORT.md`: entorno e informe de esta entrega.
-- [manual-panel-checklist.md](manual-panel-checklist.md): comprobaciones humanas aún sin completar salvo evidencia explícita.
+- [manual-panel-checklist.md](manual-panel-checklist.md): inspección manual ejecutada según las observaciones del usuario; [resultados, capturas y exportación verificada](runs/20260907T123851573Z-9a66e3/manual-panel-result.md). Dimensiones de ventana y fecha/hora manuales no registradas.
 
 Si se identifica un fallo de producción se conserva la ejecución original. Esta entrega no añade validadores ni corrige automáticamente aceptación silenciosa. Cualquier corrección futura debe ir en commit y ejecución separados.

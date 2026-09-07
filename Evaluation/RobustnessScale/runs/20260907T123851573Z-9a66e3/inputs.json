@@ -96,5 +96,55 @@
     "scale/descriptors/a100_r20.json": "127ddd7a9fd1a1ebf3b84152fbb979f4b7eca8a00ea436b920203f9e465a59b0",
     "scale/descriptors/a200_r20.json": "a8a31a7c90bc377437d102ee1c35dc4bd356b37f405aa43ef020339f66c60b47",
     "scale/descriptors/a1_r100.json": "d6405f3b9236ace6aff8f1213424cde77b165bd77a9c6803b8710a656cf0093b"
+  },
+  "manual_evidence": {
+    "observation_source": "User-reported manual observations, supplied PNGs and exported JSON",
+    "manual_observation_utc": null,
+    "window_dimensions": null,
+    "unity": "6000.3.1f1",
+    "windows_display_scale_percent": 150,
+    "mode": "Edit mode; no scene generation or runtime",
+    "result": "runs/20260907T123851573Z-9a66e3/manual-panel-result.md",
+    "verification": "runs/20260907T123851573Z-9a66e3/manual-export-verification.json",
+    "screenshots": [
+      {
+        "file": "manual-a1-rule000.png",
+        "source_label": "CapturaRule000",
+        "available": true,
+        "treatment": "Original bytes; no editing"
+      },
+      {
+        "file": "manual-a1-rule099.png",
+        "source_label": "CapturaRule099",
+        "available": true,
+        "treatment": "Original bytes; no editing"
+      },
+      {
+        "file": "manual-unsupported-action.png",
+        "source_label": "CapturaUnsupportedAction",
+        "available": true,
+        "treatment": "Original bytes; no editing"
+      },
+      {
+        "file": "manual-a200-rule019.png",
+        "source_label": "CapturaEvalActor199Rule019",
+        "available": true,
+        "treatment": "Original bytes; no editing"
+      },
+      {
+        "file": "manual-a200-hierarchy.png",
+        "available": false,
+        "note": "No independent image supplied; hierarchy is visible in manual-a200-rule019.png"
+      }
+    ],
+    "sha256": {
+      "runs/20260907T123851573Z-9a66e3/manual-panel-result.md": "33191ccfd6d502a48ac79026d0a3b6ff71e442aa1f4319920f83a12fdbed0bf0",
+      "runs/20260907T123851573Z-9a66e3/manual-a1-r100-export.json": "1bd769b9525b900fefc91b0d7f117eda6a7e3626a5837bfcd697d390622a5f41",
+      "runs/20260907T123851573Z-9a66e3/manual-export-verification.json": "77e42c7a4b12cc7a91084d4485854c18e7a17051cd55f4b32cdab51f7f4dd9d7",
+      "runs/20260907T123851573Z-9a66e3/manual-a1-rule000.png": "550028053543f833001d04411e4d001325060912e4036ae6259fec0e72d91114",
+      "runs/20260907T123851573Z-9a66e3/manual-a1-rule099.png": "9f39388e3735bdf99e2b2657c2c313488c3b9c15af110f798550112c03324519",
+      "runs/20260907T123851573Z-9a66e3/manual-unsupported-action.png": "5392a2f63d5a193c8b675eb46302fd1a8a6090e1a63dfe885762c00384ac2810",
+      "runs/20260907T123851573Z-9a66e3/manual-a200-rule019.png": "436edd052a5dc5ada74e6868cc1202f50e1cb0eaaef3259998ce877c2bfd0322"
+    }
   }
 }

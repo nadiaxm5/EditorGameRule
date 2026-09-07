@@ -265,5 +265,11 @@
       "correctness": true
     }
   ],
-  "interpretation": "Correctness=false on invalid inputs is an observation, not an audit failure. Missing observations remain pending."
+  "interpretation": "Correctness=false on invalid inputs is an observation, not an audit failure. Missing observations remain pending.",
+  "manual_evidence": {
+    "checked_hashes": 7,
+    "export_checks_satisfied": true,
+    "result": "runs/20260907T123851573Z-9a66e3/manual-panel-result.md",
+    "interpretation": "Reported manual observations complement, and do not reclassify, automatic results."
+  }
 }
