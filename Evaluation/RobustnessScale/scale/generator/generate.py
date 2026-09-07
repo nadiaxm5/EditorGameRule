@@ -68,7 +68,7 @@ def generate(root=ROOT):
                 "cases": cases, "scale": [{"case_id": f"a{a}_r{r}", "actors": a, "rules_per_actor": r,
                 "file": f"scale/descriptors/a{a}_r{r}.json"} for a, r in CONFIGS],
                 "sha256": {p: hashlib.sha256(v.encode()).hexdigest() for p, v in values.items()}}
-    (root / "inputs.json").write_text(encode(manifest), encoding="utf-8")
+    (root / "inputs.json").write_bytes(encode(manifest).encode("utf-8"))
     return manifest
 
 
