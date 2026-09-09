@@ -8,7 +8,7 @@ namespace GameRuleEditor.Windows
     /// </summary>
     public class GameRuleEditorWindow : EditorWindow
     {
-        [MenuItem("GameRule/Editor Window")]
+        //[MenuItem("GameRule/Editor Window")]
         public static void ShowWindow()
         {
             // Redirect to the new layout manager
