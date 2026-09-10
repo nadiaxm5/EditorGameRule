@@ -64,7 +64,7 @@ namespace GameRuleEditor.Core
             rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
 
             // Remove default floats
-            string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(\.0)?,?";
+            string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(?:\.0+)?(?=\s*[,}]),?";
             rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
 
             // Manual construction
@@ -194,8 +194,8 @@ namespace GameRuleEditor.Core
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
 
             // --- SANITIZE & DEFAULTS ---
-            // Si el JSON importado no tenía estos campos, JsonUtility los deja null.
-            // Aquí asignamos los valores por defecto.
+            // Si el JSON importado no tenï¿½a estos campos, JsonUtility los deja null.
+            // Aquï¿½ asignamos los valores por defecto.
 
             if (sceneData.ScreenResolution == null || sceneData.ScreenResolution.Length < 2)
                 sceneData.ScreenResolution = new float[] { 1920, 1080 };
@@ -241,6 +241,7 @@ namespace GameRuleEditor.Core
                         }
                     }
                     if (actor.Properties == null) actor.Properties = new List<string>();
+                    if (actor.Components == null) actor.Components = new List<ActorComponentMeta>();
                 }
             }
             else

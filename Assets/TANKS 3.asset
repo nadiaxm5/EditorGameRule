@@ -1,0 +1,1087 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: TANKS 3
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: TANKS
+  sceneData:
+    GameName: TANKS
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - -12
+    - 20
+    - 5
+    CameraRotation:
+    - 50
+    - 60
+    - 0
+    SunPosition:
+    - 0
+    - 10
+    - 0
+    SunRotation:
+    - 54.3
+    - -26.2
+    - 10.5
+    SunColor: ffc864
+    SunAmbientColor: b4b4b4
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: LevelArt
+      Active: 1
+      PrefabName: LevelArt
+      Tag: Obstacle
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+      Components: []
+    - ActorName: BlueTank
+      Active: 1
+      PrefabName: BlueTank
+      Tag: BlueTank
+      IconColorHex: 
+      Position:
+      - -3
+      - 0
+      - 30
+      Rotation:
+      - 0
+      - 180
+      - 0
+      Scale: []
+      Size: []
+      Velocity:
+      - 10
+      - 0
+      - 10
+      AngularVelocity:
+      - 0
+      - 90
+      - 0
+      Density: 0
+      Friction: 0.6
+      Bounciness: 0
+      Drag: 0.2
+      Properties:
+      - speed=10
+      - angularSpeed=90
+      - health=100
+      - offsetY=1.7
+      - offsetZ=1.35
+      - maxAim=200
+      - currentAim=0
+      Script:
+      - Name: Rule 1
+        When:
+        - Keyboard(D,press)
+        Do:
+        - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
+        - PlayParticles(DustTrail)
+        groupId: g14c6fad3
+      - Name: Rule 2
+        When:
+        - Keyboard(A,press)
+        Do:
+        - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
+        - PlayParticles(DustTrail)
+        groupId: g14c6fad3
+      - Name: Rule 3
+        When:
+        - Keyboard(W,press)
+        Do:
+        - Move(this.speed,0,this.ry,0)
+        groupId: g14c6fad3
+      - Name: Rule 4
+        When:
+        - Keyboard(S,press)
+        Do:
+        - Move(this.speed,0,this.ry+180,0)
+        groupId: g14c6fad3
+      - Name: Rule 5
+        When:
+        - Collision(Shell)
+        Do:
+        - Edit(this.health,this.health-Shell.damage)
+        - PushTo(-300,RedTank.x,RedTank.y,RedTank.z)
+        groupId: g14c6fad3
+      - Name: Rule 6
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(RedWin.Active,1)
+        groupId: g14c6fad3
+      - Name: Rule 7
+        When:
+        - Keyboard(Space,press)
+        Do:
+        - Edit(this.currentAim,this.currentAim+1)
+        - PlaySound(ShotCharging)
+        groupId: g14c6fad3
+      - Name: Rule 8
+        When:
+        - Compare(this.currentAim>=this.maxAim)
+        Do:
+        - Edit(this.currentAim,this.maxAim)
+        groupId: g14c6fad3
+      - Name: Rule 9
+        When:
+        - Keyboard(Space,up)
+        Do:
+        - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
+        - Edit(this.currentAim,0)
+        - PlaySound(ShotFiring)
+        groupId: g14c6fad3
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: g14c6fad3
+    - ActorName: RedTank
+      Active: 1
+      PrefabName: RedTank
+      Tag: RedTank
+      IconColorHex: 
+      Position:
+      - 13
+      - 0
+      - -5
+      Rotation:
+      - 0
+      - 0
+      - 0
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0.6
+      Bounciness: 0
+      Drag: 0.2
+      Properties:
+      - speed=10
+      - angularSpeed=90
+      - health=100
+      - offsetY=1.7
+      - offsetZ=1.35
+      - maxAim=200
+      - currentAim=0
+      Script:
+      - Name: Rule 1
+        When:
+        - Keyboard(RightArrow,press)
+        Do:
+        - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
+        - PlayParticles(DustTrail)
+        groupId: g4db445c1
+      - Name: Rule 2
+        When:
+        - Keyboard(LeftArrow,press)
+        Do:
+        - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
+        - PlayParticles(DustTrail)
+        groupId: g4db445c1
+      - Name: Rule 3
+        When:
+        - Keyboard(UpArrow,press)
+        Do:
+        - Move(this.speed,0,this.ry,0)
+        groupId: g4db445c1
+      - Name: Rule 4
+        When:
+        - Keyboard(DownArrow,press)
+        Do:
+        - Move(this.speed,0,this.ry+180,0)
+        groupId: g4db445c1
+      - Name: Rule 5
+        When:
+        - Collision(Shell)
+        Do:
+        - Edit(this.health,this.health-Shell.damage)
+        - PushTo(-300,BlueTank.x,BlueTank.y,BlueTank.z)
+        groupId: g4db445c1
+      - Name: Rule 6
+        When:
+        - Compare(this.health<=0)
+        Do:
+        - Edit(BlueWin.Active,1)
+        groupId: g4db445c1
+      - Name: Rule 7
+        When:
+        - Keyboard(Enter,press)
+        Do:
+        - Edit(this.currentAim,this.currentAim+1)
+        - PlaySound(ShotCharging)
+        groupId: g4db445c1
+      - Name: Rule 8
+        When:
+        - Compare(this.currentAim>=this.maxAim)
+        Do:
+        - Edit(this.currentAim,this.maxAim)
+        groupId: g4db445c1
+      - Name: Rule 9
+        When:
+        - Keyboard(Enter,up)
+        Do:
+        - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
+        - Edit(this.currentAim,0)
+        - PlaySound(ShotFiring)
+        groupId: g4db445c1
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: g4db445c1
+    - ActorName: Shell
+      Active: 0
+      PrefabName: Shell
+      Tag: Shell
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - speed=15
+      - damage=50
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Move(this.speed,0,this.ry,0)
+        groupId: g6bd7c88f
+      - Name: Rule 2
+        When:
+        - Collision(BlueTank)
+        Do:
+        - Spawn(ShellExplosion,this)
+        - Delete(this)
+        groupId: g6bd7c88f
+      - Name: Rule 3
+        When:
+        - Collision(RedTank)
+        Do:
+        - Spawn(ShellExplosion,this)
+        - Delete(this)
+        groupId: g6bd7c88f
+      - Name: Rule 4
+        When:
+        - Collision(Obstacle)
+        Do:
+        - Spawn(ShellExplosion,this)
+        - Delete(this)
+        groupId: g6bd7c88f
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: g6bd7c88f
+    - ActorName: ShellExplosion
+      Active: 0
+      PrefabName: ShellExplosion
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - PlayParticles(ShellExplosion)
+        - PlaySound(ShellExplosion)
+        groupId: g382cab8c
+      - Name: Rule 2
+        When:
+        - Timer(0.5)
+        Do:
+        - Delete(this)
+        groupId: g382cab8c
+      Components:
+      - type: Rules
+        name: Rules
+        id: g382cab8c
+    - ActorName: BlueAim
+      Active: 1
+      PrefabName: BlueAim
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Edit(this.x,BlueTank.x)
+        - Edit(this.y,BlueTank.y)
+        - Edit(this.z,BlueTank.z)
+        - Edit(this.ry,BlueTank.ry)
+        - Edit(this.sliderValue,BlueTank.currentAim)
+        groupId: g12945b90
+      Components:
+      - type: Rules
+        name: Rules
+        id: g12945b90
+    - ActorName: RedAim
+      Active: 1
+      PrefabName: RedAim
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Edit(this.x,RedTank.x)
+        - Edit(this.y,RedTank.y)
+        - Edit(this.z,RedTank.z)
+        - Edit(this.ry,RedTank.ry)
+        - Edit(this.sliderValue,RedTank.currentAim)
+        groupId: g85c46a5d
+      Components:
+      - type: Rules
+        name: Rules
+        id: g85c46a5d
+    - ActorName: RedHealth
+      Active: 1
+      PrefabName: RedHealth
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - offsetY=0.05
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Edit(this.x,RedTank.x)
+        - Edit(this.y,RedTank.y+this.offsetY)
+        - Edit(this.z,RedTank.z)
+        - Edit(this.ry,RedTank.ry)
+        - Edit(this.sliderValue,RedTank.health)
+        groupId: gae0e9887
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: gae0e9887
+    - ActorName: BlueHealth
+      Active: 1
+      PrefabName: BlueHealth
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - offsetY=0.05
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Edit(this.x,BlueTank.x)
+        - Edit(this.y,BlueTank.y+this.offsetY)
+        - Edit(this.z,BlueTank.z)
+        - Edit(this.ry,BlueTank.ry)
+        - Edit(this.sliderValue,BlueTank.health)
+        groupId: g53e4b90e
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: g53e4b90e
+    - ActorName: BlueWin
+      Active: 0
+      PrefabName: BlueWin
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Timer(1)
+        Do:
+        - LoadScene()
+        groupId: gebb8b86f
+      Components:
+      - type: Rules
+        name: Rules
+        id: gebb8b86f
+    - ActorName: RedWin
+      Active: 0
+      PrefabName: RedWin
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Timer(1)
+        Do:
+        - LoadScene()
+        groupId: g0d7e44ed
+      Components:
+      - type: Rules
+        name: Rules
+        id: g0d7e44ed
+    - ActorName: CameraManager
+      Active: 1
+      PrefabName: CameraManager
+      Tag: 
+      IconColorHex: 
+      Position: []
+      Rotation: []
+      Scale: []
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties:
+      - despX=15
+      - offsetY=15
+      - offsetZ=10
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - Edit(#CameraPosition.x,(BlueTank.x+RedTank.x)/2 - this.despX)
+        - Edit(#CameraPosition.y,this.offsetY + (abs(BlueTank.x-RedTank.x)+abs(BlueTank.z-RedTank.z))/3)
+        - Edit(#CameraPosition.z,(BlueTank.z+RedTank.z)/2 - this.offsetZ)
+        groupId: gb9eb0558
+      Components:
+      - type: Properties
+        name: Properties
+        id: 
+      - type: Rules
+        name: Rules
+        id: gb9eb0558
+    CustomVariables: []
+  actors:
+  - ActorName: LevelArt
+    Active: 1
+    PrefabName: LevelArt
+    Tag: Obstacle
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+    Components: []
+  - ActorName: BlueTank
+    Active: 1
+    PrefabName: BlueTank
+    Tag: BlueTank
+    IconColorHex: 
+    Position:
+    - -3
+    - 0
+    - 30
+    Rotation:
+    - 0
+    - 180
+    - 0
+    Scale: []
+    Size: []
+    Velocity:
+    - 10
+    - 0
+    - 10
+    AngularVelocity:
+    - 0
+    - 90
+    - 0
+    Density: 0
+    Friction: 0.6
+    Bounciness: 0
+    Drag: 0.2
+    Properties:
+    - speed=10
+    - angularSpeed=90
+    - health=100
+    - offsetY=1.7
+    - offsetZ=1.35
+    - maxAim=200
+    - currentAim=0
+    Script:
+    - Name: Rule 1
+      When:
+      - Keyboard(D,press)
+      Do:
+      - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
+      - PlayParticles(DustTrail)
+      groupId: g14c6fad3
+    - Name: Rule 2
+      When:
+      - Keyboard(A,press)
+      Do:
+      - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
+      - PlayParticles(DustTrail)
+      groupId: g14c6fad3
+    - Name: Rule 3
+      When:
+      - Keyboard(W,press)
+      Do:
+      - Move(this.speed,0,this.ry,0)
+      groupId: g14c6fad3
+    - Name: Rule 4
+      When:
+      - Keyboard(S,press)
+      Do:
+      - Move(this.speed,0,this.ry+180,0)
+      groupId: g14c6fad3
+    - Name: Rule 5
+      When:
+      - Collision(Shell)
+      Do:
+      - Edit(this.health,this.health-Shell.damage)
+      - PushTo(-300,RedTank.x,RedTank.y,RedTank.z)
+      groupId: g14c6fad3
+    - Name: Rule 6
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(RedWin.Active,1)
+      groupId: g14c6fad3
+    - Name: Rule 7
+      When:
+      - Keyboard(Space,press)
+      Do:
+      - Edit(this.currentAim,this.currentAim+1)
+      - PlaySound(ShotCharging)
+      groupId: g14c6fad3
+    - Name: Rule 8
+      When:
+      - Compare(this.currentAim>=this.maxAim)
+      Do:
+      - Edit(this.currentAim,this.maxAim)
+      groupId: g14c6fad3
+    - Name: Rule 9
+      When:
+      - Keyboard(Space,up)
+      Do:
+      - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
+      - Edit(this.currentAim,0)
+      - PlaySound(ShotFiring)
+      groupId: g14c6fad3
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g14c6fad3
+  - ActorName: RedTank
+    Active: 1
+    PrefabName: RedTank
+    Tag: RedTank
+    IconColorHex: 
+    Position:
+    - 13
+    - 0
+    - -5
+    Rotation:
+    - 0
+    - 0
+    - 0
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0.6
+    Bounciness: 0
+    Drag: 0.2
+    Properties:
+    - speed=10
+    - angularSpeed=90
+    - health=100
+    - offsetY=1.7
+    - offsetZ=1.35
+    - maxAim=200
+    - currentAim=0
+    Script:
+    - Name: Rule 1
+      When:
+      - Keyboard(RightArrow,press)
+      Do:
+      - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
+      - PlayParticles(DustTrail)
+      groupId: g4db445c1
+    - Name: Rule 2
+      When:
+      - Keyboard(LeftArrow,press)
+      Do:
+      - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
+      - PlayParticles(DustTrail)
+      groupId: g4db445c1
+    - Name: Rule 3
+      When:
+      - Keyboard(UpArrow,press)
+      Do:
+      - Move(this.speed,0,this.ry,0)
+      groupId: g4db445c1
+    - Name: Rule 4
+      When:
+      - Keyboard(DownArrow,press)
+      Do:
+      - Move(this.speed,0,this.ry+180,0)
+      groupId: g4db445c1
+    - Name: Rule 5
+      When:
+      - Collision(Shell)
+      Do:
+      - Edit(this.health,this.health-Shell.damage)
+      - PushTo(-300,BlueTank.x,BlueTank.y,BlueTank.z)
+      groupId: g4db445c1
+    - Name: Rule 6
+      When:
+      - Compare(this.health<=0)
+      Do:
+      - Edit(BlueWin.Active,1)
+      groupId: g4db445c1
+    - Name: Rule 7
+      When:
+      - Keyboard(Enter,press)
+      Do:
+      - Edit(this.currentAim,this.currentAim+1)
+      - PlaySound(ShotCharging)
+      groupId: g4db445c1
+    - Name: Rule 8
+      When:
+      - Compare(this.currentAim>=this.maxAim)
+      Do:
+      - Edit(this.currentAim,this.maxAim)
+      groupId: g4db445c1
+    - Name: Rule 9
+      When:
+      - Keyboard(Enter,up)
+      Do:
+      - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
+      - Edit(this.currentAim,0)
+      - PlaySound(ShotFiring)
+      groupId: g4db445c1
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g4db445c1
+  - ActorName: Shell
+    Active: 0
+    PrefabName: Shell
+    Tag: Shell
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - speed=15
+    - damage=50
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Move(this.speed,0,this.ry,0)
+      groupId: g6bd7c88f
+    - Name: Rule 2
+      When:
+      - Collision(BlueTank)
+      Do:
+      - Spawn(ShellExplosion,this)
+      - Delete(this)
+      groupId: g6bd7c88f
+    - Name: Rule 3
+      When:
+      - Collision(RedTank)
+      Do:
+      - Spawn(ShellExplosion,this)
+      - Delete(this)
+      groupId: g6bd7c88f
+    - Name: Rule 4
+      When:
+      - Collision(Obstacle)
+      Do:
+      - Spawn(ShellExplosion,this)
+      - Delete(this)
+      groupId: g6bd7c88f
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g6bd7c88f
+  - ActorName: ShellExplosion
+    Active: 0
+    PrefabName: ShellExplosion
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - PlayParticles(ShellExplosion)
+      - PlaySound(ShellExplosion)
+      groupId: g382cab8c
+    - Name: Rule 2
+      When:
+      - Timer(0.5)
+      Do:
+      - Delete(this)
+      groupId: g382cab8c
+    Components:
+    - type: Rules
+      name: Rules
+      id: g382cab8c
+  - ActorName: BlueAim
+    Active: 1
+    PrefabName: BlueAim
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Edit(this.x,BlueTank.x)
+      - Edit(this.y,BlueTank.y)
+      - Edit(this.z,BlueTank.z)
+      - Edit(this.ry,BlueTank.ry)
+      - Edit(this.sliderValue,BlueTank.currentAim)
+      groupId: g12945b90
+    Components:
+    - type: Rules
+      name: Rules
+      id: g12945b90
+  - ActorName: RedAim
+    Active: 1
+    PrefabName: RedAim
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Edit(this.x,RedTank.x)
+      - Edit(this.y,RedTank.y)
+      - Edit(this.z,RedTank.z)
+      - Edit(this.ry,RedTank.ry)
+      - Edit(this.sliderValue,RedTank.currentAim)
+      groupId: g85c46a5d
+    Components:
+    - type: Rules
+      name: Rules
+      id: g85c46a5d
+  - ActorName: RedHealth
+    Active: 1
+    PrefabName: RedHealth
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - offsetY=0.05
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Edit(this.x,RedTank.x)
+      - Edit(this.y,RedTank.y+this.offsetY)
+      - Edit(this.z,RedTank.z)
+      - Edit(this.ry,RedTank.ry)
+      - Edit(this.sliderValue,RedTank.health)
+      groupId: gae0e9887
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: gae0e9887
+  - ActorName: BlueHealth
+    Active: 1
+    PrefabName: BlueHealth
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - offsetY=0.05
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Edit(this.x,BlueTank.x)
+      - Edit(this.y,BlueTank.y+this.offsetY)
+      - Edit(this.z,BlueTank.z)
+      - Edit(this.ry,BlueTank.ry)
+      - Edit(this.sliderValue,BlueTank.health)
+      groupId: g53e4b90e
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g53e4b90e
+  - ActorName: BlueWin
+    Active: 0
+    PrefabName: BlueWin
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Timer(1)
+      Do:
+      - LoadScene()
+      groupId: gebb8b86f
+    Components:
+    - type: Rules
+      name: Rules
+      id: gebb8b86f
+  - ActorName: RedWin
+    Active: 0
+    PrefabName: RedWin
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Timer(1)
+      Do:
+      - LoadScene()
+      groupId: g0d7e44ed
+    Components:
+    - type: Rules
+      name: Rules
+      id: g0d7e44ed
+  - ActorName: CameraManager
+    Active: 1
+    PrefabName: CameraManager
+    Tag: 
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties:
+    - despX=15
+    - offsetY=15
+    - offsetZ=10
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - Edit(#CameraPosition.x,(BlueTank.x+RedTank.x)/2 - this.despX)
+      - Edit(#CameraPosition.y,this.offsetY + (abs(BlueTank.x-RedTank.x)+abs(BlueTank.z-RedTank.z))/3)
+      - Edit(#CameraPosition.z,(BlueTank.z+RedTank.z)/2 - this.offsetZ)
+      groupId: gb9eb0558
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: gb9eb0558

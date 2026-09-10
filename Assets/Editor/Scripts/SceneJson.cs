@@ -22,12 +22,21 @@ public class SceneJson
 }
 
 [System.Serializable]
+public class ActorComponentMeta
+{
+    public string type; // "Properties" | "Rules"
+    public string name;
+    public string id;   // unique id for Rules components — links rules to this component
+}
+
+[System.Serializable]
 public class ActorJson
 {
     public string ActorName;
     public bool Active = true;
     public string PrefabName;
     public string Tag;
+    public string IconColorHex;
     public float[] Position;
     public float[] Rotation;
     public float[] Scale;
@@ -40,13 +49,16 @@ public class ActorJson
     public float Drag;
     public List<string> Properties;
     public List<SentenceJson> Script = new List<SentenceJson>();
+    public List<ActorComponentMeta> Components = new List<ActorComponentMeta>();
 }
 
 [System.Serializable]
 public class SentenceJson
 {
+    public string Name;
     public List<string> When;
     public List<string> Do;
+    public string groupId; // links this rule to a Rules component id
 }
 
 [System.Serializable]

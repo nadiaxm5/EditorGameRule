@@ -34,14 +34,17 @@ public static class Condition
         var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
         if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
 
-        tagCollisions[tag].RemoveWhere(obj => obj == null);
+        tagCollisions[tag].RemoveWhere(o => o == null);
 
         return tagCollisions[tag].Count > 0;
     }
 
     public static bool Keyboard(string key, string keyMode)
     {
-        var k = (Key)Enum.Parse(typeof(Key), key);
+        // Case-insensitive so "d" and "D" both resolve to Key.D (the Key enum members are PascalCase).
+        // TryParse also avoids throwing every frame when the key name is invalid.
+        if (!Enum.TryParse(key?.Trim(), ignoreCase: true, out Key k))
+            return false;
 
         switch (keyMode)
         {

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
 
@@ -39,6 +40,31 @@ namespace GameRuleEditor.Controllers
         {
             if (context == null) return;
 
+            // After undo/redo, the project data may have changed (e.g. actor removed),
+            // but selectedActorIndex/selectedScriptIndex on EditorContext are NOT part of
+            // the undo record. Clamp them to valid ranges to avoid null references.
+            if (context.currentProject != null)
+            {
+                int actorCount = context.currentProject.actors.Count;
+                if (context.selectedActorIndex >= actorCount)
+                {
+                    context.selectedActorIndex = actorCount - 1;
+                    context.selectedScriptIndex = -1;
+                }
+
+                if (context.selectedActorIndex >= 0)
+                {
+                    var actor = context.currentProject.actors[context.selectedActorIndex];
+                    int scriptCount = actor.Script?.Count ?? 0;
+                    if (context.selectedScriptIndex >= scriptCount)
+                        context.selectedScriptIndex = scriptCount - 1;
+                }
+                else
+                {
+                    context.selectedScriptIndex = -1;
+                }
+            }
+
             context.isUndoRedoRefresh = true;
             context.NotifyAll();
             context.isUndoRedoRefresh = false;
@@ -48,7 +74,9 @@ namespace GameRuleEditor.Controllers
         private void OnEditorUpdate()
         {
             if (context.currentProject == null || context.selectedActorIndex < 0) return;
-            SyncSceneToData(context.SelectedActor);
+            var actor = context.SelectedActor;
+            if (actor == null) return;
+            SyncSceneToData(actor);
         }
 
         #region Project Operations
@@ -89,18 +117,58 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Imports a JSON file and loads it as a project
         /// </summary>
-        public void ImportJsonAsProject(string jsonPath, string projectSavePath)
+        public void ImportJsonAsProject(string jsonPath)
         {
             var project = GameRuleEditor.Core.GameRuleProject.ImportFromJson(jsonPath);
-            if (project != null)
-            {
-                AssetDatabase.CreateAsset(project, projectSavePath);
-                AssetDatabase.SaveAssets();
-                LoadProject(project);
-            }
+            if (project == null) return;
+
+            string safeName = SanitizeFileName(project.projectName);
+            string savePath = $"Assets/{safeName}.asset";
+            savePath = AssetDatabase.GenerateUniqueAssetPath(savePath);
+
+            AssetDatabase.CreateAsset(project, savePath);
+            AssetDatabase.SaveAssets();
+            LoadProject(project);
+        }
+
+        private static string SanitizeFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "ImportedProject";
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+                name = name.Replace(c, '_');
+            return name;
         }
 
         #endregion Project Operations
+
+        #region Scene Generation
+
+        /// <summary>
+        /// Generates the Unity scene from the current project data.
+        /// Exports a temporary JSON to Resources/Games and calls Loader.LoadJson.
+        /// </summary>
+        public void GenerateScene()
+        {
+            if (context.currentProject == null)
+            {
+                Debug.LogError("No project loaded to generate scene from.");
+                return;
+            }
+
+            string gamesFolder = Application.dataPath + "/Resources/Games";
+            if (!Directory.Exists(gamesFolder))
+                Directory.CreateDirectory(gamesFolder);
+
+            string fileName = context.currentProject.projectName + ".json";
+            string fullPath = gamesFolder + "/" + fileName;
+            context.currentProject.SaveToJsonFile(fullPath);
+            AssetDatabase.Refresh();
+
+            Loader.LoadJson(fileName);
+            Debug.Log($"Scene generated from project '{context.currentProject.projectName}'");
+        }
+
+        #endregion Scene Generation
 
         #region Scene Settings Operations
 
@@ -168,6 +236,42 @@ namespace GameRuleEditor.Controllers
             context.currentProject.sceneData.CustomVariables.RemoveAt(index);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Pushes the camera settings onto the scene camera (a child of GameManager).
+        /// Without this the GameManager script only applies them on Play, so edits made in
+        /// Scene Settings are invisible while working in the editor.
+        /// </summary>
+        public void SyncCameraToScene()
+        {
+            if (context.currentProject == null) return;
+
+            Camera camera = FindSceneCamera();
+            if (camera == null) return;
+
+            var scene = context.currentProject.sceneData;
+            Undo.RecordObject(camera.transform, "Change Camera Transform");
+
+            if (scene.CameraPosition != null && scene.CameraPosition.Length >= 3)
+                camera.transform.position = new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]);
+
+            if (scene.CameraRotation != null && scene.CameraRotation.Length >= 3)
+                camera.transform.eulerAngles = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
+
+            EditorSceneManager.MarkSceneDirty(camera.gameObject.scene);
+        }
+
+        /// <summary>
+        /// The camera the generated GameManager drives — the same lookup it does at runtime
+        /// (<c>GetComponentInChildren&lt;Camera&gt;</c>). Null when the scene has not been generated yet.
+        /// </summary>
+        private static Camera FindSceneCamera()
+        {
+            GameObject gameManager = FindSceneObjectByName("GameManager");
+            if (gameManager == null) return null;
+
+            return gameManager.GetComponentInChildren<Camera>(true);
         }
 
         #endregion Scene Settings Operations
@@ -394,8 +498,25 @@ namespace GameRuleEditor.Controllers
         // Push data from JSON to GameObject
         public void SyncDataToScene(ActorJson actor)
         {
-            GameObject obj = GameObject.Find(actor.ActorName);
+            if (actor == null) return;
+            GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return;
+
+            if (obj.activeSelf != actor.Active)
+                obj.SetActive(actor.Active);
+
+            if (!string.IsNullOrEmpty(actor.Tag) && obj.tag != actor.Tag)
+            {
+                EnsureTagExists(actor.Tag);
+                try
+                {
+                    obj.tag = actor.Tag;
+                }
+                catch (UnityException)
+                {
+                    // Ignore invalid/missing tags in TagManager to avoid breaking editor sync.
+                }
+            }
 
             if (actor.Position != null && actor.Position.Length >= 3)
                 obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
@@ -410,13 +531,36 @@ namespace GameRuleEditor.Controllers
         // Pull data from GameObject to JSON if changed
         public bool SyncSceneToData(ActorJson actor)
         {
-            GameObject obj = GameObject.Find(actor.ActorName);
+            if (actor == null) return false;
+            GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return false;
-
-            if (!obj.transform.hasChanged) return false;
 
             bool changed = false;
             bool Diff(float a, float b) => Mathf.Abs(a - b) > 0.001f;
+
+            // Tag can change without affecting transform.hasChanged.
+            if (!string.IsNullOrEmpty(obj.tag) && actor.Tag != obj.tag)
+            {
+                actor.Tag = obj.tag;
+                changed = true;
+            }
+
+            if (actor.Active != obj.activeSelf)
+            {
+                actor.Active = obj.activeSelf;
+                changed = true;
+            }
+
+            if (!obj.transform.hasChanged)
+            {
+                if (changed)
+                {
+                    EditorUtility.SetDirty(context.currentProject);
+                    context.NotifyProjectChanged();
+                }
+
+                return changed;
+            }
 
             // Position Check
             Vector3 pos = obj.transform.position;
@@ -456,6 +600,50 @@ namespace GameRuleEditor.Controllers
             return changed;
         }
 
+        private static void EnsureTagExists(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag)) return;
+
+            foreach (string existing in UnityEditorInternal.InternalEditorUtility.tags)
+            {
+                if (existing == tag)
+                    return;
+            }
+
+            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty tagsProp = tagManager.FindProperty("tags");
+            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
+            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = tag;
+            tagManager.ApplyModifiedProperties();
+            tagManager.Update();
+            AssetDatabase.SaveAssets();
+        }
+
+        private static GameObject FindSceneObjectByName(string objectName)
+        {
+            if (string.IsNullOrWhiteSpace(objectName))
+                return null;
+
+            var activeOnly = GameObject.Find(objectName);
+            if (activeOnly != null)
+                return activeOnly;
+
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            for (int i = 0; i < allObjects.Length; i++)
+            {
+                var go = allObjects[i];
+                if (go == null || go.name != objectName)
+                    continue;
+
+                if (!go.scene.IsValid() || EditorUtility.IsPersistent(go))
+                    continue;
+
+                return go;
+            }
+
+            return null;
+        }
+
         #endregion Actor Operations
 
         #region Script/Rule Operations
@@ -482,8 +670,47 @@ namespace GameRuleEditor.Controllers
 
             SentenceJson newRule = new SentenceJson
             {
+                Name = $"Rule {actor.Script.Count + 1}",
                 When = hasCondition ? new List<string> { "" } : new List<string>(),
                 Do = new List<string> { "" }
+            };
+
+            actor.Script.Add(newRule);
+
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+
+            context.SelectScript(actor.Script.Count - 1);
+        }
+
+        /// <summary>
+        /// Adds a new empty rule to an actor's script. When a groupId is given the rule is tagged
+        /// before notifying, so every listener (e.g. the Properties panel's rule counts) sees the
+        /// final group on the first rebuild instead of a momentary null.
+        /// </summary>
+        public void AddEmptyRule(int actorIndex, string groupId = null)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Empty Rule");
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null)
+            {
+                actor.Script = new List<SentenceJson>();
+            }
+
+            SentenceJson newRule = new SentenceJson
+            {
+                Name = $"Rule {actor.Script.Count + 1}",
+                When = new List<string>(),
+                Do = new List<string>(),
+                groupId = string.IsNullOrEmpty(groupId) ? null : groupId
             };
 
             actor.Script.Add(newRule);
@@ -592,6 +819,41 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
+        /// Moves a rule to a target index
+        /// </summary>
+        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                fromIndex < 0 ||
+                fromIndex >= actor.Script.Count ||
+                toIndex < 0 ||
+                toIndex >= actor.Script.Count ||
+                fromIndex == toIndex)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Move Rule");
+
+            SentenceJson moved = actor.Script[fromIndex];
+            actor.Script.RemoveAt(fromIndex);
+            toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
+            actor.Script.Insert(toIndex, moved);
+
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            context.SelectScript(toIndex);
+        }
+
+        /// <summary>
         /// Duplicates a rule
         /// </summary>
         public void DuplicateRule(int actorIndex, int ruleIndex)
@@ -616,6 +878,7 @@ namespace GameRuleEditor.Controllers
             SentenceJson original = actor.Script[ruleIndex];
             SentenceJson duplicate = new SentenceJson
             {
+                Name = string.IsNullOrEmpty(original.Name) ? "Rule (Copy)" : $"{original.Name} (Copy)",
                 When = new List<string>(original.When),
                 Do = new List<string>(original.Do)
             };
@@ -625,6 +888,84 @@ namespace GameRuleEditor.Controllers
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
             context.SelectScript(ruleIndex + 1);
+        }
+
+        /// <summary>
+        /// Removes the condition from a rule, converting it to unconditional
+        /// </summary>
+        public void RemoveRuleCondition(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Remove Rule Condition");
+            actor.Script[ruleIndex].When = new List<string>();
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Adds a condition to an unconditional rule, converting it to conditional
+        /// </summary>
+        public void AddRuleCondition(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Rule Condition");
+            actor.Script[ruleIndex].When = new List<string> { "" };
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        /// <summary>
+        /// Adds an action to a rule that has no actions yet
+        /// </summary>
+        public void AddRuleAction(int actorIndex, int ruleIndex)
+        {
+            if (context.currentProject == null ||
+                actorIndex < 0 ||
+                actorIndex >= context.currentProject.actors.Count)
+            {
+                return;
+            }
+
+            ActorJson actor = context.currentProject.actors[actorIndex];
+            if (actor.Script == null ||
+                ruleIndex < 0 ||
+                ruleIndex >= actor.Script.Count)
+            {
+                return;
+            }
+
+            Undo.RecordObject(context.currentProject, "Add Rule Action");
+            actor.Script[ruleIndex].Do = new List<string> { "" };
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
         }
 
         /// <summary>

@@ -1,0 +1,179 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: UserStudy
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: UserStudy
+  sceneData:
+    GameName: UserStudy
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - 3.7
+    - 4.52
+    - -8.7
+    CameraRotation:
+    - 17.4
+    - 0
+    - 0
+    SunPosition:
+    - 0
+    - 3
+    - 0
+    SunRotation:
+    - 50
+    - -30
+    - 0
+    SunColor: ffffff
+    SunAmbientColor: 808080
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: Enemy
+      Active: 1
+      PrefabName: ZomBunny
+      Tag: Enemy
+      IconColorHex: 
+      Position:
+      - 0.11
+      - -0.0109241605
+      - 5.71
+      Rotation:
+      - -0
+      - 1.2878609
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When: []
+        Do:
+        - NavigateTo(5,this.x,this.y,this.z)
+        groupId: g428cd050
+      Components:
+      - type: Rules
+        name: Rules
+        id: g428cd050
+    - ActorName: Environment
+      Active: 1
+      PrefabName: Environment
+      Tag: Untagged
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Size: []
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      Properties: []
+      Script: []
+      Components:
+      - type: Rules
+        name: Rules
+        id: g24f729b4
+    CustomVariables: []
+  actors:
+  - ActorName: Enemy
+    Active: 1
+    PrefabName: ZomBunny
+    Tag: Enemy
+    IconColorHex: 
+    Position:
+    - 0.11
+    - -0.0109241605
+    - 5.71
+    Rotation:
+    - -0
+    - 1.2878609
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script:
+    - Name: Rule 1
+      When: []
+      Do:
+      - NavigateTo(5,this.x,this.y,this.z)
+      groupId: g428cd050
+    Components:
+    - type: Rules
+      name: Rules
+      id: g428cd050
+  - ActorName: Environment
+    Active: 1
+    PrefabName: Environment
+    Tag: Untagged
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Size: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    Properties: []
+    Script: []
+    Components:
+    - type: Rules
+      name: Rules
+      id: g24f729b4

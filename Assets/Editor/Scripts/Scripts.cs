@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditorInternal;
+using GameRuleEditor.Core;
 
 public static class Scripts
 {
@@ -25,7 +26,7 @@ public static class Scripts
             outfile.WriteLine("using UnityEngine;");
             outfile.WriteLine("using System.Collections.Generic;");
             outfile.WriteLine("");
-            outfile.WriteLine("public class " + actor.ActorName + " : MonoBehaviour {");
+            outfile.WriteLine("public class " + actor.ActorName + " : MonoBehaviour, IGameRuleActor {");
 
             // Properties
             outfile.WriteLine("    public bool Active = " + actor.Active.ToString().ToLower() + ";");
@@ -51,80 +52,83 @@ public static class Scripts
 
             foreach (SentenceJson s in actor.Script)
             {
-                bool isUpdate = s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
+                // Filter out empty entries
+                if (s.When != null) s.When = s.When.Where(w => !string.IsNullOrWhiteSpace(w)).ToList();
+                if (s.Do != null) s.Do = s.Do.Where(d => !string.IsNullOrWhiteSpace(d)).ToList();
+
+                // Skip sentences with no actions
+                if (s.Do == null || !s.Do.Any()) continue;
+
+                bool isUpdate = s.When != null && s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
                 if (isUpdate) updateSentences.Add(s);
                 else fixedSentences.Add(s);
             }
 
-            //FixedUpdate
-            if (fixedSentences.Any())
+            // Physics-phase rules are invoked by the central scheduler in actor declaration order.
+            // Always emit the method, even when empty, to satisfy IGameRuleActor.
+            outfile.WriteLine("    public void EvalFixedUpdate(){");
+            foreach (SentenceJson s in fixedSentences)
             {
-                outfile.WriteLine("    void FixedUpdate(){");
-                foreach (SentenceJson s in fixedSentences)
+                if (s.When != null && s.When.Any())
                 {
-                    if (s.When.Any())
-                    {
-                        outfile.Write("        if(");
-                        string conditionExpression = ProcessCondition(s.When[0]);
-                        outfile.Write(conditionExpression);
-                        outfile.WriteLine("){");
+                    outfile.Write("        if(");
+                    string conditionExpression = ProcessCondition(s.When[0]);
+                    outfile.Write(conditionExpression);
+                    outfile.WriteLine("){");
 
-                        foreach (string c in ExtractIndividualConditions(s.When[0]))
-                        {
-                            if (c.Contains("Collision")) hasCollision = true;
-                            scope.Add(c);
-                        }
-                    }
-                    else
+                    foreach (string c in ExtractIndividualConditions(s.When[0]))
                     {
-                        outfile.WriteLine("        {");
+                        if (c.Contains("Collision")) hasCollision = true;
+                        scope.Add(c);
                     }
-
-                    foreach (string a in s.Do)
-                    {
-                        if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
-                        scope.Add(a);
-                        outfile.WriteLine("            Action." + StringToCommand(a) + ";");
-                    }
-                    outfile.WriteLine("        }");
                 }
-                outfile.WriteLine("    }");
-            }
+                else
+                {
+                    outfile.WriteLine("        {");
+                }
 
-            // Update
-            if (updateSentences.Any())
+                foreach (string a in s.Do)
+                {
+                    if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
+                    scope.Add(a);
+                    outfile.WriteLine("            Action." + StringToCommand(a) + ";");
+                }
+                outfile.WriteLine("        }");
+            }
+            outfile.WriteLine("    }");
+
+            // Input-phase rules are invoked by the central scheduler in actor declaration order.
+            // Always emit the method, even when empty, to satisfy IGameRuleActor.
+            outfile.WriteLine("    public void EvalUpdate(){");
+            foreach (SentenceJson s in updateSentences)
             {
-                outfile.WriteLine("    void Update(){");
-                foreach (SentenceJson s in updateSentences)
+                if (s.When != null && s.When.Any())
                 {
-                    if (s.When.Any())
-                    {
-                        outfile.Write("        if(");
-                        string conditionExpression = ProcessCondition(s.When[0]);
-                        outfile.Write(conditionExpression);
-                        outfile.WriteLine("){");
+                    outfile.Write("        if(");
+                    string conditionExpression = ProcessCondition(s.When[0]);
+                    outfile.Write(conditionExpression);
+                    outfile.WriteLine("){");
 
-                        foreach (string c in ExtractIndividualConditions(s.When[0]))
-                        {
-                            if (c.Contains("Collision")) hasCollision = true;
-                            scope.Add(c);
-                        }
-                    }
-                    else
+                    foreach (string c in ExtractIndividualConditions(s.When[0]))
                     {
-                        outfile.WriteLine("        {");
+                        if (c.Contains("Collision")) hasCollision = true;
+                        scope.Add(c);
                     }
-
-                    foreach (string a in s.Do)
-                    {
-                        if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
-                        scope.Add(a);
-                        outfile.WriteLine("            Action." + StringToCommand(a) + ";");
-                    }
-                    outfile.WriteLine("        }");
                 }
-                outfile.WriteLine("    }");
+                else
+                {
+                    outfile.WriteLine("        {");
+                }
+
+                foreach (string a in s.Do)
+                {
+                    if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
+                    scope.Add(a);
+                    outfile.WriteLine("            Action." + StringToCommand(a) + ";");
+                }
+                outfile.WriteLine("        }");
             }
+            outfile.WriteLine("    }");
 
             // Awake
             List<string> awakeLines = new List<string>();
@@ -185,17 +189,35 @@ public static class Scripts
         // Traslate a game.json comand into a valid unity command
         int init = element.IndexOf("(");
         int end = element.LastIndexOf(")");
+
+        // Handle elements without parentheses (e.g. bare command names)
+        if (init < 0 || end < 0 || end <= init)
+        {
+            string bare = element.Trim();
+            if (bare == "Delete") return "Delete(gameObject)";
+            if (bare == "QuitGame" || bare == "LoadScene") return bare + "()";
+            return bare + "()";
+        }
+
         string name = element.Substring(0, init);
         string command = name;
         string rest = element.Substring(init + 1, end - init - 1);
-        string[] parameters = rest.Split(new string[] { "," }, StringSplitOptions.None);
+        List<string> parameters = rest.Split(new string[] { "," }, StringSplitOptions.None).ToList();
+
+        // A parameter left empty in the editor — or missing in a hand-written JSON — would reach
+        // the runtime as "" and blow up the expression parser. Fill it with the same default the
+        // editor shows for that slot (ActionDefaults is the shared table).
+        while (parameters.Count < ActionDefaults.ParameterCount(name)) parameters.Add(string.Empty);
+        for (int i = 0; i < parameters.Count; i++)
+            parameters[i] = ActionDefaults.Fill(name, i, parameters[i]);
+
         command += "(";
         int counter = 0;
         foreach (string s in parameters)
         {
             counter++;
             command += "\"" + s + "\"";
-            if (parameters.Length != counter) command += ",";
+            if (parameters.Count != counter) command += ",";
         }
         if (name == "Compare" || name == "Edit" || name == "Check") command += ",scopeList)";
         else if (name == "Move" || name == "MoveTo" || name == "NavigateTo" || name == "RotateTo" || name == "Rotate" || name == "Push" || name == "PushTo" || name == "Torque") command += ",gameObject,scopeList)";
@@ -209,7 +231,7 @@ public static class Scripts
             command = $"Spawn(\"{prefab}\", gameObject";
 
             List<string> extraParams = new List<string>();
-            for (int i = 2; i < parameters.Length; i++)
+            for (int i = 2; i < parameters.Count; i++)
                 extraParams.Add($"\"{parameters[i].Trim()}\"");
 
             while (extraParams.Count < 6)
@@ -265,20 +287,29 @@ public static class Scripts
         return conditions;
     }
 
-    public static void CreateGameManager(SceneJson scene)
+    public static void CreateGameManager(SceneJson scene, List<string> declarationOrder)
     {
         string path = "Assets/Resources/Scripts/GameManager.cs";
 
         using (StreamWriter outfile = new StreamWriter(path))
         {
             outfile.WriteLine("using UnityEngine;");
+            outfile.WriteLine("using System.Collections.Generic;");
+            outfile.WriteLine("using UnityEngine.SceneManagement;");
             outfile.WriteLine("");
+            outfile.WriteLine("[DefaultExecutionOrder(-100)]");
             outfile.WriteLine("public class GameManager : MonoBehaviour");
             outfile.WriteLine("{");
             outfile.WriteLine("    public static GameManager Instance { get; private set; }");
             outfile.WriteLine("    private Camera mainCamera;");
             outfile.WriteLine("    private Light sunLight;");
             outfile.WriteLine("    private AudioSource audioSource;");
+            outfile.WriteLine("");
+
+            // Canonical actor order from the project descriptor, captured before Loader reverses
+            // the list for scene instantiation.
+            string bakedOrder = string.Join(", ", declarationOrder.Select(name => "\"" + name + "\""));
+            outfile.WriteLine("    private static readonly string[] ActorOrder = new string[] { " + bakedOrder + " };");
             outfile.WriteLine("");
 
             outfile.WriteLine($"    public string GameName = \"{scene.GameName ?? "Unknown"}\";");
@@ -382,7 +413,10 @@ public static class Scripts
             outfile.WriteLine("            DontDestroyOnLoad(gameObject);");
             outfile.WriteLine("        }");
             outfile.WriteLine("        else");
+            outfile.WriteLine("        {");
             outfile.WriteLine("            Destroy(gameObject);");
+            outfile.WriteLine("            return;");
+            outfile.WriteLine("        }");
             outfile.WriteLine("        ");
             outfile.WriteLine("        mainCamera = GetComponentInChildren<Camera>();");
             outfile.WriteLine("        sunLight = GetComponentInChildren<Light>();");
@@ -391,18 +425,36 @@ public static class Scripts
             outfile.WriteLine("        ApplyCameraSettings();");
             outfile.WriteLine("        ApplySunSettings();");
             outfile.WriteLine("        ApplyGlobalSettings();");
+            outfile.WriteLine("        ");
+            outfile.WriteLine("        SceneManager.sceneLoaded += OnSceneLoaded;");
+            outfile.WriteLine("        ActorScheduler.Build(ActorOrder);");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    void OnDestroy()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        if (Instance == this)");
+            outfile.WriteLine("            SceneManager.sceneLoaded -= OnSceneLoaded;");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        ActorScheduler.Build(ActorOrder);");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
             outfile.WriteLine("    void Update()");
             outfile.WriteLine("    {");
             outfile.WriteLine("        UpdateRuntimeVariables();");
+            outfile.WriteLine("        ActorScheduler.RunUpdate();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
             outfile.WriteLine("    void FixedUpdate()");
             outfile.WriteLine("    {");
             outfile.WriteLine("        UpdateMousePosition();");
+            outfile.WriteLine("        ActorScheduler.RunFixedUpdate();");
             outfile.WriteLine("        ApplyCameraSettings();");
             outfile.WriteLine("        ApplySunSettings();");
             outfile.WriteLine("    }");
