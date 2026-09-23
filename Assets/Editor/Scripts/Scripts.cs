@@ -228,6 +228,8 @@ public static class Scripts
         else if (name == "Spawn")
         {
             string prefab = parameters[0];
+            // The serialized second parameter is always "this". At runtime that means the
+            // GameObject executing this generated rule, never a user-selectable actor.
             command = $"Spawn(\"{prefab}\", gameObject";
 
             List<string> extraParams = new List<string>();

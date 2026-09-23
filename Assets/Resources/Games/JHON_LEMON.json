@@ -9,6 +9,7 @@
     "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
+    "SoundTrack": "",
     "CustomVariables": [],
     "Cast": [
         {

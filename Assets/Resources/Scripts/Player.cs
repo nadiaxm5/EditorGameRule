@@ -114,5 +114,8 @@ public class Player : MonoBehaviour, IGameRuleActor {
         TagCollisions["Bullet"] = new HashSet<GameObject>();
         TagCollisions["ZomBear"] = new HashSet<GameObject>();
         TagCollisions["End"] = new HashSet<GameObject>();
+        TagCollisions["Shell"] = new HashSet<GameObject>();
+        TagCollisions["RedTank"] = new HashSet<GameObject>();
+        TagCollisions["BlueTank"] = new HashSet<GameObject>();
     }
 }

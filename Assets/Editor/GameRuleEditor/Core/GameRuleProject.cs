@@ -67,6 +67,10 @@ namespace GameRuleEditor.Core
             string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(?:\.0+)?(?=\s*[,}]),?";
             rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
 
+            // False physics override flags mean "inherit from prefab" and need not clutter JSON.
+            string inheritedPhysicsPattern = @"\s*""Override(?:Density|Friction|Bounciness|Drag)"": false,?";
+            rawJson = Regex.Replace(rawJson, inheritedPhysicsPattern, "");
+
             // Manual construction
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
@@ -247,6 +251,7 @@ namespace GameRuleEditor.Core
             {
                 foreach (var actor in sceneData.Cast)
                 {
+                    ActorPhysicsUtility.NormalizeLegacyOverrides(actor);
                     if (actor.Script != null)
                     {
                         foreach (var sentence in actor.Script)

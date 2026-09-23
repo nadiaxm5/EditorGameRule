@@ -28,6 +28,16 @@ namespace GameRuleEditor.Panels
         private Toggle activeToggle;
         private bool suppressActiveToggleCallback;
 
+        private Vector3Field velocityField;
+        private Vector3Field angularVelocityField;
+        private FloatField densityField;
+        private FloatField dragField;
+        private FloatField frictionField;
+        private FloatField bouncinessField;
+        private Label physicsStatusLabel;
+        private Button revertPhysicsButton;
+        private readonly Dictionary<string, Label> physicsLabels = new Dictionary<string, Label>();
+
         private VisualElement componentsContainer;
 
         private class VectorRow
@@ -210,6 +220,47 @@ namespace GameRuleEditor.Panels
             CreateOverrideableVector3(transformContainer, "Rotation", "Rotation");
             CreateOverrideableVector3(transformContainer, "Scale", "Scale");
 
+            // ─── Physics (inherited from the prefab until edited) ───
+            var physicsSection = new Foldout { text = "Physics", value = true };
+            physicsSection.style.unityFontStyleAndWeight = FontStyle.Bold;
+            physicsSection.style.marginBottom = 10;
+
+            var physicsIcon = new Image { image = EditorGUIUtility.IconContent("Rigidbody Icon").image, style = { width = 16, height = 16, marginRight = 4 } };
+            var physicsHeaderLabel = physicsSection.Q<Label>();
+            if (physicsHeaderLabel != null)
+                physicsHeaderLabel.parent.Insert(physicsHeaderLabel.parent.IndexOf(physicsHeaderLabel), physicsIcon);
+
+            scrollView.Add(physicsSection);
+
+            var physicsContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            physicsSection.Add(physicsContainer);
+
+            velocityField = CreatePhysicsVector3(physicsContainer, "Velocity", "Velocity");
+            velocityField.tooltip = "Initial linear velocity.";
+            angularVelocityField = CreatePhysicsVector3(physicsContainer, "Angular Velocity", "AngularVelocity");
+            angularVelocityField.tooltip = "Initial angular velocity in radians per second.";
+            densityField = CreatePhysicsFloat(physicsContainer, "Density", "Density");
+            densityField.tooltip = "Applied to Rigidbody.mass for compatibility with the existing GameRule format.";
+            dragField = CreatePhysicsFloat(physicsContainer, "Drag", "Drag");
+            frictionField = CreatePhysicsFloat(physicsContainer, "Friction", "Friction");
+            bouncinessField = CreatePhysicsFloat(physicsContainer, "Bounciness", "Bounciness");
+
+            physicsStatusLabel = new Label();
+            physicsStatusLabel.style.whiteSpace = WhiteSpace.Normal;
+            physicsStatusLabel.style.color = new Color(0.72f, 0.72f, 0.72f);
+            physicsStatusLabel.style.marginTop = 4;
+            physicsStatusLabel.style.marginBottom = 4;
+            physicsContainer.Add(physicsStatusLabel);
+
+            revertPhysicsButton = new Button(() =>
+            {
+                if (context.selectedActorIndex >= 0)
+                    controller.RevertActorProperty(context.selectedActorIndex, "Physics");
+            }) { text = "Revert Physics to Prefab" };
+            revertPhysicsButton.style.alignSelf = Align.FlexEnd;
+            revertPhysicsButton.style.marginTop = 3;
+            physicsContainer.Add(revertPhysicsButton);
+
             // ─── Dynamic components ───
             componentsContainer = new VisualElement();
             componentsContainer.style.marginTop = 5;
@@ -253,6 +304,9 @@ namespace GameRuleEditor.Panels
 
             // Auto-migrate legacy data
             bool dirty = false;
+
+            if (ActorPhysicsUtility.NormalizeLegacyOverrides(actor))
+                dirty = true;
 
             // 1. Ensure every Rules component has an id
             foreach (var comp in actor.Components)
@@ -331,6 +385,7 @@ namespace GameRuleEditor.Panels
             UpdateVectorRow("Position", actor.Position, prefab?.transform.position ?? Vector3.zero);
             UpdateVectorRow("Rotation", actor.Rotation, prefab?.transform.eulerAngles ?? Vector3.zero);
             UpdateVectorRow("Scale", actor.Scale, prefab?.transform.localScale ?? Vector3.one);
+            UpdatePhysicsUI(actor, prefab);
 
             RebuildComponents();
         }
@@ -1169,6 +1224,120 @@ namespace GameRuleEditor.Panels
                 vecField.SetValueWithoutNotify(prefabDefault);
                 row.label.style.unityFontStyleAndWeight = FontStyle.Normal;
             }
+        }
+
+        private Vector3Field CreatePhysicsVector3(VisualElement parent, string labelText, string propertyKey)
+        {
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
+            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } };
+            row.Add(label);
+
+            var field = new Vector3Field { style = { flexGrow = 1 } };
+            field.RegisterValueChangedCallback(evt =>
+            {
+                ActorJson actor = context.SelectedActor;
+                if (actor == null) return;
+
+                Undo.RecordObject(context.currentProject, "Change " + labelText);
+                float[] value = { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                if (propertyKey == "Velocity") actor.Velocity = value;
+                else actor.AngularVelocity = value;
+
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(actor);
+                if (revertPhysicsButton != null) revertPhysicsButton.SetEnabled(true);
+            });
+
+            row.Add(field);
+            parent.Add(row);
+            physicsLabels[propertyKey] = label;
+            return field;
+        }
+
+        private FloatField CreatePhysicsFloat(VisualElement parent, string labelText, string propertyKey)
+        {
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
+            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } };
+            row.Add(label);
+
+            var field = new FloatField { style = { flexGrow = 1 } };
+            field.RegisterValueChangedCallback(evt =>
+            {
+                ActorJson actor = context.SelectedActor;
+                if (actor == null) return;
+
+                float value = evt.newValue;
+                if (propertyKey == "Density") value = Mathf.Max(ActorPhysicsUtility.MinimumDensity, value);
+                else if (propertyKey == "Drag") value = Mathf.Max(0f, value);
+                else value = Mathf.Clamp01(value);
+
+                Undo.RecordObject(context.currentProject, "Change " + labelText);
+                switch (propertyKey)
+                {
+                    case "Density": actor.Density = value; actor.OverrideDensity = true; break;
+                    case "Drag": actor.Drag = value; actor.OverrideDrag = true; break;
+                    case "Friction": actor.Friction = value; actor.OverrideFriction = true; break;
+                    case "Bounciness": actor.Bounciness = value; actor.OverrideBounciness = true; break;
+                }
+
+                if (!Mathf.Approximately(value, evt.newValue))
+                    field.SetValueWithoutNotify(value);
+
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
+                EditorUtility.SetDirty(context.currentProject);
+                controller.SyncDataToScene(actor);
+                if (revertPhysicsButton != null) revertPhysicsButton.SetEnabled(true);
+            });
+
+            row.Add(field);
+            parent.Add(row);
+            physicsLabels[propertyKey] = label;
+            return field;
+        }
+
+        private void UpdatePhysicsUI(ActorJson actor, GameObject prefab)
+        {
+            Rigidbody body = prefab != null ? prefab.GetComponent<Rigidbody>() : null;
+            Collider collider = prefab != null ? prefab.GetComponent<Collider>() : null;
+
+            velocityField.SetEnabled(body != null);
+            angularVelocityField.SetEnabled(body != null);
+            densityField.SetEnabled(body != null);
+            dragField.SetEnabled(body != null);
+            frictionField.SetEnabled(collider != null);
+            bouncinessField.SetEnabled(collider != null);
+
+            velocityField.SetValueWithoutNotify(ActorPhysicsUtility.ToVector3(actor.Velocity, body != null ? body.linearVelocity : Vector3.zero));
+            angularVelocityField.SetValueWithoutNotify(ActorPhysicsUtility.ToVector3(actor.AngularVelocity, body != null ? body.angularVelocity : Vector3.zero));
+            densityField.SetValueWithoutNotify(actor.OverrideDensity ? actor.Density : body != null ? body.mass : 0f);
+            dragField.SetValueWithoutNotify(actor.OverrideDrag ? actor.Drag : body != null ? body.linearDamping : 0f);
+            frictionField.SetValueWithoutNotify(actor.OverrideFriction ? actor.Friction : ActorPhysicsUtility.GetFriction(collider));
+            bouncinessField.SetValueWithoutNotify(actor.OverrideBounciness ? actor.Bounciness : ActorPhysicsUtility.GetBounciness(collider));
+
+            SetPhysicsLabelState("Velocity", actor.Velocity != null && actor.Velocity.Length >= 3);
+            SetPhysicsLabelState("AngularVelocity", actor.AngularVelocity != null && actor.AngularVelocity.Length >= 3);
+            SetPhysicsLabelState("Density", actor.OverrideDensity);
+            SetPhysicsLabelState("Drag", actor.OverrideDrag);
+            SetPhysicsLabelState("Friction", actor.OverrideFriction);
+            SetPhysicsLabelState("Bounciness", actor.OverrideBounciness);
+
+            if (body != null && collider != null)
+                physicsStatusLabel.text = "Root Rigidbody and Collider found.";
+            else if (body == null && collider == null)
+                physicsStatusLabel.text = "The prefab root has no Rigidbody or Collider. Physics fields are disabled.";
+            else if (body == null)
+                physicsStatusLabel.text = "The prefab root has no Rigidbody. Rigidbody fields are disabled.";
+            else
+                physicsStatusLabel.text = "The prefab root has no Collider. Collider fields are disabled.";
+
+            revertPhysicsButton.SetEnabled(ActorPhysicsUtility.HasOverrides(actor));
+        }
+
+        private void SetPhysicsLabelState(string key, bool overridden)
+        {
+            if (physicsLabels.TryGetValue(key, out Label label))
+                label.style.unityFontStyleAndWeight = overridden ? FontStyle.Bold : FontStyle.Normal;
         }
 
         // ──────────────────────────────────

@@ -40,13 +40,16 @@ public class ActorJson
     public float[] Position;
     public float[] Rotation;
     public float[] Scale;
-    public float[] Size;
     public float[] Velocity;
     public float[] AngularVelocity;
     public float Density;
     public float Friction;
     public float Bounciness;
     public float Drag;
+    public bool OverrideDensity;
+    public bool OverrideFriction;
+    public bool OverrideBounciness;
+    public bool OverrideDrag;
     public List<string> Properties;
     public List<SentenceJson> Script = new List<SentenceJson>();
     public List<ActorComponentMeta> Components = new List<ActorComponentMeta>();

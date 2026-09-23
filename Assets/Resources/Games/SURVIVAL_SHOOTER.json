@@ -1,7 +1,7 @@
 {
     "GameName": "SURVIVAL_SHOOTER",
     "ScreenResolution": [1920, 1080],
-    "CameraPosition": [0, 6, -7],
+    "CameraPosition": [0, 5.49, -7],
     "CameraRotation": [30, 0, 0],
     "SunPosition": [3.3899, 10.902, -5.8255],
     "SunRotation": [22.704, 65.875, -175.012],
@@ -35,6 +35,9 @@
             "Tag": "Player",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "AngularVelocity": [0.0, 0.0, 0.0],
             "Properties": [
                 "speed=5",
                 "rotSpeed=360",
@@ -496,13 +499,14 @@
             "ActorName": "ZomBearSpawner",
             "Active": true,
             "PrefabName": "ZomBearSpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [22.5, 0.0, 15.0],
-            "Rotation": [0.0, -120.0, 0.0],
+            "Rotation": [0.0, 240.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Timer(2)"
                     ],
@@ -517,20 +521,28 @@
             "ActorName": "ZomBunnySpawner",
             "Active": true,
             "PrefabName": "ZomBunnySpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [-20.5, 0.0, 12.5],
             "Rotation": [0.0, 130.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Timer(3)"
                     ],
                     "Do": [
                         "Spawn(ZomBunny,this)"
                     ],
-                    "groupId": ""
+                    "groupId": "g799734ee"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g799734ee"
                 }
             ]
         },

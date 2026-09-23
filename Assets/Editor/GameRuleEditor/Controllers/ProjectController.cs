@@ -37,7 +37,7 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Basicamente se llama cada vez que el usuario hace Ctrl+Z o Ctrl+Y, para asegurarnos de que la UI se actualice con los datos restaurados por Unity. Sin esto, la UI podría quedar desincronizada después de un undo/redo.
         /// </summary>
-        private void OnUndoRedoPerformed() 
+        private void OnUndoRedoPerformed()
         {
             if (context == null) return;
 
@@ -66,6 +66,10 @@ namespace GameRuleEditor.Controllers
                 }
             }
 
+            SyncGravityToScene();
+            if (context.SelectedActor != null)
+                SyncDataToScene(context.SelectedActor);
+
             context.isUndoRedoRefresh = true;
             context.NotifyAll();
             context.isUndoRedoRefresh = false;
@@ -88,6 +92,7 @@ namespace GameRuleEditor.Controllers
         public void CreateNewProject(string projectName)
         {
             context.CreateNewProject(projectName);
+            SyncGravityToScene();
             EditorUtility.SetDirty(context);
         }
 
@@ -98,8 +103,17 @@ namespace GameRuleEditor.Controllers
         {
             Undo.RecordObject(context, "Load Project");
             context.LoadProject(project);
+            SyncGravityToScene();
             SyncSoundTrackToScene();
             EditorUtility.SetDirty(context);
+        }
+
+        public void SyncGravityToScene()
+        {
+            float[] gravity = context?.currentProject?.sceneData?.Gravity;
+            if (gravity == null || gravity.Length < 3) return;
+
+            Physics.gravity = new Vector3(gravity[0], gravity[1], gravity[2]);
         }
 
         /// <summary>
@@ -341,7 +355,6 @@ namespace GameRuleEditor.Controllers
                 Scale = null,
                 Velocity = null,
                 AngularVelocity = null,
-                Size = null,
                 Properties = new List<string>(),
                 Script = new List<SentenceJson>()
             };
@@ -367,14 +380,10 @@ namespace GameRuleEditor.Controllers
                 case "Position": actor.Position = null; break;
                 case "Rotation": actor.Rotation = null; break;
                 case "Scale": actor.Scale = null; break;
-                case "Size": actor.Size = null; break;
                 case "Velocity": actor.Velocity = null; break;
                 case "AngularVelocity": actor.AngularVelocity = null; break;
                 case "Physics":
-                    actor.Density = 0;
-                    actor.Friction = 0;
-                    actor.Bounciness = 0;
-                    actor.Drag = 0;
+                    ActorPhysicsUtility.ClearOverrides(actor);
                     break;
             }
 
@@ -565,6 +574,10 @@ namespace GameRuleEditor.Controllers
 
             if (actor.Scale != null && actor.Scale.Length >= 3)
                 obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
+
+            GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
+            if (ActorPhysicsUtility.ApplyTo(obj, actor, prefab, true) && obj.scene.IsValid())
+                EditorSceneManager.MarkSceneDirty(obj.scene);
         }
 
         // Pull data from GameObject to JSON if changed
@@ -590,45 +603,46 @@ namespace GameRuleEditor.Controllers
                 changed = true;
             }
 
-            if (!obj.transform.hasChanged)
+            // Do not persist velocities produced by a running simulation. In Edit mode,
+            // Inspector changes to root Rigidbody/Collider components are bidirectional.
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                if (changed)
+                GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
+                if (ActorPhysicsUtility.CaptureFrom(obj, actor, prefab))
+                    changed = true;
+            }
+
+            if (obj.transform.hasChanged)
+            {
+                // Position Check
+                Vector3 pos = obj.transform.position;
+                if (actor.Position == null || actor.Position.Length < 3 || Diff(actor.Position[0], pos.x) || Diff(actor.Position[1], pos.y) || Diff(actor.Position[2], pos.z))
                 {
-                    EditorUtility.SetDirty(context.currentProject);
-                    context.NotifyProjectChanged();
+                    if (actor.Position == null || actor.Position.Length < 3) actor.Position = new float[3];
+                    actor.Position[0] = pos.x; actor.Position[1] = pos.y; actor.Position[2] = pos.z;
+                    changed = true;
                 }
 
-                return changed;
-            }
+                // Rotation Check
+                Vector3 rot = obj.transform.eulerAngles;
+                if (actor.Rotation == null || actor.Rotation.Length < 3 || Diff(actor.Rotation[0], rot.x) || Diff(actor.Rotation[1], rot.y) || Diff(actor.Rotation[2], rot.z))
+                {
+                    if (actor.Rotation == null || actor.Rotation.Length < 3) actor.Rotation = new float[3];
+                    actor.Rotation[0] = rot.x; actor.Rotation[1] = rot.y; actor.Rotation[2] = rot.z;
+                    changed = true;
+                }
 
-            // Position Check
-            Vector3 pos = obj.transform.position;
-            if (actor.Position == null || actor.Position.Length < 3 || Diff(actor.Position[0], pos.x) || Diff(actor.Position[1], pos.y) || Diff(actor.Position[2], pos.z))
-            {
-                if (actor.Position == null || actor.Position.Length < 3) actor.Position = new float[3];
-                actor.Position[0] = pos.x; actor.Position[1] = pos.y; actor.Position[2] = pos.z;
-                changed = true;
-            }
+                // Scale Check
+                Vector3 scl = obj.transform.localScale;
+                if (actor.Scale == null || actor.Scale.Length < 3 || Diff(actor.Scale[0], scl.x) || Diff(actor.Scale[1], scl.y) || Diff(actor.Scale[2], scl.z))
+                {
+                    if (actor.Scale == null || actor.Scale.Length < 3) actor.Scale = new float[] { 1, 1, 1 };
+                    actor.Scale[0] = scl.x; actor.Scale[1] = scl.y; actor.Scale[2] = scl.z;
+                    changed = true;
+                }
 
-            // Rotation Check
-            Vector3 rot = obj.transform.eulerAngles;
-            if (actor.Rotation == null || actor.Rotation.Length < 3 || Diff(actor.Rotation[0], rot.x) || Diff(actor.Rotation[1], rot.y) || Diff(actor.Rotation[2], rot.z))
-            {
-                if (actor.Rotation == null || actor.Rotation.Length < 3) actor.Rotation = new float[3];
-                actor.Rotation[0] = rot.x; actor.Rotation[1] = rot.y; actor.Rotation[2] = rot.z;
-                changed = true;
+                obj.transform.hasChanged = false;
             }
-
-            // Scale Check
-            Vector3 scl = obj.transform.localScale;
-            if (actor.Scale == null || actor.Scale.Length < 3 || Diff(actor.Scale[0], scl.x) || Diff(actor.Scale[1], scl.y) || Diff(actor.Scale[2], scl.z))
-            {
-                if (actor.Scale == null || actor.Scale.Length < 3) actor.Scale = new float[] { 1, 1, 1 };
-                actor.Scale[0] = scl.x; actor.Scale[1] = scl.y; actor.Scale[2] = scl.z;
-                changed = true;
-            }
-
-            obj.transform.hasChanged = false;
 
             if (changed)
             {

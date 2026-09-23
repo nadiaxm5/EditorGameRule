@@ -209,6 +209,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Gravity");
                 context.currentProject.sceneData.Gravity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                controller.SyncGravityToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -471,6 +472,7 @@ namespace GameRuleEditor.Panels
             UpdateVector3Field(sunPosField, scene.SunPosition);
             UpdateVector3Field(sunRotField, scene.SunRotation);
             UpdateVector3Field(gravityField, scene.Gravity);
+            controller.SyncGravityToScene();
 
             AudioClip soundTrack = SoundTrackUtility.Resolve(scene.SoundTrack);
             if (soundTrackField.value != soundTrack)

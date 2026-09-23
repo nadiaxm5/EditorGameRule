@@ -43,11 +43,17 @@ namespace GameRuleEditor.CustomControls
                 typeDropdown.SetValueWithoutNotify(result.Name);
                 UpdateParameterFields();
 
-                for (int i = 0; i < inputElements.Count && i < result.Params.Count; i++)
+                for (int i = 0; i < inputElements.Count; i++)
                 {
                     if (inputElements[i] is TextField tf)
                     {
-                        tf.SetValueWithoutNotify(ValueOrDefault(tf, result.Params[i]));
+                        // Spawn keeps "this" as its serialized second parameter for backwards
+                        // compatibility, but it is fixed and therefore has no editable field.
+                        int sourceIndex = result.Name == "Spawn" && i > 0 ? i + 1 : i;
+                        string value = sourceIndex < result.Params.Count
+                            ? result.Params[sourceIndex]
+                            : string.Empty;
+                        tf.SetValueWithoutNotify(ValueOrDefault(tf, value));
                     }
                 }
             }
@@ -98,10 +104,13 @@ namespace GameRuleEditor.CustomControls
                 case "Edit":
                     AddParameterField("Property", true); AddParameterField("Value", true); break;
                 case "Spawn":
-                    AddParameterField("Prefab", true, false, true);
-                    AddParameterField("Spawner", true, false, true);
-                    AddParameterField("Pos X", true); AddParameterField("Pos Y", true); AddParameterField("Pos Z", true);
-                    AddParameterField("Rot X", true); AddParameterField("Rot Y", true); AddParameterField("Rot Z", true);
+                    AddParameterField("Prefab", true, false, true, 0);
+                    AddParameterField("Pos X", true, actionParameterIndex: 2);
+                    AddParameterField("Pos Y", true, actionParameterIndex: 3);
+                    AddParameterField("Pos Z", true, actionParameterIndex: 4);
+                    AddParameterField("Rot X", true, actionParameterIndex: 5);
+                    AddParameterField("Rot Y", true, actionParameterIndex: 6);
+                    AddParameterField("Rot Z", true, actionParameterIndex: 7);
                     break;
 
                 case "Animate": AddResourceField<AnimationClip>("Animation Name"); break;
@@ -122,10 +131,12 @@ namespace GameRuleEditor.CustomControls
         }
 
         // Standard Text + Picker Button
-        private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false, bool actorsOnly = false)
+        private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false,
+                                       bool actorsOnly = false, int actionParameterIndex = -1)
         {
             // Value assumed when the field is left blank, so the user doesn't have to type it.
-            string emptyDefault = ActionDefaults.Get(typeDropdown.value, inputElements.Count);
+            int defaultIndex = actionParameterIndex >= 0 ? actionParameterIndex : inputElements.Count;
+            string emptyDefault = ActionDefaults.Get(typeDropdown.value, defaultIndex);
 
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 140, alignItems = Align.Center } };
             container.style.flexShrink = 0;
@@ -245,6 +256,11 @@ namespace GameRuleEditor.CustomControls
             {
                 if (el is TextField tf) parameters.Add(ValueOrDefault(tf, tf.value));
             }
+
+            // Spawn is always relative to the actor executing the rule. Keep "this" in the
+            // serialized action so existing JSON and script generation retain their format.
+            if (type == "Spawn") parameters.Insert(1, "this");
+
             if (parameters.Count == 0) return $"{type}()";
             return $"{type}({string.Join(",", parameters)})";
         }

@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
 
     public string GameName = "SURVIVAL_SHOOTER";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(0f, 6f, -7f);
+    public Vector3 CameraPosition = new Vector3(0f, 5.49f, -7f);
     public Vector3 CameraRotation = new Vector3(30f, 0f, 0f);
     public Vector3 SunPosition = new Vector3(3.3899f, 10.902f, -5.8255f);
     public Vector3 SunRotation = new Vector3(22.704f, 65.875f, -175.012f);

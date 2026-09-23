@@ -53,13 +53,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script: []
       Components: []
@@ -77,7 +80,6 @@ MonoBehaviour:
       - 180
       - 0
       Scale: []
-      Size: []
       Velocity:
       - 10
       - 0
@@ -90,6 +92,10 @@ MonoBehaviour:
       Friction: 0.6
       Bounciness: 0
       Drag: 0.2
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - speed=10
       - angularSpeed=90
@@ -174,13 +180,16 @@ MonoBehaviour:
       - 0
       - 0
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0.6
       Bounciness: 0
       Drag: 0.2
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - speed=10
       - angularSpeed=90
@@ -259,13 +268,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - speed=15
       - damage=50
@@ -305,13 +317,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script:
       - Name: 
@@ -335,13 +350,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script:
       - Name: 
@@ -362,13 +380,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script:
       - Name: 
@@ -389,13 +410,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - offsetY=0.05
       Script:
@@ -417,13 +441,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - offsetY=0.05
       Script:
@@ -445,13 +472,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script:
       - Name: 
@@ -469,13 +499,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties: []
       Script:
       - Name: 
@@ -493,13 +526,16 @@ MonoBehaviour:
       Position: []
       Rotation: []
       Scale: []
-      Size: []
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
       Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
       Properties:
       - despX=15
       - offsetY=15
@@ -523,13 +559,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script: []
     Components: []
@@ -543,23 +582,29 @@ MonoBehaviour:
     - 0
     - 30
     Rotation:
-    - 0
+    - -0
     - 180
     - 0
-    Scale: []
-    Size: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity:
-    - 10
     - 0
-    - 10
+    - 0
+    - 0
     AngularVelocity:
     - 0
-    - 90
+    - 0
     - 0
     Density: 0
     Friction: 0.6
     Bounciness: 0
     Drag: 0.2
+    OverrideDensity: 0
+    OverrideFriction: 1
+    OverrideBounciness: 0
+    OverrideDrag: 1
     Properties:
     - speed=10
     - angularSpeed=90
@@ -569,67 +614,73 @@ MonoBehaviour:
     - maxAim=200
     - currentAim=0
     Script:
-    - Name: 
+    - Name: Rule 1
       When:
       - Keyboard(D,press)
       Do:
       - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
       - PlayParticles(DustTrail)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 2
       When:
       - Keyboard(A,press)
       Do:
       - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
       - PlayParticles(DustTrail)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 3
       When:
       - Keyboard(W,press)
       Do:
       - Move(this.speed,0,this.ry,0)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 4
       When:
       - Keyboard(S,press)
       Do:
       - Move(this.speed,0,this.ry+180,0)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 5
       When:
       - Collision(Shell)
       Do:
       - Edit(this.health,this.health-Shell.damage)
       - PushTo(-300,RedTank.x,RedTank.y,RedTank.z)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 6
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(RedWin.Active,1)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 7
       When:
       - Keyboard(Space,press)
       Do:
       - Edit(this.currentAim,this.currentAim+1)
       - PlaySound(ShotCharging)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 8
       When:
       - Compare(this.currentAim>=this.maxAim)
       Do:
       - Edit(this.currentAim,this.maxAim)
-      groupId: 
-    - Name: 
+      groupId: g172b8118
+    - Name: Rule 9
       When:
       - Keyboard(Space,up)
       Do:
       - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
       - Edit(this.currentAim,0)
       - PlaySound(ShotFiring)
-      groupId: 
-    Components: []
+      groupId: g172b8118
+    Components:
+    - type: Properties
+      name: Properties
+      id: 
+    - type: Rules
+      name: Rules
+      id: g172b8118
   - ActorName: RedTank
     Active: 1
     PrefabName: RedTank
@@ -644,13 +695,16 @@ MonoBehaviour:
     - 0
     - 0
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0.6
     Bounciness: 0
     Drag: 0.2
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties:
     - speed=10
     - angularSpeed=90
@@ -729,13 +783,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties:
     - speed=15
     - damage=50
@@ -775,13 +832,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script:
     - Name: 
@@ -805,13 +865,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script:
     - Name: 
@@ -832,13 +895,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script:
     - Name: 
@@ -859,13 +925,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties:
     - offsetY=0.05
     Script:
@@ -887,13 +956,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties:
     - offsetY=0.05
     Script:
@@ -915,13 +987,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script:
     - Name: 
@@ -939,13 +1014,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties: []
     Script:
     - Name: 
@@ -963,13 +1041,16 @@ MonoBehaviour:
     Position: []
     Rotation: []
     Scale: []
-    Size: []
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
     Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
     Properties:
     - despX=15
     - offsetY=15
