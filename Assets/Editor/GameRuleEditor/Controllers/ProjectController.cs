@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
+using GameRuleEditor.Core;
 
 namespace GameRuleEditor.Controllers
 {
@@ -97,6 +98,7 @@ namespace GameRuleEditor.Controllers
         {
             Undo.RecordObject(context, "Load Project");
             context.LoadProject(project);
+            SyncSoundTrackToScene();
             EditorUtility.SetDirty(context);
         }
 
@@ -260,6 +262,43 @@ namespace GameRuleEditor.Controllers
                 camera.transform.eulerAngles = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
 
             EditorSceneManager.MarkSceneDirty(camera.gameObject.scene);
+        }
+
+        /// <summary>
+        /// Applies the selected soundtrack to the generated GameManager immediately.
+        /// The GameManager prefab itself deliberately contains no fixed AudioSource.
+        /// </summary>
+        public void SyncSoundTrackToScene(bool recordUndo = true)
+        {
+            if (context.currentProject == null) return;
+
+            GameObject gameManager = FindSceneObjectByName("GameManager");
+            if (gameManager == null) return;
+
+            SoundTrackUtility.ApplyToGameManager(
+                gameManager,
+                context.currentProject.sceneData.SoundTrack,
+                recordUndo);
+
+            // Keep an already-generated GameManager component in sync when the scene
+            // does not need to be regenerated before Play.
+            foreach (MonoBehaviour behaviour in gameManager.GetComponents<MonoBehaviour>())
+            {
+                if (behaviour == null || behaviour.GetType().Name != "GameManager") continue;
+
+                var field = behaviour.GetType().GetField("SoundTrack");
+                if (field == null || field.FieldType != typeof(string)) continue;
+
+                string value = context.currentProject.sceneData.SoundTrack ?? "";
+                if (Equals(field.GetValue(behaviour), value)) continue;
+
+                if (recordUndo)
+                    Undo.RecordObject(behaviour, "Change Soundtrack");
+                field.SetValue(behaviour, value);
+                EditorUtility.SetDirty(behaviour);
+            }
+
+            EditorSceneManager.MarkSceneDirty(gameManager.scene);
         }
 
         /// <summary>

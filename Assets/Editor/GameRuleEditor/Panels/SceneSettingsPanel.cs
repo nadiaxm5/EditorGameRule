@@ -38,6 +38,7 @@ namespace GameRuleEditor.Panels
         private ColorField backgroundColorField;
 
         private Vector3Field gravityField;
+        private ObjectField soundTrackField;
 
         // Variable List Container
         private VisualElement customVariablesContainer;
@@ -211,6 +212,29 @@ namespace GameRuleEditor.Panels
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
+
+            // Audio section
+            var audioSection = CreateSection("Audio");
+            scrollView.Add(audioSection);
+
+            soundTrackField = new ObjectField("Soundtrack:")
+            {
+                objectType = typeof(AudioClip),
+                allowSceneObjects = false
+            };
+            soundTrackField.style.marginBottom = 5;
+            soundTrackField.RegisterValueChangedCallback(evt =>
+            {
+                if (context.currentProject == null) return;
+
+                Undo.RecordObject(context.currentProject, "Change Soundtrack");
+                context.currentProject.sceneData.SoundTrack =
+                    SoundTrackUtility.GetReference(evt.newValue as AudioClip);
+                controller.SyncSoundTrackToScene();
+                EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
+            });
+            audioSection.Add(soundTrackField);
 
             // Custom Variables section
             var customVarSection = CreateSection("Custom Global Variables");
@@ -447,6 +471,10 @@ namespace GameRuleEditor.Panels
             UpdateVector3Field(sunPosField, scene.SunPosition);
             UpdateVector3Field(sunRotField, scene.SunRotation);
             UpdateVector3Field(gravityField, scene.Gravity);
+
+            AudioClip soundTrack = SoundTrackUtility.Resolve(scene.SoundTrack);
+            if (soundTrackField.value != soundTrack)
+                soundTrackField.SetValueWithoutNotify(soundTrack);
 
             if (sunColorField.value != BytesToColor(scene.SunColor))
                 sunColorField.SetValueWithoutNotify(BytesToColor(scene.SunColor));

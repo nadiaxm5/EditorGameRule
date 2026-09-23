@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using GameRuleEditor.Core;
 using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 public static class Loader
@@ -58,6 +59,7 @@ public static class Loader
 
         GameObject gmInstance = Object.Instantiate(gameManagerPrefab);
         gmInstance.name = "GameManager";
+        SoundTrackUtility.ApplyToGameManager(gmInstance, scene.SoundTrack, false);
 
         // Load
         CreateTags(scene.Cast);

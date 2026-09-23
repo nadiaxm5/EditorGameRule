@@ -9,6 +9,7 @@
     "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
+    "SoundTrack": "Assets/Audio/Music/BackgroundMusic.mp3",
     "CustomVariables": [
         {"name": "Score", "type": "float", "floatValue": 0}
     ],
@@ -47,16 +48,16 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)",
                         "Edit(#CameraPosition.x,this.x)",
                         "Edit(#CameraPosition.z,this.z-this.offsetCam)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(RightArrow,press)"
                     ],
@@ -64,10 +65,10 @@
                         "Move(this.speed, 0, 90, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(LeftArrow,press)"
                     ],
@@ -75,10 +76,10 @@
                         "Move(this.speed, 0, -90, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(UpArrow,press)"
                     ],
@@ -86,10 +87,10 @@
                         "Move(this.speed, 0, 0, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Keyboard(DownArrow,press)"
                     ],
@@ -97,20 +98,20 @@
                         "Move(this.speed, 0, 180, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
                     ],
                     "Do": [
                         "Edit(this.moving,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Collision(Hellephant)"
                     ],
@@ -118,10 +119,10 @@
                         "Edit(this.health,this.health-Hellephant.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Collision(ZomBear)"
                     ],
@@ -129,10 +130,10 @@
                         "Edit(this.health,this.health-ZomBear.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "Collision(ZomBunny)"
                     ],
@@ -140,10 +141,10 @@
                         "Edit(this.health,this.health-ZomBunny.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 10",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -153,20 +154,20 @@
                         "Edit(this.moving,0)",
                         "Edit(this.speed,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 11",
                     "When": [
                         "Compare(this.health==this.lastHealth)"
                     ],
                     "Do": [
                         "Edit(DamageCanvas.Active,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 12",
                     "When": [
                         "Compare(this.health<this.lastHealth)"
                     ],
@@ -174,10 +175,10 @@
                         "Edit(DamageCanvas.Active,1)",
                         "Edit(this.lastHealth,this.health)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 13",
                     "When": [
                         "Touch(press,false)"
                     ],
@@ -188,37 +189,49 @@
                         "PlaySound(PlayerGunShot)",
                         "PlayParticles(GunBarrelEnd)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 14",
                     "When": [
                         "Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Move)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 15",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health>0)"
                     ],
                     "Do": [
                         "Animate(Idle)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 16",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health<=0)"
                     ],
                     "Do": [
                         "Animate(Death)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g754e79de"
                 }
             ]
         },

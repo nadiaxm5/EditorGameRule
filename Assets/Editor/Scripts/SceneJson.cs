@@ -14,7 +14,7 @@ public class SceneJson
     public byte[] SunAmbientColor;
     public byte[] BackgroundColor;
     public float[] Gravity;
-    public string SoundTrack;
+    public string SoundTrack = "";
     public float[] Mouse;
     public float[] MouseWorld;
     public List<ActorJson> Cast;

@@ -303,7 +303,6 @@ public static class Scripts
             outfile.WriteLine("    public static GameManager Instance { get; private set; }");
             outfile.WriteLine("    private Camera mainCamera;");
             outfile.WriteLine("    private Light sunLight;");
-            outfile.WriteLine("    private AudioSource audioSource;");
             outfile.WriteLine("");
 
             // Canonical actor order from the project descriptor, captured before Loader reverses
@@ -368,15 +367,10 @@ public static class Scripts
             else
                 outfile.WriteLine("    public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);");
 
-            outfile.WriteLine("    public string SoundTrack");
-            outfile.WriteLine("    {");
-            outfile.WriteLine("        get");
-            outfile.WriteLine("        {");
-            outfile.WriteLine("            if (audioSource != null && audioSource.clip != null)");
-            outfile.WriteLine("                return audioSource.clip.name;");
-            outfile.WriteLine("            return \"\";");
-            outfile.WriteLine("        }");
-            outfile.WriteLine("    }");
+            string soundTrack = (scene.SoundTrack ?? "")
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"");
+            outfile.WriteLine($"    public string SoundTrack = \"{soundTrack}\";");
 
             outfile.WriteLine("    public float FPS { get; private set; }");
 
@@ -420,7 +414,6 @@ public static class Scripts
             outfile.WriteLine("        ");
             outfile.WriteLine("        mainCamera = GetComponentInChildren<Camera>();");
             outfile.WriteLine("        sunLight = GetComponentInChildren<Light>();");
-            outfile.WriteLine("        audioSource = GetComponent<AudioSource>();");
             outfile.WriteLine("        ");
             outfile.WriteLine("        ApplyCameraSettings();");
             outfile.WriteLine("        ApplySunSettings();");

@@ -77,6 +77,10 @@ namespace GameRuleEditor.Windows
             {
                 if (context?.currentProject != null && controller != null)
                 {
+                    // Apply the project soundtrack even when the existing scene can be
+                    // reused and no regeneration is necessary.
+                    controller.SyncSoundTrackToScene(false);
+
                     // Check if the scene is already generated (same name + GameManager exists).
                     // Also require every actor to have a GameObject in the scene: adding an actor only
                     // touches project data, so without this an actor added after generation would be

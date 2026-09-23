@@ -83,6 +83,7 @@ namespace GameRuleEditor.Core
 
             sb.AppendLine($"    \"BackgroundColor\": {ColorToJson(sceneData.BackgroundColor)},");
             sb.AppendLine($"    \"Gravity\": {Vec3ToJson(sceneData.Gravity)},");
+            sb.AppendLine($"    \"SoundTrack\": \"{EscapeJsonString(sceneData.SoundTrack)}\",");
 
             // Custom Variables
             if (realVariables != null && realVariables.Count > 0)
@@ -137,6 +138,17 @@ namespace GameRuleEditor.Core
         {
             if (c == null || c.Length < 3) return "[255, 255, 255]";
             return $"[{c[0]}, {c[1]}, {c[2]}]";
+        }
+
+        private string EscapeJsonString(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n")
+                .Replace("\t", "\\t");
         }
 
         private string BuildCleanCustomVariablesJson(List<CustomVariable> variables)
@@ -223,6 +235,9 @@ namespace GameRuleEditor.Core
 
             if (sceneData.Gravity == null || sceneData.Gravity.Length < 3)
                 sceneData.Gravity = new float[] { 0, -9.81f, 0 };
+
+            if (sceneData.SoundTrack == null)
+                sceneData.SoundTrack = "";
 
             if (sceneData.CustomVariables == null)
                 sceneData.CustomVariables = new List<CustomVariable>();
