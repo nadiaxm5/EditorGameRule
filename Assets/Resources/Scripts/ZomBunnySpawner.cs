@@ -9,8 +9,6 @@ public class ZomBunnySpawner : MonoBehaviour, IGameRuleActor {
             Action.Spawn("ZomBunny", gameObject, "0", "0", "0", "0", "0", "0", scopeList);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Timer(3);Spawn(ZomBunny,this)");

@@ -9,8 +9,6 @@ public class ZomBearSpawner : MonoBehaviour, IGameRuleActor {
             Action.Spawn("ZomBear", gameObject, "0", "0", "0", "0", "0", "0", scopeList);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Timer(2);Spawn(ZomBear,this)");

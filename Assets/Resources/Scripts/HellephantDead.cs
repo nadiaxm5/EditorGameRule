@@ -14,8 +14,6 @@ public class HellephantDead : MonoBehaviour, IGameRuleActor {
             Action.Delete(gameObject);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Animate(Death);PlaySound(HellephantDeath);PlayParticles(DeathParticles);Timer(1);Delete(this)");

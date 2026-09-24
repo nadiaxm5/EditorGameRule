@@ -103,10 +103,7 @@ public static class Action
 
         Vector3 direction = new Vector3(Mathf.Cos(rx) * Mathf.Sin(ry), Mathf.Sin(rx), Mathf.Cos(rx) * Mathf.Cos(ry)).normalized;
         Vector3 delta = direction * v * Time.deltaTime;
-
-        Utils.SetProperty("this.x", obj.transform.position.x + delta.x, obj);
-        Utils.SetProperty("this.y", obj.transform.position.y + delta.y, obj);
-        Utils.SetProperty("this.z", obj.transform.position.z + delta.z, obj);
+        Utils.SetPosition(obj, Utils.GetPosition(obj) + delta);
     }
 
     public static void MoveTo(string speedExp, string xExp, string yExp, string zExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -120,7 +117,7 @@ public static class Action
         float targetZ = (float)parser.ParseNumber(zExp).GetNumber();
         float speed = (float)parser.ParseNumber(speedExp).GetNumber();
 
-        Vector3 currentPos = obj.transform.position;
+        Vector3 currentPos = Utils.GetPosition(obj);
         Vector3 targetPos = new Vector3(targetX, targetY, targetZ);
         Vector3 direction = (targetPos - currentPos).normalized;
         Vector3 step = direction * speed * Time.deltaTime;
@@ -129,9 +126,7 @@ public static class Action
             step = targetPos - currentPos;
         Vector3 newPos = currentPos + step;
 
-        Utils.SetProperty("this.x", newPos.x, obj);
-        Utils.SetProperty("this.y", newPos.y, obj);
-        Utils.SetProperty("this.z", newPos.z, obj);
+        Utils.SetPosition(obj, newPos);
     }
 
     public static void NavigateTo(string speedExp, string xExp, string yExp, string zExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -236,11 +231,8 @@ public static class Action
 
         Vector3 localAxis = new Vector3(rx, ry, rz).normalized;
         if (localAxis == Vector3.zero) localAxis = Vector3.up;
-        obj.transform.Rotate(localAxis, angleDelta, Space.Self);
-
-        Utils.SetProperty(obj.name + ".rx", obj.transform.eulerAngles.x, obj);
-        Utils.SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
-        Utils.SetProperty(obj.name + ".rz", obj.transform.eulerAngles.z, obj);
+        Quaternion newRotation = Utils.GetRotation(obj) * Quaternion.AngleAxis(angleDelta, localAxis);
+        Utils.SetRotation(obj, newRotation);
     }
 
     public static void RotateTo(string aExp, string dxExp, string dyExp, string dzExp, string pxExp, string pyExp, string pzExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -259,15 +251,14 @@ public static class Action
 
         Vector3 pivot = new Vector3(px, py, pz);
         Vector3 targetDir = new Vector3(dx, dy, dz) - pivot;
-        Vector3 currentDir = obj.transform.position - pivot;
+        Vector3 currentDir = Utils.GetPosition(obj) - pivot;
 
         Quaternion targetRot = Quaternion.LookRotation(targetDir.normalized, Vector3.up);
-        obj.transform.rotation = Quaternion.RotateTowards(obj.transform.rotation, targetRot, a * Time.deltaTime);
+        Quaternion newRotation = Quaternion.RotateTowards(Utils.GetRotation(obj), targetRot, a * Time.deltaTime);
+        Utils.SetRotation(obj, newRotation);
 
         Vector3 rotatedPos = pivot + targetRot * currentDir.normalized * currentDir.magnitude;
-        obj.transform.position = rotatedPos;
-
-        Utils.SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
+        Utils.SetPosition(obj, rotatedPos);
     }
 
     public static void Push(string forceExp, string rxExp, string ryExp, string rzExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -306,7 +297,7 @@ public static class Action
         float targetZ = (float)parser.ParseNumber(zExp).GetNumber();
 
         Vector3 targetPos = new Vector3(targetX, targetY, targetZ);
-        Vector3 direction = (targetPos - obj.transform.position).normalized;
+        Vector3 direction = (targetPos - Utils.GetPosition(obj)).normalized;
         Vector3 forceVector = direction * force;
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();

@@ -9,8 +9,6 @@ public class HellephantSpawner : MonoBehaviour, IGameRuleActor {
             Action.Spawn("Hellephant", gameObject, "0", "0", "0", "0", "0", "0", scopeList);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Timer(5);Spawn(Hellephant,this)");

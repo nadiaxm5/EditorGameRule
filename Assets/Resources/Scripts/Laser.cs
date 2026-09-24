@@ -9,8 +9,6 @@ public class Laser : MonoBehaviour, IGameRuleActor {
             Action.Delete(gameObject);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Delete(this)");

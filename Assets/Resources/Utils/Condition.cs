@@ -1,9 +1,6 @@
 ﻿using B83.LogicExpressionParser;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
 public static class Condition
 {
@@ -41,53 +38,28 @@ public static class Condition
 
     public static bool Keyboard(string key, string keyMode)
     {
-        // Case-insensitive so "d" and "D" both resolve to Key.D (the Key enum members are PascalCase).
-        // TryParse also avoids throwing every frame when the key name is invalid.
-        if (!Enum.TryParse(key?.Trim(), ignoreCase: true, out Key k))
-            return false;
-
-        switch (keyMode)
-        {
-            case "press": return UnityEngine.InputSystem.Keyboard.current[k].isPressed;
-            case "down": return UnityEngine.InputSystem.Keyboard.current[k].wasPressedThisFrame;
-            case "up": return UnityEngine.InputSystem.Keyboard.current[k].wasReleasedThisFrame;
-        }
-        return false;
+        return GameRuleInput.KeyboardState(key, keyMode);
     }
 
     public static bool Touch(string type, string onActor, GameObject obj)
     {
-        var mouse = Mouse.current;
-        if (mouse == null) return false;
-        ButtonControl btn = mouse.leftButton;
+        bool inputMatches = GameRuleInput.TouchState(type);
+        bool isOverMode = string.Equals(type?.Trim(), "isOver", System.StringComparison.OrdinalIgnoreCase);
 
         if (onActor.Contains("false"))
-        {
-            switch (type)
-            {
-                case "press": return btn.isPressed;
-                case "down": return btn.wasPressedThisFrame;
-                case "up": return btn.wasReleasedThisFrame;
-                case "tap": return btn.wasReleasedThisFrame && !btn.isPressed;
-                case "isOver": return false;
-            }
-        }
+            return isOverMode ? false : inputMatches;
 
         if (onActor.Contains("true"))
         {
             bool isOverActor = false;
-            Ray ray = Camera.main.ScreenPointToRay(mouse.position.ReadValue());
+            Camera camera = Camera.main;
+            if (camera == null) return false;
+
+            Ray ray = camera.ScreenPointToRay(GameRuleInput.PointerPosition(type));
             if (Physics.Raycast(ray, out RaycastHit hit))
                 isOverActor = hit.collider.gameObject == obj;
 
-            switch (type)
-            {
-                case "press": return isOverActor && btn.isPressed;
-                case "down": return isOverActor && btn.wasPressedThisFrame;
-                case "up": return isOverActor && btn.wasReleasedThisFrame;
-                case "tap": return isOverActor && btn.wasReleasedThisFrame && !btn.isPressed;
-                case "isOver": return isOverActor;
-            }
+            return isOverMode ? isOverActor : isOverActor && inputMatches;
         }
 
         return false;

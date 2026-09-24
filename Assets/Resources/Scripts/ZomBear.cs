@@ -35,8 +35,6 @@ public class ZomBear : MonoBehaviour, IGameRuleActor {
             Action.Animate("Move",gameObject);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Edit(this.moving,1);NavigateTo(this.speed,Player.x,Player.y,Player.z);Compare(Player.health<0);Edit(this.moving,0);Edit(this.speed,0);Collision(Bullet);Edit(this.health,this.health-Bullet.damage);PlaySound(ZomBearHurt);PlayParticles(HitParticles);Compare(this.health<=0);Edit(#Score,#Score+10);Spawn(ZomBearDead,this);Delete(this);Check(this.moving);Animate(Idle);Animate(Move)");

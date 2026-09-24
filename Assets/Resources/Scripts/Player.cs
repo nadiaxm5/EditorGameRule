@@ -20,6 +20,25 @@ public class Player : MonoBehaviour, IGameRuleActor {
             Action.Edit("#CameraPosition.x","this.x",scopeList);
             Action.Edit("#CameraPosition.z","this.z-this.offsetCam",scopeList);
         }
+        if(Condition.Keyboard("RightArrow","press")){
+            Action.Move("this.speed"," 0"," 90"," 0",gameObject,scopeList);
+            Action.Edit("this.moving","1",scopeList);
+        }
+        if(Condition.Keyboard("LeftArrow","press")){
+            Action.Move("this.speed"," 0"," -90"," 0",gameObject,scopeList);
+            Action.Edit("this.moving","1",scopeList);
+        }
+        if(Condition.Keyboard("UpArrow","press")){
+            Action.Move("this.speed"," 0"," 0"," 0",gameObject,scopeList);
+            Action.Edit("this.moving","1",scopeList);
+        }
+        if(Condition.Keyboard("DownArrow","press")){
+            Action.Move("this.speed"," 0"," 180"," 0",gameObject,scopeList);
+            Action.Edit("this.moving","1",scopeList);
+        }
+        if(Condition.Keyboard("RightArrow","up") || Condition.Keyboard("LeftArrow","up") || Condition.Keyboard("UpArrow","up") || Condition.Keyboard("DownArrow","up")){
+            Action.Edit("this.moving","0",scopeList);
+        }
         if(Condition.Collision("Hellephant",gameObject)){
             Action.Edit("this.health","this.health-Hellephant.damage",scopeList);
             Action.PlaySound("PlayerHurt",gameObject);
@@ -45,6 +64,13 @@ public class Player : MonoBehaviour, IGameRuleActor {
             Action.Edit("DamageCanvas.Active","1",scopeList);
             Action.Edit("this.lastHealth","this.health",scopeList);
         }
+        if(Condition.Touch("press","false",gameObject)){
+            Action.Spawn("Bullet", gameObject, "this.offsetX", "this.offsetY", "this.offsetZ", "0", "0", "0", scopeList);
+            Action.Spawn("Laser", gameObject, "this.offsetX", "this.offsetY", "this.offsetZ", "0", "0", "0", scopeList);
+            Action.Edit("ShotLight.Active","1",scopeList);
+            Action.PlaySound("PlayerGunShot",gameObject);
+            Action.PlayParticles("GunBarrelEnd",gameObject);
+        }
         if(Condition.Check("this.moving",scopeList)){
             Action.Animate("Move",gameObject);
         }
@@ -55,37 +81,9 @@ public class Player : MonoBehaviour, IGameRuleActor {
             Action.Animate("Death",gameObject);
         }
     }
-    public void EvalUpdate(){
-        if(Condition.Keyboard("RightArrow","press")){
-            Action.Move("this.speed"," 0"," 90"," 0",gameObject,scopeList);
-            Action.Edit("this.moving","1",scopeList);
-        }
-        if(Condition.Keyboard("LeftArrow","press")){
-            Action.Move("this.speed"," 0"," -90"," 0",gameObject,scopeList);
-            Action.Edit("this.moving","1",scopeList);
-        }
-        if(Condition.Keyboard("UpArrow","press")){
-            Action.Move("this.speed"," 0"," 0"," 0",gameObject,scopeList);
-            Action.Edit("this.moving","1",scopeList);
-        }
-        if(Condition.Keyboard("DownArrow","press")){
-            Action.Move("this.speed"," 0"," 180"," 0",gameObject,scopeList);
-            Action.Edit("this.moving","1",scopeList);
-        }
-        if(Condition.Keyboard("RightArrow","up") || Condition.Keyboard("LeftArrow","up") || Condition.Keyboard("UpArrow","up") || Condition.Keyboard("DownArrow","up")){
-            Action.Edit("this.moving","0",scopeList);
-        }
-        if(Condition.Touch("press","false",gameObject)){
-            Action.Spawn("Bullet", gameObject, "this.offsetX", "this.offsetY", "this.offsetZ", "0", "0", "0", scopeList);
-            Action.Spawn("Laser", gameObject, "this.offsetX", "this.offsetY", "this.offsetZ", "0", "0", "0", scopeList);
-            Action.Edit("ShotLight.Active","1",scopeList);
-            Action.PlaySound("PlayerGunShot",gameObject);
-            Action.PlayParticles("GunBarrelEnd",gameObject);
-        }
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
-        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z);Edit(#CameraPosition.x,this.x);Edit(#CameraPosition.z,this.z-this.offsetCam);Collision(Hellephant);Edit(this.health,this.health-Hellephant.damage);PlaySound(PlayerHurt);Collision(ZomBear);Edit(this.health,this.health-ZomBear.damage);Collision(ZomBunny);Edit(this.health,this.health-ZomBunny.damage);Compare(this.health<=0);Edit(GameOver.Active,1);PlaySound(PlayerDeath);Edit(this.moving,0);Edit(this.speed,0);Compare(this.health==this.lastHealth);Edit(DamageCanvas.Active,0);Compare(this.health<this.lastHealth);Edit(DamageCanvas.Active,1);Edit(this.lastHealth,this.health);Check(this.moving);Animate(Move);Compare(this.health>0);Animate(Idle);Animate(Death);Keyboard(RightArrow,press);Move(this.speed, 0, 90, 0);Edit(this.moving,1);Keyboard(LeftArrow,press);Move(this.speed, 0, -90, 0);Keyboard(UpArrow,press);Move(this.speed, 0, 0, 0);Keyboard(DownArrow,press);Move(this.speed, 0, 180, 0);Keyboard(RightArrow,up);Keyboard(LeftArrow,up);Keyboard(UpArrow,up);Keyboard(DownArrow,up);Touch(press,false);Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ);Spawn(Laser,this,this.offsetX,this.offsetY,this.offsetZ);Edit(ShotLight.Active,1);PlaySound(PlayerGunShot);PlayParticles(GunBarrelEnd)");
+        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z);Edit(#CameraPosition.x,this.x);Edit(#CameraPosition.z,this.z-this.offsetCam);Keyboard(RightArrow,press);Move(this.speed, 0, 90, 0);Edit(this.moving,1);Keyboard(LeftArrow,press);Move(this.speed, 0, -90, 0);Keyboard(UpArrow,press);Move(this.speed, 0, 0, 0);Keyboard(DownArrow,press);Move(this.speed, 0, 180, 0);Keyboard(RightArrow,up);Keyboard(LeftArrow,up);Keyboard(UpArrow,up);Keyboard(DownArrow,up);Edit(this.moving,0);Collision(Hellephant);Edit(this.health,this.health-Hellephant.damage);PlaySound(PlayerHurt);Collision(ZomBear);Edit(this.health,this.health-ZomBear.damage);Collision(ZomBunny);Edit(this.health,this.health-ZomBunny.damage);Compare(this.health<=0);Edit(GameOver.Active,1);PlaySound(PlayerDeath);Edit(this.speed,0);Compare(this.health==this.lastHealth);Edit(DamageCanvas.Active,0);Compare(this.health<this.lastHealth);Edit(DamageCanvas.Active,1);Edit(this.lastHealth,this.health);Touch(press,false);Spawn(Bullet,this,this.offsetX,this.offsetY,this.offsetZ);Spawn(Laser,this,this.offsetX,this.offsetY,this.offsetZ);Edit(ShotLight.Active,1);PlaySound(PlayerGunShot);PlayParticles(GunBarrelEnd);Check(this.moving);Animate(Move);Compare(this.health>0);Animate(Idle);Animate(Death)");
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
     }

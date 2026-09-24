@@ -5,6 +5,50 @@ using System.Linq;
 
 public static class Utils
 {
+    public static Vector3 GetPosition(GameObject obj)
+    {
+        if (obj == null) return Vector3.zero;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        return body != null && !body.isKinematic ? body.position : obj.transform.position;
+    }
+
+    public static Quaternion GetRotation(GameObject obj)
+    {
+        if (obj == null) return Quaternion.identity;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        return body != null && !body.isKinematic ? body.rotation : obj.transform.rotation;
+    }
+
+    public static void SetPosition(GameObject obj, Vector3 position)
+    {
+        if (obj == null) return;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        if (body != null && !body.isKinematic)
+        {
+            if (body.interpolation == RigidbodyInterpolation.None)
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.MovePosition(position);
+            return;
+        }
+
+        obj.transform.position = position;
+    }
+
+    public static void SetRotation(GameObject obj, Quaternion rotation)
+    {
+        if (obj == null) return;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        if (body != null && !body.isKinematic)
+        {
+            if (body.interpolation == RigidbodyInterpolation.None)
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.MoveRotation(rotation);
+            return;
+        }
+
+        obj.transform.rotation = rotation;
+    }
+
     public static float GetProperty(KeyValuePair<string, GameObject> s)
     {
         GameObject obj = s.Value;
@@ -20,12 +64,12 @@ public static class Utils
         {
             switch (elements[1])
             {
-                case "x": value = obj.transform.position.x; break;
-                case "y": value = obj.transform.position.y; break;
-                case "z": value = obj.transform.position.z; break;
-                case "rx": value = obj.transform.eulerAngles.x; break;
-                case "ry": value = obj.transform.eulerAngles.y; break;
-                case "rz": value = obj.transform.eulerAngles.z; break;
+                case "x": value = GetPosition(obj).x; break;
+                case "y": value = GetPosition(obj).y; break;
+                case "z": value = GetPosition(obj).z; break;
+                case "rx": value = GetRotation(obj).eulerAngles.x; break;
+                case "ry": value = GetRotation(obj).eulerAngles.y; break;
+                case "rz": value = GetRotation(obj).eulerAngles.z; break;
                 case "sx": value = obj.transform.localScale.x; break;
                 case "sy": value = obj.transform.localScale.y; break;
                 case "sz": value = obj.transform.localScale.z; break;
@@ -159,12 +203,12 @@ public static class Utils
             var script = obj.GetComponent(obj.name);
             switch (elements[1])
             {
-                case "x": obj.transform.position = new Vector3(value, obj.transform.position.y, obj.transform.position.z); break;
-                case "y": obj.transform.position = new Vector3(obj.transform.position.x, value, obj.transform.position.z); break;
-                case "z": obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, value); break;
-                case "rx": obj.transform.eulerAngles = new Vector3(value, obj.transform.eulerAngles.y, obj.transform.eulerAngles.z); break;
-                case "ry": obj.transform.eulerAngles = new Vector3(obj.transform.eulerAngles.x, value, obj.transform.eulerAngles.z); break;
-                case "rz": obj.transform.eulerAngles = new Vector3(obj.transform.eulerAngles.x, obj.transform.eulerAngles.y, value); break;
+                case "x": { Vector3 p = GetPosition(obj); p.x = value; SetPosition(obj, p); break; }
+                case "y": { Vector3 p = GetPosition(obj); p.y = value; SetPosition(obj, p); break; }
+                case "z": { Vector3 p = GetPosition(obj); p.z = value; SetPosition(obj, p); break; }
+                case "rx": { Vector3 r = GetRotation(obj).eulerAngles; r.x = value; SetRotation(obj, Quaternion.Euler(r)); break; }
+                case "ry": { Vector3 r = GetRotation(obj).eulerAngles; r.y = value; SetRotation(obj, Quaternion.Euler(r)); break; }
+                case "rz": { Vector3 r = GetRotation(obj).eulerAngles; r.z = value; SetRotation(obj, Quaternion.Euler(r)); break; }
                 case "sx": obj.transform.localScale = new Vector3(value, obj.transform.localScale.y, obj.transform.localScale.z); break;
                 case "sy": obj.transform.localScale = new Vector3(obj.transform.localScale.x, value, obj.transform.localScale.z); break;
                 case "sz": obj.transform.localScale = new Vector3(obj.transform.localScale.x, obj.transform.localScale.y, value); break;

@@ -27,10 +27,13 @@
             "IconColorHex": "",
             "Position": [-3.0, 0.0, 30.0],
             "Rotation": [0.0, 180.0, 0.0],
-            "Velocity": [10.0, 0.0, 10.0],
-            "AngularVelocity": [0.0, 90.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Velocity": [0.0, 0.0, 0.0],
+            "AngularVelocity": [0.0, 0.0, 0.0],
             "Friction": 0.6000000238418579,
             "Drag": 0.20000000298023225,
+            "OverrideFriction": true,
+            "OverrideDrag": true,
             "Properties": [
                 "speed=10",
                 "angularSpeed=90",
@@ -42,7 +45,7 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Keyboard(D,press)"
                     ],
@@ -50,10 +53,10 @@
                         "Rotate(this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(A,press)"
                     ],
@@ -61,30 +64,30 @@
                         "Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(W,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(S,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry+180,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Collision(Shell)"
                     ],
@@ -92,20 +95,20 @@
                         "Edit(this.health,this.health-Shell.damage)",
                         "PushTo(-300,RedTank.x,RedTank.y,RedTank.z)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
                     "Do": [
                         "Edit(RedWin.Active,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Keyboard(Space,press)"
                     ],
@@ -113,20 +116,20 @@
                         "Edit(this.currentAim,this.currentAim+1)",
                         "PlaySound(ShotCharging)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Compare(this.currentAim>=this.maxAim)"
                     ],
                     "Do": [
                         "Edit(this.currentAim,this.maxAim)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "Keyboard(Space,up)"
                     ],
@@ -135,7 +138,19 @@
                         "Edit(this.currentAim,0)",
                         "PlaySound(ShotFiring)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g172b8118"
                 }
             ]
         },

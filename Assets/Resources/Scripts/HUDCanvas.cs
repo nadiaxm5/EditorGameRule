@@ -10,8 +10,6 @@ public class HUDCanvas : MonoBehaviour, IGameRuleActor {
             Action.Edit("this.text","#Score",scopeList);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Edit(this.sliderValue,Player.health);Edit(this.text,#Score)");

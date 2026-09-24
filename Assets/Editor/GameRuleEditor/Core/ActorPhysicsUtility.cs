@@ -113,13 +113,16 @@ namespace GameRuleEditor.Core
                 if (Different(targetBody.linearVelocity, velocity) ||
                     Different(targetBody.angularVelocity, angularVelocity) ||
                     Different(targetBody.mass, density) ||
-                    Different(targetBody.linearDamping, drag))
+                    Different(targetBody.linearDamping, drag) ||
+                    targetBody.interpolation == RigidbodyInterpolation.None)
                 {
                     if (recordUndo) Undo.RecordObject(targetBody, "Apply Actor Physics");
                     targetBody.linearVelocity = velocity;
                     targetBody.angularVelocity = angularVelocity;
                     targetBody.mass = density;
                     targetBody.linearDamping = drag;
+                    if (targetBody.interpolation == RigidbodyInterpolation.None)
+                        targetBody.interpolation = RigidbodyInterpolation.Interpolate;
                     changed = true;
                 }
             }

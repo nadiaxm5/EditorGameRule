@@ -46,8 +46,7 @@ public static class Scripts
                 outfile.WriteLine("    public Dictionary<string, float> propertyList = new Dictionary<string, float>();");
             outfile.WriteLine("    private Dictionary<string, float> timers = new Dictionary<string, float>();");
 
-            // Split Update and FixedUpdate
-            List<SentenceJson> updateSentences = new List<SentenceJson>();
+            // Every rule is evaluated in declaration order during one deterministic fixed tick.
             List<SentenceJson> fixedSentences = new List<SentenceJson>();
 
             foreach (SentenceJson s in actor.Script)
@@ -59,48 +58,13 @@ public static class Scripts
                 // Skip sentences with no actions
                 if (s.Do == null || !s.Do.Any()) continue;
 
-                bool isUpdate = s.When != null && s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
-                if (isUpdate) updateSentences.Add(s);
-                else fixedSentences.Add(s);
+                fixedSentences.Add(s);
             }
 
             // Physics-phase rules are invoked by the central scheduler in actor declaration order.
             // Always emit the method, even when empty, to satisfy IGameRuleActor.
             outfile.WriteLine("    public void EvalFixedUpdate(){");
             foreach (SentenceJson s in fixedSentences)
-            {
-                if (s.When != null && s.When.Any())
-                {
-                    outfile.Write("        if(");
-                    string conditionExpression = ProcessCondition(s.When[0]);
-                    outfile.Write(conditionExpression);
-                    outfile.WriteLine("){");
-
-                    foreach (string c in ExtractIndividualConditions(s.When[0]))
-                    {
-                        if (c.Contains("Collision")) hasCollision = true;
-                        scope.Add(c);
-                    }
-                }
-                else
-                {
-                    outfile.WriteLine("        {");
-                }
-
-                foreach (string a in s.Do)
-                {
-                    if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
-                    scope.Add(a);
-                    outfile.WriteLine("            Action." + StringToCommand(a) + ";");
-                }
-                outfile.WriteLine("        }");
-            }
-            outfile.WriteLine("    }");
-
-            // Input-phase rules are invoked by the central scheduler in actor declaration order.
-            // Always emit the method, even when empty, to satisfy IGameRuleActor.
-            outfile.WriteLine("    public void EvalUpdate(){");
-            foreach (SentenceJson s in updateSentences)
             {
                 if (s.When != null && s.When.Any())
                 {
@@ -305,6 +269,10 @@ public static class Scripts
             outfile.WriteLine("    public static GameManager Instance { get; private set; }");
             outfile.WriteLine("    private Camera mainCamera;");
             outfile.WriteLine("    private Light sunLight;");
+            outfile.WriteLine("    private Vector3 previousCameraPosition;");
+            outfile.WriteLine("    private Vector3 currentCameraPosition;");
+            outfile.WriteLine("    private Quaternion previousCameraRotation;");
+            outfile.WriteLine("    private Quaternion currentCameraRotation;");
             outfile.WriteLine("");
 
             // Canonical actor order from the project descriptor, captured before Loader reverses
@@ -417,7 +385,8 @@ public static class Scripts
             outfile.WriteLine("        mainCamera = GetComponentInChildren<Camera>();");
             outfile.WriteLine("        sunLight = GetComponentInChildren<Light>();");
             outfile.WriteLine("        ");
-            outfile.WriteLine("        ApplyCameraSettings();");
+            outfile.WriteLine("        InitializeCameraState();");
+            outfile.WriteLine("        ApplyCameraSettingsImmediate();");
             outfile.WriteLine("        ApplySunSettings();");
             outfile.WriteLine("        ApplyGlobalSettings();");
             outfile.WriteLine("        ");
@@ -441,17 +410,32 @@ public static class Scripts
 
             outfile.WriteLine("    void Update()");
             outfile.WriteLine("    {");
-            outfile.WriteLine("        UpdateRuntimeVariables();");
-            outfile.WriteLine("        ActorScheduler.RunUpdate();");
+            outfile.WriteLine("        GameRuleInput.CaptureFrame();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
             outfile.WriteLine("    void FixedUpdate()");
             outfile.WriteLine("    {");
-            outfile.WriteLine("        UpdateMousePosition();");
-            outfile.WriteLine("        ActorScheduler.RunFixedUpdate();");
-            outfile.WriteLine("        ApplyCameraSettings();");
-            outfile.WriteLine("        ApplySunSettings();");
+            outfile.WriteLine("        GameRuleInput.BeginFixedTick();");
+            outfile.WriteLine("        try");
+            outfile.WriteLine("        {");
+            outfile.WriteLine("            UpdateRuntimeVariables();");
+            outfile.WriteLine("            UpdateMousePosition();");
+            outfile.WriteLine("            BeginCameraFixedTick();");
+            outfile.WriteLine("            ActorScheduler.RunFixedUpdate();");
+            outfile.WriteLine("            EndCameraFixedTick();");
+            outfile.WriteLine("            ApplySunSettings();");
+            outfile.WriteLine("        }");
+            outfile.WriteLine("        finally");
+            outfile.WriteLine("        {");
+            outfile.WriteLine("            GameRuleInput.EndFixedTick();");
+            outfile.WriteLine("        }");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    void LateUpdate()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        ApplyCameraSettingsInterpolated();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
@@ -467,23 +451,54 @@ public static class Scripts
             outfile.WriteLine("    {");
             outfile.WriteLine("        if (mainCamera != null)");
             outfile.WriteLine("        {");
-            outfile.WriteLine("            var mouse = UnityEngine.InputSystem.Mouse.current;");
-            outfile.WriteLine("            if (mouse != null)");
+            outfile.WriteLine("            Vector2 m = GameRuleInput.PointerPosition();");
+            outfile.WriteLine("            Mouse = new Vector3(m.x, m.y, 0);");
+            outfile.WriteLine();
+            outfile.WriteLine("            Transform cameraTransform = mainCamera.transform;");
+            outfile.WriteLine("            Vector3 renderedPosition = cameraTransform.position;");
+            outfile.WriteLine("            Quaternion renderedRotation = cameraTransform.rotation;");
+            outfile.WriteLine("            Ray ray;");
+            outfile.WriteLine("            try");
             outfile.WriteLine("            {");
-            outfile.WriteLine("                Vector2 m = mouse.position.ReadValue();");
-            outfile.WriteLine("                Mouse = new Vector3(m.x, m.y, 0);");
-            outfile.WriteLine();
-            outfile.WriteLine("                Ray ray = mainCamera.ScreenPointToRay(Mouse);");
-            outfile.WriteLine("                Plane plane = new Plane(Vector3.up, Vector3.zero);");
-            outfile.WriteLine();
-            outfile.WriteLine("                if (plane.Raycast(ray, out float enter))");
-            outfile.WriteLine("                    MouseWorld = ray.GetPoint(enter);");
+            outfile.WriteLine("                cameraTransform.SetPositionAndRotation(CameraPosition, Quaternion.Euler(CameraRotation));");
+            outfile.WriteLine("                ray = mainCamera.ScreenPointToRay(Mouse);");
             outfile.WriteLine("            }");
+            outfile.WriteLine("            finally");
+            outfile.WriteLine("            {");
+            outfile.WriteLine("                cameraTransform.SetPositionAndRotation(renderedPosition, renderedRotation);");
+            outfile.WriteLine("            }");
+            outfile.WriteLine("            Plane plane = new Plane(Vector3.up, Vector3.zero);");
+            outfile.WriteLine();
+            outfile.WriteLine("            if (plane.Raycast(ray, out float enter))");
+            outfile.WriteLine("                MouseWorld = ray.GetPoint(enter);");
             outfile.WriteLine("        }");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
-            outfile.WriteLine("    private void ApplyCameraSettings()");
+            outfile.WriteLine("    private void InitializeCameraState()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        previousCameraPosition = CameraPosition;");
+            outfile.WriteLine("        currentCameraPosition = CameraPosition;");
+            outfile.WriteLine("        previousCameraRotation = Quaternion.Euler(CameraRotation);");
+            outfile.WriteLine("        currentCameraRotation = previousCameraRotation;");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void BeginCameraFixedTick()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        previousCameraPosition = currentCameraPosition;");
+            outfile.WriteLine("        previousCameraRotation = currentCameraRotation;");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void EndCameraFixedTick()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        currentCameraPosition = CameraPosition;");
+            outfile.WriteLine("        currentCameraRotation = Quaternion.Euler(CameraRotation);");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void ApplyCameraSettingsImmediate()");
             outfile.WriteLine("    {");
             outfile.WriteLine("        if (mainCamera != null)");
             outfile.WriteLine("        {");
@@ -491,6 +506,21 @@ public static class Scripts
             outfile.WriteLine("            mainCamera.transform.eulerAngles = CameraRotation;");
             outfile.WriteLine("            mainCamera.backgroundColor = BackgroundColor;");
             outfile.WriteLine("        }");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void ApplyCameraSettingsInterpolated()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        if (mainCamera == null) return;");
+            outfile.WriteLine();
+            outfile.WriteLine("        float step = UnityEngine.Time.fixedDeltaTime;");
+            outfile.WriteLine("        float alpha = step > 0f");
+            outfile.WriteLine("            ? Mathf.Clamp01((UnityEngine.Time.time - UnityEngine.Time.fixedTime) / step)");
+            outfile.WriteLine("            : 1f;");
+            outfile.WriteLine();
+            outfile.WriteLine("        mainCamera.transform.position = Vector3.Lerp(previousCameraPosition, currentCameraPosition, alpha);");
+            outfile.WriteLine("        mainCamera.transform.rotation = Quaternion.Slerp(previousCameraRotation, currentCameraRotation, alpha);");
+            outfile.WriteLine("        mainCamera.backgroundColor = BackgroundColor;");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 

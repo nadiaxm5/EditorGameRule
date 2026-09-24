@@ -8,6 +8,10 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     private Camera mainCamera;
     private Light sunLight;
+    private Vector3 previousCameraPosition;
+    private Vector3 currentCameraPosition;
+    private Quaternion previousCameraRotation;
+    private Quaternion currentCameraRotation;
 
     private static readonly string[] ActorOrder = new string[] { "LightingReflection", "Environment", "Player", "Hellephant", "ZomBear", "ZomBunny", "HellephantSpawner", "ZomBearSpawner", "ZomBunnySpawner", "HellephantDead", "ZomBearDead", "ZomBunnyDead", "Bullet", "ShotLight", "Laser", "DamageCanvas", "HUDCanvas", "GameOver" };
 
@@ -46,7 +50,8 @@ public class GameManager : MonoBehaviour
         mainCamera = GetComponentInChildren<Camera>();
         sunLight = GetComponentInChildren<Light>();
         
-        ApplyCameraSettings();
+        InitializeCameraState();
+        ApplyCameraSettingsImmediate();
         ApplySunSettings();
         ApplyGlobalSettings();
         
@@ -67,16 +72,30 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        UpdateRuntimeVariables();
-        ActorScheduler.RunUpdate();
+        GameRuleInput.CaptureFrame();
     }
 
     void FixedUpdate()
     {
-        UpdateMousePosition();
-        ActorScheduler.RunFixedUpdate();
-        ApplyCameraSettings();
-        ApplySunSettings();
+        GameRuleInput.BeginFixedTick();
+        try
+        {
+            UpdateRuntimeVariables();
+            UpdateMousePosition();
+            BeginCameraFixedTick();
+            ActorScheduler.RunFixedUpdate();
+            EndCameraFixedTick();
+            ApplySunSettings();
+        }
+        finally
+        {
+            GameRuleInput.EndFixedTick();
+        }
+    }
+
+    void LateUpdate()
+    {
+        ApplyCameraSettingsInterpolated();
     }
 
     private void UpdateRuntimeVariables()
@@ -90,22 +109,50 @@ public class GameManager : MonoBehaviour
     {
         if (mainCamera != null)
         {
-            var mouse = UnityEngine.InputSystem.Mouse.current;
-            if (mouse != null)
+            Vector2 m = GameRuleInput.PointerPosition();
+            Mouse = new Vector3(m.x, m.y, 0);
+
+            Transform cameraTransform = mainCamera.transform;
+            Vector3 renderedPosition = cameraTransform.position;
+            Quaternion renderedRotation = cameraTransform.rotation;
+            Ray ray;
+            try
             {
-                Vector2 m = mouse.position.ReadValue();
-                Mouse = new Vector3(m.x, m.y, 0);
-
-                Ray ray = mainCamera.ScreenPointToRay(Mouse);
-                Plane plane = new Plane(Vector3.up, Vector3.zero);
-
-                if (plane.Raycast(ray, out float enter))
-                    MouseWorld = ray.GetPoint(enter);
+                cameraTransform.SetPositionAndRotation(CameraPosition, Quaternion.Euler(CameraRotation));
+                ray = mainCamera.ScreenPointToRay(Mouse);
             }
+            finally
+            {
+                cameraTransform.SetPositionAndRotation(renderedPosition, renderedRotation);
+            }
+            Plane plane = new Plane(Vector3.up, Vector3.zero);
+
+            if (plane.Raycast(ray, out float enter))
+                MouseWorld = ray.GetPoint(enter);
         }
     }
 
-    private void ApplyCameraSettings()
+    private void InitializeCameraState()
+    {
+        previousCameraPosition = CameraPosition;
+        currentCameraPosition = CameraPosition;
+        previousCameraRotation = Quaternion.Euler(CameraRotation);
+        currentCameraRotation = previousCameraRotation;
+    }
+
+    private void BeginCameraFixedTick()
+    {
+        previousCameraPosition = currentCameraPosition;
+        previousCameraRotation = currentCameraRotation;
+    }
+
+    private void EndCameraFixedTick()
+    {
+        currentCameraPosition = CameraPosition;
+        currentCameraRotation = Quaternion.Euler(CameraRotation);
+    }
+
+    private void ApplyCameraSettingsImmediate()
     {
         if (mainCamera != null)
         {
@@ -113,6 +160,20 @@ public class GameManager : MonoBehaviour
             mainCamera.transform.eulerAngles = CameraRotation;
             mainCamera.backgroundColor = BackgroundColor;
         }
+    }
+
+    private void ApplyCameraSettingsInterpolated()
+    {
+        if (mainCamera == null) return;
+
+        float step = UnityEngine.Time.fixedDeltaTime;
+        float alpha = step > 0f
+            ? Mathf.Clamp01((UnityEngine.Time.time - UnityEngine.Time.fixedTime) / step)
+            : 1f;
+
+        mainCamera.transform.position = Vector3.Lerp(previousCameraPosition, currentCameraPosition, alpha);
+        mainCamera.transform.rotation = Quaternion.Slerp(previousCameraRotation, currentCameraRotation, alpha);
+        mainCamera.backgroundColor = BackgroundColor;
     }
 
     private void ApplySunSettings()

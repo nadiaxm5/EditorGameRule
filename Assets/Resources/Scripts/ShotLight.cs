@@ -12,8 +12,6 @@ public class ShotLight : MonoBehaviour, IGameRuleActor {
             Action.Edit("this.Active","0",scopeList);
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Edit(this.x,Player.x);Edit(this.y,Player.y);Edit(this.z,Player.z);Edit(this.Active,0)");
