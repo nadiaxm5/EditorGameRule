@@ -13,6 +13,9 @@ namespace GameRuleEditor.Controllers
     /// </summary>
     public class ProjectController
     {
+        public const string ProjectsAssetFolder = "Assets/Projects";
+        public static string ProjectsAbsoluteFolder => Path.Combine(Application.dataPath, "Projects");
+
         private GameRuleEditor.Core.EditorContext context;
 
         public ProjectController(GameRuleEditor.Core.EditorContext editorContext)
@@ -86,6 +89,12 @@ namespace GameRuleEditor.Controllers
 
         #region Project Operations
 
+        public static void EnsureProjectsFolder()
+        {
+            if (!AssetDatabase.IsValidFolder(ProjectsAssetFolder))
+                AssetDatabase.CreateFolder("Assets", "Projects");
+        }
+
         /// <summary>
         /// Creates a new empty project
         /// </summary>
@@ -106,6 +115,20 @@ namespace GameRuleEditor.Controllers
             SyncGravityToScene();
             SyncSoundTrackToScene();
             EditorUtility.SetDirty(context);
+        }
+
+        /// <summary>
+        /// Loads a project and generates its scene and scripts without entering Play mode.
+        /// Script attachment still happens after Unity finishes compiling them.
+        /// </summary>
+        public void OpenAndGenerateProject(GameRuleEditor.Core.GameRuleProject project)
+        {
+            if (project == null) return;
+
+            // An Open Project operation must never inherit a pending auto-play request.
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            LoadProject(project);
+            GenerateScene();
         }
 
         public void SyncGravityToScene()

@@ -17,8 +17,10 @@ namespace GameRuleEditor.Windows
         {
             if (!TryGetContextAndController(out var context, out var controller)) return;
 
+            ProjectController.EnsureProjectsFolder();
             string newPath = EditorUtility.SaveFilePanelInProject(
-                "Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project");
+                "Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project",
+                ProjectController.ProjectsAssetFolder);
             if (string.IsNullOrEmpty(newPath)) return;
 
             string projectName = Path.GetFileNameWithoutExtension(newPath);
@@ -32,7 +34,9 @@ namespace GameRuleEditor.Windows
         {
             if (!TryGetContextAndController(out _, out var controller)) return;
 
-            string path = EditorUtility.OpenFilePanel("Open Project", Application.dataPath, "asset");
+            ProjectController.EnsureProjectsFolder();
+            string path = EditorUtility.OpenFilePanel(
+                "Open Project", ProjectController.ProjectsAbsoluteFolder, "asset");
             if (string.IsNullOrEmpty(path)) return;
 
             if (path.StartsWith(Application.dataPath))
@@ -43,7 +47,7 @@ namespace GameRuleEditor.Windows
             var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(path);
             if (project != null)
             {
-                controller.LoadProject(project);
+                controller.OpenAndGenerateProject(project);
             }
             else
             {

@@ -100,9 +100,11 @@ namespace GameRuleEditor.Windows
             switch (choice)
             {
                 case 0: // Create New
+                    ProjectController.EnsureProjectsFolder();
                     string newPath = EditorUtility.SaveFilePanelInProject(
                         "Create New GameRule Project", "NewProject", "asset",
-                        "Choose where to save the new project");
+                        "Choose where to save the new project",
+                        ProjectController.ProjectsAssetFolder);
                     if (!string.IsNullOrEmpty(newPath))
                     {
                         string projectName = Path.GetFileNameWithoutExtension(newPath);
@@ -115,7 +117,9 @@ namespace GameRuleEditor.Windows
                     break;
 
                 case 2: // Open Existing
-                    string openPath = EditorUtility.OpenFilePanel("Open GameRule Project", "Assets", "asset");
+                    ProjectController.EnsureProjectsFolder();
+                    string openPath = EditorUtility.OpenFilePanel(
+                        "Open GameRule Project", ProjectController.ProjectsAbsoluteFolder, "asset");
                     if (!string.IsNullOrEmpty(openPath))
                     {
                         if (openPath.StartsWith(Application.dataPath))
@@ -124,7 +128,7 @@ namespace GameRuleEditor.Windows
                         var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(openPath);
                         if (project != null)
                         {
-                            controller.LoadProject(project);
+                            controller.OpenAndGenerateProject(project);
                             hierarchyWindow.Init(context, controller);
                         }
                         else

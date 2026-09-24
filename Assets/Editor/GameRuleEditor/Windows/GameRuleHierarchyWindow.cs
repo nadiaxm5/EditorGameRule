@@ -232,7 +232,10 @@ namespace GameRuleEditor.Windows
 
          private void OnNewProject()
         {
-            string newPath = EditorUtility.SaveFilePanelInProject("Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project");
+            ProjectController.EnsureProjectsFolder();
+            string newPath = EditorUtility.SaveFilePanelInProject(
+                "Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project",
+                ProjectController.ProjectsAssetFolder);
             if (!string.IsNullOrEmpty(newPath))
             {
                 if (controller == null)
@@ -247,7 +250,9 @@ namespace GameRuleEditor.Windows
 
         private void OnOpenProject()
         {
-            string path = EditorUtility.OpenFilePanel("Open Project", Application.dataPath, "asset");
+            ProjectController.EnsureProjectsFolder();
+            string path = EditorUtility.OpenFilePanel(
+                "Open Project", ProjectController.ProjectsAbsoluteFolder, "asset");
             if (!string.IsNullOrEmpty(path))
             {
                 if (path.StartsWith(Application.dataPath))
@@ -259,7 +264,7 @@ namespace GameRuleEditor.Windows
                 {
                     if (controller == null)
                         controller = GameRuleLayoutManager.GetOrCreateController(context);
-                    controller.LoadProject(project);
+                    controller.OpenAndGenerateProject(project);
                 }
                 else
                 {
