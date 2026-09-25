@@ -116,7 +116,9 @@ namespace GameRuleEditor.CustomControls
             actions.Add(actionElement);
             actionsContainer.Add(actionElement);
 
-            UpdatePreview();
+            // A newly added empty row is only a local selector until the user chooses
+            // an action. Persisting here would immediately rebuild the UI and remove it.
+            if (actionString != null) UpdatePreview();
         }
 
         private void RemoveAction(ActionElement element)

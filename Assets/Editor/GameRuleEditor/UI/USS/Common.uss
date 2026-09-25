@@ -193,7 +193,8 @@ Button:disabled {
 }
 
 /* ── Rule actions ── */
-.button-action {
+.button-action,
+.button-action > .unity-base-field__input {
     background-color: rgb(237, 69, 7);   /* #ED4507 */
     color: rgb(255, 255, 255);
     border-left-color: rgb(168, 47, 0);
@@ -202,12 +203,18 @@ Button:disabled {
     border-bottom-color: rgb(168, 47, 0);
 }
 
-.button-action:hover {
+.button-action:hover,
+.button-action:hover > .unity-base-field__input {
     background-color: rgb(255, 91, 31);  /* #FF5B1F */
 }
 
-.button-action:active {
+.button-action:active,
+.button-action:active > .unity-base-field__input {
     background-color: rgb(201, 54, 0);
+}
+
+.button-action .unity-base-popup-field__text {
+    color: rgb(255, 255, 255);
 }
 
 /* ── Property picker ── */

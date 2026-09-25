@@ -11,6 +11,8 @@ namespace GameRuleEditor.CustomControls
 {
     public class ConditionElement : VisualElement
     {
+        private const string SelectConditionLabel = "Select condition";
+
         private EditorContext context;
         private PopupField<string> typeDropdown;
         private Label negationIcon;
@@ -54,19 +56,27 @@ namespace GameRuleEditor.CustomControls
             negationIcon.style.color = new Color(0.95f, 0.2f, 0.2f);
             Add(negationIcon);
 
-            selectedConditionType = availableTypes.Count > 0 ? availableTypes[0] : "Compare";
-            typeDropdown = new PopupField<string>(dropdownTypes, selectedConditionType) { style = { width = 110 } };
+            selectedConditionType = null;
+            typeDropdown = new PopupField<string>(dropdownTypes, 0) { style = { width = 130 } };
+            typeDropdown.SetValueWithoutNotify(SelectConditionLabel);
+            typeDropdown.AddToClassList("button-condition");
             typeDropdown.style.flexShrink = 0;
             typeDropdown.RegisterValueChangedCallback(evt =>
             {
                 if (evt.newValue == "Negate")
                 {
-                    isNegated = !isNegated;
-                    UpdateNegationIcon();
-                    typeDropdown.SetValueWithoutNotify(selectedConditionType);
-                    OnChanged?.Invoke();
+                    if (!string.IsNullOrEmpty(selectedConditionType))
+                    {
+                        isNegated = !isNegated;
+                        UpdateNegationIcon();
+                        OnChanged?.Invoke();
+                    }
+
+                    typeDropdown.SetValueWithoutNotify(selectedConditionType ?? SelectConditionLabel);
                     return;
                 }
+
+                if (!availableTypes.Contains(evt.newValue)) return;
 
                 selectedConditionType = evt.newValue;
                 UpdateParameterFields(true);
@@ -289,6 +299,8 @@ namespace GameRuleEditor.CustomControls
         public string GetString()
         {
             string type = selectedConditionType;
+            if (string.IsNullOrEmpty(type)) return string.Empty;
+
             List<string> parts = new List<string>();
             string conditionText;
 

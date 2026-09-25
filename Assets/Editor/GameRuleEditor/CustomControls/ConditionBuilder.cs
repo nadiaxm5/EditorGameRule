@@ -122,7 +122,9 @@ namespace GameRuleEditor.CustomControls
             elements.Add(element);
             RebuildConditionsLayout();
 
-            UpdatePreview();
+            // A newly added empty row is only a local selector until the user chooses
+            // a condition. Persisting here would immediately rebuild the UI and remove it.
+            if (sourceValue != null) UpdatePreview();
         }
 
         private void RemoveElement(ConditionElement element)
@@ -201,14 +203,16 @@ namespace GameRuleEditor.CustomControls
             for (int i = 0; i < elements.Count; i++)
             {
                 var elem = elements[i];
-                if (i > 0)
+                string str = elem.GetString();
+                if (string.IsNullOrEmpty(str)) continue;
+
+                if (parts.Count > 0)
                 {
                     string joinOperator = elem.JoinOperatorBefore;
                     parts.Add(string.IsNullOrEmpty(joinOperator) ? "AND" : joinOperator);
                 }
 
-                string str = elem.GetString();
-                if (!string.IsNullOrEmpty(str)) parts.Add(str);
+                parts.Add(str);
             }
 
             return string.Join(" ", parts);

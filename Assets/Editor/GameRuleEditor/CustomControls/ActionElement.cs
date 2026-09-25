@@ -9,11 +9,14 @@ namespace GameRuleEditor.CustomControls
 {
     public class ActionElement : VisualElement
     {
+        private const string SelectActionLabel = "Select action";
+
         private EditorContext context;
         private PopupField<string> typeDropdown;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
+        private string selectedActionType;
 
         /// <summary>Value used for a field the user leaves empty (numeric params default to "0").</summary>
         private Dictionary<VisualElement, string> inputDefaults = new Dictionary<VisualElement, string>();
@@ -40,6 +43,7 @@ namespace GameRuleEditor.CustomControls
             var result = GameRuleParser.ParseFunction(actionString);
             if (availableTypes.Contains(result.Name))
             {
+                selectedActionType = result.Name;
                 typeDropdown.SetValueWithoutNotify(result.Name);
                 UpdateParameterFields();
 
@@ -64,9 +68,19 @@ namespace GameRuleEditor.CustomControls
             var mainRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.FlexStart } };
             mainRow.style.flexShrink = 0;
 
-            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 110, marginRight = 5 } };
+            selectedActionType = null;
+            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 130, marginRight = 5 } };
+            typeDropdown.SetValueWithoutNotify(SelectActionLabel);
+            typeDropdown.AddToClassList("button-action");
             typeDropdown.style.flexShrink = 0;
-            typeDropdown.RegisterValueChangedCallback(evt => { UpdateParameterFields(); OnChanged?.Invoke(); });
+            typeDropdown.RegisterValueChangedCallback(evt =>
+            {
+                if (!availableTypes.Contains(evt.newValue)) return;
+
+                selectedActionType = evt.newValue;
+                UpdateParameterFields();
+                OnChanged?.Invoke();
+            });
             mainRow.Add(typeDropdown);
 
             parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Column, flexGrow = 1, flexWrap = Wrap.NoWrap } };
@@ -97,7 +111,7 @@ namespace GameRuleEditor.CustomControls
             parametersContainer.Clear();
             inputElements.Clear();
             inputDefaults.Clear();
-            string type = typeDropdown.value;
+            string type = selectedActionType;
 
             switch (type)
             {
@@ -136,7 +150,7 @@ namespace GameRuleEditor.CustomControls
         {
             // Value assumed when the field is left blank, so the user doesn't have to type it.
             int defaultIndex = actionParameterIndex >= 0 ? actionParameterIndex : inputElements.Count;
-            string emptyDefault = ActionDefaults.Get(typeDropdown.value, defaultIndex);
+            string emptyDefault = ActionDefaults.Get(selectedActionType, defaultIndex);
 
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 140, alignItems = Align.Center } };
             container.style.flexShrink = 0;
@@ -246,7 +260,9 @@ namespace GameRuleEditor.CustomControls
 
         public string GetActionString()
         {
-            string type = typeDropdown.value;
+            string type = selectedActionType;
+            if (string.IsNullOrEmpty(type)) return string.Empty;
+
             List<string> parameters = new List<string>();
             foreach (var el in inputElements)
             {
