@@ -60,6 +60,7 @@ namespace GameRuleEditor.CustomControls
             typeDropdown = new PopupField<string>(dropdownTypes, 0) { style = { width = 130 } };
             typeDropdown.SetValueWithoutNotify(SelectConditionLabel);
             typeDropdown.AddToClassList("button-condition");
+            typeDropdown.AddToClassList("rule-selector-dropdown");
             typeDropdown.style.flexShrink = 0;
             typeDropdown.RegisterValueChangedCallback(evt =>
             {

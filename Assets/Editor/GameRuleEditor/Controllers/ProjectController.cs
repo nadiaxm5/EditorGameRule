@@ -379,7 +379,16 @@ namespace GameRuleEditor.Controllers
                 Velocity = null,
                 AngularVelocity = null,
                 Properties = new List<string>(),
-                Script = new List<SentenceJson>()
+                Script = new List<SentenceJson>(),
+                Components = new List<ActorComponentMeta>
+                {
+                    new ActorComponentMeta
+                    {
+                        type = "Rules",
+                        name = "Rules",
+                        id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
+                    }
+                }
             };
 
             context.currentProject.actors.Add(newActor);

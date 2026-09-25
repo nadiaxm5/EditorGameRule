@@ -132,6 +132,27 @@ Button:disabled {
     background-color: rgb(59, 39, 107); /* dark purple #3B276B */
 }
 
+.button-primary > .unity-base-field__input {
+    background-color: rgb(79, 55, 139);  /* light purple #4F378B */
+    color: rgb(234, 221, 255);
+    border-left-color: rgb(59, 39, 107);
+    border-right-color: rgb(59, 39, 107);
+    border-top-color: rgb(59, 39, 107);
+    border-bottom-color: rgb(59, 39, 107);
+}
+
+.button-primary:hover > .unity-base-field__input {
+    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
+}
+
+.button-primary:active > .unity-base-field__input {
+    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+}
+
+.button-primary .unity-base-popup-field__text {
+    color: rgb(234, 221, 255);
+}
+
 .button-secondary {
     background-color: rgb(59, 39, 107); /* dark purple #3B276B */
     color: rgb(234, 221, 255);
@@ -215,6 +236,19 @@ Button:disabled {
 
 .button-action .unity-base-popup-field__text {
     color: rgb(255, 255, 255);
+}
+
+/* Dropdowns that visually match the spacing of the standard + Add Rule button. */
+.rule-selector-dropdown {
+    min-height: 27px;
+}
+
+.rule-selector-dropdown > .unity-base-field__input {
+    min-height: 25px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 /* ── Property picker ── */

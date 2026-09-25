@@ -71,10 +71,13 @@ namespace GameRuleEditor.CustomControls
             addConditionRow.style.alignItems = Align.Center;
             addConditionRow.style.marginTop = 6;
 
-            var addOperators = new List<string> { "+ Add Condition", "AND", "OR" };
+            const string addConditionLabel = "+ Add Condition";
+            var addOperators = new List<string> { "AND", "OR" };
             nextOperatorDropdown = new PopupField<string>(addOperators, 0);
+            nextOperatorDropdown.SetValueWithoutNotify(addConditionLabel);
             nextOperatorDropdown.AddToClassList("button-condition");
-            nextOperatorDropdown.style.width = 132;
+            nextOperatorDropdown.AddToClassList("rule-selector-dropdown");
+            nextOperatorDropdown.style.width = 150;
             nextOperatorDropdown.RegisterValueChangedCallback(evt =>
             {
                 if (evt.newValue == "AND" || evt.newValue == "OR")
@@ -83,7 +86,7 @@ namespace GameRuleEditor.CustomControls
                     AddElement(joinOperator);
                 }
 
-                nextOperatorDropdown.SetValueWithoutNotify(addOperators[0]);
+                nextOperatorDropdown.SetValueWithoutNotify(addConditionLabel);
             });
             addConditionRow.Add(nextOperatorDropdown);
 
@@ -163,6 +166,8 @@ namespace GameRuleEditor.CustomControls
                     var connectorOptions = new List<string> { "AND", "OR" };
                     int defaultOp = elements[idx].JoinOperatorBefore == "OR" ? 1 : 0;
                     var connectorDropdown = new PopupField<string>(connectorOptions, defaultOp);
+                    connectorDropdown.AddToClassList("button-primary");
+                    connectorDropdown.AddToClassList("rule-selector-dropdown");
                     connectorDropdown.style.width = 70;
                     connectorDropdown.RegisterValueChangedCallback(evt =>
                     {

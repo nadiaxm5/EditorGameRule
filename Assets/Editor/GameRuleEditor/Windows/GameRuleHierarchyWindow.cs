@@ -23,7 +23,7 @@ namespace GameRuleEditor.Windows
         private List<VisualElement> actorItems = new List<VisualElement>();
         private Label actorCountLabel;
 
-        [MenuItem("GameRule/Editor")]
+        [MenuItem("GameRule/GameRule Studio Setup")]
         public static void OpenEditor()
         {
             GameRuleLayoutManager.OpenLayout();

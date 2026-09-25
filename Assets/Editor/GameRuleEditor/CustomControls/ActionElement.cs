@@ -72,6 +72,7 @@ namespace GameRuleEditor.CustomControls
             typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 130, marginRight = 5 } };
             typeDropdown.SetValueWithoutNotify(SelectActionLabel);
             typeDropdown.AddToClassList("button-action");
+            typeDropdown.AddToClassList("rule-selector-dropdown");
             typeDropdown.style.flexShrink = 0;
             typeDropdown.RegisterValueChangedCallback(evt =>
             {

@@ -498,7 +498,10 @@ namespace GameRuleEditor.Panels
             if (actor?.Script != null && actor.Script.Count > 0)
             {
                 var newRule = actor.Script[actor.Script.Count - 1];
-                collapsedRules.Add(newRule);
+                // ProjectChanged is raised while AddEmptyRule runs, so the first rebuild may
+                // initialize the new rule as collapsed. Override only that new rule here and
+                // preserve the user's open/closed state for every existing rule.
+                collapsedRules.Remove(newRule);
             }
 
             UpdateRulesList();
