@@ -384,8 +384,13 @@ namespace GameRuleEditor.Controllers
                 {
                     new ActorComponentMeta
                     {
+                        type = "Properties",
+                        name = "Custom Properties"
+                    },
+                    new ActorComponentMeta
+                    {
                         type = "Rules",
-                        name = "Rules",
+                        name = "Rules Set",
                         id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
                     }
                 }

@@ -290,7 +290,21 @@ namespace GameRuleEditor.Core
                 Rotation = null,
                 Scale = null,
                 Properties = new List<string>(),
-                Script = new List<SentenceJson>()
+                Script = new List<SentenceJson>(),
+                Components = new List<ActorComponentMeta>
+                {
+                    new ActorComponentMeta
+                    {
+                        type = "Properties",
+                        name = "Custom Properties"
+                    },
+                    new ActorComponentMeta
+                    {
+                        type = "Rules",
+                        name = "Rules Set",
+                        id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
+                    }
+                }
             };
             actors.Add(newActor);
             return newActor;

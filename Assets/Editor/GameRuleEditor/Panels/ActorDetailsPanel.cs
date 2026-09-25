@@ -39,6 +39,7 @@ namespace GameRuleEditor.Panels
         private readonly Dictionary<string, Label> physicsLabels = new Dictionary<string, Label>();
 
         private VisualElement componentsContainer;
+        private Button addRulesSetButton;
 
         private class VectorRow
         {
@@ -266,21 +267,20 @@ namespace GameRuleEditor.Panels
             componentsContainer.style.marginTop = 5;
             scrollView.Add(componentsContainer);
 
-            // ─── Add Component button ───
-            var addComponentBtn = new Button(() => ShowAddComponentMenu());
-            addComponentBtn.text = "Add Component";
-            addComponentBtn.style.marginTop = 14;
-            addComponentBtn.style.marginBottom = 8;
-            addComponentBtn.style.paddingTop = 5;
-            addComponentBtn.style.paddingBottom = 5;
-            addComponentBtn.style.alignSelf = Align.Center;
-            addComponentBtn.style.width = 200;
-            addComponentBtn.style.backgroundColor = new Color(0.22f, 0.22f, 0.25f);
-            addComponentBtn.style.borderTopLeftRadius = 4;
-            addComponentBtn.style.borderTopRightRadius = 4;
-            addComponentBtn.style.borderBottomLeftRadius = 4;
-            addComponentBtn.style.borderBottomRightRadius = 4;
-            scrollView.Add(addComponentBtn);
+            // Only shown as a recovery action when the actor has no Rules Set.
+            addRulesSetButton = new Button(AddRulesComponent) { text = "Add Rules Set" };
+            addRulesSetButton.style.marginTop = 14;
+            addRulesSetButton.style.marginBottom = 8;
+            addRulesSetButton.style.paddingTop = 5;
+            addRulesSetButton.style.paddingBottom = 5;
+            addRulesSetButton.style.alignSelf = Align.Center;
+            addRulesSetButton.style.width = 200;
+            addRulesSetButton.style.backgroundColor = new Color(0.22f, 0.22f, 0.25f);
+            addRulesSetButton.style.borderTopLeftRadius = 4;
+            addRulesSetButton.style.borderTopRightRadius = 4;
+            addRulesSetButton.style.borderBottomLeftRadius = 4;
+            addRulesSetButton.style.borderBottomRightRadius = 4;
+            scrollView.Add(addRulesSetButton);
         }
 
         // ──────────────────────────────────
@@ -308,7 +308,13 @@ namespace GameRuleEditor.Panels
             if (ActorPhysicsUtility.NormalizeLegacyOverrides(actor))
                 dirty = true;
 
-            // 1. Ensure every Rules component has an id
+            if (actor.Properties == null)
+            {
+                actor.Properties = new List<string>();
+                dirty = true;
+            }
+
+            // 1. Ensure every Rules component has an id and use the current default name.
             foreach (var comp in actor.Components)
             {
                 if (comp.type == "Rules" && string.IsNullOrEmpty(comp.id))
@@ -316,19 +322,51 @@ namespace GameRuleEditor.Panels
                     comp.id = NewGroupId();
                     dirty = true;
                 }
+
+                if (comp.type == "Rules" && TryGetDefaultRulesSetName(comp.name, out string rulesSetName))
+                {
+                    comp.name = rulesSetName;
+                    dirty = true;
+                }
             }
 
-            // 2. Add default Properties component if needed
-            if (actor.Properties != null && actor.Properties.Count > 0 && !HasComponentOfType(actor, "Properties"))
+            // 2. Custom Properties is permanent and always appears before every Rules Set.
+            int propertiesIndex = actor.Components.FindIndex(c => c.type == "Properties");
+            if (propertiesIndex < 0)
             {
-                actor.Components.Insert(0, new ActorComponentMeta { type = "Properties", name = "Properties" });
+                actor.Components.Insert(0, new ActorComponentMeta { type = "Properties", name = "Custom Properties" });
                 dirty = true;
+            }
+            else
+            {
+                var propertiesComponent = actor.Components[propertiesIndex];
+                if (propertiesComponent.name != "Custom Properties")
+                {
+                    propertiesComponent.name = "Custom Properties";
+                    dirty = true;
+                }
+
+                if (propertiesIndex != 0)
+                {
+                    actor.Components.RemoveAt(propertiesIndex);
+                    actor.Components.Insert(0, propertiesComponent);
+                    dirty = true;
+                }
+            }
+
+            for (int i = actor.Components.Count - 1; i > 0; i--)
+            {
+                if (actor.Components[i].type == "Properties")
+                {
+                    actor.Components.RemoveAt(i);
+                    dirty = true;
+                }
             }
 
             // 3. Add default Rules component if needed, then assign groupIds to ungrouped rules
             if (actor.Script != null && actor.Script.Count > 0 && !HasComponentOfType(actor, "Rules"))
             {
-                var defaultComp = new ActorComponentMeta { type = "Rules", name = "Rules", id = NewGroupId() };
+                var defaultComp = new ActorComponentMeta { type = "Rules", name = "Rules Set", id = NewGroupId() };
                 actor.Components.Add(defaultComp);
                 dirty = true;
             }
@@ -413,17 +451,27 @@ namespace GameRuleEditor.Panels
 
                 componentsContainer.Add(card);
             }
+
+            addRulesSetButton.style.display = HasComponentOfType(actor, "Rules")
+                ? DisplayStyle.None
+                : DisplayStyle.Flex;
         }
 
         /// <summary>
         /// Builds the foldout shell: drag handle + name (editable if renameable) + remove button.
         /// </summary>
-        private Foldout BuildComponentShell(ActorComponentMeta comp, int compIndex, System.Action onRemove, bool renameable = false)
+        private Foldout BuildComponentShell(
+            ActorComponentMeta comp,
+            int compIndex,
+            System.Action onRemove,
+            bool renameable = false,
+            bool draggable = true)
         {
             if (!initializedComponents.Contains(comp))
             {
                 initializedComponents.Add(comp);
-                collapsedComponents.Add(comp);
+                if (comp.type != "Rules" && comp.type != "Properties")
+                    collapsedComponents.Add(comp);
             }
             bool isCollapsed = collapsedComponents.Contains(comp);
             var foldout = new Foldout { value = !isCollapsed };
@@ -458,18 +506,21 @@ namespace GameRuleEditor.Panels
                 toggleText.style.minWidth = 0;
             }
 
-            // Drag handle — initiates component reorder
-            var dragHandle = new Label("\u2261");
-            dragHandle.tooltip = "Drag to reorder";
-            dragHandle.pickingMode = PickingMode.Position;
-            dragHandle.style.width = 16;
-            dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
-            dragHandle.style.color = new Color(0.65f, 0.65f, 0.65f);
-            dragHandle.style.marginLeft = 2;
-            dragHandle.style.marginRight = 4;
-            dragHandle.RegisterCallback<PointerDownEvent>(evt =>
-                OnCompDragStart(evt, foldout, compIndex));
-            toggleInput.Insert(1, dragHandle);
+            if (draggable)
+            {
+                // Drag handle — initiates component reorder
+                var dragHandle = new Label("\u2261");
+                dragHandle.tooltip = "Drag to reorder";
+                dragHandle.pickingMode = PickingMode.Position;
+                dragHandle.style.width = 16;
+                dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
+                dragHandle.style.color = new Color(0.65f, 0.65f, 0.65f);
+                dragHandle.style.marginLeft = 2;
+                dragHandle.style.marginRight = 4;
+                dragHandle.RegisterCallback<PointerDownEvent>(evt =>
+                    OnCompDragStart(evt, foldout, compIndex));
+                toggleInput.Insert(1, dragHandle);
+            }
 
             // Component name — editable TextField or static Label
             if (renameable)
@@ -522,34 +573,36 @@ namespace GameRuleEditor.Panels
                 toggleInput.Add(nameLabel);
             }
 
-            // Remove button
-            var removeBtn = new Button(() => onRemove?.Invoke()) { text = string.Empty };
-            removeBtn.tooltip = "Remove Component";
-            removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 28;
-            removeBtn.style.height = 26;
-            removeBtn.style.marginLeft = 4;
-            removeBtn.style.paddingLeft = 0;
-            removeBtn.style.paddingRight = 0;
+            if (onRemove != null)
+            {
+                var removeBtn = new Button(onRemove) { text = string.Empty };
+                removeBtn.tooltip = "Remove Component";
+                removeBtn.AddToClassList("button-danger");
+                removeBtn.style.width = 28;
+                removeBtn.style.height = 26;
+                removeBtn.style.marginLeft = 4;
+                removeBtn.style.paddingLeft = 0;
+                removeBtn.style.paddingRight = 0;
 
-            var trashImage = new Image();
-            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-            trashImage.style.width = 16;
-            trashImage.style.height = 16;
-            trashImage.style.alignSelf = Align.Center;
-            trashImage.style.unityBackgroundImageTintColor = Color.white;
-            removeBtn.Add(trashImage);
+                var trashImage = new Image();
+                trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
+                trashImage.style.width = 16;
+                trashImage.style.height = 16;
+                trashImage.style.alignSelf = Align.Center;
+                trashImage.style.unityBackgroundImageTintColor = Color.white;
+                removeBtn.Add(trashImage);
 
-            removeBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-            toggle.Add(removeBtn);
+                removeBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                toggle.Add(removeBtn);
+            }
 
             return foldout;
         }
 
         private VisualElement BuildPropertiesComponent(ActorComponentMeta comp, int compIndex)
         {
-            var foldout = BuildComponentShell(comp, compIndex, () => RemoveComponent(compIndex, "Properties"));
-            var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            var foldout = BuildComponentShell(comp, compIndex, null, draggable: false);
+            var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
             foldout.Add(content);
             RebuildPropertiesList(content);
             return foldout;
@@ -643,10 +696,11 @@ namespace GameRuleEditor.Panels
                 EditorUtility.SetDirty(context.currentProject);
                 RebuildPropertiesList(content);
             }) { text = "+ Add Property" };
+            addBtn.AddToClassList("button-property-picker");
             addBtn.style.marginTop = 10;
             addBtn.style.paddingTop = 4;
             addBtn.style.paddingBottom = 4;
-            addBtn.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            addBtn.style.alignSelf = Align.Center;
             content.Add(addBtn);
         }
 
@@ -964,7 +1018,8 @@ namespace GameRuleEditor.Panels
             }
 
             var actor = context.SelectedActor;
-            int clamped = Mathf.Clamp(newIndex, 0, (actor?.Components?.Count ?? 1) - 1);
+            // Index 0 is permanently reserved for Custom Properties.
+            int clamped = Mathf.Clamp(newIndex, 1, (actor?.Components?.Count ?? 2) - 1);
             if (actor?.Components != null && actor.Components.Count > 1 &&
                 originalIndex >= 0 && originalIndex < actor.Components.Count &&
                 originalIndex != clamped)
@@ -1087,51 +1142,25 @@ namespace GameRuleEditor.Panels
         }
 
         // ──────────────────────────────────
-        //  ADD / REMOVE COMPONENT
+        //  ADD / REMOVE RULES SET
         // ──────────────────────────────────
-        private void ShowAddComponentMenu()
-        {
-            var actor = context.SelectedActor;
-            if (actor == null) return;
-
-            var menu = new GenericMenu();
-
-            // Properties is limited to one per actor
-            if (HasComponentOfType(actor, "Properties"))
-                menu.AddDisabledItem(new GUIContent("Properties"));
-            else
-                menu.AddItem(new GUIContent("Properties"), false, () => AddPropertiesComponent());
-
-            // Rules allows multiple
-            menu.AddItem(new GUIContent("Rules"), false, () => AddRulesComponent());
-
-            menu.ShowAsContext();
-        }
-
-        private void AddPropertiesComponent()
-        {
-            var actor = context.SelectedActor;
-            if (actor == null) return;
-            Undo.RecordObject(context.currentProject, "Add Component");
-            actor.Components.Add(new ActorComponentMeta { type = "Properties", name = "Properties" });
-            EditorUtility.SetDirty(context.currentProject);
-            RebuildComponents();
-        }
-
         private void AddRulesComponent()
         {
             var actor = context.SelectedActor;
             if (actor == null) return;
-            Undo.RecordObject(context.currentProject, "Add Component");
-            int rulesCount = 0;
-            foreach (var c in actor.Components) if (c.type == "Rules") rulesCount++;
+            if (actor.Components == null)
+                actor.Components = new List<ActorComponentMeta>();
+            if (HasComponentOfType(actor, "Rules")) return;
+
+            Undo.RecordObject(context.currentProject, "Add Rules Set");
             actor.Components.Add(new ActorComponentMeta
             {
                 type = "Rules",
-                name = rulesCount == 0 ? "Rules" : $"Rules {rulesCount + 1}",
+                name = "Rules Set",
                 id = NewGroupId()
             });
             EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
             RebuildComponents();
         }
 
@@ -1183,6 +1212,26 @@ namespace GameRuleEditor.Panels
 
         private static string NewGroupId() =>
             "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
+
+        private static bool TryGetDefaultRulesSetName(string currentName, out string rulesSetName)
+        {
+            rulesSetName = null;
+            if (string.IsNullOrEmpty(currentName) || currentName == "Rules")
+            {
+                rulesSetName = "Rules Set";
+                return currentName != rulesSetName;
+            }
+
+            const string oldPrefix = "Rules ";
+            if (currentName.StartsWith(oldPrefix) &&
+                int.TryParse(currentName.Substring(oldPrefix.Length), out int suffix))
+            {
+                rulesSetName = $"Rules Set {suffix}";
+                return true;
+            }
+
+            return false;
+        }
 
         // ──────────────────────────────────
         //  VECTOR OVERRIDES
