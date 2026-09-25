@@ -735,7 +735,7 @@ namespace GameRuleEditor.Panels
             var openBtn = new Button(() => GameRuleRulesWindow.EnsureVisible(context, controller, capturedId, comp.name));
             openBtn.text = "Open Rules Window";
             openBtn.AddToClassList("button-primary");
-            openBtn.style.alignSelf = Align.FlexStart;
+            openBtn.style.alignSelf = Align.Center;
             content.Add(openBtn);
 
             return foldout;
@@ -791,7 +791,7 @@ namespace GameRuleEditor.Panels
             if (!isDraggingProp || row != draggedPropItem) return;
 
             float diffY = evt.position.y - dragStartPosProp.y;
-            row.transform.position = new Vector3(0f, diffY, 0f);
+            row.style.translate = new Translate(0f, diffY, 0f);
 
             var content = propDragSpacer?.parent;
             if (content == null) return;
@@ -844,7 +844,7 @@ namespace GameRuleEditor.Panels
             IPointerEvent pointerEvt = evt as IPointerEvent;
             if (pointerEvt != null) row.ReleasePointer(pointerEvt.pointerId);
 
-            row.transform.position = Vector3.zero;
+            row.style.translate = new Translate(0f, 0f, 0f);
             row.style.opacity = StyleKeyword.Null;
             row.style.position = StyleKeyword.Null;
             row.style.top = StyleKeyword.Null;
@@ -941,7 +941,7 @@ namespace GameRuleEditor.Panels
             if (!isDraggingComp || card != draggedCompItem) return;
 
             float diffY = evt.position.y - dragStartPosComp.y;
-            card.transform.position = new Vector3(0f, diffY, 0f);
+            card.style.translate = new Translate(0f, diffY, 0f);
 
             float draggedCenterY = card.layout.y + diffY + card.layout.height / 2f;
 
@@ -990,7 +990,7 @@ namespace GameRuleEditor.Panels
             IPointerEvent pointerEvt = evt as IPointerEvent;
             if (pointerEvt != null) card.ReleasePointer(pointerEvt.pointerId);
 
-            card.transform.position = Vector3.zero;
+            card.style.translate = new Translate(0f, 0f, 0f);
             card.style.opacity = StyleKeyword.Null;
             card.style.position = StyleKeyword.Null;
             card.style.top = StyleKeyword.Null;

@@ -562,7 +562,7 @@ namespace GameRuleEditor.Panels
                 return;
 
             float diffY = evt.position.y - dragStartPosRule.y;
-            ruleContainer.transform.position = new Vector3(0f, diffY, 0f);
+            ruleContainer.style.translate = new Translate(0f, diffY, 0f);
 
             float draggedCenterY = ruleContainer.layout.y + diffY + (ruleContainer.layout.height / 2f);
 
@@ -619,7 +619,7 @@ namespace GameRuleEditor.Panels
                 ruleContainer.ReleasePointer(pointerEvt.pointerId);
 
             // Reset visuals
-            ruleContainer.transform.position = Vector3.zero;
+            ruleContainer.style.translate = new Translate(0f, 0f, 0f);
             ruleContainer.style.opacity = StyleKeyword.Null;
             ruleContainer.style.position = StyleKeyword.Null;
             ruleContainer.style.top = StyleKeyword.Null;

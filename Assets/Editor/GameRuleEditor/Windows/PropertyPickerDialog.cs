@@ -331,7 +331,13 @@ namespace GameRuleEditor.Windows
 
         private void EnsureStyles()
         {
-            if (navigationButtonStyle != null) return;
+            if (navigationButtonStyle != null &&
+                propertyButtonStyle != null &&
+                navigationColoredLabelStyle != null &&
+                propertyColoredLabelStyle != null)
+            {
+                return;
+            }
 
             navigationButtonStyle = CreateButtonStyle(TextAnchor.MiddleCenter);
             propertyButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);

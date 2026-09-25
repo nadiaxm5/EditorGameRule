@@ -24,9 +24,7 @@ namespace GameRuleEditor.Windows
             if (string.IsNullOrEmpty(newPath)) return;
 
             string projectName = Path.GetFileNameWithoutExtension(newPath);
-            controller.CreateNewProject(projectName);
-            AssetDatabase.CreateAsset(context.currentProject, newPath);
-            AssetDatabase.SaveAssets();
+            controller.CreateAndGenerateProject(projectName, newPath);
         }
 
         [MenuItem("GameRule/Actions/Open Project", priority = 21)]

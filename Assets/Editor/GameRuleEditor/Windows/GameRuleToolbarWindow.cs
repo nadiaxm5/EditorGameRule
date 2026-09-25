@@ -214,9 +214,7 @@ namespace GameRuleEditor.Windows
                     controller = GameRuleLayoutManager.GetOrCreateController(context);
                 
                 string projectName = Path.GetFileNameWithoutExtension(newPath);
-                controller.CreateNewProject(projectName);
-                AssetDatabase.CreateAsset(context.currentProject, newPath);
-                AssetDatabase.SaveAssets();
+                controller.CreateAndGenerateProject(projectName, newPath);
             }
         }
 

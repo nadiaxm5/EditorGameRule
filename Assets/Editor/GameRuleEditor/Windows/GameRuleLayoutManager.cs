@@ -108,9 +108,7 @@ namespace GameRuleEditor.Windows
                     if (!string.IsNullOrEmpty(newPath))
                     {
                         string projectName = Path.GetFileNameWithoutExtension(newPath);
-                        controller.CreateNewProject(projectName);
-                        AssetDatabase.CreateAsset(context.currentProject, newPath);
-                        AssetDatabase.SaveAssets();
+                        controller.CreateAndGenerateProject(projectName, newPath);
                         // Re-init hierarchy
                         hierarchyWindow.Init(context, controller);
                     }

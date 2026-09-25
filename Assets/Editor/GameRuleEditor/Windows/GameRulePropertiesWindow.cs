@@ -50,8 +50,10 @@ namespace GameRuleEditor.Windows
 
         private void OnActorSelected(int index)
         {
-            if (titleLabel != null && context?.SelectedActor != null)
-                titleLabel.text = $"Properties — {context.SelectedActor.ActorName}";
+            if (titleLabel == null) return;
+
+            string actorName = context?.SelectedActor?.ActorName ?? "Actor";
+            titleLabel.text = $"Properties — {actorName}";
         }
 
         private void BuildUI()

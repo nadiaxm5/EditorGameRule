@@ -103,6 +103,8 @@ namespace GameRuleEditor.Core
             selectedScriptIndex = -1;
 
             OnProjectLoaded?.Invoke();
+            OnActorSelected?.Invoke(selectedActorIndex);
+            OnScriptSelected?.Invoke(selectedScriptIndex);
         }
 
         /// <summary>

@@ -106,6 +106,23 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
+        /// Creates and saves a new project, then generates its scene and scripts without entering Play mode.
+        /// Keeping the whole operation here ensures every New Project entry point behaves like Open Project.
+        /// </summary>
+        public void CreateAndGenerateProject(string projectName, string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath)) return;
+
+            CreateNewProject(projectName);
+            AssetDatabase.CreateAsset(context.currentProject, assetPath);
+            AssetDatabase.SaveAssets();
+
+            // A New Project operation must never inherit a pending auto-play request.
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            GenerateScene();
+        }
+
+        /// <summary>
         /// Loads an existing project
         /// </summary>
         public void LoadProject(GameRuleEditor.Core.GameRuleProject project)
