@@ -56,33 +56,10 @@ namespace GameRuleEditor.CustomControls
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 10;
 
-            var labelRow = new VisualElement();
-            labelRow.style.flexDirection = FlexDirection.Row;
-            labelRow.style.alignItems = Align.Center;
-
             var label = new Label("WHEN (Conditions)");
             label.style.fontSize = 12;
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
-            labelRow.Add(label);
-
-            var removeConditionBtn = new Button(() => OnRemoveCondition?.Invoke()) { text = string.Empty };
-            removeConditionBtn.AddToClassList("button-danger");
-            removeConditionBtn.style.width = 28;
-            removeConditionBtn.style.height = 26;
-            removeConditionBtn.style.marginLeft = 8;
-            removeConditionBtn.style.fontSize = 10;
-
-            var trashImage = new Image();
-            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-            trashImage.style.width = 16;
-            trashImage.style.height = 16;
-            trashImage.style.alignSelf = Align.Center;
-            trashImage.style.unityBackgroundImageTintColor = Color.white;
-            removeConditionBtn.Add(trashImage);
-
-            labelRow.Add(removeConditionBtn);
-
-            header.Add(labelRow);
+            header.Add(label);
             Add(header);
 
             conditionsContainer = new VisualElement();
@@ -94,9 +71,10 @@ namespace GameRuleEditor.CustomControls
             addConditionRow.style.alignItems = Align.Center;
             addConditionRow.style.marginTop = 6;
 
-            var addOperators = new List<string> { "+", "AND", "OR" };
+            var addOperators = new List<string> { "+ Add Condition", "AND", "OR" };
             nextOperatorDropdown = new PopupField<string>(addOperators, 0);
-            nextOperatorDropdown.style.width = 78;
+            nextOperatorDropdown.AddToClassList("button-condition");
+            nextOperatorDropdown.style.width = 132;
             nextOperatorDropdown.RegisterValueChangedCallback(evt =>
             {
                 if (evt.newValue == "AND" || evt.newValue == "OR")
@@ -150,13 +128,17 @@ namespace GameRuleEditor.CustomControls
         private void RemoveElement(ConditionElement element)
         {
             elements.Remove(element);
-            if (elements.Count > 0)
+
+            if (elements.Count == 0)
             {
-                elements[0].SetJoinOperator(null);
+                conditionsContainer.Clear();
+                addConditionRow.style.display = DisplayStyle.None;
+                OnRemoveCondition?.Invoke();
+                return;
             }
 
+            elements[0].SetJoinOperator(null);
             RebuildConditionsLayout();
-
             UpdatePreview();
         }
 

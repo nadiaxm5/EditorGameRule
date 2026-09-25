@@ -236,17 +236,13 @@ namespace GameRuleEditor.CustomControls
 
         private Button CreatePickerButton(System.Action onClick)
         {
-            var pickBtn = new Button(onClick) { text = "" };
-            pickBtn.AddToClassList(ObjectField.selectorUssClassName);
-            pickBtn.style.width = 20;
-            pickBtn.style.height = 20;
+            var pickBtn = new Button(onClick) { text = "Pick Property" };
+            pickBtn.AddToClassList("button-property-picker");
+            pickBtn.style.minWidth = 88;
+            pickBtn.style.height = 22;
             pickBtn.style.marginLeft = 2;
             pickBtn.style.flexShrink = 0;
-
-            var selectorImage = new VisualElement();
-            selectorImage.AddToClassList("unity-object-field__selector-image");
-            pickBtn.Add(selectorImage);
-            pickBtn.tooltip = "Pick value";
+            pickBtn.tooltip = "Pick Property";
 
             return pickBtn;
         }

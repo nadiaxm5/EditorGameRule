@@ -523,15 +523,23 @@ namespace GameRuleEditor.Panels
             }
 
             // Remove button
-            var removeBtn = new Button(() => onRemove?.Invoke());
-            removeBtn.text = "\u2715";
+            var removeBtn = new Button(() => onRemove?.Invoke()) { text = string.Empty };
             removeBtn.tooltip = "Remove Component";
             removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 22;
-            removeBtn.style.height = 20;
+            removeBtn.style.width = 28;
+            removeBtn.style.height = 26;
             removeBtn.style.marginLeft = 4;
             removeBtn.style.paddingLeft = 0;
             removeBtn.style.paddingRight = 0;
+
+            var trashImage = new Image();
+            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
+            trashImage.style.width = 16;
+            trashImage.style.height = 16;
+            trashImage.style.alignSelf = Align.Center;
+            trashImage.style.unityBackgroundImageTintColor = Color.white;
+            removeBtn.Add(trashImage);
+
             removeBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
             toggle.Add(removeBtn);
 

@@ -61,16 +61,23 @@ namespace GameRuleEditor.CustomControls
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.Add(label);
 
-            var addButton = new Button(() => AddAction(null));
-            addButton.text = "+ Add Action";
-            addButton.AddToClassList("button-primary");
-            addButton.style.height = 25;
-            header.Add(addButton);
-
             Add(header);
 
             actionsContainer = new VisualElement();
             Add(actionsContainer);
+
+            var addActionRow = new VisualElement();
+            addActionRow.style.flexDirection = FlexDirection.Row;
+            addActionRow.style.justifyContent = Justify.Center;
+            addActionRow.style.alignItems = Align.Center;
+            addActionRow.style.marginTop = 6;
+
+            var addButton = new Button(() => AddAction(null));
+            addButton.text = "+ Add Action";
+            addButton.AddToClassList("button-action");
+            addButton.style.height = 25;
+            addActionRow.Add(addButton);
+            Add(addActionRow);
 /*
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;

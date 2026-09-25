@@ -434,6 +434,7 @@ namespace GameRuleEditor.Panels
                 conditionBuilder.OnRemoveCondition += () =>
                 {
                     controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
+                    UpdateRulesList();
                 };
                 contentContainer.Add(conditionBuilder);
             }
@@ -448,7 +449,7 @@ namespace GameRuleEditor.Panels
                     UpdateRulesList();
                 });
                 addConditionBtn.text = "+ Add Condition";
-                addConditionBtn.AddToClassList("button-primary");
+                addConditionBtn.AddToClassList("button-condition");
                 addConditionBtn.style.marginBottom = 10;
                 addConditionBtn.style.alignSelf = Align.FlexStart;
                 contentContainer.Add(addConditionBtn);
@@ -475,7 +476,7 @@ namespace GameRuleEditor.Panels
                     UpdateRulesList();
                 });
                 addActionBtn.text = "+ Add Action";
-                addActionBtn.AddToClassList("button-success");
+                addActionBtn.AddToClassList("button-action");
                 addActionBtn.style.marginBottom = 10;
                 addActionBtn.style.alignSelf = Align.FlexStart;
                 contentContainer.Add(addActionBtn);

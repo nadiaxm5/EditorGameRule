@@ -1,8 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class End : MonoBehaviour, IGameRuleActor {
-    public bool Active = true;
+public class DamageCanvas : MonoBehaviour, IGameRuleActor {
+    public bool Active = false;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){
     }

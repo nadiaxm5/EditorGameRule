@@ -104,58 +104,130 @@ Button:disabled {
     color: rgb(107, 114, 128); /* textMuted #6b7280 */
 }
 
-/* ── Primary (Material Design 3 purple) ── */
-.button-primary {
-    background-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant #4F378B */
+/* ── Shared purple palette ── */
+.button-primary,
+.button-success,
+.list-item.list-item-selected,
+.actor-list-item.actor-list-item--selected,
+.fab-create {
+    background-color: rgb(79, 55, 139);  /* light purple #4F378B */
     color: rgb(234, 221, 255);           /* primaryFixed #EADDFF */
-    border-left-color: rgb(59, 39, 107); /* borderPrimary #3b276b */
+    border-left-color: rgb(59, 39, 107); /* dark purple #3B276B */
     border-right-color: rgb(59, 39, 107);
     border-top-color: rgb(59, 39, 107);
     border-bottom-color: rgb(59, 39, 107);
 }
 
-.button-primary:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover #6044A5 */
+.button-primary:hover,
+.button-success:hover,
+.list-item.list-item-selected:hover,
+.actor-list-item.actor-list-item--selected:hover,
+.fab-create:hover {
+    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
 }
 
-.button-primary:active {
-    background-color: rgb(65, 45, 115);
+.button-primary:active,
+.button-success:active,
+.fab-create:active {
+    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
 }
 
-/* ── Danger (dark purple) ── */
+.button-secondary {
+    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+    color: rgb(234, 221, 255);
+    border-left-color: rgb(50, 31, 95);
+    border-right-color: rgb(50, 31, 95);
+    border-top-color: rgb(50, 31, 95);
+    border-bottom-color: rgb(50, 31, 95);
+}
+
+.button-secondary:hover {
+    background-color: rgb(72, 50, 125); /* dark purple hover #48327D */
+}
+
+.button-secondary:active {
+    background-color: rgb(59, 39, 107);
+}
+
+/* ── Destructive / trash ── */
 .button-danger {
-    background-color: rgb(59, 39, 107);   /* borderPrimary #3b276b */
-    color: rgb(208, 188, 255);            /* primaryFixedDim #D0BCFF */
-    border-left-color: rgb(45, 28, 85);
-    border-right-color: rgb(45, 28, 85);
-    border-top-color: rgb(45, 28, 85);
-    border-bottom-color: rgb(45, 28, 85);
+    background-color: rgb(204, 0, 31);   /* #CC001F */
+    color: rgb(255, 255, 255);
+    border-left-color: rgb(143, 0, 22);
+    border-right-color: rgb(143, 0, 22);
+    border-top-color: rgb(143, 0, 22);
+    border-bottom-color: rgb(143, 0, 22);
 }
 
 .button-danger:hover {
-    background-color: rgb(72, 50, 125);
+    background-color: rgb(226, 26, 54);  /* #E21A36 */
 }
 
 .button-danger:active {
-    background-color: rgb(50, 33, 95);
+    background-color: rgb(168, 0, 25);
 }
 
-/* ── Success (light purple) ── */
-.button-success {
-    background-color: rgb(96, 68, 165);   /* onPrimaryFixedVariantHover #6044A5 */
-    color: rgb(234, 221, 255);            /* primaryFixed #EADDFF */
-    border-left-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant #4F378B */
-    border-right-color: rgb(79, 55, 139);
-    border-top-color: rgb(79, 55, 139);
-    border-bottom-color: rgb(79, 55, 139);
+/* ── Rule conditions ── */
+.button-condition,
+.button-condition > .unity-base-field__input {
+    background-color: rgb(5, 168, 170);  /* #05A8AA */
+    color: rgb(255, 255, 255);
+    border-left-color: rgb(3, 122, 124);
+    border-right-color: rgb(3, 122, 124);
+    border-top-color: rgb(3, 122, 124);
+    border-bottom-color: rgb(3, 122, 124);
 }
 
-.button-success:hover {
-    background-color: rgb(115, 85, 185);  /* lighter purple */
+.button-condition:hover,
+.button-condition:hover > .unity-base-field__input {
+    background-color: rgb(22, 190, 192); /* #16BEC0 */
 }
 
-.button-success:active {
-    background-color: rgb(79, 55, 139);
+.button-condition:active,
+.button-condition:active > .unity-base-field__input {
+    background-color: rgb(4, 136, 138);
+}
+
+.button-condition .unity-base-popup-field__text {
+    color: rgb(255, 255, 255);
+}
+
+/* ── Rule actions ── */
+.button-action {
+    background-color: rgb(237, 69, 7);   /* #ED4507 */
+    color: rgb(255, 255, 255);
+    border-left-color: rgb(168, 47, 0);
+    border-right-color: rgb(168, 47, 0);
+    border-top-color: rgb(168, 47, 0);
+    border-bottom-color: rgb(168, 47, 0);
+}
+
+.button-action:hover {
+    background-color: rgb(255, 91, 31);  /* #FF5B1F */
+}
+
+.button-action:active {
+    background-color: rgb(201, 54, 0);
+}
+
+/* ── Property picker ── */
+.button-property-picker {
+    background-color: rgb(255, 174, 3);  /* #FFAE03 */
+    color: rgb(30, 30, 30);
+    border-left-color: rgb(181, 121, 0);
+    border-right-color: rgb(181, 121, 0);
+    border-top-color: rgb(181, 121, 0);
+    border-bottom-color: rgb(181, 121, 0);
+    -unity-font-style: bold;
+}
+
+.button-property-picker:hover {
+    background-color: rgb(255, 193, 61); /* #FFC13D */
+    color: rgb(30, 30, 30);
+}
+
+.button-property-picker:active {
+    background-color: rgb(217, 146, 0);
 }
 
 /* ═══════════════════════════════════════════
@@ -295,16 +367,11 @@ PopupField {
 }
 
 .list-item-selected {
-    background-color: rgb(79, 55, 139); /* onPrimaryFixedVariant */
     color: rgb(234, 221, 255);          /* primaryFixed */
     border-left-color: rgb(59, 39, 107);
     border-right-color: rgb(59, 39, 107);
     border-top-color: rgb(59, 39, 107);
     border-bottom-color: rgb(59, 39, 107);
-}
-
-.list-item-selected:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
 }
 
 /* ═══════════════════════════════════════════
@@ -318,14 +385,6 @@ PopupField {
 
 .actor-list-item:hover {
     background-color: rgb(56, 56, 56); /* hoverBackground #383838 */
-}
-
-.actor-list-item--selected {
-    background-color: rgb(79, 55, 139); /* onPrimaryFixedVariant #4F378B */
-}
-
-.actor-list-item--selected:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
 }
 
 .actor-list-item--selected > Label {
@@ -374,7 +433,6 @@ PopupField {
     border-top-right-radius: 20px;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    background-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant */
     color: rgb(234, 221, 255);           /* primaryFixed */
     border-left-color: rgb(59, 39, 107); /* borderPrimary */
     border-right-color: rgb(59, 39, 107);
@@ -388,14 +446,6 @@ PopupField {
     -unity-text-align: middle-center;
     padding: 0;
     margin: 0;
-}
-
-.fab-create:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
-}
-
-.fab-create:active {
-    background-color: rgb(65, 45, 115);
 }
 
 /* ═══════════════════════════════════════════

@@ -51,6 +51,15 @@ namespace GameRuleEditor.Windows
         private System.Action<string> onPick;
         private EditorContext context;
 
+        private static readonly Color PickerYellow = new Color32(255, 174, 3, 255);
+        private static readonly Color PickerYellowHover = new Color32(255, 193, 61, 255);
+        private static readonly Color PickerYellowActive = new Color32(217, 146, 0, 255);
+
+        private GUIStyle navigationButtonStyle;
+        private GUIStyle propertyButtonStyle;
+        private GUIStyle navigationColoredLabelStyle;
+        private GUIStyle propertyColoredLabelStyle;
+
         // Filters
         private bool boolOnly = false;
 
@@ -77,6 +86,7 @@ namespace GameRuleEditor.Windows
             win.actorsOnly = onlyActors;
             win.resourceType = resourceFilter;
             win.minSize = new Vector2(500, 300);
+            win.wantsMouseMove = true;
             win.InitData();
             win.ShowUtility();
         }
@@ -93,6 +103,9 @@ namespace GameRuleEditor.Windows
 
         private void OnGUI()
         {
+            EnsureStyles();
+            if (Event.current.type == EventType.MouseMove) Repaint();
+
             // 1. Resource Mode (New)
             if (resourceType != null)
             {
@@ -108,10 +121,19 @@ namespace GameRuleEditor.Windows
             }
 
             // 3. Standard Property Mode
+            const float outerPadding = 8f;
+            const float columnGap = 6f;
+            float availableWidth = Mathf.Max(450f, position.width - (outerPadding * 2f) - (columnGap * 2f));
+            float propertiesWidth = Mathf.Clamp(availableWidth * 0.34f, 170f, 300f);
+            float categoryWidth = (availableWidth - propertiesWidth) * 0.5f;
+            float groupWidth = categoryWidth;
+
+            GUILayout.Space(outerPadding);
             EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(outerPadding);
 
             // Col 1: Category
-            DrawColumn(ref scrollCategory, 150, () =>
+            DrawColumn(ref scrollCategory, categoryWidth, () =>
             {
                 DrawSelectable("Me (this)", "Me");
                 DrawSelectable("Game (#)", "Game");
@@ -120,8 +142,10 @@ namespace GameRuleEditor.Windows
                 foreach (var actorName in actorNames) DrawSelectable(actorName, actorName);
             });
 
+            GUILayout.Space(columnGap);
+
             // Col 2: Group
-            DrawColumn(ref scrollGroup, 150, () =>
+            DrawColumn(ref scrollGroup, groupWidth, () =>
             {
                 if (selectedCategory == "Game")
                 {
@@ -144,14 +168,18 @@ namespace GameRuleEditor.Windows
                 }
             });
 
+            GUILayout.Space(columnGap);
+
             // Col 3: Properties
-            DrawColumn(ref scrollProps, 200, () =>
+            DrawColumn(ref scrollProps, propertiesWidth, () =>
             {
                 if (selectedCategory == "Game") DrawGameProperties();
                 else DrawActorProperties();
             });
 
+            GUILayout.Space(outerPadding);
             EditorGUILayout.EndHorizontal();
+            GUILayout.Space(outerPadding);
         }
 
         // [New] Draws list of files in Resources folder matching the type
@@ -222,17 +250,17 @@ namespace GameRuleEditor.Windows
 
         private void DrawSelectable(string label, string id)
         {
-            GUI.backgroundColor = (selectedCategory == id) ? Color.cyan : Color.white;
             string defaultGroup = (id == "Game") ? "Global" : "Transform";
-            if (GUILayout.Button(label, EditorStyles.miniButton)) { selectedCategory = id; selectedGroup = defaultGroup; }
-            GUI.backgroundColor = Color.white;
+            if (DrawTintedButton(label, navigationButtonStyle, navigationColoredLabelStyle, selectedCategory == id))
+            {
+                selectedCategory = id;
+                selectedGroup = defaultGroup;
+            }
         }
 
         private void DrawGroupSelectable(string label, string id)
         {
-            GUI.backgroundColor = (selectedGroup == id) ? Color.cyan : Color.white;
-            if (GUILayout.Button(label, EditorStyles.miniButton)) selectedGroup = id;
-            GUI.backgroundColor = Color.white;
+            if (DrawTintedButton(label, navigationButtonStyle, navigationColoredLabelStyle, selectedGroup == id)) selectedGroup = id;
         }
 
         private void DrawGameProperties()
@@ -294,7 +322,81 @@ namespace GameRuleEditor.Windows
 
         private void DrawFinalItem(string label, string result)
         {
-            if (GUILayout.Button(label, EditorStyles.label)) { onPick?.Invoke(result); Close(); }
+            if (DrawTintedButton(label, propertyButtonStyle, propertyColoredLabelStyle, false))
+            {
+                onPick?.Invoke(result);
+                Close();
+            }
+        }
+
+        private void EnsureStyles()
+        {
+            if (navigationButtonStyle != null) return;
+
+            navigationButtonStyle = CreateButtonStyle(TextAnchor.MiddleCenter);
+            propertyButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);
+            propertyButtonStyle.padding = new RectOffset(8, 8, 2, 2);
+            navigationColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleCenter, new RectOffset(2, 2, 2, 2));
+            propertyColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
+        }
+
+        private static GUIStyle CreateButtonStyle(TextAnchor alignment)
+        {
+            return new GUIStyle(EditorStyles.miniButton)
+            {
+                alignment = alignment,
+                stretchWidth = true
+            };
+        }
+
+        private static GUIStyle CreateColoredLabelStyle(TextAnchor alignment, RectOffset padding)
+        {
+            var style = new GUIStyle(EditorStyles.label)
+            {
+                alignment = alignment,
+                padding = padding
+            };
+            Color textColor = new Color32(30, 30, 30, 255);
+            style.normal.textColor = textColor;
+            style.hover.textColor = textColor;
+            style.active.textColor = textColor;
+            style.focused.textColor = textColor;
+            style.onNormal.textColor = textColor;
+            style.onHover.textColor = textColor;
+            style.onActive.textColor = textColor;
+            style.onFocused.textColor = textColor;
+            return style;
+        }
+
+        private static bool DrawTintedButton(string label, GUIStyle buttonStyle, GUIStyle coloredLabelStyle, bool selected)
+        {
+            var content = new GUIContent(label);
+            Rect buttonRect = GUILayoutUtility.GetRect(
+                content,
+                buttonStyle,
+                GUILayout.Height(22),
+                GUILayout.ExpandWidth(true));
+
+            bool hovered = buttonRect.Contains(Event.current.mousePosition);
+            bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
+            bool colored = selected || hovered;
+            bool clicked = GUI.Button(buttonRect, colored ? GUIContent.none : content, buttonStyle);
+
+            if (colored)
+            {
+                Color fillColor = pressed
+                    ? PickerYellowActive
+                    : hovered ? PickerYellowHover : PickerYellow;
+                var fillRect = new Rect(
+                    buttonRect.x + 2f,
+                    buttonRect.y + 2f,
+                    Mathf.Max(0f, buttonRect.width - 4f),
+                    Mathf.Max(0f, buttonRect.height - 4f));
+                EditorGUI.DrawRect(fillRect, fillColor);
+                GUI.Label(buttonRect, content, coloredLabelStyle);
+            }
+
+            return clicked;
         }
     }
 }
