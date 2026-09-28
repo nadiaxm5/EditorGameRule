@@ -18,6 +18,9 @@
             "PrefabName": "BlueTank",
             "Tag": "Untagged",
             "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0000025044780613825425, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Components": [
                 {
                     "type": "Properties",

@@ -120,28 +120,28 @@ namespace GameRuleEditor.CustomControls
                     AddParameterField("Property", true); AddParameterField("Value", true); break;
                 case "Spawn":
                     AddParameterField("Prefab", true, false, true, 0);
-                    AddParameterField("Pos X", true, actionParameterIndex: 2);
-                    AddParameterField("Pos Y", true, actionParameterIndex: 3);
-                    AddParameterField("Pos Z", true, actionParameterIndex: 4);
-                    AddParameterField("Rot X", true, actionParameterIndex: 5);
-                    AddParameterField("Rot Y", true, actionParameterIndex: 6);
-                    AddParameterField("Rot Z", true, actionParameterIndex: 7);
+                    AddParameterField("Offset X", true, actionParameterIndex: 2);
+                    AddParameterField("Offset Y", true, actionParameterIndex: 3);
+                    AddParameterField("Offset Z", true, actionParameterIndex: 4);
+                    AddParameterField("Rotation X", true, actionParameterIndex: 5);
+                    AddParameterField("Rotation Y", true, actionParameterIndex: 6);
+                    AddParameterField("Rotation Z", true, actionParameterIndex: 7);
                     break;
 
-                case "Animate": AddResourceField<AnimationClip>("Animation Name", "Pick Animation", "All Animations"); break;
-                case "PlaySound": AddResourceField<AudioClip>("Sound Name", "Pick Sound", "All Sounds"); break;
-                case "PlayParticles": AddResourceField<ParticleSystem>("Particle Prefab", "Pick Particle", "All Particles"); break;
+                case "Animate": AddResourceField<AnimationClip>("Animation", "Pick Animation", "All Animations"); break;
+                case "PlaySound": AddResourceField<AudioClip>("Sound", "Pick Sound", "All Sounds"); break;
+                case "PlayParticles": AddResourceField<ParticleSystem>("Particle System", "Pick Particle", "All Particles"); break;
 
-                case "Move": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
-                case "MoveTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
-                case "NavigateTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
+                case "Move": AddParameterField("Speed", true); AddParameterField("Rotation X", true); AddParameterField("Rotation Y", true); break;
+                case "MoveTo": AddParameterField("Speed", true); AddParameterField("Target X", true); AddParameterField("Target Y", true); AddParameterField("Target Z", true); break;
+                case "NavigateTo": AddParameterField("Speed", true); AddParameterField("Target X", true); AddParameterField("Target Y", true); AddParameterField("Target Z", true); break;
 
-                case "Rotate": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
-                case "RotateTo": AddParameterField("Speed", true); AddParameterField("DX", true); AddParameterField("DY", true); AddParameterField("DZ", true); AddParameterField("PivotX", true); AddParameterField("PivotY", true); AddParameterField("PivotZ", true); break;
-                case "Torque": AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
+                case "Rotate": AddParameterField("Turn Speed", true); AddParameterField("Rotation X", true); AddParameterField("Rotation Y", true); AddParameterField("Rotation Z", true); break;
+                case "RotateTo": AddParameterField("Turn Speed", true); AddParameterField("Target X", true); AddParameterField("Target Y", true); AddParameterField("Target Z", true); AddParameterField("Pivot X", true); AddParameterField("Pivot Y", true); AddParameterField("Pivot Z", true); break;
+                case "Torque": AddParameterField("Torque X", true); AddParameterField("Torque Y", true); AddParameterField("Torque Z", true); break;
 
-                case "Push": AddParameterField("Force", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
-                case "PushTo": AddParameterField("Force", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
+                case "Push": AddParameterField("Force", true); AddParameterField("Rotation X", true); AddParameterField("Rotation Y", true); break;
+                case "PushTo": AddParameterField("Force", true); AddParameterField("Target X", true); AddParameterField("Target Y", true); AddParameterField("Target Z", true); break;
             }
         }
 
@@ -289,6 +289,10 @@ namespace GameRuleEditor.CustomControls
             {
                 if (el is TextField tf) parameters.Add(ValueOrDefault(tf, tf.value));
             }
+
+            // Move and Push retain their legacy RZ parameter for JSON/runtime compatibility.
+            // The runtime does not use it, so the editor keeps it hidden and writes zero.
+            if (type == "Move" || type == "Push") parameters.Add("0");
 
             // Spawn is always relative to the actor executing the rule. Keep "this" in the
             // serialized action so existing JSON and script generation retain their format.

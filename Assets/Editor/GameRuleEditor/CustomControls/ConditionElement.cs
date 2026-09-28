@@ -14,10 +14,9 @@ namespace GameRuleEditor.CustomControls
 
         private EditorContext context;
         private PopupField<string> typeDropdown;
-        private Label negationIcon;
+        private Button negationButton;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
-        private List<string> dropdownTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
         public System.Action OnChanged;
         public System.Action OnRemove;
@@ -25,14 +24,21 @@ namespace GameRuleEditor.CustomControls
         private string selectedConditionType;
         private string joinOperatorBefore;
 
+        private static readonly Dictionary<string, string> EventDisplayNames = new Dictionary<string, string>
+        {
+            { "press", "Held" },
+            { "down", "Pressed" },
+            { "up", "Released" },
+            { "tap", "Tapped" },
+            { "isOver", "Pointer Over" }
+        };
+
         public string JoinOperatorBefore => joinOperatorBefore;
 
         public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null)
         {
             context = ctx;
             availableTypes = conditionTypes;
-            dropdownTypes = new List<string> { "Negate" };
-            dropdownTypes.AddRange(conditionTypes);
             style.flexDirection = FlexDirection.Row; style.marginBottom = 5;
             style.flexShrink = 0;
             style.borderTopLeftRadius = 3; style.borderTopRightRadius = 3;
@@ -47,38 +53,33 @@ namespace GameRuleEditor.CustomControls
             style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
             SetJoinOperator(joinOperatorBefore);
 
-            negationIcon = new Label("!");
-            negationIcon.style.width = 16;
-            negationIcon.style.marginRight = 4;
-            negationIcon.style.unityTextAlign = TextAnchor.MiddleCenter;
-            negationIcon.style.unityFontStyleAndWeight = FontStyle.Bold;
-            negationIcon.style.color = new Color(0.95f, 0.2f, 0.2f);
-            Add(negationIcon);
+            negationButton = new Button(() =>
+            {
+                if (string.IsNullOrEmpty(selectedConditionType)) return;
+
+                isNegated = !isNegated;
+                UpdateNegationVisual();
+                OnChanged?.Invoke();
+            })
+            {
+                text = "NOT",
+                tooltip = "Invert this condition"
+            };
+            negationButton.AddToClassList("button-negation");
+            Add(negationButton);
 
             selectedConditionType = null;
-            typeDropdown = new PopupField<string>(dropdownTypes, 0) { style = { width = 130 } };
+            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 130 } };
             typeDropdown.SetValueWithoutNotify(SelectConditionLabel);
             typeDropdown.AddToClassList("button-condition");
             typeDropdown.AddToClassList("rule-selector-dropdown");
             typeDropdown.style.flexShrink = 0;
             typeDropdown.RegisterValueChangedCallback(evt =>
             {
-                if (evt.newValue == "Negate")
-                {
-                    if (!string.IsNullOrEmpty(selectedConditionType))
-                    {
-                        isNegated = !isNegated;
-                        UpdateNegationIcon();
-                        OnChanged?.Invoke();
-                    }
-
-                    typeDropdown.SetValueWithoutNotify(selectedConditionType ?? SelectConditionLabel);
-                    return;
-                }
-
                 if (!availableTypes.Contains(evt.newValue)) return;
 
                 selectedConditionType = evt.newValue;
+                UpdateNegationVisual();
                 UpdateParameterFields(true);
             });
             Add(typeDropdown);
@@ -103,7 +104,7 @@ namespace GameRuleEditor.CustomControls
 
             Add(removeBtn);
 
-            UpdateNegationIcon();
+            UpdateNegationVisual();
             UpdateParameterFields(false);
         }
 
@@ -115,12 +116,17 @@ namespace GameRuleEditor.CustomControls
         public void SetNegated(bool negated)
         {
             isNegated = negated;
-            UpdateNegationIcon();
+            UpdateNegationVisual();
         }
 
-        private void UpdateNegationIcon()
+        private void UpdateNegationVisual()
         {
-            negationIcon.style.display = isNegated ? DisplayStyle.Flex : DisplayStyle.None;
+            bool hasCondition = !string.IsNullOrEmpty(selectedConditionType);
+            bool showAsNegated = hasCondition && isNegated;
+
+            negationButton.SetEnabled(hasCondition);
+            negationButton.EnableInClassList("button-negation--active", showAsNegated);
+            EnableInClassList("condition-negated", showAsNegated);
         }
 
         public void SetFromSource(string token)
@@ -130,6 +136,7 @@ namespace GameRuleEditor.CustomControls
             {
                 selectedConditionType = result.Name;
                 typeDropdown.SetValueWithoutNotify(result.Name);
+                UpdateNegationVisual();
                 UpdateParameterFields(false);
                 FillFieldsFromParams(result.Name, result.Params);
             }
@@ -144,19 +151,20 @@ namespace GameRuleEditor.CustomControls
             switch (type)
             {
                 case "Compare":
-                    AddParameterField("Value 1", true, false);
+                    AddParameterField("Property 1", true, false);
                     var operators = new List<string> { "<", "<=", "==", "!=", ">=", ">" };
                     var opDropdown = new PopupField<string>(operators, 0) { style = { width = 45 } };
                     opDropdown.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(opDropdown); inputElements.Add(opDropdown);
-                    AddParameterField("Value 2", true, false);
+                    AddParameterField("Property 2", true, false);
                     break;
 
-                case "Check": AddParameterField("Boolean Var", true, true); break;
+                case "Check": AddParameterField("Boolean Property", true, true); break;
 
                 case "Collision":
                     var projectTags = Loader.GetProjectTags(context?.currentProject?.actors);
 
+                    parametersContainer.Add(CreateFieldTag("Tag"));
                     var tagDrop = new PopupField<string>(projectTags, 0) { style = { flexGrow = 1 } };
                     tagDrop.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(tagDrop); inputElements.Add(tagDrop);
@@ -166,24 +174,39 @@ namespace GameRuleEditor.CustomControls
 
                 case "Touch":
                     var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
-                    var tMode = new PopupField<string>(touchModes, 0) { style = { width = 70 } };
+                    parametersContainer.Add(CreateFieldTag("Event"));
+                    var tMode = CreateEventDropdown(touchModes, 0, 92);
                     tMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(tMode); inputElements.Add(tMode);
 
-                    var onActorToggle = new Toggle("On Actor");
+                    var onActorToggle = new Toggle("On This Actor");
                     onActorToggle.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(onActorToggle); inputElements.Add(onActorToggle);
                     break;
 
                 case "Keyboard":
-                    AddParameterField("Key (e.g. Space)");
+                    AddParameterField("Key");
                     var keyModes = new List<string> { "press", "down", "up" };
-                    var kMode = new PopupField<string>(keyModes, 0) { style = { width = 70 } };
+                    parametersContainer.Add(CreateFieldTag("Event"));
+                    var kMode = CreateEventDropdown(keyModes, 0, 82);
                     kMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(kMode); inputElements.Add(kMode);
                     break;
             }
             if (notifyChange) OnChanged?.Invoke();
+        }
+
+        private static PopupField<string> CreateEventDropdown(List<string> choices, int defaultIndex, float width)
+        {
+            var dropdown = new PopupField<string>(choices, defaultIndex) { style = { width = width } };
+            dropdown.formatListItemCallback = FormatEventName;
+            dropdown.formatSelectedValueCallback = FormatEventName;
+            return dropdown;
+        }
+
+        private static string FormatEventName(string value)
+        {
+            return EventDisplayNames.TryGetValue(value, out string displayName) ? displayName : value;
         }
 
         private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false)

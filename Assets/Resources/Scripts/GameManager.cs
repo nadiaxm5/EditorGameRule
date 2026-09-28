@@ -13,16 +13,16 @@ public class GameManager : MonoBehaviour
     private Quaternion previousCameraRotation;
     private Quaternion currentCameraRotation;
 
-    private static readonly string[] ActorOrder = new string[] { "LevelArt", "BlueTank", "RedTank", "Shell", "ShellExplosion", "BlueAim", "RedAim", "RedHealth", "BlueHealth", "BlueWin", "RedWin", "CameraManager" };
+    private static readonly string[] ActorOrder = new string[] { "NewActor", "NewActor_1" };
 
-    public string GameName = "TANKS";
+    public string GameName = "NewProject2";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(-12f, 20f, 5f);
-    public Vector3 CameraRotation = new Vector3(50f, 60f, 0f);
-    public Vector3 SunPosition = new Vector3(0f, 10f, 0f);
-    public Vector3 SunRotation = new Vector3(54.3f, -26.2f, 10.5f);
-    public Color SunColor = new Color32(255, 200, 100, 255);
-    public Color SunAmbientColor = new Color32(180, 180, 180, 255);
+    public Vector3 CameraPosition = new Vector3(0f, 1f, -10f);
+    public Vector3 CameraRotation = new Vector3(0f, 0f, 0f);
+    public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
+    public Vector3 SunRotation = new Vector3(50f, -30f, 0f);
+    public Color SunColor = new Color32(255, 255, 255, 255);
+    public Color SunAmbientColor = new Color32(128, 128, 128, 255);
     public Color BackgroundColor = new Color32(0, 0, 0, 255);
     public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
     public string SoundTrack = "";

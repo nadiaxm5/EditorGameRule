@@ -24,11 +24,11 @@ namespace GameRuleEditor.Core
             // Spawn is always relative to the actor executing the rule; offsets default to zero.
             { "Spawn",      new[] { null, "this", "0", "0", "0", "0", "0", "0" } },
 
-            // Destinations: falling back to the actor's own coordinate leaves that axis untouched.
-            { "MoveTo",     new[] { "0", "this.x", "this.y", "this.z" } },
-            { "NavigateTo", new[] { "0", "this.x", "this.y", "this.z" } },
-            { "PushTo",     new[] { "0", "this.x", "this.y", "this.z" } },
-            { "RotateTo",   new[] { "0", "this.x", "this.y", "this.z", "this.x", "this.y", "this.z" } },
+            // Destinations default to the world origin. RotateTo keeps its pivot on the actor.
+            { "MoveTo",     new[] { "0", "0", "0", "0" } },
+            { "NavigateTo", new[] { "0", "0", "0", "0" } },
+            { "PushTo",     new[] { "0", "0", "0", "0" } },
+            { "RotateTo",   new[] { "0", "0", "0", "0", "this.x", "this.y", "this.z" } },
         };
 
         /// <summary>Default for one parameter, or null when it has none.</summary>

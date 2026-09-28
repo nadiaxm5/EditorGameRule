@@ -170,6 +170,62 @@ Button:disabled {
     background-color: rgb(59, 39, 107);
 }
 
+/* ── Logical negation ── */
+.button-negation {
+    width: 48px;
+    min-width: 48px;
+    height: 26px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    background-color: rgb(52, 52, 52);
+    color: rgb(185, 185, 185);
+    border-left-color: rgb(75, 75, 75);
+    border-right-color: rgb(75, 75, 75);
+    border-top-color: rgb(75, 75, 75);
+    border-bottom-color: rgb(75, 75, 75);
+    -unity-font-style: bold;
+}
+
+.button-negation:hover {
+    background-color: rgb(68, 68, 68);
+    color: rgb(255, 255, 255);
+}
+
+.button-negation:active {
+    background-color: rgb(85, 85, 85);
+}
+
+.button-negation:disabled {
+    background-color: rgb(45, 45, 45);
+    color: rgb(100, 100, 100);
+    border-left-color: rgb(60, 60, 60);
+    border-right-color: rgb(60, 60, 60);
+    border-top-color: rgb(60, 60, 60);
+    border-bottom-color: rgb(60, 60, 60);
+}
+
+.button-negation.button-negation--active {
+    background-color: rgb(79, 55, 139); /* light purple #4F378B */
+    color: rgb(234, 221, 255);
+    border-left-color: rgb(59, 39, 107);
+    border-right-color: rgb(59, 39, 107);
+    border-top-color: rgb(59, 39, 107);
+    border-bottom-color: rgb(59, 39, 107);
+}
+
+.button-negation.button-negation--active:hover {
+    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
+}
+
+.button-negation.button-negation--active:active {
+    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+}
+
+.condition-negated {
+    border-left-width: 3px;
+    border-left-color: rgb(79, 55, 139);
+}
+
 /* ── Destructive / trash ── */
 .button-danger {
     background-color: rgb(204, 0, 31);   /* #CC001F */
