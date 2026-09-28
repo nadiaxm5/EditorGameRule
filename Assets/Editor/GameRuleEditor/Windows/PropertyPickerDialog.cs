@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using System.Linq;
@@ -63,8 +64,29 @@ namespace GameRuleEditor.Windows
         // Filters
         private bool boolOnly = false;
 
-        private bool actorsOnly = false;
         private System.Type resourceType = null; // [New] Filter for resources
+        private bool prefabMode = false;
+        private bool includeActorPrefabs = false;
+        private PrefabSource selectedPrefabSource = PrefabSource.ActorPrefabs;
+        private string prefabSearch = string.Empty;
+        private string resourceTabLabel = "All Resources";
+        private string resourceSearch = string.Empty;
+
+        private const string PrefabsFolder = "Assets/Resources/Prefabs";
+
+        private enum PrefabSource
+        {
+            ActorPrefabs,
+            AllPrefabs
+        }
+
+        private struct PreviewGridItem
+        {
+            public string Label;
+            public string Result;
+            public string SecondaryName;
+            public Object PreviewObject;
+        }
 
         private string selectedCategory = "Me";
         private string selectedGroup = "Transform";
@@ -77,18 +99,104 @@ namespace GameRuleEditor.Windows
         private ActorJson currentActor;
 
         // [Updated] Added resourceFilter parameter
-        public static void Show(EditorContext ctx, System.Action<string> callback, bool onlyBooleans = false, bool onlyActors = false, System.Type resourceFilter = null)
+        public static void Show(EditorContext ctx, System.Action<string> callback, bool onlyBooleans = false,
+                                System.Type resourceFilter = null, Rect? anchorScreenRect = null)
         {
             var win = GetWindow<PropertyPickerDialog>(true, "Pick Property", true);
             win.context = ctx;
             win.onPick = callback;
             win.boolOnly = onlyBooleans;
-            win.actorsOnly = onlyActors;
             win.resourceType = resourceFilter;
+            win.prefabMode = false;
+            win.prefabSearch = string.Empty;
             win.minSize = new Vector2(500, 300);
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
             win.wantsMouseMove = true;
             win.InitData();
             win.ShowUtility();
+        }
+
+        public static void ShowPrefab(EditorContext ctx, System.Action<string> callback, bool includeActorPrefabs,
+                                      Rect? anchorScreenRect = null)
+        {
+            var win = GetWindow<PropertyPickerDialog>(true, "Pick Prefab", true);
+            win.context = ctx;
+            win.onPick = callback;
+            win.boolOnly = false;
+            win.resourceType = null;
+            win.prefabMode = true;
+            win.includeActorPrefabs = includeActorPrefabs;
+            win.selectedPrefabSource = includeActorPrefabs
+                ? PrefabSource.ActorPrefabs
+                : PrefabSource.AllPrefabs;
+            win.prefabSearch = string.Empty;
+            win.scrollCategory = Vector2.zero;
+            win.minSize = new Vector2(360, 220);
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
+            win.wantsMouseMove = true;
+            win.InitData();
+            win.ShowUtility();
+        }
+
+        public static void ShowResource(EditorContext ctx, System.Action<string> callback,
+                                        System.Type resourceFilter, string windowTitle,
+                                        string allResourcesLabel, Rect? anchorScreenRect = null)
+        {
+            var win = GetWindow<PropertyPickerDialog>(true, windowTitle, true);
+            win.context = ctx;
+            win.onPick = callback;
+            win.boolOnly = false;
+            win.resourceType = resourceFilter;
+            win.prefabMode = false;
+            win.resourceTabLabel = allResourcesLabel;
+            win.resourceSearch = string.Empty;
+            win.scrollCategory = Vector2.zero;
+            win.minSize = new Vector2(360, 220);
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
+            win.wantsMouseMove = true;
+            win.InitData();
+            win.ShowUtility();
+        }
+
+        /// <summary>Converts a UI Toolkit element's panel-space bounds to desktop screen coordinates.</summary>
+        public static Rect GetScreenRect(VisualElement element)
+        {
+            if (element == null) return default;
+
+            Rect screenRect = element.worldBound;
+            EditorWindow hostWindow = EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow;
+            if (hostWindow != null)
+                screenRect.position += hostWindow.position.position;
+
+            return screenRect;
+        }
+
+        private static void PositionNearAnchor(EditorWindow window, Rect? anchorScreenRect, Vector2 windowSize)
+        {
+            if (!anchorScreenRect.HasValue || anchorScreenRect.Value.width <= 0f)
+            {
+                window.position = new Rect(window.position.position, windowSize);
+                return;
+            }
+
+            Rect anchor = anchorScreenRect.Value;
+            Rect desktop = UnityEditorInternal.InternalEditorUtility.GetBoundsOfDesktopAtPoint(anchor.center);
+            const float gap = 4f;
+
+            float x = anchor.xMin;
+            float y = anchor.yMax + gap;
+
+            if (x + windowSize.x > desktop.xMax)
+                x = desktop.xMax - windowSize.x;
+            if (x < desktop.xMin)
+                x = desktop.xMin;
+
+            if (y + windowSize.y > desktop.yMax)
+                y = anchor.yMin - windowSize.y - gap;
+            if (y < desktop.yMin)
+                y = desktop.yMin;
+
+            window.position = new Rect(new Vector2(x, y), windowSize);
         }
 
         private void InitData()
@@ -106,6 +214,12 @@ namespace GameRuleEditor.Windows
             EnsureStyles();
             if (Event.current.type == EventType.MouseMove) Repaint();
 
+            if (prefabMode)
+            {
+                DrawPrefabMode();
+                return;
+            }
+
             // 1. Resource Mode (New)
             if (resourceType != null)
             {
@@ -113,14 +227,7 @@ namespace GameRuleEditor.Windows
                 return;
             }
 
-            // 2. Actors Only Mode
-            if (actorsOnly)
-            {
-                DrawActorsOnlyMode();
-                return;
-            }
-
-            // 3. Standard Property Mode
+            // 2. Standard Property Mode
             const float outerPadding = 8f;
             const float columnGap = 6f;
             float availableWidth = Mathf.Max(450f, position.width - (outerPadding * 2f) - (columnGap * 2f));
@@ -182,64 +289,315 @@ namespace GameRuleEditor.Windows
             GUILayout.Space(outerPadding);
         }
 
-        // [New] Draws list of files in Resources folder matching the type
         private void DrawResourceMode()
         {
-            EditorGUILayout.LabelField($"Select {resourceType.Name}:", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
+            const float outerPadding = 8f;
+            GUILayout.Space(outerPadding);
 
-            scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(outerPadding);
 
-            // Find all assets of type in Resources folder
-            var assets = Resources.LoadAll("", resourceType);
+            float tabWidth = Mathf.Clamp(EditorStyles.miniButton.CalcSize(
+                new GUIContent(resourceTabLabel)).x + 18f, 96f, 140f);
+            DrawYellowTabButton(resourceTabLabel, true, tabWidth);
 
-            if (assets.Length == 0)
-            {
-                EditorGUILayout.HelpBox($"No {resourceType.Name} found in Resources folder.", MessageType.Info);
-            }
+            GUILayout.FlexibleSpace();
+            float searchWidth = Mathf.Clamp(position.width * 0.32f, 115f, 210f);
+            GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.textField;
+            resourceSearch = EditorGUILayout.TextField(resourceSearch ?? string.Empty, searchStyle,
+                GUILayout.Width(searchWidth), GUILayout.Height(22f));
 
-            foreach (var asset in assets)
-            {
-                if (GUILayout.Button(asset.name, EditorStyles.miniButton))
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(6f);
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
+
+            var assets = Resources.LoadAll("", resourceType)
+                .OrderBy(asset => asset.name, System.StringComparer.OrdinalIgnoreCase)
+                .Where(asset => MatchesSearch(resourceSearch, asset.name))
+                .Select(asset => new PreviewGridItem
                 {
-                    onPick?.Invoke(asset.name);
-                    Close();
-                }
+                    Label = asset.name,
+                    Result = asset.name,
+                    SecondaryName = resourceType.Name,
+                    PreviewObject = asset
+                })
+                .ToList();
+
+            if (assets.Count == 0)
+            {
+                EditorGUILayout.HelpBox($"No items in {resourceTabLabel} match the search.", MessageType.Info);
+            }
+            else
+            {
+                DrawPreviewGrid(assets);
             }
 
             EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(outerPadding);
         }
 
-        private void DrawActorsOnlyMode()
+        private void DrawPrefabMode()
         {
-            EditorGUILayout.LabelField("Select Actor / Prefab:", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
+            const float outerPadding = 8f;
+            GUILayout.Space(outerPadding);
 
-            scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(outerPadding);
 
-            foreach (var actorName in actorNames)
+            if (includeActorPrefabs &&
+                DrawYellowTabButton("Actor Prefabs", selectedPrefabSource == PrefabSource.ActorPrefabs, 112f))
             {
-                if (GUILayout.Button(actorName, EditorStyles.miniButton))
+                selectedPrefabSource = PrefabSource.ActorPrefabs;
+                scrollCategory = Vector2.zero;
+            }
+
+            if (includeActorPrefabs) GUILayout.Space(4f);
+
+            if (DrawYellowTabButton("All Prefabs", selectedPrefabSource == PrefabSource.AllPrefabs, 96f))
+            {
+                selectedPrefabSource = PrefabSource.AllPrefabs;
+                scrollCategory = Vector2.zero;
+            }
+
+            GUILayout.FlexibleSpace();
+            float searchWidth = Mathf.Clamp(position.width * 0.32f, 115f, 210f);
+            GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.textField;
+            prefabSearch = EditorGUILayout.TextField(prefabSearch ?? string.Empty, searchStyle,
+                GUILayout.Width(searchWidth), GUILayout.Height(22f));
+
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(6f);
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
+
+            List<GameObject> selectablePrefabs = LoadSelectablePrefabs();
+            var gridItems = new List<PreviewGridItem>();
+
+            if (selectedPrefabSource == PrefabSource.ActorPrefabs)
+            {
+                foreach (string actorName in actorNames)
                 {
-                    onPick?.Invoke(actorName);
-                    Close();
+                    ActorJson actor = context.currentProject.actors.Find(item => item.ActorName == actorName);
+                    string prefabName = actor?.PrefabName ?? string.Empty;
+                    if (!MatchesPrefabSearch(actorName, prefabName)) continue;
+
+                    GameObject prefab = selectablePrefabs.Find(item => item.name == prefabName);
+                    gridItems.Add(new PreviewGridItem
+                    {
+                        Label = actorName,
+                        Result = actorName,
+                        SecondaryName = prefabName,
+                        PreviewObject = prefab
+                    });
+                }
+            }
+            else
+            {
+                foreach (GameObject prefab in selectablePrefabs)
+                {
+                    if (!MatchesPrefabSearch(prefab.name)) continue;
+
+                    gridItems.Add(new PreviewGridItem
+                    {
+                        Label = prefab.name,
+                        Result = prefab.name,
+                        SecondaryName = prefab.name,
+                        PreviewObject = prefab
+                    });
                 }
             }
 
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Resources/Prefabs:", EditorStyles.boldLabel);
-
-            var prefabs = Resources.LoadAll<GameObject>("Prefabs");
-            foreach (var p in prefabs)
+            if (gridItems.Count == 0)
             {
-                if (GUILayout.Button(p.name, EditorStyles.miniButton))
-                {
-                    onPick?.Invoke(p.name);
-                    Close();
-                }
+                string message = selectedPrefabSource == PrefabSource.ActorPrefabs
+                    ? "No actor prefabs match the search."
+                    : "No prefabs in Resources/Prefabs match the search.";
+                EditorGUILayout.HelpBox(message, MessageType.Info);
+            }
+            else
+            {
+                DrawPreviewGrid(gridItems);
             }
 
             EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(outerPadding);
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(outerPadding);
+        }
+
+        private void DrawPreviewGrid(List<PreviewGridItem> items)
+        {
+            const float gap = 8f;
+            const float minimumCardWidth = 96f;
+            const float maximumCardWidth = 114f;
+            const float cardHeight = 116f;
+
+            // Account for outer padding, help-box padding and the vertical scrollbar.
+            float availableWidth = Mathf.Max(minimumCardWidth, position.width - 42f);
+            int columns = Mathf.Max(1,
+                Mathf.FloorToInt((availableWidth + gap) / (minimumCardWidth + gap)));
+            float cardWidth = Mathf.Min(maximumCardWidth,
+                (availableWidth - (gap * (columns - 1))) / columns);
+
+            for (int start = 0; start < items.Count; start += columns)
+            {
+                EditorGUILayout.BeginHorizontal();
+
+                int end = Mathf.Min(start + columns, items.Count);
+                for (int index = start; index < end; index++)
+                {
+                    DrawPreviewCard(items[index], cardWidth, cardHeight);
+                    if (index < end - 1) GUILayout.Space(gap);
+                }
+
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+                GUILayout.Space(gap);
+            }
+        }
+
+        private void DrawPreviewCard(PreviewGridItem item, float width, float height)
+        {
+            Rect cardRect = GUILayoutUtility.GetRect(width, height,
+                GUILayout.Width(width), GUILayout.Height(height));
+            bool hovered = cardRect.Contains(Event.current.mousePosition);
+            bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
+
+            string tooltip = string.IsNullOrEmpty(item.SecondaryName) || item.SecondaryName == item.Label
+                ? item.Label
+                : $"{item.Label} — {item.SecondaryName}";
+            bool clicked = GUI.Button(cardRect, new GUIContent(string.Empty, tooltip), GUIStyle.none);
+
+            Color cardColor = pressed
+                ? PickerYellowActive
+                : hovered ? PickerYellowHover : new Color(0.19f, 0.19f, 0.20f, 1f);
+            EditorGUI.DrawRect(cardRect, cardColor);
+
+            float previewSize = Mathf.Min(width - 12f, 76f);
+            var previewRect = new Rect(
+                cardRect.x + ((width - previewSize) * 0.5f),
+                cardRect.y + 6f,
+                previewSize,
+                previewSize);
+
+            Texture preview = GetAssetPreview(item.PreviewObject);
+            if (preview != null)
+                GUI.DrawTexture(previewRect, preview, ScaleMode.ScaleToFit, true);
+
+            var labelRect = new Rect(cardRect.x + 5f, previewRect.yMax + 3f,
+                width - 10f, Mathf.Max(20f, cardRect.yMax - previewRect.yMax - 6f));
+            GUIStyle labelStyle = new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.UpperCenter,
+                wordWrap = true,
+                clipping = TextClipping.Clip
+            };
+            if (hovered || pressed)
+            {
+                Color hoveredTextColor = new Color32(30, 30, 30, 255);
+                labelStyle.normal.textColor = hoveredTextColor;
+                labelStyle.hover.textColor = hoveredTextColor;
+                labelStyle.active.textColor = hoveredTextColor;
+                labelStyle.focused.textColor = hoveredTextColor;
+            }
+
+            GUI.Label(labelRect, new GUIContent(item.Label, tooltip), labelStyle);
+
+            if (clicked)
+            {
+                onPick?.Invoke(item.Result);
+                Close();
+            }
+        }
+
+        private Texture GetAssetPreview(Object asset)
+        {
+            Object previewTarget = asset is Component component ? component.gameObject : asset;
+            if (previewTarget == null)
+                return EditorGUIUtility.IconContent("Prefab Icon").image;
+
+            Texture preview = AssetPreview.GetAssetPreview(previewTarget);
+            if (preview != null) return preview;
+
+            if (AssetPreview.IsLoadingAssetPreview(previewTarget.GetInstanceID()))
+                Repaint();
+
+            return AssetPreview.GetMiniThumbnail(previewTarget) ??
+                   EditorGUIUtility.ObjectContent(null, previewTarget.GetType()).image;
+        }
+
+        private bool MatchesPrefabSearch(params string[] names)
+        {
+            return MatchesSearch(prefabSearch, names);
+        }
+
+        private static bool MatchesSearch(string query, params string[] names)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return true;
+
+            string search = query.Trim();
+            return names.Any(name => !string.IsNullOrEmpty(name) &&
+                name.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private static List<GameObject> LoadSelectablePrefabs()
+        {
+            var prefabs = new List<GameObject>();
+            if (!AssetDatabase.IsValidFolder(PrefabsFolder)) return prefabs;
+
+            foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { PrefabsFolder }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!path.EndsWith(".prefab", System.StringComparison.OrdinalIgnoreCase)) continue;
+
+                string folder = System.IO.Path.GetDirectoryName(path);
+                if (folder == null || folder.Replace('\\', '/') != PrefabsFolder) continue;
+
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (prefab != null) prefabs.Add(prefab);
+            }
+
+            prefabs.Sort((left, right) => EditorUtility.NaturalCompare(left.name, right.name));
+            return prefabs;
+        }
+
+        private static bool DrawYellowTabButton(string label, bool selected, float width)
+        {
+            GUIStyle style = new GUIStyle(EditorStyles.miniButton)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold
+            };
+
+            Rect rect = GUILayoutUtility.GetRect(new GUIContent(label), style,
+                GUILayout.Width(width), GUILayout.Height(22f));
+            bool hovered = rect.Contains(Event.current.mousePosition);
+            bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
+            bool clicked = GUI.Button(rect, GUIContent.none, style);
+
+            Color fillColor = pressed || selected
+                ? PickerYellowActive
+                : hovered ? PickerYellowHover : PickerYellow;
+            EditorGUI.DrawRect(new Rect(rect.x + 2f, rect.y + 2f,
+                Mathf.Max(0f, rect.width - 4f), Mathf.Max(0f, rect.height - 4f)), fillColor);
+
+            GUIStyle labelStyle = CreateColoredLabelStyle(TextAnchor.MiddleCenter, new RectOffset(2, 2, 2, 2));
+            labelStyle.fontStyle = FontStyle.Bold;
+            GUI.Label(rect, label, labelStyle);
+            return clicked;
         }
 
         private void DrawColumn(ref Vector2 scroll, float width, System.Action drawContent)
@@ -339,10 +697,11 @@ namespace GameRuleEditor.Windows
                 return;
             }
 
-            navigationButtonStyle = CreateButtonStyle(TextAnchor.MiddleCenter);
+            navigationButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);
             propertyButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);
             propertyButtonStyle.padding = new RectOffset(8, 8, 2, 2);
-            navigationColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleCenter, new RectOffset(2, 2, 2, 2));
+            navigationButtonStyle.padding = new RectOffset(8, 8, 2, 2);
+            navigationColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
             propertyColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
         }
 

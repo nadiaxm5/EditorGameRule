@@ -128,9 +128,9 @@ namespace GameRuleEditor.CustomControls
                     AddParameterField("Rot Z", true, actionParameterIndex: 7);
                     break;
 
-                case "Animate": AddResourceField<AnimationClip>("Animation Name"); break;
-                case "PlaySound": AddResourceField<AudioClip>("Sound Name"); break;
-                case "PlayParticles": AddResourceField<ParticleSystem>("Particle Prefab"); break;
+                case "Animate": AddResourceField<AnimationClip>("Animation Name", "Pick Animation", "All Animations"); break;
+                case "PlaySound": AddResourceField<AudioClip>("Sound Name", "Pick Sound", "All Sounds"); break;
+                case "PlayParticles": AddResourceField<ParticleSystem>("Particle Prefab", "Pick Particle", "All Particles"); break;
 
                 case "Move": AddParameterField("Speed", true); AddParameterField("RX", true); AddParameterField("RY", true); AddParameterField("RZ", true); break;
                 case "MoveTo": AddParameterField("Speed", true); AddParameterField("X", true); AddParameterField("Y", true); AddParameterField("Z", true); break;
@@ -147,7 +147,7 @@ namespace GameRuleEditor.CustomControls
 
         // Standard Text + Picker Button
         private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false,
-                                       bool actorsOnly = false, int actionParameterIndex = -1)
+                                       bool prefabPickerMode = false, int actionParameterIndex = -1)
         {
             // Value assumed when the field is left blank, so the user doesn't have to type it.
             int defaultIndex = actionParameterIndex >= 0 ? actionParameterIndex : inputElements.Count;
@@ -180,17 +180,32 @@ namespace GameRuleEditor.CustomControls
 
             if (showPicker)
             {
-                var pickBtn = CreatePickerButton(() =>
+                var pickBtn = CreatePickerButton(anchorScreenRect =>
                 {
-                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly, actorsOnly);
-                });
+                    if (prefabPickerMode)
+                    {
+                        GameRuleEditor.Windows.PropertyPickerDialog.ShowPrefab(context, (picked) =>
+                        {
+                            field.value = picked;
+                            OnChanged?.Invoke();
+                        }, includeActorPrefabs: true, anchorScreenRect: anchorScreenRect);
+                    }
+                    else
+                    {
+                        GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
+                        {
+                            field.value = picked;
+                            OnChanged?.Invoke();
+                        }, boolOnly, anchorScreenRect: anchorScreenRect);
+                    }
+                }, prefabPickerMode ? "Pick Prefab" : "Pick Property");
                 container.Add(pickBtn);
             }
             parametersContainer.Add(container); inputElements.Add(field);
         }
 
         // [Updated] Now looks identical to AddParameterField but picks resources
-        private void AddResourceField<T>(string placeholder) where T : Object
+        private void AddResourceField<T>(string placeholder, string pickerLabel, string allResourcesLabel) where T : Object
         {
             var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 180, alignItems = Align.Center } };
             container.style.flexShrink = 0;
@@ -204,14 +219,14 @@ namespace GameRuleEditor.CustomControls
             textField.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
             container.Add(textField);
 
-            var pickBtn = CreatePickerButton(() =>
+            var pickBtn = CreatePickerButton(anchorScreenRect =>
             {
-                GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (name) =>
+                GameRuleEditor.Windows.PropertyPickerDialog.ShowResource(context, (name) =>
                 {
                     textField.value = name;
                     OnChanged?.Invoke();
-                }, resourceFilter: typeof(T));
-            });
+                }, typeof(T), pickerLabel, allResourcesLabel, anchorScreenRect);
+            }, pickerLabel);
 
             container.Add(pickBtn);
             parametersContainer.Add(container);
@@ -239,15 +254,20 @@ namespace GameRuleEditor.CustomControls
             return tag;
         }
 
-        private Button CreatePickerButton(System.Action onClick)
+        private Button CreatePickerButton(System.Action<Rect> onClick, string label = "Pick Property")
         {
-            var pickBtn = new Button(onClick) { text = "Pick Property" };
+            Button pickBtn = null;
+            pickBtn = new Button(() =>
+            {
+                onClick?.Invoke(GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(pickBtn));
+            }) { text = label };
             pickBtn.AddToClassList("button-property-picker");
-            pickBtn.style.minWidth = 88;
+            pickBtn.style.width = 100;
+            pickBtn.style.minWidth = 100;
             pickBtn.style.height = 22;
             pickBtn.style.marginLeft = 2;
             pickBtn.style.flexShrink = 0;
-            pickBtn.tooltip = "Pick Property";
+            pickBtn.tooltip = label;
 
             return pickBtn;
         }

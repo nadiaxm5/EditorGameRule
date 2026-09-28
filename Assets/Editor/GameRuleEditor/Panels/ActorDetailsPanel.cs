@@ -173,8 +173,15 @@ namespace GameRuleEditor.Panels
             // ─── Prefab ───
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
             prefabRow.Add(new Label("Prefab") { style = { width = 40, unityTextAlign = TextAnchor.MiddleCenter } });
-            prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1 } };
+            prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1, minWidth = 0 } };
             prefabPicker.tooltip = "Only prefabs inside " + PrefabsFolder;
+
+            // The whole field opens our custom prefab picker, so Unity's separate circular
+            // object-selector button is unnecessary.
+            var prefabSelectorButton = prefabPicker.Q<VisualElement>(className: ObjectField.selectorUssClassName);
+            if (prefabSelectorButton != null)
+                prefabSelectorButton.style.display = DisplayStyle.None;
+
             prefabPicker.RegisterValueChangedCallback(evt =>
             {
                 if (context.selectedActorIndex < 0) return;
@@ -200,6 +207,10 @@ namespace GameRuleEditor.Panels
             prefabPicker.RegisterCallback<DragUpdatedEvent>(OnPrefabPickerDragUpdated, TrickleDown.TrickleDown);
             prefabPicker.RegisterCallback<DragPerformEvent>(OnPrefabPickerDragPerform, TrickleDown.TrickleDown);
             prefabRow.Add(prefabPicker);
+
+            // Tag controls occupy 140 px and the actor-name field has a 10 px right margin.
+            // Reserving both makes the two editable fields end at exactly the same position.
+            prefabRow.Add(new VisualElement { style = { width = 150, flexShrink = 0 } });
             scrollView.Add(prefabRow);
 
             // ─── Transform (always-on) ───
@@ -1040,15 +1051,15 @@ namespace GameRuleEditor.Panels
         // ──────────────────────────────────
         private void OnPrefabPickerPointerDown(PointerDownEvent evt)
         {
-            if (!IsSelectorButton(evt.target as VisualElement)) return;
+            if (evt.button != 0) return;
             evt.StopImmediatePropagation();
             evt.StopPropagation();
-            ShowPrefabMenu();
+            ShowPrefabPicker();
         }
 
         private void OnPrefabPickerMouseDown(MouseDownEvent evt)
         {
-            if (!IsSelectorButton(evt.target as VisualElement)) return;
+            if (evt.button != 0) return;
             evt.StopImmediatePropagation();
             evt.StopPropagation();
         }
@@ -1068,43 +1079,16 @@ namespace GameRuleEditor.Panels
             evt.StopPropagation();
         }
 
-        /// <summary>True when the element is the ObjectField's picker button (or a child of it).</summary>
-        private static bool IsSelectorButton(VisualElement element)
-        {
-            while (element != null)
-            {
-                if (element.ClassListContains(ObjectField.selectorUssClassName)) return true;
-                if (element.ClassListContains(ObjectField.ussClassName)) return false;
-                element = element.parent;
-            }
-            return false;
-        }
-
-        private void ShowPrefabMenu()
+        private void ShowPrefabPicker()
         {
             if (context.selectedActorIndex < 0) return;
 
-            string currentName = context.SelectedActor.PrefabName;
-            var menu = new GenericMenu();
-
-            menu.AddItem(new GUIContent("None"), string.IsNullOrEmpty(currentName), () => prefabPicker.value = null);
-            menu.AddSeparator("");
-
-            var prefabs = LoadSelectablePrefabs();
-            if (prefabs.Count == 0)
+            PropertyPickerDialog.ShowPrefab(context, prefabName =>
             {
-                menu.AddDisabledItem(new GUIContent("No prefabs in " + PrefabsFolder));
-            }
-            else
-            {
-                foreach (var prefab in prefabs)
-                {
-                    var picked = prefab;
-                    menu.AddItem(new GUIContent(picked.name), picked.name == currentName, () => prefabPicker.value = picked);
-                }
-            }
-
-            menu.DropDown(prefabPicker.worldBound);
+                GameObject prefab = LoadSelectablePrefabs().Find(item => item.name == prefabName);
+                if (prefab != null) prefabPicker.value = prefab;
+            }, includeActorPrefabs: false,
+                anchorScreenRect: PropertyPickerDialog.GetScreenRect(prefabPicker));
         }
 
         private static List<GameObject> LoadSelectablePrefabs()

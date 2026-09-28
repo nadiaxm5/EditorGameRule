@@ -215,9 +215,13 @@ namespace GameRuleEditor.CustomControls
 
             if (showPicker)
             {
-                var pickBtn = CreatePickerButton(() =>
+                var pickBtn = CreatePickerButton(anchorScreenRect =>
                 {
-                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly);
+                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
+                    {
+                        field.value = picked;
+                        OnChanged?.Invoke();
+                    }, boolOnly, anchorScreenRect: anchorScreenRect);
                 });
                 container.Add(pickBtn);
             }
@@ -245,11 +249,16 @@ namespace GameRuleEditor.CustomControls
             return tag;
         }
 
-        private Button CreatePickerButton(System.Action onClick)
+        private Button CreatePickerButton(System.Action<Rect> onClick)
         {
-            var pickBtn = new Button(onClick) { text = "Pick Property" };
+            Button pickBtn = null;
+            pickBtn = new Button(() =>
+            {
+                onClick?.Invoke(GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(pickBtn));
+            }) { text = "Pick Property" };
             pickBtn.AddToClassList("button-property-picker");
-            pickBtn.style.minWidth = 88;
+            pickBtn.style.width = 100;
+            pickBtn.style.minWidth = 100;
             pickBtn.style.height = 22;
             pickBtn.style.marginLeft = 2;
             pickBtn.style.flexShrink = 0;
