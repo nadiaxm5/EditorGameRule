@@ -377,6 +377,30 @@ namespace GameRuleEditor.Panels
                     foldoutToggle.Add(titleField);
                 }
 
+                var duplicateBtn = new Button(() =>
+                {
+                    controller.DuplicateRule(context.selectedActorIndex, ruleIndex);
+
+                    var actor = context.SelectedActor;
+                    int duplicateIndex = ruleIndex + 1;
+                    if (actor?.Script != null && duplicateIndex < actor.Script.Count)
+                    {
+                        SentenceJson duplicatedRule = actor.Script[duplicateIndex];
+                        collapsedRules.Remove(duplicatedRule);
+                    }
+
+                    UpdateRulesList();
+                }) { text = "Duplicate" };
+                duplicateBtn.tooltip = "Duplicate Rule";
+                duplicateBtn.AddToClassList("button-primary");
+                duplicateBtn.style.height = 26;
+                duplicateBtn.style.marginLeft = 4;
+                duplicateBtn.style.paddingLeft = 10;
+                duplicateBtn.style.paddingRight = 10;
+                duplicateBtn.style.flexShrink = 0;
+                duplicateBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                foldoutToggle.Add(duplicateBtn);
+
                 var removeIconBtn = new Button(() =>
                 {
                     if (EditorUtility.DisplayDialog(

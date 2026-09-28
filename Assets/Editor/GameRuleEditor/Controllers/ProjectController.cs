@@ -986,8 +986,9 @@ namespace GameRuleEditor.Controllers
             SentenceJson duplicate = new SentenceJson
             {
                 Name = string.IsNullOrEmpty(original.Name) ? "Rule (Copy)" : $"{original.Name} (Copy)",
-                When = new List<string>(original.When),
-                Do = new List<string>(original.Do)
+                When = original.When != null ? new List<string>(original.When) : new List<string>(),
+                Do = original.Do != null ? new List<string>(original.Do) : new List<string>(),
+                groupId = original.groupId
             };
 
             actor.Script.Insert(ruleIndex + 1, duplicate);
