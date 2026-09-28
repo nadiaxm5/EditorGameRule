@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GameRuleEditor.Windows
 {
@@ -209,6 +210,28 @@ namespace GameRuleEditor.Windows
                 .ToList();
         }
 
+        /// <summary>
+        /// Shows self references with the selected actor's name while keeping "this" as the
+        /// persisted GameRule syntax.
+        /// </summary>
+        public static string ToDisplayReference(EditorContext ctx, string value)
+        {
+            string actorName = ctx?.SelectedActor?.ActorName;
+            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(actorName)) return value;
+
+            return Regex.Replace(value, @"(?<![A-Za-z0-9_])this\.", actorName + ".",
+                RegexOptions.IgnoreCase);
+        }
+
+        public static string ToStoredReference(EditorContext ctx, string value)
+        {
+            string actorName = ctx?.SelectedActor?.ActorName;
+            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(actorName)) return value;
+
+            string actorReference = @"(?<![A-Za-z0-9_])" + Regex.Escape(actorName) + @"\.";
+            return Regex.Replace(value, actorReference, "this.", RegexOptions.IgnoreCase);
+        }
+
         private void OnGUI()
         {
             EnsureStyles();
@@ -231,28 +254,27 @@ namespace GameRuleEditor.Windows
             const float outerPadding = 8f;
             const float columnGap = 6f;
             float availableWidth = Mathf.Max(450f, position.width - (outerPadding * 2f) - (columnGap * 2f));
-            float propertiesWidth = Mathf.Clamp(availableWidth * 0.34f, 170f, 300f);
-            float categoryWidth = (availableWidth - propertiesWidth) * 0.5f;
-            float groupWidth = categoryWidth;
+            float columnWidth = availableWidth / 3f;
 
             GUILayout.Space(outerPadding);
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(outerPadding);
 
             // Col 1: Category
-            DrawColumn(ref scrollCategory, categoryWidth, () =>
+            DrawColumn(ref scrollCategory, columnWidth, () =>
             {
-                DrawSelectable("Me (this)", "Me");
-                DrawSelectable("Game (#)", "Game");
+                string meLabel = currentActor == null ? "Me" : $"Me ({currentActor.ActorName})";
+                DrawSelectable(meLabel, "Me");
+                DrawSelectable("Game (global)", "Game");
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Actors", EditorStyles.boldLabel);
                 foreach (var actorName in actorNames) DrawSelectable(actorName, actorName);
-            });
+            }, hideHorizontalScrollbar: true);
 
             GUILayout.Space(columnGap);
 
             // Col 2: Group
-            DrawColumn(ref scrollGroup, groupWidth, () =>
+            DrawColumn(ref scrollGroup, columnWidth, () =>
             {
                 if (selectedCategory == "Game")
                 {
@@ -278,7 +300,7 @@ namespace GameRuleEditor.Windows
             GUILayout.Space(columnGap);
 
             // Col 3: Properties
-            DrawColumn(ref scrollProps, propertiesWidth, () =>
+            DrawColumn(ref scrollProps, columnWidth, () =>
             {
                 if (selectedCategory == "Game") DrawGameProperties();
                 else DrawActorProperties();
@@ -602,10 +624,16 @@ namespace GameRuleEditor.Windows
             return clicked;
         }
 
-        private void DrawColumn(ref Vector2 scroll, float width, System.Action drawContent)
+        private void DrawColumn(ref Vector2 scroll, float width, System.Action drawContent,
+                                bool hideHorizontalScrollbar = false)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(width), GUILayout.ExpandHeight(true));
-            scroll = EditorGUILayout.BeginScrollView(scroll); drawContent(); EditorGUILayout.EndScrollView(); EditorGUILayout.EndVertical();
+            scroll = hideHorizontalScrollbar
+                ? EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, GUI.skin.verticalScrollbar)
+                : EditorGUILayout.BeginScrollView(scroll);
+            drawContent();
+            EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawSelectable(string label, string id)
@@ -700,6 +728,7 @@ namespace GameRuleEditor.Windows
             }
 
             navigationButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);
+            navigationButtonStyle.clipping = TextClipping.Clip;
             propertyButtonStyle = CreateButtonStyle(TextAnchor.MiddleLeft);
             propertyButtonStyle.padding = new RectOffset(8, 8, 2, 2);
             navigationButtonStyle.padding = new RectOffset(8, 8, 2, 2);
@@ -739,12 +768,18 @@ namespace GameRuleEditor.Windows
         {
             var content = new GUIContent(label);
             Rect buttonRect = GUILayoutUtility.GetRect(
-                content,
+                GUIContent.none,
                 buttonStyle,
                 GUILayout.Height(22),
                 GUILayout.ExpandWidth(true));
 
-            bool hovered = buttonRect.Contains(Event.current.mousePosition);
+            // Each column owns a separate scroll view. Comparing their local coordinates can
+            // make controls in different columns appear hovered at the same time, so compare
+            // both positions in desktop coordinates instead.
+            Vector2 buttonScreenPosition = GUIUtility.GUIToScreenPoint(buttonRect.position);
+            Rect buttonScreenRect = new Rect(buttonScreenPosition, buttonRect.size);
+            Vector2 mouseScreenPosition = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+            bool hovered = buttonScreenRect.Contains(mouseScreenPosition);
             bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
             bool colored = selected || hovered;
             bool clicked = GUI.Button(buttonRect, colored ? GUIContent.none : content, buttonStyle);

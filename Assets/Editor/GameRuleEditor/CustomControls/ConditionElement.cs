@@ -18,6 +18,7 @@ namespace GameRuleEditor.CustomControls
         private VisualElement parametersContainer;
         private List<string> availableTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
+        private HashSet<VisualElement> selfReferenceFields = new HashSet<VisualElement>();
         public System.Action OnChanged;
         public System.Action OnRemove;
         private bool isNegated;
@@ -146,6 +147,7 @@ namespace GameRuleEditor.CustomControls
         {
             parametersContainer.Clear();
             inputElements.Clear();
+            selfReferenceFields.Clear();
             string type = selectedConditionType;
 
             switch (type)
@@ -220,6 +222,16 @@ namespace GameRuleEditor.CustomControls
             field.style.flexShrink = 0;
             field.isReadOnly = false;
             field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
+            if (showPicker)
+            {
+                selfReferenceFields.Add(field);
+                field.RegisterCallback<FocusOutEvent>(evt =>
+                {
+                    field.SetValueWithoutNotify(GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(
+                        context,
+                        GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, field.value)));
+                });
+            }
             container.Add(field);
 
             if (showPicker)
@@ -228,7 +240,7 @@ namespace GameRuleEditor.CustomControls
                 {
                     GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
                     {
-                        field.value = picked;
+                        field.value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked);
                         OnChanged?.Invoke();
                     }, boolOnly, anchorScreenRect: anchorScreenRect);
                 });
@@ -296,8 +308,16 @@ namespace GameRuleEditor.CustomControls
                 // and requiring text on either side made the whole string fall into Value 1, which
                 // then duplicated the operator on every rebuild.
                 var match = Regex.Match(fullExpr, @"^(.*?)\s*(<=|>=|==|!=|<|>)\s*(.*)$");
-                if (match.Success) { ((TextField)inputElements[0]).value = StripOperators(match.Groups[1].Value); ((PopupField<string>)inputElements[1]).value = match.Groups[2].Value.Trim(); ((TextField)inputElements[2]).value = StripOperators(match.Groups[3].Value); }
-                else { ((TextField)inputElements[0]).value = fullExpr; }
+                if (match.Success)
+                {
+                    ((TextField)inputElements[0]).value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, StripOperators(match.Groups[1].Value));
+                    ((PopupField<string>)inputElements[1]).value = match.Groups[2].Value.Trim();
+                    ((TextField)inputElements[2]).value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, StripOperators(match.Groups[3].Value));
+                }
+                else
+                {
+                    ((TextField)inputElements[0]).value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, fullExpr);
+                }
             }
             else if (type == "Touch")
             {
@@ -308,7 +328,13 @@ namespace GameRuleEditor.CustomControls
                 int paramIdx = 0;
                 for (int i = 0; i < inputElements.Count && paramIdx < p.Count; i++)
                 {
-                    if (inputElements[i] is TextField tf) tf.value = p[paramIdx++];
+                    if (inputElements[i] is TextField tf)
+                    {
+                        string value = p[paramIdx++];
+                        tf.value = selfReferenceFields.Contains(tf)
+                            ? GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, value)
+                            : value;
+                    }
                     else if (inputElements[i] is PopupField<string> pf && pf.choices.Contains(p[paramIdx])) pf.value = p[paramIdx++];
                     else if (inputElements[i] is Toggle tg && bool.TryParse(p[paramIdx], out bool b)) { tg.value = b; paramIdx++; }
                 }
@@ -325,13 +351,21 @@ namespace GameRuleEditor.CustomControls
 
             if (type == "Compare")
             {
-                string v1 = ((TextField)inputElements[0]).value; string op = ((PopupField<string>)inputElements[1]).value; string v2 = ((TextField)inputElements[2]).value;
+                string v1 = GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, ((TextField)inputElements[0]).value);
+                string op = ((PopupField<string>)inputElements[1]).value;
+                string v2 = GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, ((TextField)inputElements[2]).value);
                 conditionText = $"Compare({v1} {op} {v2})";
                 return isNegated ? $"NOT {conditionText}" : conditionText;
             }
             foreach (var el in inputElements)
             {
-                if (el is TextField tf) parts.Add(tf.value);
+                if (el is TextField tf)
+                {
+                    string value = selfReferenceFields.Contains(tf)
+                        ? GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, tf.value)
+                        : tf.value;
+                    parts.Add(value);
+                }
                 else if (el is PopupField<string> pf) parts.Add(pf.value);
                 else if (el is Toggle tg) parts.Add(tg.value.ToString().ToLower());
             }

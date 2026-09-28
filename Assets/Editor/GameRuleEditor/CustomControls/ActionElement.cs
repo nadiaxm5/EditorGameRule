@@ -17,6 +17,7 @@ namespace GameRuleEditor.CustomControls
         private List<string> availableTypes;
         private List<VisualElement> inputElements = new List<VisualElement>();
         private string selectedActionType;
+        private HashSet<VisualElement> selfReferenceFields = new HashSet<VisualElement>();
 
         /// <summary>Value used for a field the user leaves empty (numeric params default to "0").</summary>
         private Dictionary<VisualElement, string> inputDefaults = new Dictionary<VisualElement, string>();
@@ -57,6 +58,8 @@ namespace GameRuleEditor.CustomControls
                         string value = sourceIndex < result.Params.Count
                             ? result.Params[sourceIndex]
                             : string.Empty;
+                        if (selfReferenceFields.Contains(tf))
+                            value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, value);
                         tf.SetValueWithoutNotify(ValueOrDefault(tf, value));
                     }
                 }
@@ -112,6 +115,7 @@ namespace GameRuleEditor.CustomControls
             parametersContainer.Clear();
             inputElements.Clear();
             inputDefaults.Clear();
+            selfReferenceFields.Clear();
             string type = selectedActionType;
 
             switch (type)
@@ -164,15 +168,31 @@ namespace GameRuleEditor.CustomControls
             field.isReadOnly = false;
             field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
 
+            bool supportsSelfReference = showPicker && !prefabPickerMode;
+            if (supportsSelfReference) selfReferenceFields.Add(field);
+
             if (emptyDefault != null)
             {
-                inputDefaults[field] = emptyDefault;
-                field.SetValueWithoutNotify(emptyDefault);
+                string displayDefault = supportsSelfReference
+                    ? GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, emptyDefault)
+                    : emptyDefault;
+                inputDefaults[field] = displayDefault;
+                field.SetValueWithoutNotify(displayDefault);
 
                 // Clearing the field falls back to the default instead of leaving it blank.
                 field.RegisterCallback<FocusOutEvent>(evt =>
                 {
-                    if (string.IsNullOrWhiteSpace(field.value)) field.value = emptyDefault;
+                    if (string.IsNullOrWhiteSpace(field.value)) field.value = displayDefault;
+                });
+            }
+
+            if (supportsSelfReference)
+            {
+                field.RegisterCallback<FocusOutEvent>(evt =>
+                {
+                    field.SetValueWithoutNotify(GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(
+                        context,
+                        GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, field.value)));
                 });
             }
 
@@ -194,7 +214,7 @@ namespace GameRuleEditor.CustomControls
                     {
                         GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) =>
                         {
-                            field.value = picked;
+                            field.value = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked);
                             OnChanged?.Invoke();
                         }, boolOnly, anchorScreenRect: anchorScreenRect);
                     }
@@ -287,7 +307,13 @@ namespace GameRuleEditor.CustomControls
             List<string> parameters = new List<string>();
             foreach (var el in inputElements)
             {
-                if (el is TextField tf) parameters.Add(ValueOrDefault(tf, tf.value));
+                if (el is TextField tf)
+                {
+                    string value = ValueOrDefault(tf, tf.value);
+                    if (selfReferenceFields.Contains(tf))
+                        value = GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, value);
+                    parameters.Add(value);
+                }
             }
 
             // Move and Push retain their legacy RZ parameter for JSON/runtime compatibility.
