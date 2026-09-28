@@ -413,7 +413,7 @@ namespace GameRuleEditor.Panels
             suppressActiveToggleCallback = false;
 
             tagField.UnregisterValueChangedCallback(OnTagFieldValueChanged);
-            var choices = new List<string>(UnityEditorInternal.InternalEditorUtility.tags);
+            var choices = Loader.GetProjectTags(context.currentProject?.actors);
             choices.Add("Add Custom Tag...");
             tagField.choices = choices;
             tagField.SetValueWithoutNotify(actor.Tag ?? "Untagged");
@@ -1491,17 +1491,6 @@ namespace GameRuleEditor.Panels
                     string newTag = textField.value.Trim();
                     if (!string.IsNullOrEmpty(newTag) && newTag != "Add Custom Tag...")
                     {
-                        bool exists = false;
-                        foreach (string t in UnityEditorInternal.InternalEditorUtility.tags)
-                            if (t == newTag) { exists = true; break; }
-                        if (!exists)
-                        {
-                            var tagMgr = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-                            var tagsProp = tagMgr.FindProperty("tags");
-                            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
-                            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = newTag;
-                            tagMgr.ApplyModifiedProperties();
-                        }
                         if (context.SelectedActor != null)
                         {
                             Undo.RecordObject(context.currentProject, "Change Tag");

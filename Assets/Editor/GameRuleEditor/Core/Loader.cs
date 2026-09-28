@@ -10,6 +10,14 @@ using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessa
 
 public static class Loader
 {
+    private static readonly string[] DefaultGameRuleTags =
+    {
+        "Untagged",
+        "Player",
+        "Enemy",
+        "Obstacle"
+    };
+
     public static void LoadJson(string fileName)
     {
         string jsonPath = Application.dataPath + "/Resources/Games/" + fileName;
@@ -73,35 +81,97 @@ public static class Loader
 
     public static void CreateTags(List<ActorJson> actorList)
     {
-        // Load TagManager asset
-        SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-        SerializedProperty tagsProperty = tagManager.FindProperty("tags");
+        EnsureProjectTags(actorList);
+    }
 
-        // Get existing tags to avoid duplicates
-        HashSet<string> existingTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+    /// <summary>
+    /// Returns the single tag list used by actor Properties, Collision and generated scripts.
+    /// Empty actor tags are intentionally ignored so they keep their existing "inherit prefab" meaning.
+    /// </summary>
+    public static List<string> GetProjectTags(IEnumerable<ActorJson> actors)
+    {
+        var result = new List<string>(DefaultGameRuleTags);
+        if (actors == null) return result;
 
-        foreach (ActorJson actor in actorList)
+        foreach (ActorJson actor in actors)
         {
-            string tagToCheck = actor.Tag;
-
-            // Skip if invalid or already exists
-            if (string.IsNullOrEmpty(tagToCheck) || existingTags.Contains(tagToCheck))
-            {
-                continue;
-            }
-
-            // Add new tag
-            int index = tagsProperty.arraySize;
-            tagsProperty.InsertArrayElementAtIndex(index);
-            SerializedProperty newTag = tagsProperty.GetArrayElementAtIndex(index);
-            newTag.stringValue = tagToCheck;
-
-            existingTags.Add(tagToCheck);
+            if (actor != null && !string.IsNullOrEmpty(actor.Tag) && !result.Contains(actor.Tag))
+                result.Add(actor.Tag);
         }
 
-        // Save changes
+        return result;
+    }
+
+    public static void EnsureTagExists(string tag)
+    {
+        EnsureTags(new[] { tag });
+    }
+
+    public static void EnsureProjectTags(IEnumerable<ActorJson> actors)
+    {
+        if (actors == null) return;
+        EnsureTags(actors.Where(actor => actor != null).Select(actor => actor.Tag));
+    }
+
+    /// <summary>
+    /// Registers and applies a non-empty actor tag. An empty tag deliberately leaves the prefab tag unchanged.
+    /// </summary>
+    public static bool TryApplyTag(GameObject obj, string tag)
+    {
+        if (obj == null) return false;
+        if (string.IsNullOrEmpty(tag)) return true;
+
+        EnsureTagExists(tag);
+        try
+        {
+            obj.tag = tag;
+            return true;
+        }
+        catch (UnityException exception)
+        {
+            Debug.LogWarning($"Could not assign tag '{tag}' to '{obj.name}': {exception.Message}");
+            return false;
+        }
+    }
+
+    private static void EnsureTags(IEnumerable<string> tags)
+    {
+        if (tags == null) return;
+
+        Object[] tagManagerAssets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
+        if (tagManagerAssets == null || tagManagerAssets.Length == 0)
+        {
+            Debug.LogError("TagManager.asset could not be loaded.");
+            return;
+        }
+
+        SerializedObject tagManager = new SerializedObject(tagManagerAssets[0]);
+        SerializedProperty tagsProperty = tagManager.FindProperty("tags");
+        if (tagsProperty == null)
+        {
+            Debug.LogError("The tags property could not be found in TagManager.asset.");
+            return;
+        }
+
+        HashSet<string> existingTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+        bool changed = false;
+
+        foreach (string tag in tags)
+        {
+            if (string.IsNullOrEmpty(tag) || existingTags.Contains(tag)) continue;
+
+            int index = tagsProperty.arraySize;
+            tagsProperty.InsertArrayElementAtIndex(index);
+            tagsProperty.GetArrayElementAtIndex(index).stringValue = tag;
+            existingTags.Add(tag);
+            changed = true;
+        }
+
+        if (!changed) return;
+
         tagManager.ApplyModifiedProperties();
         tagManager.Update();
+        AssetDatabase.SaveAssets();
     }
 
     private static void LoadPrefabs(List<ActorJson> actorList)
@@ -112,7 +182,7 @@ public static class Loader
             GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab((GameObject)prefab);
             obj.name = actor.ActorName;
 
-            if (!string.IsNullOrEmpty(actor.Tag)) obj.tag = actor.Tag;
+            TryApplyTag(obj, actor.Tag);
             if (actor.Position != null) obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
             if (actor.Rotation != null) obj.transform.eulerAngles = new Vector3(actor.Rotation[0], actor.Rotation[1], actor.Rotation[2]);
             if (actor.Scale != null) obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);

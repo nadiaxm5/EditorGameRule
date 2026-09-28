@@ -35,14 +35,21 @@
             "IconColorHex": "",
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Timer(1)"
                     ],
                     "Do": [
                         "QuitGame()"
                     ],
-                    "groupId": ""
+                    "groupId": "ga0d17198"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "ga0d17198"
                 }
             ]
         },
@@ -263,31 +270,43 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "NavigateTo(this.speed,this.x,this.y,this.zTarget)"
                     ],
-                    "groupId": ""
+                    "groupId": "g90283421"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Compare(this.z>=this.z1)"
                     ],
                     "Do": [
                         "Edit(this.zTarget,this.z0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g90283421"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Compare(this.z<=this.z0)"
                     ],
                     "Do": [
                         "Edit(this.zTarget,this.z1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g90283421"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g90283421"
                 }
             ]
         },

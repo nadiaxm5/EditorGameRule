@@ -1,0 +1,69 @@
+{
+    "GameName": "NewProject2",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [0, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "SoundTrack": "",
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "NewActor",
+            "Active": true,
+            "PrefabName": "BlueTank",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "gb8cf3a3b"
+                }
+            ]
+        },
+        {
+            "ActorName": "NewActor_1",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Custom",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Timer(2)"
+                    ],
+                    "Do": [
+                        "Spawn(BlueTank,this,0,0,0,0,0,0)"
+                    ],
+                    "groupId": "g416cb4ae"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "g416cb4ae"
+                }
+            ]
+        }
+    ]
+}

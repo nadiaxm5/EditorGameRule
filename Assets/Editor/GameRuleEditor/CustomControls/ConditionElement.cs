@@ -5,7 +5,6 @@ using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using System.Text.RegularExpressions;
-using System.Linq; // Required for Sorting/ToList
 
 namespace GameRuleEditor.CustomControls
 {
@@ -156,22 +155,9 @@ namespace GameRuleEditor.CustomControls
                 case "Check": AddParameterField("Boolean Var", true, true); break;
 
                 case "Collision":
-                    // Start with Unity tags
-                    HashSet<string> allTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+                    var projectTags = Loader.GetProjectTags(context?.currentProject?.actors);
 
-                    // Add tags from current project actors
-                    if (context?.currentProject?.actors != null)
-                    {
-                        foreach (var actor in context.currentProject.actors)
-                        {
-                            if (!string.IsNullOrEmpty(actor.Tag)) allTags.Add(actor.Tag);
-                        }
-                    }
-
-                    var sortedTags = allTags.ToList();
-                    sortedTags.Sort();
-
-                    var tagDrop = new PopupField<string>(sortedTags, 0) { style = { flexGrow = 1 } };
+                    var tagDrop = new PopupField<string>(projectTags, 0) { style = { flexGrow = 1 } };
                     tagDrop.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(tagDrop); inputElements.Add(tagDrop);
                     break;

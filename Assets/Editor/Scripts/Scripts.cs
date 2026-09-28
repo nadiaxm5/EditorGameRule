@@ -5,16 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditorInternal;
 using GameRuleEditor.Core;
 
 public static class Scripts
 {
     public static void Create(List<ActorJson> actorList)
     {
+        List<string> projectTags = Loader.GetProjectTags(actorList);
+
         foreach (ActorJson actor in actorList)
         {
-            List<string> tags = new List<string>(InternalEditorUtility.tags);
+            List<string> tags = new List<string>(projectTags);
             List<string> scope = new List<string>();
             List<string> spawns = new List<string>();
             List<string> properties = new List<string>();
@@ -124,13 +125,15 @@ public static class Scripts
                 foreach (string t in tags)
                     awakeLines.Add("        TagCollisions[\"" + t + "\"] = new HashSet<GameObject>();");
                 outfile.WriteLine("    void OnTriggerEnter(Collider other) {");
-                outfile.WriteLine("        if (TagCollisions.ContainsKey(other.tag))");
-                outfile.WriteLine("            TagCollisions[other.tag].Add(other.gameObject);");
+                outfile.WriteLine("        GameObject otherActor = other.transform.root.gameObject;");
+                outfile.WriteLine("        if (TagCollisions.ContainsKey(otherActor.tag))");
+                outfile.WriteLine("            TagCollisions[otherActor.tag].Add(otherActor);");
                 outfile.WriteLine("    }");
 
                 outfile.WriteLine("    void OnTriggerExit(Collider other) {");
-                outfile.WriteLine("        if (TagCollisions.ContainsKey(other.tag))");
-                outfile.WriteLine("            TagCollisions[other.tag].Remove(other.gameObject);");
+                outfile.WriteLine("        GameObject otherActor = other.transform.root.gameObject;");
+                outfile.WriteLine("        if (TagCollisions.ContainsKey(otherActor.tag))");
+                outfile.WriteLine("            TagCollisions[otherActor.tag].Remove(otherActor);");
                 outfile.WriteLine("    }");
             }
 

@@ -602,22 +602,18 @@ namespace GameRuleEditor.Controllers
         {
             if (actor == null) return;
             GameObject obj = FindSceneObjectByName(actor.ActorName);
-            if (obj == null) return;
+            if (obj == null)
+            {
+                Loader.EnsureTagExists(actor.Tag);
+                return;
+            }
 
             if (obj.activeSelf != actor.Active)
                 obj.SetActive(actor.Active);
 
             if (!string.IsNullOrEmpty(actor.Tag) && obj.tag != actor.Tag)
             {
-                EnsureTagExists(actor.Tag);
-                try
-                {
-                    obj.tag = actor.Tag;
-                }
-                catch (UnityException)
-                {
-                    // Ignore invalid/missing tags in TagManager to avoid breaking editor sync.
-                }
+                Loader.TryApplyTag(obj, actor.Tag);
             }
 
             if (actor.Position != null && actor.Position.Length >= 3)
@@ -705,25 +701,6 @@ namespace GameRuleEditor.Controllers
             }
 
             return changed;
-        }
-
-        private static void EnsureTagExists(string tag)
-        {
-            if (string.IsNullOrWhiteSpace(tag)) return;
-
-            foreach (string existing in UnityEditorInternal.InternalEditorUtility.tags)
-            {
-                if (existing == tag)
-                    return;
-            }
-
-            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-            SerializedProperty tagsProp = tagManager.FindProperty("tags");
-            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
-            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = tag;
-            tagManager.ApplyModifiedProperties();
-            tagManager.Update();
-            AssetDatabase.SaveAssets();
         }
 
         private static GameObject FindSceneObjectByName(string objectName)

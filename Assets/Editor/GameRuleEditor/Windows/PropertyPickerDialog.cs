@@ -396,9 +396,11 @@ namespace GameRuleEditor.Windows
                     GameObject prefab = selectablePrefabs.Find(item => item.name == prefabName);
                     gridItems.Add(new PreviewGridItem
                     {
-                        Label = actorName,
-                        Result = actorName,
-                        SecondaryName = prefabName,
+                        Label = string.IsNullOrEmpty(prefabName)
+                            ? actorName
+                            : $"{actorName} ({prefabName})",
+                        Result = prefabName,
+                        SecondaryName = null,
                         PreviewObject = prefab
                     });
                 }
