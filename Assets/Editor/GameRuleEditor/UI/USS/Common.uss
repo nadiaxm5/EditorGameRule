@@ -335,6 +335,10 @@ Button:disabled {
     color: rgb(30, 30, 30);
 }
 
+.button-property-picker .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(30, 30, 30);
+}
+
 /* ── Numeric values ── */
 .button-number-picker,
 .button-number-picker > .unity-base-field__input {
@@ -360,6 +364,10 @@ Button:disabled {
 
 .button-number-picker .unity-base-popup-field__text {
     color: rgb(20, 45, 25);
+}
+
+.button-number-picker .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(20, 45, 25);
 }
 
 .numeric-stepper {
@@ -408,23 +416,46 @@ Button:disabled {
 
 /* ── Compare expression builder ── */
 .compare-operand {
-    margin-left: 3px;
-    margin-right: 3px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgb(42, 42, 42);
+    border-left-color: rgb(74, 74, 74);
+    border-right-color: rgb(74, 74, 74);
+    border-top-color: rgb(74, 74, 74);
+    border-bottom-color: rgb(74, 74, 74);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 .compare-operand-toolbar {
+    height: 28px;
+    min-height: 28px;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
 }
 
 .compare-operand-label {
-    min-width: 62px;
-    margin-right: 4px;
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    height: 28px;
+    min-height: 28px;
+    margin-right: 6px;
     padding-left: 6px;
     padding-right: 6px;
-    padding-top: 1px;
-    padding-bottom: 1px;
+    padding-top: 0;
+    padding-bottom: 0;
     background-color: rgb(46, 46, 46);
     color: rgb(217, 217, 217);
     border-top-left-radius: 3px;
@@ -437,88 +468,151 @@ Button:disabled {
 }
 
 .compare-value-picker {
-    width: 174px;
-    min-width: 174px;
-    flex-shrink: 0;
+    min-width: 0;
+    height: 28px;
+    margin: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .compare-value-picker > .unity-base-field__input {
-    min-width: 170px;
+    min-width: 0;
 }
 
 .compare-operation-dropdown {
-    width: 58px;
-    min-width: 58px;
-    margin-left: 3px;
+    width: 54px;
+    min-width: 54px;
+    height: 28px;
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     flex-shrink: 0;
 }
 
 .compare-operation-dropdown > .unity-base-field__input {
-    min-width: 54px;
+    min-width: 50px;
     padding-left: 7px;
     padding-right: 5px;
 }
 
 .compare-operator-container {
-    width: 94px;
-    min-width: 94px;
+    width: 56px;
+    min-width: 56px;
     flex-shrink: 0;
+    align-self: stretch;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    padding-bottom: 7px;
+    margin-bottom: 0;
 }
 
 .compare-operator-dropdown {
-    width: 66px;
-    min-width: 66px;
+    width: 48px;
+    min-width: 48px;
+    height: 28px;
     margin-left: 0;
     margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     flex-shrink: 0;
 }
 
 .compare-operator-dropdown > .unity-base-field__input {
-    min-width: 62px;
-    padding-left: 9px;
-    padding-right: 7px;
+    min-width: 44px;
+    padding-left: 6px;
+    padding-right: 4px;
+}
+
+.keyboard-key-picker {
+    width: 130px;
+    min-width: 130px;
+    height: 22px;
+    flex-shrink: 0;
+    -unity-text-align: middle-left;
+}
+
+.check-property-field {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.collision-tag-dropdown {
+    width: 135px;
+    min-width: 135px;
+    flex-shrink: 0;
 }
 
 .compare-terms {
-    min-height: 28px;
+    height: 30px;
+    min-height: 30px;
     flex-direction: row;
-    flex-wrap: wrap;
     align-items: center;
-    padding-left: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: rgb(32, 32, 32);
+    border-left-color: rgb(68, 68, 68);
+    border-right-color: rgb(68, 68, 68);
+    border-top-color: rgb(68, 68, 68);
+    border-bottom-color: rgb(68, 68, 68);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.compare-terms-content {
+    min-width: 0;
+    height: 28px;
+    min-height: 28px;
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .compare-empty-expression {
     color: rgb(145, 145, 145);
     font-size: 10px;
     -unity-font-style: italic;
-    margin-left: 4px;
+    margin-left: 5px;
 }
 
 .compare-term {
     flex-direction: row;
     align-items: center;
-    margin-right: 3px;
-    margin-bottom: 2px;
+    margin-right: 4px;
+    margin-bottom: 0;
 }
 
 .compare-term-operator {
-    width: 48px;
-    min-width: 48px;
-    margin-right: 2px;
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
     flex-shrink: 0;
 }
 
 .compare-term-operator > .unity-base-field__input {
-    min-width: 44px;
-    min-height: 22px;
+    min-width: 42px;
+    min-height: 24px;
     padding-left: 7px;
     padding-right: 5px;
 }
 
 .compare-pending-operator {
-    min-height: 22px;
+    min-height: 24px;
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -533,11 +627,16 @@ Button:disabled {
 .compare-property-term {
     min-width: 92px;
     max-width: 180px;
-    min-height: 22px;
+    height: 24px;
+    min-height: 24px;
     padding-left: 7px;
     padding-right: 7px;
     padding-top: 2px;
     padding-bottom: 2px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     background-color: rgb(30, 30, 30);
     border-left-color: rgb(68, 68, 68);
     border-right-color: rgb(68, 68, 68);
@@ -563,7 +662,8 @@ Button:disabled {
 .compare-legacy-term {
     min-width: 92px;
     max-width: 180px;
-    min-height: 22px;
+    height: 24px;
+    min-height: 24px;
     padding-left: 7px;
     padding-right: 7px;
     background-color: rgb(30, 30, 30);
@@ -584,10 +684,14 @@ Button:disabled {
 }
 
 .compare-remove-term {
-    width: 22px;
-    min-width: 22px;
-    height: 22px;
-    margin-left: 2px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
