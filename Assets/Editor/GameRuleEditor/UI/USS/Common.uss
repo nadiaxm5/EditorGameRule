@@ -414,6 +414,263 @@ Button:disabled {
     font-size: 7px;
 }
 
+/* ── Action parameter builders ── */
+.action-parameter-row {
+    min-height: 28px;
+    min-width: 140px;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 3px;
+    margin-bottom: 4px;
+}
+
+.action-single-picker,
+.action-scalar-control,
+.action-expression-control,
+.action-value-selection,
+.action-expression-selection,
+.action-expression-term {
+    flex-direction: row;
+    align-items: center;
+}
+
+.action-resource-picker {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+    height: 24px;
+    margin: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    -unity-text-align: middle-left;
+}
+
+.action-picker-value-display {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    height: 24px;
+    min-height: 24px;
+    margin-left: 0;
+    margin-right: 6px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(30, 30, 30);
+    color: rgb(229, 231, 235);
+    border-left-color: rgb(68, 68, 68);
+    border-right-color: rgb(68, 68, 68);
+    border-top-color: rgb(68, 68, 68);
+    border-bottom-color: rgb(68, 68, 68);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -unity-text-align: middle-left;
+    flex-shrink: 0;
+}
+
+.action-picker-value-display:hover {
+    background-color: rgb(56, 56, 56);
+    color: rgb(255, 255, 255);
+}
+
+.action-picker-value-display.action-empty-value {
+    color: rgb(145, 145, 145);
+    -unity-font-style: italic;
+}
+
+.action-scalar-control,
+.action-expression-control {
+    flex-grow: 1;
+}
+
+.action-value-picker {
+    width: 184px;
+    min-width: 184px;
+    height: 28px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.action-value-picker > .unity-base-field__input {
+    min-width: 180px;
+}
+
+.action-value-selection,
+.action-expression-selection {
+    min-height: 24px;
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+.action-value-selection {
+    flex-shrink: 0;
+}
+
+.action-expression-selection {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: 30px;
+    min-height: 30px;
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: rgb(32, 32, 32);
+    border-left-color: rgb(68, 68, 68);
+    border-right-color: rgb(68, 68, 68);
+    border-top-color: rgb(68, 68, 68);
+    border-bottom-color: rgb(68, 68, 68);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    flex-shrink: 0;
+}
+
+.action-empty-expression {
+    color: rgb(145, 145, 145);
+    font-size: 10px;
+    -unity-font-style: italic;
+    margin-left: 5px;
+}
+
+.action-selected-value,
+.action-legacy-value {
+    min-width: 92px;
+    max-width: 160px;
+    height: 24px;
+    min-height: 24px;
+    margin: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(30, 30, 30);
+    color: rgb(229, 231, 235);
+    border-left-color: rgb(68, 68, 68);
+    border-right-color: rgb(68, 68, 68);
+    border-top-color: rgb(68, 68, 68);
+    border-bottom-color: rgb(68, 68, 68);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -unity-text-align: middle-left;
+}
+
+.action-selected-value:hover,
+.action-legacy-value:hover {
+    background-color: rgb(56, 56, 56);
+    color: rgb(255, 255, 255);
+}
+
+.action-legacy-value {
+    color: rgb(190, 190, 190);
+    -unity-font-style: italic;
+}
+
+.action-number-degree-suffix {
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    bottom: 2px;
+    width: 9px;
+    min-width: 9px;
+    margin: 0;
+    padding: 0;
+    color: rgb(229, 231, 235);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+.action-number-value .numeric-stepper-field > .unity-base-field__input {
+    padding-right: 15px;
+}
+
+.action-clear-value {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    margin-left: 4px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.action-operation-picker {
+    width: 54px;
+    min-width: 54px;
+    height: 28px;
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.action-operation-picker > .unity-base-field__input {
+    min-width: 50px;
+}
+
+.action-expression-term {
+    margin-right: 4px;
+}
+
+.action-term-operator {
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.action-term-operator > .unity-base-field__input {
+    min-width: 42px;
+    min-height: 24px;
+}
+
+.action-pending-operator {
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-right: 4px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -unity-text-align: middle-center;
+}
+
+.action-number-value {
+    flex-shrink: 0;
+}
+
 /* ── Compare expression builder ── */
 .compare-operand {
     margin-left: 4px;

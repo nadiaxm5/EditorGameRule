@@ -192,9 +192,9 @@ MonoBehaviour:
     Script:
     - Name: Rule 1
       When:
-      - Compare(this.x + -0.1 <= -0.2 - this.x) AND Keyboard(,press) AND Collision(Untagged)
+      - Compare(this.rz <= ) AND Compare( < )
       Do:
-      - MoveTo(0,0,0,0)
+      - NavigateTo(0,0,0,0)
       groupId: g416cb4ae
     Components:
     - type: Properties
