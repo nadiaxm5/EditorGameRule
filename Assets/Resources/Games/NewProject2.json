@@ -47,10 +47,10 @@
                 {
                     "Name": "Rule 1",
                     "When": [
-                        "Timer(2)"
+                        "Compare(this.x + -0.1 <= -0.2 - this.x) AND Keyboard(,press) AND Collision(Untagged)"
                     ],
                     "Do": [
-                        "Spawn(BlueTank,this,0,0,0,0,0,0)"
+                        "MoveTo(0,0,0,0)"
                     ],
                     "groupId": "g416cb4ae"
                 }

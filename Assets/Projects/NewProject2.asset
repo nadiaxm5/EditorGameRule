@@ -44,17 +44,104 @@ MonoBehaviour:
     SoundTrack: 
     Mouse: []
     MouseWorld: []
-    Cast: []
+    Cast:
+    - ActorName: NewActor
+      Active: 1
+      PrefabName: BlueTank
+      Tag: Untagged
+      IconColorHex: 
+      Position:
+      - -0
+      - 0
+      - 0
+      Rotation:
+      - 0.000002504478
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
+      Properties: []
+      Script: []
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
+      - type: Rules
+        name: Rules Set
+        id: gb8cf3a3b
+    - ActorName: NewActor_1
+      Active: 1
+      PrefabName: Empty
+      Tag: Custom
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
+      Properties: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Timer(2)
+        Do:
+        - Spawn(BlueTank,this,0,0,0,0,0,0)
+        groupId: g416cb4ae
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
+      - type: Rules
+        name: Rules Set
+        id: g416cb4ae
     CustomVariables: []
   actors:
   - ActorName: NewActor
     Active: 1
-    PrefabName: Empty
+    PrefabName: BlueTank
     Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - -0
+    - 0
+    - 0
+    Rotation:
+    - 0.000002504478
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -66,14 +153,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
-    Script:
-    - Name: Rule 1
-      When:
-      - Compare( < ) AND Compare( < )
-      Do:
-      - Edit(,this.x)
-      - Edit(,)
-      groupId: gb8cf3a3b
+    Script: []
     Components:
     - type: Properties
       name: Custom Properties
@@ -84,11 +164,20 @@ MonoBehaviour:
   - ActorName: NewActor_1
     Active: 1
     PrefabName: Empty
-    Tag: Untagged
+    Tag: Custom
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -103,9 +192,9 @@ MonoBehaviour:
     Script:
     - Name: Rule 1
       When:
-      - Check()
+      - Compare(this.x + -0.1 <= -0.2 - this.x) AND Keyboard(,press) AND Collision(Untagged)
       Do:
-      - Move(0,0,0,0)
+      - MoveTo(0,0,0,0)
       groupId: g416cb4ae
     Components:
     - type: Properties
@@ -114,213 +203,3 @@ MonoBehaviour:
     - type: Rules
       name: Rules Set
       id: g416cb4ae
-  - ActorName: NewActor_2
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties: []
-    Script:
-    - Name: Rule 1
-      When: []
-      Do:
-      - Edit(,)
-      - Edit(,)
-      groupId: g3a6b0d42
-    - Name: Rule 2
-      When: []
-      Do: []
-      groupId: g3a6b0d42
-    Components:
-    - type: Rules
-      name: Rules
-      id: g3a6b0d42
-    - type: Properties
-      name: Properties
-      id: 
-  - ActorName: NewActor_3
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties: []
-    Script:
-    - Name: Rule 1
-      When:
-      - Keyboard(,press) AND Check() OR Touch(press,false)
-      Do: []
-      groupId: ged31e601
-    Components:
-    - type: Rules
-      name: Rules
-      id: ged31e601
-  - ActorName: NewActor_4
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties: []
-    Script:
-    - Name: Rule 1
-      When: []
-      Do: []
-      groupId: gbc35ebe1
-    Components:
-    - type: Rules
-      name: Rules
-      id: gbc35ebe1
-  - ActorName: NewActor_5
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties: []
-    Script: []
-    Components:
-    - type: Rules
-      name: Rules
-      id: g30446a91
-  - ActorName: NewActor_6
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties:
-    - NewProp=0
-    Script:
-    - Name: Rule 1
-      When:
-      - Compare( < )
-      Do: []
-      groupId: g521af870
-    Components:
-    - type: Properties
-      name: Custom Properties
-      id: 
-    - type: Rules
-      name: Rules Set
-      id: g521af870
-  - ActorName: NewActor_7
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties:
-    - NewProp=0
-    Script: []
-    Components:
-    - type: Properties
-      name: Custom Properties
-      id: 
-    - type: Rules
-      name: Rules Set
-      id: g18c92a31
-  - ActorName: NewActor_8
-    Active: 1
-    PrefabName: Empty
-    Tag: Untagged
-    IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
-    Velocity: []
-    AngularVelocity: []
-    Density: 0
-    Friction: 0
-    Bounciness: 0
-    Drag: 0
-    OverrideDensity: 0
-    OverrideFriction: 0
-    OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties: []
-    Script:
-    - Name: Rule 1
-      When: []
-      Do: []
-      groupId: g9ca29a0b
-    Components:
-    - type: Properties
-      name: Custom Properties
-      id: 
-    - type: Rules
-      name: Rules Set
-      id: g9ca29a0b
