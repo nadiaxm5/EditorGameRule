@@ -16,7 +16,7 @@ namespace GameRuleEditor.CustomControls
         private const string SelectActionLabel = "Select action";
 
         private EditorContext context;
-        private PopupField<string> typeDropdown;
+        private TooltipPopupField typeDropdown;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
         private readonly List<ParameterBinding> parameterBindings = new List<ParameterBinding>();
@@ -66,16 +66,22 @@ namespace GameRuleEditor.CustomControls
             mainRow.style.flexShrink = 0;
 
             selectedActionType = null;
-            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 130, marginRight = 5 } };
-            typeDropdown.SetValueWithoutNotify(SelectActionLabel);
+            typeDropdown = new TooltipPopupField(
+                RuleTooltips.ActionOptions(availableTypes),
+                SelectActionLabel,
+                "Choose an action to run when the conditions are true.",
+                RuleDropdownPalette.Action)
+            {
+                style = { width = 130, marginRight = 5 }
+            };
             typeDropdown.AddToClassList("button-action");
             typeDropdown.AddToClassList("rule-selector-dropdown");
             typeDropdown.style.flexShrink = 0;
-            typeDropdown.RegisterValueChangedCallback(evt =>
+            typeDropdown.RegisterValueChangedCallback(newValue =>
             {
-                if (!availableTypes.Contains(evt.newValue)) return;
+                if (!availableTypes.Contains(newValue)) return;
 
-                selectedActionType = evt.newValue;
+                selectedActionType = newValue;
                 UpdateParameterFields();
                 OnChanged?.Invoke();
             });
@@ -86,17 +92,14 @@ namespace GameRuleEditor.CustomControls
             parametersContainer.style.marginRight = 4;
             mainRow.Add(parametersContainer);
 
-            var removeBtn = new Button(() => OnRemove?.Invoke()) { text = string.Empty };
+            var removeBtn = new Button(() => OnRemove?.Invoke())
+            {
+                text = "×",
+                tooltip = "Remove Action"
+            };
             removeBtn.AddToClassList("button-danger");
+            removeBtn.AddToClassList("button-danger-icon");
             removeBtn.style.width = 28; removeBtn.style.height = 26;
-
-            var trashImage = new Image();
-            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-            trashImage.style.width = 16;
-            trashImage.style.height = 16;
-            trashImage.style.alignSelf = Align.Center;
-            trashImage.style.unityBackgroundImageTintColor = Color.white;
-            removeBtn.Add(trashImage);
 
             mainRow.Add(removeBtn);
 
@@ -192,6 +195,7 @@ namespace GameRuleEditor.CustomControls
         private VisualElement CreateFieldTag(string text)
         {
             var tag = new Label(text);
+            tag.tooltip = RuleTooltips.Parameter(selectedActionType, text);
             tag.style.fontSize = 9;
             tag.style.unityFontStyleAndWeight = FontStyle.Bold;
             tag.style.color = new Color(0.85f, 0.85f, 0.85f);

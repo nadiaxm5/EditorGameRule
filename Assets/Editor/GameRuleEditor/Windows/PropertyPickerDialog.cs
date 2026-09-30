@@ -61,6 +61,8 @@ namespace GameRuleEditor.Windows
         private GUIStyle propertyButtonStyle;
         private GUIStyle navigationColoredLabelStyle;
         private GUIStyle propertyColoredLabelStyle;
+        private Vector2 mouseScreenPosition;
+        private Rect currentColumnScreenRect;
 
         // Filters
         private bool boolOnly = false;
@@ -234,6 +236,10 @@ namespace GameRuleEditor.Windows
 
         private void OnGUI()
         {
+            // Capture this before entering any ScrollView. Event.current.mousePosition is
+            // interpreted in the active GUI clip, so converting it from inside each column
+            // can offset it by that column's origin and make a neighbouring button hover.
+            mouseScreenPosition = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
             EnsureStyles();
             if (Event.current.type == EventType.MouseMove) Repaint();
 
@@ -627,13 +633,19 @@ namespace GameRuleEditor.Windows
         private void DrawColumn(ref Vector2 scroll, float width, System.Action drawContent,
                                 bool hideHorizontalScrollbar = false)
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.Width(width), GUILayout.ExpandHeight(true));
+            Rect columnRect = EditorGUILayout.BeginVertical(
+                EditorStyles.helpBox, GUILayout.Width(width), GUILayout.ExpandHeight(true));
+            Rect previousColumnScreenRect = currentColumnScreenRect;
+            Vector2 columnScreenPosition = GUIUtility.GUIToScreenPoint(columnRect.position);
+            currentColumnScreenRect = new Rect(columnScreenPosition, columnRect.size);
+
             scroll = hideHorizontalScrollbar
                 ? EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, GUI.skin.verticalScrollbar)
                 : EditorGUILayout.BeginScrollView(scroll);
             drawContent();
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
+            currentColumnScreenRect = previousColumnScreenRect;
         }
 
         private void DrawSelectable(string label, string id)
@@ -764,7 +776,7 @@ namespace GameRuleEditor.Windows
             return style;
         }
 
-        private static bool DrawTintedButton(string label, GUIStyle buttonStyle, GUIStyle coloredLabelStyle, bool selected)
+        private bool DrawTintedButton(string label, GUIStyle buttonStyle, GUIStyle coloredLabelStyle, bool selected)
         {
             var content = new GUIContent(label);
             Rect buttonRect = GUILayoutUtility.GetRect(
@@ -773,13 +785,10 @@ namespace GameRuleEditor.Windows
                 GUILayout.Height(22),
                 GUILayout.ExpandWidth(true));
 
-            // Each column owns a separate scroll view. Comparing their local coordinates can
-            // make controls in different columns appear hovered at the same time, so compare
-            // both positions in desktop coordinates instead.
             Vector2 buttonScreenPosition = GUIUtility.GUIToScreenPoint(buttonRect.position);
             Rect buttonScreenRect = new Rect(buttonScreenPosition, buttonRect.size);
-            Vector2 mouseScreenPosition = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
-            bool hovered = buttonScreenRect.Contains(mouseScreenPosition);
+            Rect visibleButtonScreenRect = Intersect(buttonScreenRect, currentColumnScreenRect);
+            bool hovered = visibleButtonScreenRect.Contains(mouseScreenPosition);
             bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
             bool colored = selected || hovered;
             bool clicked = GUI.Button(buttonRect, colored ? GUIContent.none : content, buttonStyle);
@@ -799,6 +808,17 @@ namespace GameRuleEditor.Windows
             }
 
             return clicked;
+        }
+
+        private static Rect Intersect(Rect first, Rect second)
+        {
+            float xMin = Mathf.Max(first.xMin, second.xMin);
+            float yMin = Mathf.Max(first.yMin, second.yMin);
+            float xMax = Mathf.Min(first.xMax, second.xMax);
+            float yMax = Mathf.Min(first.yMax, second.yMax);
+            return xMax > xMin && yMax > yMin
+                ? Rect.MinMaxRect(xMin, yMin, xMax, yMax)
+                : Rect.zero;
         }
     }
 }

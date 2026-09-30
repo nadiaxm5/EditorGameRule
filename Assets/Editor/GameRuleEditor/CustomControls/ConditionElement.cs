@@ -21,12 +21,12 @@ namespace GameRuleEditor.CustomControls
         private readonly List<string> availableTypes;
         private readonly List<VisualElement> inputElements = new List<VisualElement>();
         private readonly HashSet<VisualElement> selfReferenceFields = new HashSet<VisualElement>();
-        private PopupField<string> typeDropdown;
+        private TooltipPopupField typeDropdown;
         private Button negationButton;
         private VisualElement parametersContainer;
         private ExpressionOperandControl compareLeftOperand;
         private ExpressionOperandControl compareRightOperand;
-        private PopupField<string> compareOperatorDropdown;
+        private TooltipPopupField compareOperatorDropdown;
         private Button keyboardKeyButton;
         private Button checkPropertyButton;
         private string selectedKeyboardKey;
@@ -79,15 +79,21 @@ namespace GameRuleEditor.CustomControls
             negationButton.AddToClassList("button-negation");
             Add(negationButton);
 
-            typeDropdown = new PopupField<string>(availableTypes, 0) { style = { width = 130 } };
-            typeDropdown.SetValueWithoutNotify(SelectConditionLabel);
+            typeDropdown = new TooltipPopupField(
+                RuleTooltips.ConditionOptions(availableTypes),
+                SelectConditionLabel,
+                "Choose a condition that must be true.",
+                RuleDropdownPalette.Condition)
+            {
+                style = { width = 130 }
+            };
             typeDropdown.AddToClassList("button-condition");
             typeDropdown.AddToClassList("rule-selector-dropdown");
             typeDropdown.style.flexShrink = 0;
-            typeDropdown.RegisterValueChangedCallback(evt =>
+            typeDropdown.RegisterValueChangedCallback(newValue =>
             {
-                if (!availableTypes.Contains(evt.newValue)) return;
-                selectedConditionType = evt.newValue;
+                if (!availableTypes.Contains(newValue)) return;
+                selectedConditionType = newValue;
                 UpdateNegationVisual();
                 UpdateParameterFields();
             });
@@ -101,16 +107,15 @@ namespace GameRuleEditor.CustomControls
             Add(parametersContainer);
             Add(new VisualElement { style = { flexGrow = 1 } });
 
-            var removeButton = new Button(() => OnRemove?.Invoke()) { text = string.Empty };
+            var removeButton = new Button(() => OnRemove?.Invoke())
+            {
+                text = "×",
+                tooltip = "Remove Condition"
+            };
             removeButton.AddToClassList("button-danger");
+            removeButton.AddToClassList("button-danger-icon");
             removeButton.style.width = 28;
             removeButton.style.height = 26;
-            var trashImage = new Image { image = EditorGUIUtility.IconContent("TreeEditor.Trash").image };
-            trashImage.style.width = 16;
-            trashImage.style.height = 16;
-            trashImage.style.alignSelf = Align.Center;
-            trashImage.style.unityBackgroundImageTintColor = Color.white;
-            removeButton.Add(trashImage);
             Add(removeButton);
 
             UpdateNegationVisual();
@@ -189,6 +194,7 @@ namespace GameRuleEditor.CustomControls
                     parametersContainer.Add(touchMode);
                     inputElements.Add(touchMode);
                     var onActorToggle = new Toggle("On This Actor");
+                    onActorToggle.tooltip = RuleTooltips.Parameter("Touch", "On This Actor");
                     onActorToggle.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(onActorToggle);
                     inputElements.Add(onActorToggle);
@@ -207,13 +213,15 @@ namespace GameRuleEditor.CustomControls
             compareLeftOperand.Changed += () => OnChanged?.Invoke();
             parametersContainer.Add(compareLeftOperand);
 
-            compareOperatorDropdown = new PopupField<string>(
-                new List<string> { "<", "<=", "==", "!=", ">=", ">" }, 0);
+            compareOperatorDropdown = new TooltipPopupField(
+                RuleTooltips.ComparisonOptions(),
+                "<",
+                "Choose how Property 1 is compared with Property 2.",
+                RuleDropdownPalette.Number);
             compareOperatorDropdown.AddToClassList("button-number-picker");
             compareOperatorDropdown.AddToClassList("rule-selector-dropdown");
             compareOperatorDropdown.AddToClassList("compare-operator-dropdown");
-            compareOperatorDropdown.tooltip = "Comparison operator";
-            compareOperatorDropdown.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
+            compareOperatorDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
             var operatorContainer = new VisualElement();
             operatorContainer.AddToClassList("compare-operator-container");
             operatorContainer.Add(compareOperatorDropdown);
@@ -384,7 +392,8 @@ namespace GameRuleEditor.CustomControls
             };
             container.style.flexShrink = 0;
             VisualElement fieldTag = CreateFieldTag(label);
-            fieldTag.tooltip = "Drag horizontally to change the value";
+            fieldTag.tooltip = RuleTooltips.Parameter(selectedConditionType, label) +
+                               " Drag horizontally to change the value.";
             container.Add(fieldTag);
             var stepper = new NumericStepper(initialValue, step, clampToZero ? 0f : (float?)null);
             stepper.Changed += () => OnChanged?.Invoke();
@@ -397,6 +406,7 @@ namespace GameRuleEditor.CustomControls
         private VisualElement CreateFieldTag(string text)
         {
             var tag = new Label(text);
+            tag.tooltip = RuleTooltips.Parameter(selectedConditionType, text);
             tag.style.fontSize = 9;
             tag.style.unityFontStyleAndWeight = FontStyle.Bold;
             tag.style.color = new Color(0.85f, 0.85f, 0.85f);
@@ -685,8 +695,8 @@ namespace GameRuleEditor.CustomControls
             private readonly EditorContext context;
             private readonly List<ExpressionTerm> terms = new List<ExpressionTerm>();
             private readonly VisualElement termsContainer;
-            private readonly PopupField<string> valuePickerDropdown;
-            private readonly PopupField<string> operationDropdown;
+            private readonly TooltipPopupField valuePickerDropdown;
+            private readonly TooltipPopupField operationDropdown;
             private string pendingOperator;
             private bool lockedLegacyExpression;
             private bool suppressChanged;
@@ -704,17 +714,19 @@ namespace GameRuleEditor.CustomControls
                 toolbar.AddToClassList("compare-operand-toolbar");
                 var fieldTag = new Label(label);
                 fieldTag.AddToClassList("compare-operand-label");
+                fieldTag.tooltip = RuleTooltips.Parameter("Compare", label);
                 toolbar.Add(fieldTag);
 
-                valuePickerDropdown = new PopupField<string>(
-                    new List<string> { PickPropertyChoice, PickNumberChoice }, 0);
-                valuePickerDropdown.SetValueWithoutNotify(PickValueLabel);
+                valuePickerDropdown = new TooltipPopupField(
+                    RuleTooltips.ValueSourceOptions(),
+                    PickValueLabel,
+                    "Choose a property or a number.",
+                    RuleDropdownPalette.Property);
                 valuePickerDropdown.AddToClassList("button-property-picker");
                 valuePickerDropdown.AddToClassList("rule-selector-dropdown");
                 valuePickerDropdown.AddToClassList("compare-value-picker");
-                valuePickerDropdown.RegisterValueChangedCallback(evt =>
+                valuePickerDropdown.RegisterValueChangedCallback(choice =>
                 {
-                    string choice = evt.newValue;
                     valuePickerDropdown.SetValueWithoutNotify(PickValueLabel);
                     if (choice == PickPropertyChoice)
                     {
@@ -727,19 +739,23 @@ namespace GameRuleEditor.CustomControls
                 });
                 toolbar.Add(valuePickerDropdown);
 
-                operationDropdown = new PopupField<string>(new List<string> { "+", "-" }, 0);
-                operationDropdown.SetValueWithoutNotify(PickOperationLabel);
+                operationDropdown = new TooltipPopupField(
+                    RuleTooltips.ArithmeticOptions(),
+                    PickOperationLabel,
+                    "Add or subtract one more property or number.",
+                    RuleDropdownPalette.Number);
                 operationDropdown.AddToClassList("button-number-picker");
                 operationDropdown.AddToClassList("rule-selector-dropdown");
                 operationDropdown.AddToClassList("compare-operation-dropdown");
-                operationDropdown.RegisterValueChangedCallback(evt =>
+                operationDropdown.RegisterValueChangedCallback(newValue =>
                 {
                     if (terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression)
                     {
-                        pendingOperator = evt.newValue;
+                        pendingOperator = newValue;
+                        operationDropdown.SetValueWithoutNotify(PickOperationLabel);
                         RebuildTerms();
                     }
-                    operationDropdown.SetValueWithoutNotify(PickOperationLabel);
+                    else operationDropdown.SetValueWithoutNotify(PickOperationLabel);
                 });
                 toolbar.Add(operationDropdown);
                 Add(toolbar);
@@ -861,13 +877,16 @@ namespace GameRuleEditor.CustomControls
 
                     if (i > 0)
                     {
-                        var operatorDropdown = new PopupField<string>(
-                            new List<string> { "+", "-" }, term.OperatorBefore == "-" ? 1 : 0);
+                        var operatorDropdown = new TooltipPopupField(
+                            RuleTooltips.ArithmeticOptions(),
+                            term.OperatorBefore == "-" ? "-" : "+",
+                            "Change this arithmetic operation.",
+                            RuleDropdownPalette.Number);
                         operatorDropdown.AddToClassList("button-number-picker");
                         operatorDropdown.AddToClassList("compare-term-operator");
-                        operatorDropdown.RegisterValueChangedCallback(evt =>
+                        operatorDropdown.RegisterValueChangedCallback(newValue =>
                         {
-                            term.OperatorBefore = evt.newValue;
+                            term.OperatorBefore = newValue;
                             NotifyChanged();
                         });
                         row.Add(operatorDropdown);

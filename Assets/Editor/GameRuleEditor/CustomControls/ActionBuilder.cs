@@ -74,6 +74,7 @@ namespace GameRuleEditor.CustomControls
 
             var addButton = new Button(() => AddAction(null));
             addButton.text = "+ Add Action";
+            addButton.tooltip = "Add another action to this rule.";
             addButton.AddToClassList("button-action");
             addButton.style.height = 25;
             addActionRow.Add(addButton);

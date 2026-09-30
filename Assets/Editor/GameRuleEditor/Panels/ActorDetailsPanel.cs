@@ -586,22 +586,15 @@ namespace GameRuleEditor.Panels
 
             if (onRemove != null)
             {
-                var removeBtn = new Button(onRemove) { text = string.Empty };
+                var removeBtn = new Button(onRemove) { text = "×" };
                 removeBtn.tooltip = "Remove Component";
                 removeBtn.AddToClassList("button-danger");
+                removeBtn.AddToClassList("button-danger-icon");
                 removeBtn.style.width = 28;
                 removeBtn.style.height = 26;
                 removeBtn.style.marginLeft = 4;
                 removeBtn.style.paddingLeft = 0;
                 removeBtn.style.paddingRight = 0;
-
-                var trashImage = new Image();
-                trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                trashImage.style.width = 16;
-                trashImage.style.height = 16;
-                trashImage.style.alignSelf = Align.Center;
-                trashImage.style.unityBackgroundImageTintColor = Color.white;
-                removeBtn.Add(trashImage);
 
                 removeBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
                 toggle.Add(removeBtn);
@@ -677,17 +670,11 @@ namespace GameRuleEditor.Panels
                     {
                         controller.RemoveActorProperty(context.selectedActorIndex, idx);
                         RebuildPropertiesList(content);
-                    }) { text = string.Empty };
+                    }) { text = "×", tooltip = "Remove Property" };
                     delBtn.AddToClassList("button-danger");
+                    delBtn.AddToClassList("button-danger-icon");
                     delBtn.style.width = 28;
                     delBtn.style.height = 26;
-                    var trashImg = new Image();
-                    trashImg.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                    trashImg.style.width = 16;
-                    trashImg.style.height = 16;
-                    trashImg.style.alignSelf = Align.Center;
-                    trashImg.style.unityBackgroundImageTintColor = Color.white;
-                    delBtn.Add(trashImg);
                     row.Add(delBtn);
 
                     // Spacer-based drag registration

@@ -413,23 +413,16 @@ namespace GameRuleEditor.Panels
                         UpdateRulesList();
                     }
                 });
-                removeIconBtn.text = string.Empty;
+                removeIconBtn.text = "×";
                 removeIconBtn.tooltip = "Remove Rule";
                 removeIconBtn.AddToClassList("button-danger");
+                removeIconBtn.AddToClassList("button-danger-icon");
                 removeIconBtn.style.width = 28;
                 removeIconBtn.style.height = 26;
                 removeIconBtn.style.marginLeft = 4;
                 removeIconBtn.style.paddingLeft = 0;
                 removeIconBtn.style.paddingRight = 0;
                 removeIconBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-
-                var trashImage = new Image();
-                trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                trashImage.style.width = 16;
-                trashImage.style.height = 16;
-                trashImage.style.alignSelf = Align.Center;
-                trashImage.style.unityBackgroundImageTintColor = Color.white;
-                removeIconBtn.Add(trashImage);
 
                 foldoutToggle.Add(removeIconBtn);
             }

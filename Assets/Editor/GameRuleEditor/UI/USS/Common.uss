@@ -206,25 +206,25 @@ Button:disabled {
 }
 
 .button-negation.button-negation--active {
-    background-color: rgb(79, 55, 139); /* light purple #4F378B */
-    color: rgb(234, 221, 255);
-    border-left-color: rgb(59, 39, 107);
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    background-color: rgb(204, 0, 31); /* same red as the remove buttons */
+    color: rgb(255, 255, 255);
+    border-left-color: rgb(143, 0, 22);
+    border-right-color: rgb(143, 0, 22);
+    border-top-color: rgb(143, 0, 22);
+    border-bottom-color: rgb(143, 0, 22);
 }
 
 .button-negation.button-negation--active:hover {
-    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
+    background-color: rgb(226, 26, 54);
 }
 
 .button-negation.button-negation--active:active {
-    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+    background-color: rgb(168, 0, 25);
 }
 
 .condition-negated {
     border-left-width: 3px;
-    border-left-color: rgb(79, 55, 139);
+    border-left-color: rgb(204, 0, 31);
 }
 
 /* ── Destructive / trash ── */
@@ -243,6 +243,16 @@ Button:disabled {
 
 .button-danger:active {
     background-color: rgb(168, 0, 25);
+}
+
+.button-danger-icon {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 1px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
 /* ── Rule conditions ── */
@@ -306,6 +316,44 @@ Button:disabled {
     padding-bottom: 5px;
     padding-left: 10px;
     padding-right: 10px;
+}
+
+/* Button-backed rule dropdowns allow every open menu item to have a tooltip. */
+.tooltip-popup-field {
+    min-height: 27px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    -unity-text-align: middle-center;
+}
+
+.tooltip-dropdown-menu {
+    padding: 4px;
+    background-color: rgb(43, 43, 43);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(90, 90, 90);
+    border-right-color: rgb(90, 90, 90);
+    border-top-color: rgb(90, 90, 90);
+    border-bottom-color: rgb(90, 90, 90);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.tooltip-dropdown-option {
+    min-height: 24px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
+    -unity-text-align: middle-left;
 }
 
 /* ── Property picker ── */
@@ -745,6 +793,13 @@ Button:disabled {
     margin-top: 0;
     margin-bottom: 0;
     flex-shrink: 0;
+}
+
+.compare-operation-dropdown.tooltip-popup-field,
+.compare-operator-dropdown.tooltip-popup-field,
+.compare-term-operator.tooltip-popup-field {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .compare-operation-dropdown > .unity-base-field__input {
