@@ -155,6 +155,7 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
             root.AddToClassList("hierarchy-root");
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
@@ -169,7 +170,7 @@ namespace GameRuleEditor.Windows
             }
 
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // #252526
+            root.style.backgroundColor = GameRuleTheme.Background;
 
             //BuildHeader(root);
             BuildContent(root);
@@ -180,9 +181,9 @@ namespace GameRuleEditor.Windows
         {
             var header = new VisualElement();
             header.style.height = 30;
-            header.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            header.style.backgroundColor = GameRuleTheme.InsetSurface;
             header.style.borderBottomWidth = 1;
-            header.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
+            header.style.borderBottomColor = GameRuleTheme.Border;
             header.style.justifyContent = Justify.Center;
             header.style.paddingLeft = 8;
             header.style.flexDirection = FlexDirection.Row;
@@ -202,7 +203,7 @@ namespace GameRuleEditor.Windows
             projectMenu.style.overflow = Overflow.Hidden;
             projectMenu.style.textOverflow = TextOverflow.Ellipsis;
             projectMenu.style.fontSize = 11;
-            projectMenu.style.color = new Color(0.61f, 0.64f, 0.69f); // #9ca3af
+            projectMenu.style.color = GameRuleTheme.MutedText;
             projectMenu.style.maxWidth = 220;
             projectMenu.style.marginRight = 8;
             projectMenu.style.backgroundColor = Color.clear;
@@ -215,7 +216,7 @@ namespace GameRuleEditor.Windows
             var label = new Label("Cast");
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             label.style.fontSize = 12;
-            label.style.color = new Color(0.898f, 0.906f, 0.922f);
+            label.style.color = GameRuleTheme.Text;
             header.Add(label);
             */
 /*            
@@ -330,7 +331,7 @@ namespace GameRuleEditor.Windows
         {
             var scrollView = new ScrollView();
             scrollView.style.flexGrow = 1;
-            scrollView.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // panelBackground
+            scrollView.style.backgroundColor = GameRuleTheme.Background;
 
             actorListContainer = new VisualElement();
             actorListContainer.style.paddingTop = 4;
@@ -389,16 +390,16 @@ namespace GameRuleEditor.Windows
             addActorBtn.style.marginBottom = 10;
             addActorBtn.style.paddingTop = 6;
             addActorBtn.style.paddingBottom = 6;
-            addActorBtn.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
-            addActorBtn.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
+            addActorBtn.style.backgroundColor = GameRuleTheme.Surface;
+            addActorBtn.style.color = GameRuleTheme.Text;
             addActorBtn.style.borderTopWidth = 1;
             addActorBtn.style.borderBottomWidth = 1;
             addActorBtn.style.borderLeftWidth = 1;
             addActorBtn.style.borderRightWidth = 1;
-            addActorBtn.style.borderTopColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderBottomColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderLeftColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderRightColor = new Color(0.1f, 0.1f, 0.1f);
+            addActorBtn.style.borderTopColor = GameRuleTheme.Border;
+            addActorBtn.style.borderBottomColor = GameRuleTheme.Border;
+            addActorBtn.style.borderLeftColor = GameRuleTheme.Border;
+            addActorBtn.style.borderRightColor = GameRuleTheme.Border;
             addActorBtn.style.marginLeft = 20;
             actorListContainer.Add(addActorBtn);
 
@@ -438,7 +439,7 @@ namespace GameRuleEditor.Windows
             icon.style.width = 16;
             icon.style.height = 16;
             icon.style.marginRight = 4;
-            icon.tintColor = new Color(0.72f, 0.82f, 1f);
+            icon.tintColor = GameRuleTheme.IconTint;
             item.Add(icon);
 
             var nameLabel = new Label(context?.currentProject?.projectName ?? "No Project");
@@ -448,7 +449,6 @@ namespace GameRuleEditor.Windows
             nameLabel.style.overflow = Overflow.Hidden;
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;
             nameLabel.style.whiteSpace = WhiteSpace.NoWrap;
-            nameLabel.style.color = new Color(0.898f, 0.906f, 0.922f);
             item.Add(nameLabel);
 
             return item;
@@ -487,11 +487,11 @@ namespace GameRuleEditor.Windows
             icon.style.height = 16;
             icon.style.marginRight = 4;
               
-            Color iconColor = new Color(0.8f, 0.8f, 0.8f);
+            Color iconColor = GameRuleTheme.MutedText;
             if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
             icon.tintColor = iconColor;
             } else {
-            icon.tintColor = new Color(0.8f, 0.8f, 0.8f);
+            icon.tintColor = GameRuleTheme.MutedText;
             }
             item.Add(icon);
             
@@ -501,7 +501,6 @@ namespace GameRuleEditor.Windows
             nameLabel.style.overflow = Overflow.Hidden;
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;
             nameLabel.style.whiteSpace = WhiteSpace.NoWrap;
-            nameLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary #e5e7eb
             item.Add(nameLabel);
 
             // Click → select actor
@@ -567,8 +566,8 @@ namespace GameRuleEditor.Windows
             var textInput = renameField.Q(TextField.textInputUssName);
             if (textInput != null)
             {
-                textInput.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f);
-                textInput.style.color = new Color(0.898f, 0.906f, 0.922f);
+                textInput.style.backgroundColor = GameRuleTheme.Background;
+                textInput.style.color = GameRuleTheme.Text;
                 textInput.style.borderTopWidth = 1;
                 textInput.style.borderBottomWidth = 1;
                 textInput.style.borderLeftWidth = 1;
@@ -929,18 +928,18 @@ namespace GameRuleEditor.Windows
             root.style.flexGrow = 1;
             root.style.justifyContent = Justify.Center;
             root.style.alignItems = Align.Center;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f);
+            root.style.backgroundColor = GameRuleTheme.Background;
 
             var title = new Label("GameRule Editor");
             title.style.fontSize = 18;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.color = new Color(0.816f, 0.867f, 1f); // primaryFixed #D0BCFF close
+            title.style.color = GameRuleTheme.AccentText;
             title.style.marginBottom = 8;
             root.Add(title);
 
             var subtitle = new Label("No project loaded");
             subtitle.style.fontSize = 12;
-            subtitle.style.color = new Color(0.61f, 0.64f, 0.69f);
+            subtitle.style.color = GameRuleTheme.MutedText;
             subtitle.style.marginBottom = 20;
             root.Add(subtitle);
 

@@ -66,7 +66,7 @@ namespace GameRuleEditor.CustomControls
 
         private void CreateUI(string initialJoinOperator)
         {
-            style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            style.backgroundColor = GameRuleTheme.BrightHeader;
             SetJoinOperator(initialJoinOperator);
 
             negationButton = new Button(() =>
@@ -409,8 +409,8 @@ namespace GameRuleEditor.CustomControls
             tag.tooltip = RuleTooltips.Parameter(selectedConditionType, text);
             tag.style.fontSize = 9;
             tag.style.unityFontStyleAndWeight = FontStyle.Bold;
-            tag.style.color = new Color(0.85f, 0.85f, 0.85f);
-            tag.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+            tag.style.color = GameRuleTheme.Text;
+            tag.style.backgroundColor = GameRuleTheme.Surface;
             tag.style.borderTopLeftRadius = 3;
             tag.style.borderTopRightRadius = 3;
             tag.style.borderBottomLeftRadius = 3;

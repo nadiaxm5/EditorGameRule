@@ -93,18 +93,20 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
             
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
                 "Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
             root.style.flexGrow = 1;
+            root.style.backgroundColor = GameRuleTheme.Background;
 
             var toolbar = new Toolbar();
             toolbar.style.height = 32;
-            toolbar.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f); // #333333
+            toolbar.style.backgroundColor = GameRuleTheme.InsetSurface;
             toolbar.style.borderBottomWidth = 1;
-            toolbar.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f); // #1a1a1a
+            toolbar.style.borderBottomColor = GameRuleTheme.Border;
             toolbar.style.flexShrink = 0;
 
             // Grupo izquierda (se queda igual)
@@ -139,7 +141,7 @@ namespace GameRuleEditor.Windows
             projectNameLabel.style.overflow = Overflow.Hidden;
             projectNameLabel.style.textOverflow = TextOverflow.Ellipsis;
             projectNameLabel.style.fontSize = 11;
-            projectNameLabel.style.color = new Color(0.61f, 0.64f, 0.69f); // #9ca3af
+            projectNameLabel.style.color = GameRuleTheme.MutedText;
             projectNameLabel.style.maxWidth = 220;
             projectNameLabel.style.marginRight = 8;
             leftGroup.Add(projectNameLabel);

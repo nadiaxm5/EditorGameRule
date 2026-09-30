@@ -21,6 +21,18 @@
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0000025044780613825425, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Timer(0)"
+                    ],
+                    "Do": [
+                        ""
+                    ],
+                    "groupId": "gb8cf3a3b"
+                }
+            ],
             "Components": [
                 {
                     "type": "Properties",
@@ -43,14 +55,14 @@
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
+            "Properties": [
+                "NewProp=0"
+            ],
             "Script": [
                 {
                     "Name": "Rule 1",
                     "When": [
-                        "Compare(this.x + -0.1 <= -0.2 - this.x) AND Keyboard(,press) AND Collision(Untagged)"
-                    ],
-                    "Do": [
-                        "MoveTo(0,0,0,0)"
+                        "NOT Compare(0 + 0 == )"
                     ],
                     "groupId": "g416cb4ae"
                 }

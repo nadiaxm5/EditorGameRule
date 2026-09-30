@@ -75,7 +75,7 @@ namespace GameRuleEditor.Panels
 
             var noSelectionLabel = new Label("Select an actor to edit its script rules");
             noSelectionLabel.style.fontSize = 14;
-            noSelectionLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+            noSelectionLabel.style.color = GameRuleTheme.SubtleText;
             noSelectionContainer.Add(noSelectionLabel);
 
             Add(noSelectionContainer);
@@ -153,7 +153,7 @@ namespace GameRuleEditor.Panels
             closeInfoBtn.style.borderBottomWidth = 0;
             closeInfoBtn.style.borderLeftWidth = 0;
             closeInfoBtn.style.borderRightWidth = 0;
-            closeInfoBtn.style.color = new Color(0.7f, 0.7f, 0.7f);
+            closeInfoBtn.style.color = GameRuleTheme.MutedText;
             infoBox.Add(closeInfoBtn);
 
             scrollView.Add(infoBox);
@@ -224,7 +224,7 @@ namespace GameRuleEditor.Panels
             if (visibleAbsIndices.Count == 0)
             {
                 var emptyLabel = new Label("No rules defined. Add a rule to get started.");
-                emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+                emptyLabel.style.color = GameRuleTheme.SubtleText;
                 emptyLabel.style.fontSize = 12;
                 emptyLabel.style.marginTop = 20;
                 emptyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -357,7 +357,7 @@ namespace GameRuleEditor.Panels
                     dragHandle.pickingMode = PickingMode.Position;
                     dragHandle.style.width = 16;
                     dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
-                    dragHandle.style.color = new Color(0.65f, 0.65f, 0.65f);
+                    dragHandle.style.color = GameRuleTheme.SubtleText;
                     dragHandle.style.marginLeft = 2;
                     dragHandle.style.marginRight = 4;
 

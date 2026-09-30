@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 public class NewActor_1 : MonoBehaviour, IGameRuleActor {
     public bool Active = true;
+    public float NewProp=0f;
+    public Dictionary<string, float> propertyList = new Dictionary<string, float>();
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){
-        if(Condition.Timer("2",gameObject)){
-            Action.Spawn("BlueTank", gameObject, "0", "0", "0", "0", "0", "0", scopeList);
-        }
     }
-    public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
-        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Timer(2);Spawn(BlueTank,this,0,0,0,0,0,0)");
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
+    }
+    void Awake() {
+        propertyList = Utils.CreateProperties("NewProp=0");
     }
 }

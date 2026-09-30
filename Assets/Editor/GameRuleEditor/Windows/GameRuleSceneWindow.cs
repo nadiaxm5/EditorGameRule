@@ -40,12 +40,13 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // panelBackground
+            root.style.backgroundColor = GameRuleTheme.Background; // panelBackground
 
             // Header
             var headerContainer = new VisualElement();
@@ -55,15 +56,15 @@ namespace GameRuleEditor.Windows
             headerContainer.style.height = 32;
             headerContainer.style.paddingLeft = 10;
             headerContainer.style.paddingRight = 6;
-            headerContainer.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f); // headerBackground
+            headerContainer.style.backgroundColor = GameRuleTheme.Header; // headerBackground
             headerContainer.style.borderBottomWidth = 1;
-            headerContainer.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
+            headerContainer.style.borderBottomColor = GameRuleTheme.Border;
             headerContainer.style.flexShrink = 0;
 
             titleLabel = new Label("Scene Settings");
             titleLabel.style.fontSize = 12;
             titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
+            titleLabel.style.color = GameRuleTheme.Text; // textPrimary
             headerContainer.Add(titleLabel);
 
             var closeBtn = new Button(() => this.Close());

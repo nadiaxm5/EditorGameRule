@@ -106,7 +106,7 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.flexGrow = 1;
             noSelectionContainer.style.justifyContent = Justify.Center;
             noSelectionContainer.style.alignItems = Align.Center;
-            noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = Color.gray } });
+            noSelectionContainer.Add(new Label("Select an actor to edit") { style = { color = GameRuleTheme.SubtleText } });
             Add(noSelectionContainer);
 
             mainContainer = new VisualElement();
@@ -259,7 +259,7 @@ namespace GameRuleEditor.Panels
 
             physicsStatusLabel = new Label();
             physicsStatusLabel.style.whiteSpace = WhiteSpace.Normal;
-            physicsStatusLabel.style.color = new Color(0.72f, 0.72f, 0.72f);
+            physicsStatusLabel.style.color = GameRuleTheme.MutedText;
             physicsStatusLabel.style.marginTop = 4;
             physicsStatusLabel.style.marginBottom = 4;
             physicsContainer.Add(physicsStatusLabel);
@@ -286,7 +286,7 @@ namespace GameRuleEditor.Panels
             addRulesSetButton.style.paddingBottom = 5;
             addRulesSetButton.style.alignSelf = Align.Center;
             addRulesSetButton.style.width = 200;
-            addRulesSetButton.style.backgroundColor = new Color(0.22f, 0.22f, 0.25f);
+            addRulesSetButton.style.backgroundColor = GameRuleTheme.Surface;
             addRulesSetButton.style.borderTopLeftRadius = 4;
             addRulesSetButton.style.borderTopRightRadius = 4;
             addRulesSetButton.style.borderBottomLeftRadius = 4;
@@ -422,7 +422,7 @@ namespace GameRuleEditor.Panels
             var iconImage = this.Q<Image>("PrefabColorImage");
             if (iconImage != null)
             {
-                Color c = new Color(0.8f, 0.8f, 0.8f);
+                Color c = GameRuleTheme.MutedText;
                 if (!string.IsNullOrEmpty(actor.IconColorHex))
                     ColorUtility.TryParseHtmlString(actor.IconColorHex, out c);
                 iconImage.tintColor = c;
@@ -495,7 +495,7 @@ namespace GameRuleEditor.Panels
             });
             foldout.style.unityFontStyleAndWeight = FontStyle.Bold;
             foldout.style.marginBottom = 10;
-            foldout.style.backgroundColor = new Color(0.18f, 0.18f, 0.20f);
+            foldout.style.backgroundColor = GameRuleTheme.Surface;
             foldout.style.borderTopLeftRadius = 4;
             foldout.style.borderTopRightRadius = 4;
             foldout.style.borderBottomLeftRadius = 4;
@@ -525,7 +525,7 @@ namespace GameRuleEditor.Panels
                 dragHandle.pickingMode = PickingMode.Position;
                 dragHandle.style.width = 16;
                 dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
-                dragHandle.style.color = new Color(0.65f, 0.65f, 0.65f);
+                dragHandle.style.color = GameRuleTheme.SubtleText;
                 dragHandle.style.marginLeft = 2;
                 dragHandle.style.marginRight = 4;
                 dragHandle.RegisterCallback<PointerDownEvent>(evt =>
@@ -637,7 +637,7 @@ namespace GameRuleEditor.Panels
                     handle.style.fontSize = 16;
                     handle.style.width = 16;
                     handle.style.unityTextAlign = TextAnchor.MiddleCenter;
-                    handle.style.color = Color.gray;
+                    handle.style.color = GameRuleTheme.SubtleText;
                     handle.style.marginRight = 4;
                     row.Add(handle);
 
@@ -724,7 +724,7 @@ namespace GameRuleEditor.Panels
             var infoLabel = new Label(ruleCount == 0
                 ? "No rules defined yet."
                 : $"{ruleCount} rule{(ruleCount == 1 ? "" : "s")} defined.");
-            infoLabel.style.color = new Color(0.6f, 0.6f, 0.6f);
+            infoLabel.style.color = GameRuleTheme.MutedText;
             infoLabel.style.fontSize = 11;
             infoLabel.style.marginBottom = 8;
             content.Add(infoLabel);

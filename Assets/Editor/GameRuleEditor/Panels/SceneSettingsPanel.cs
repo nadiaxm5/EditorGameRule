@@ -243,7 +243,7 @@ namespace GameRuleEditor.Panels
 
             // Variable creation
             var creationBox = new VisualElement();
-            creationBox.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            creationBox.style.backgroundColor = GameRuleTheme.InsetSurface;
             creationBox.style.paddingTop = 10; creationBox.style.paddingBottom = 10;
             creationBox.style.paddingLeft = 10; creationBox.style.paddingRight = 10;
             creationBox.style.borderTopLeftRadius = 5; creationBox.style.borderTopRightRadius = 5;

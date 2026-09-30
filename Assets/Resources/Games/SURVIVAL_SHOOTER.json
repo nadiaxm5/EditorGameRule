@@ -26,7 +26,17 @@
             "Active": true,
             "PrefabName": "Environment",
             "Tag": "Obstacle",
-            "IconColorHex": ""
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                }
+            ]
         },
         {
             "ActorName": "Player",
@@ -228,24 +238,27 @@
             "Components": [
                 {
                     "type": "Properties",
-                    "name": "Properties",
+                    "name": "Custom Properties",
                     "id": ""
                 },
                 {
                     "type": "Rules",
-                    "name": "Rules",
+                    "name": "Rules Set",
                     "id": "g754e79de"
                 }
             ]
         },
         {
             "ActorName": "Hellephant",
-            "Active": false,
+            "Active": true,
             "PrefabName": "Hellephant",
             "Tag": "Hellephant",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 32.0],
-            "Rotation": [0.0, -130.0, 0.0],
+            "Rotation": [0.0, 230.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Drag": 3.4028234663852887e38,
+            "OverrideDrag": true,
             "Properties": [
                 "speed=2",
                 "health=300",
@@ -254,15 +267,15 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -270,10 +283,10 @@
                         "Edit(this.moving,0)",
                         "Edit(this.speed,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -282,10 +295,10 @@
                         "PlaySound(HellephantHurt)",
                         "PlayParticles(HitParticles)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -294,27 +307,39 @@
                         "Spawn(HellephantDead,this)",
                         "Delete(this)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Idle)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Move)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "g3a9190cf"
                 }
             ]
         },

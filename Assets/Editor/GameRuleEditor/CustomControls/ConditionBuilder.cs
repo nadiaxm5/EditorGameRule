@@ -39,7 +39,7 @@ namespace GameRuleEditor.CustomControls
                 }
             }
 
-            style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
+            style.backgroundColor = GameRuleTheme.RaisedSurface;
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
             style.borderBottomLeftRadius = 5; style.borderBottomRightRadius = 5;
             style.paddingTop = 10; style.paddingBottom = 10;
@@ -96,7 +96,7 @@ namespace GameRuleEditor.CustomControls
 /*
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
-            previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            previewContainer.style.backgroundColor = GameRuleTheme.InsetSurface;
             previewContainer.style.paddingTop = 5;
             previewContainer.style.paddingBottom = 5;
             previewContainer.style.paddingLeft = 5;
@@ -104,7 +104,7 @@ namespace GameRuleEditor.CustomControls
 
             previewLabel = new Label("");
             previewLabel.style.fontSize = 11;
-            previewLabel.style.color = new Color(0.8f, 0.9f, 1f);
+            previewLabel.style.color = GameRuleTheme.PreviewText;
             previewLabel.style.whiteSpace = WhiteSpace.Normal;
             previewContainer.Add(previewLabel);
             Add(previewContainer); */

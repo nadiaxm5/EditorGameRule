@@ -61,6 +61,7 @@ namespace GameRuleEditor.Windows
         private GUIStyle propertyButtonStyle;
         private GUIStyle navigationColoredLabelStyle;
         private GUIStyle propertyColoredLabelStyle;
+        private bool stylesAreProSkin;
         private Vector2 mouseScreenPosition;
         private Rect currentColumnScreenRect;
 
@@ -513,7 +514,7 @@ namespace GameRuleEditor.Windows
 
             Color cardColor = pressed
                 ? PickerYellowActive
-                : hovered ? PickerYellowHover : new Color(0.19f, 0.19f, 0.20f, 1f);
+                : hovered ? PickerYellowHover : GameRuleTheme.Header;
             EditorGUI.DrawRect(cardRect, cardColor);
 
             float previewSize = Mathf.Min(width - 12f, 76f);
@@ -734,7 +735,8 @@ namespace GameRuleEditor.Windows
             if (navigationButtonStyle != null &&
                 propertyButtonStyle != null &&
                 navigationColoredLabelStyle != null &&
-                propertyColoredLabelStyle != null)
+                propertyColoredLabelStyle != null &&
+                stylesAreProSkin == EditorGUIUtility.isProSkin)
             {
                 return;
             }
@@ -746,6 +748,7 @@ namespace GameRuleEditor.Windows
             navigationButtonStyle.padding = new RectOffset(8, 8, 2, 2);
             navigationColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
             propertyColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
+            stylesAreProSkin = EditorGUIUtility.isProSkin;
         }
 
         private static GUIStyle CreateButtonStyle(TextAnchor alignment)

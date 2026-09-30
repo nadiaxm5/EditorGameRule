@@ -22,9 +22,9 @@ namespace GameRuleEditor.Panels
 
             style.minWidth = 250;
             style.maxWidth = 350;
-            style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
+            style.backgroundColor = GameRuleTheme.RaisedSurface;
             style.borderRightWidth = 1;
-            style.borderRightColor = new Color(0.15f, 0.15f, 0.15f);
+            style.borderRightColor = GameRuleTheme.SoftBorder;
 
             CreateUI();
             UpdateUI();
@@ -53,9 +53,9 @@ namespace GameRuleEditor.Panels
             header.style.paddingBottom = 10;
             header.style.paddingLeft = 10;
             header.style.paddingRight = 10;
-            header.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            header.style.backgroundColor = GameRuleTheme.BrightHeader;
             header.style.borderBottomWidth = 1;
-            header.style.borderBottomColor = new Color(0.15f, 0.15f, 0.15f);
+            header.style.borderBottomColor = GameRuleTheme.SoftBorder;
 
             var title = new Label("Actors");
             title.style.fontSize = 14;
@@ -88,14 +88,14 @@ namespace GameRuleEditor.Panels
             footer.style.paddingBottom = 5;
             footer.style.paddingLeft = 5;
             footer.style.paddingRight = 5;
-            footer.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            footer.style.backgroundColor = GameRuleTheme.BrightHeader;
             footer.style.borderTopWidth = 1;
-            footer.style.borderTopColor = new Color(0.15f, 0.15f, 0.15f);
+            footer.style.borderTopColor = GameRuleTheme.SoftBorder;
 
             var countLabel = new Label();
             countLabel.name = "actor-count";
             countLabel.style.fontSize = 10;
-            countLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
+            countLabel.style.color = GameRuleTheme.MutedText;
             footer.Add(countLabel);
 
             Add(footer);
@@ -111,7 +111,7 @@ namespace GameRuleEditor.Panels
                 var emptyLabel = new Label("No actors in project");
                 emptyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
                 emptyLabel.style.marginTop = 20;
-                emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+                emptyLabel.style.color = GameRuleTheme.SubtleText;
                 actorListContainer.Add(emptyLabel);
                 UpdateCount(0);
                 return;
@@ -159,13 +159,13 @@ namespace GameRuleEditor.Panels
 
             var prefabLabel = new Label($"Prefab: {actor.PrefabName}");
             prefabLabel.style.fontSize = 10;
-            prefabLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
+            prefabLabel.AddToClassList("actor-prefab-label");
             content.Add(prefabLabel);
 
             int scriptCount = actor.Script?.Count ?? 0;
             var scriptLabel = new Label($"Rules: {scriptCount}");
             scriptLabel.style.fontSize = 10;
-            scriptLabel.style.color = new Color(0.6f, 0.7f, 0.8f);
+            scriptLabel.AddToClassList("actor-rule-count");
             content.Add(scriptLabel);
 
             item.Add(content);

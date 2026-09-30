@@ -73,7 +73,13 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
-      Script: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Timer(0)
+        Do:
+        - 
+        groupId: gb8cf3a3b
       Components:
       - type: Properties
         name: Custom Properties
@@ -108,13 +114,13 @@ MonoBehaviour:
       OverrideFriction: 0
       OverrideBounciness: 0
       OverrideDrag: 0
-      Properties: []
+      Properties:
+      - NewProp=0
       Script:
       - Name: Rule 1
         When:
-        - Timer(2)
-        Do:
-        - Spawn(BlueTank,this,0,0,0,0,0,0)
+        - NOT Compare(0 + 0 == )
+        Do: []
         groupId: g416cb4ae
       Components:
       - type: Properties
@@ -153,7 +159,13 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
-    Script: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Timer(0)
+      Do:
+      - 
+      groupId: gb8cf3a3b
     Components:
     - type: Properties
       name: Custom Properties
@@ -188,13 +200,13 @@ MonoBehaviour:
     OverrideFriction: 0
     OverrideBounciness: 0
     OverrideDrag: 0
-    Properties: []
+    Properties:
+    - NewProp=0
     Script:
     - Name: Rule 1
       When:
-      - Compare(this.rz <= ) AND Compare( < )
-      Do:
-      - NavigateTo(0,0,0,0)
+      - NOT Compare(0 + 0 == )
+      Do: []
       groupId: g416cb4ae
     Components:
     - type: Properties

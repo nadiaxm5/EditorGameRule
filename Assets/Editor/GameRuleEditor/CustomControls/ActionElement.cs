@@ -33,7 +33,7 @@ namespace GameRuleEditor.CustomControls
             availableTypes = actionTypes;
             style.marginBottom = 5;
             style.flexShrink = 0;
-            style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+            style.backgroundColor = GameRuleTheme.BrightHeader;
             style.paddingTop = 5; style.paddingBottom = 5;
             style.paddingLeft = 5; style.paddingRight = 5;
             CreateUI();
@@ -198,8 +198,8 @@ namespace GameRuleEditor.CustomControls
             tag.tooltip = RuleTooltips.Parameter(selectedActionType, text);
             tag.style.fontSize = 9;
             tag.style.unityFontStyleAndWeight = FontStyle.Bold;
-            tag.style.color = new Color(0.85f, 0.85f, 0.85f);
-            tag.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+            tag.style.color = GameRuleTheme.Text;
+            tag.style.backgroundColor = GameRuleTheme.Surface;
             tag.style.borderTopLeftRadius = 3;
             tag.style.borderTopRightRadius = 3;
             tag.style.borderBottomLeftRadius = 3;

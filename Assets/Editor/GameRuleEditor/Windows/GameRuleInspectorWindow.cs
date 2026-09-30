@@ -158,13 +158,14 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
                 "Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // panelBackground
+            root.style.backgroundColor = GameRuleTheme.Background; // panelBackground
 
             // Header
             headerContainer = new VisualElement();
@@ -174,15 +175,15 @@ namespace GameRuleEditor.Windows
             headerContainer.style.height = 32;
             headerContainer.style.paddingLeft = 10;
             headerContainer.style.paddingRight = 6;
-            headerContainer.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f); // headerBackground
+            headerContainer.style.backgroundColor = GameRuleTheme.Header; // headerBackground
             headerContainer.style.borderBottomWidth = 1;
-            headerContainer.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
+            headerContainer.style.borderBottomColor = GameRuleTheme.Border;
             headerContainer.style.flexShrink = 0;
 
             titleLabel = new Label("Inspector");
             titleLabel.style.fontSize = 12;
             titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
+            titleLabel.style.color = GameRuleTheme.Text; // textPrimary
             headerContainer.Add(titleLabel);
 
             var closeBtn = new Button(() =>
@@ -259,12 +260,12 @@ namespace GameRuleEditor.Windows
             container.style.alignItems = Align.Center;
 
             var label = new Label("Nothing selected");
-            label.style.color = new Color(0.42f, 0.44f, 0.50f); // textMuted
+            label.style.color = GameRuleTheme.MutedText; // textMuted
             label.style.fontSize = 12;
             container.Add(label);
 
             var hint = new Label("Use the hierarchy or context menu\nto open an inspector");
-            hint.style.color = new Color(0.42f, 0.44f, 0.50f);
+            hint.style.color = GameRuleTheme.MutedText;
             hint.style.fontSize = 10;
             hint.style.unityTextAlign = TextAnchor.MiddleCenter;
             hint.style.marginTop = 6;
