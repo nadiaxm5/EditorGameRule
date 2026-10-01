@@ -318,6 +318,11 @@ namespace GameRuleEditor.CustomControls
         public string value => currentValue;
         public event System.Action<string> ValueChanged;
 
+        public bool ContainsOption(string optionValue)
+        {
+            return options.Any(option => option.Value == optionValue);
+        }
+
         public TooltipPopupField(IEnumerable<TooltipDropdownOption> choices,
                                  string initialValue,
                                  string placeholderTooltip,
@@ -532,6 +537,31 @@ namespace GameRuleEditor.CustomControls
             };
         }
 
+        public static List<TooltipDropdownOption> EventOptions(string conditionType, IEnumerable<string> values)
+        {
+            return values.Select(value => new TooltipDropdownOption(
+                value, ConditionElement.FormatEventName(value), Event(conditionType, value))).ToList();
+        }
+
+        private static string Event(string conditionType, string value)
+        {
+            switch (value)
+            {
+                case "press": return conditionType == "Keyboard"
+                    ? "True while the key is pressed, including its first press."
+                    : "True while the left mouse button is pressed, including its first press.";
+                case "down": return conditionType == "Keyboard"
+                    ? "True when the key is first pressed."
+                    : "True when the left mouse button is first pressed.";
+                case "up": return conditionType == "Keyboard"
+                    ? "True when the key is released."
+                    : "True when the left mouse button is released.";
+                case "tap": return "True when the left mouse button is released and no longer pressed.";
+                case "isOver": return "True while the pointer is over this actor, even without a click; enable On This Actor.";
+                default: return "Choose when this event is detected.";
+            }
+        }
+
         public static List<TooltipDropdownOption> ValueSourceOptions()
         {
             return new List<TooltipDropdownOption>
@@ -588,9 +618,9 @@ namespace GameRuleEditor.CustomControls
                 case "Collision.Tag": return "Tag that the other colliding actor must have.";
                 case "Timer.Seconds": return "Seconds between each successful timer check.";
                 case "Keyboard.Key": return "Keyboard key to monitor.";
-                case "Keyboard.Event": return "Key event that must occur: held, pressed, or released.";
-                case "Touch.Event": return "Pointer or touch event that must occur.";
-                case "Touch.On This Actor": return "Require the pointer or touch to be over this actor.";
+                case "Keyboard.Event": return "Choose Press (while pressed), Down (first press), or Up (release).";
+                case "Touch.Event": return "Choose Press, Down, Up, Tap, or IsOver for the mouse pointer.";
+                case "Touch.On This Actor": return "Require the pointer to be over this actor; enable for IsOver.";
                 case "Compare.Property 1": return "Left side of the comparison.";
                 case "Compare.Property 2": return "Right side of the comparison.";
             }

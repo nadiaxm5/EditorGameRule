@@ -107,9 +107,10 @@ namespace GameRuleEditor.Panels
                     return;
                 }
                 List<RuleConditionTerm> terms = RuleConditionSequence.Parse(rule.When[0]);
-                if (index > terms.Count || (index == terms.Count && !context.PendingRuleElement))
+                if (index >= terms.Count || string.IsNullOrWhiteSpace(terms[index].Source))
                 {
                     context.ClearRuleElementSelection();
+                    ShowEmpty("Select a condition or action in Rules to edit its details.");
                     return;
                 }
                 BuildConditionDetails(rule, index, terms);
@@ -117,9 +118,10 @@ namespace GameRuleEditor.Panels
             else
             {
                 int count = rule.Do?.Count ?? 0;
-                if (index > count || (index == count && !context.PendingRuleElement))
+                if (index >= count || string.IsNullOrWhiteSpace(rule.Do[index]))
                 {
                     context.ClearRuleElementSelection();
+                    ShowEmpty("Select a condition or action in Rules to edit its details.");
                     return;
                 }
                 BuildActionDetails(rule, index);

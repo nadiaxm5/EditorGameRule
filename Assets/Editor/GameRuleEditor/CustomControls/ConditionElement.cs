@@ -42,12 +42,6 @@ namespace GameRuleEditor.CustomControls
         public VisualElement TypeSelector => typeDropdown;
         public string JoinOperatorBefore => joinOperatorBefore;
 
-        private static readonly Dictionary<string, string> EventDisplayNames = new Dictionary<string, string>
-        {
-            { "press", "Held" }, { "down", "Pressed" }, { "up", "Released" },
-            { "tap", "Tapped" }, { "isOver", "Pointer Over" }
-        };
-
         public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null,
                                 bool detailsMode = false)
         {
@@ -203,7 +197,7 @@ namespace GameRuleEditor.CustomControls
                 case "Touch":
                     var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
                     parametersContainer.Add(CreateFieldTag("Event"));
-                    var touchMode = CreateEventDropdown(touchModes, 0, 92);
+                    var touchMode = CreateEventDropdown("Touch", touchModes, 92);
                     touchMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
                     parametersContainer.Add(touchMode);
                     inputElements.Add(touchMode);
@@ -261,7 +255,7 @@ namespace GameRuleEditor.CustomControls
             parametersContainer.Add(keyContainer);
 
             parametersContainer.Add(CreateFieldTag("Event"));
-            var keyMode = CreateEventDropdown(new List<string> { "press", "down", "up" }, 0, 82);
+            var keyMode = CreateEventDropdown("Keyboard", new List<string> { "press", "down", "up" }, 82);
             keyMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
             parametersContainer.Add(keyMode);
             inputElements.Add(keyMode);
@@ -350,17 +344,26 @@ namespace GameRuleEditor.CustomControls
             return Regex.Replace(spaced, @"^Digit([0-9])$", "Number $1");
         }
 
-        private static PopupField<string> CreateEventDropdown(List<string> choices, int defaultIndex, float width)
+        private static TooltipPopupField CreateEventDropdown(string conditionType, List<string> choices, float width)
         {
-            var dropdown = new PopupField<string>(choices, defaultIndex) { style = { width = width } };
-            dropdown.formatListItemCallback = FormatEventName;
-            dropdown.formatSelectedValueCallback = FormatEventName;
+            var dropdown = new TooltipPopupField(
+                RuleTooltips.EventOptions(conditionType, choices),
+                choices[0],
+                RuleTooltips.Parameter(conditionType, "Event"),
+                RuleDropdownPalette.Condition)
+            {
+                style = { width = width }
+            };
+            dropdown.AddToClassList("button-condition");
+            dropdown.AddToClassList("rule-selector-dropdown");
             return dropdown;
         }
 
-        private static string FormatEventName(string value)
+        internal static string FormatEventName(string value)
         {
-            return EventDisplayNames.TryGetValue(value, out string displayName) ? displayName : value;
+            return string.IsNullOrEmpty(value)
+                ? value
+                : char.ToUpperInvariant(value[0]) + value.Substring(1);
         }
 
         private void AddPropertyField(string label, bool boolOnly)
@@ -481,8 +484,8 @@ namespace GameRuleEditor.CustomControls
             {
                 if (inputElements.Count >= 2)
                 {
-                    var eventDropdown = (PopupField<string>)inputElements[0];
-                    if (parameters.Count > 0 && eventDropdown.choices.Contains(parameters[0]))
+                    var eventDropdown = (TooltipPopupField)inputElements[0];
+                    if (parameters.Count > 0 && eventDropdown.ContainsOption(parameters[0]))
                         eventDropdown.SetValueWithoutNotify(parameters[0]);
                     if (parameters.Count > 1 && bool.TryParse(parameters[1], out bool onActor))
                         ((Toggle)inputElements[1]).SetValueWithoutNotify(onActor);
@@ -512,8 +515,8 @@ namespace GameRuleEditor.CustomControls
                 }
                 if (parameters.Count > 1)
                 {
-                    var eventDropdown = (PopupField<string>)inputElements[0];
-                    if (eventDropdown.choices.Contains(parameters[1]))
+                    var eventDropdown = (TooltipPopupField)inputElements[0];
+                    if (eventDropdown.ContainsOption(parameters[1]))
                         eventDropdown.SetValueWithoutNotify(parameters[1]);
                 }
                 return;
@@ -563,7 +566,7 @@ namespace GameRuleEditor.CustomControls
 
             if (selectedConditionType == "Keyboard")
             {
-                string eventName = inputElements.Count > 0 && inputElements[0] is PopupField<string> eventDropdown
+                string eventName = inputElements.Count > 0 && inputElements[0] is TooltipPopupField eventDropdown
                     ? eventDropdown.value
                     : string.Empty;
                 conditionText = $"Keyboard({selectedKeyboardKey ?? string.Empty},{eventName})";
@@ -581,6 +584,8 @@ namespace GameRuleEditor.CustomControls
                     parts.Add(numberField.SerializedValue);
                 else if (element is PopupField<string> popupField)
                     parts.Add(popupField.value);
+                else if (element is TooltipPopupField eventDropdown)
+                    parts.Add(eventDropdown.value);
                 else if (element is Toggle toggle)
                     parts.Add(toggle.value.ToString().ToLowerInvariant());
             }

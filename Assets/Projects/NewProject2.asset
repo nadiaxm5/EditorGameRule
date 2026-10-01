@@ -162,9 +162,25 @@ MonoBehaviour:
     Script:
     - Name: Rule 1
       When:
-      - Timer(0)
+      - Compare( < ) AND Check(this.Active) AND Collision(Untagged) AND Keyboard(A,down)
+        AND Touch(press,false) AND Timer(0)
       Do:
-      - 
+      - Edit(,)
+      - Spawn(,this,0,0,0,0,0,0)
+      - Animate()
+      - Move(0,0,0,0)
+      - MoveTo(0,0,0,0)
+      - NavigateTo(0,0,0,0)
+      - LoadScene()
+      - QuitGame()
+      - PlaySound()
+      - PlayParticles()
+      - Delete()
+      - Rotate(0,0,0,0)
+      - RotateTo(0,0,0,0,this.x,this.y,this.z)
+      - Push(0,0,0,0)
+      - PushTo(0,0,0,0)
+      - Torque(0,0,0)
       groupId: gb8cf3a3b
     Components:
     - type: Properties
@@ -208,6 +224,7 @@ MonoBehaviour:
       - Collision(Untagged) OR Compare(this.z < )
       Do:
       - Spawn(,this,0,0,0,0,0,0)
+      - Edit(,)
       groupId: g416cb4ae
     Components:
     - type: Properties
