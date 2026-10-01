@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.CustomControls;
@@ -35,6 +37,7 @@ namespace GameRuleEditor.Panels
 
         // Abs indices of rules currently visible (respects groupId filter)
         private List<int> visibleAbsIndices = new List<int>();
+        private bool subscribed;
 
         public ScriptEditorPanel(EditorContext editorContext, ProjectController projectController, string groupId = null, string groupName = null)
         {
@@ -53,16 +56,26 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            // Subscribe to events
+            RegisterCallback<AttachToPanelEvent>(_ => { Subscribe(); UpdateUI(); });
+            RegisterCallback<DetachFromPanelEvent>(_ => Unsubscribe());
+        }
+
+        private void Subscribe()
+        {
+            if (subscribed) return;
+            subscribed = true;
             context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
+            context.OnRuleElementSelected += UpdateRulesList;
+        }
 
-            // Cleanup when removed from visual tree
-            RegisterCallback<DetachFromPanelEvent>(evt =>
-            {
-                context.OnActorSelected -= OnActorSelected;
-                context.OnProjectChanged -= UpdateUI;
-            });
+        private void Unsubscribe()
+        {
+            if (!subscribed) return;
+            subscribed = false;
+            context.OnActorSelected -= OnActorSelected;
+            context.OnProjectChanged -= UpdateUI;
+            context.OnRuleElementSelected -= UpdateRulesList;
         }
 
         private void CreateUI()
@@ -260,7 +273,11 @@ namespace GameRuleEditor.Panels
             if (!initializedRules.Contains(rule))
             {
                 initializedRules.Add(rule);
-                collapsedRules.Add(rule);
+                // A rebuilt window must not hide the rule whose condition or action
+                // is still selected in Rule Details.
+                if (context.selectedScriptIndex != ruleIndex ||
+                    context.SelectedRuleElementKind == RuleElementKind.None)
+                    collapsedRules.Add(rule);
             }
 
             bool isCollapsed = collapsedRules.Contains(rule);
@@ -432,74 +449,388 @@ namespace GameRuleEditor.Panels
             container.RegisterCallback<PointerUpEvent>(evt => OnRuleDragEnd(evt, container));
             container.RegisterCallback<PointerCaptureOutEvent>(evt => OnRuleDragEnd(evt, container));
 
-            // Condition builder
-            if (hasCondition)
-            {
-                var conditionBuilder = new ConditionBuilder(context);
-                if (rule.When.Count > 0)
-                {
-                    conditionBuilder.SetCondition(rule.When[0]);
-                }
-                conditionBuilder.OnConditionChanged += conditionStr =>
-                {
-                    List<string> conditions = string.IsNullOrEmpty(conditionStr)
-                        ? new List<string> { "" }
-                        : new List<string> { conditionStr };
-
-                    controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex, conditions);
-                };
-                conditionBuilder.OnRemoveCondition += () =>
-                {
-                    controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
-                    UpdateRulesList();
-                };
-                contentContainer.Add(conditionBuilder);
-            }
-            else
-            {
-                var addConditionBtn = new Button(() =>
-                {
-                    controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
-                    // Rebuild directly instead of relying on the NotifyProjectChanged → UpdateUI path:
-                    // the focus guard there can skip the refresh (a just-clicked foldout/field may still
-                    // read as focused), which left the new condition invisible until the actor was reselected.
-                    UpdateRulesList();
-                });
-                addConditionBtn.text = "+ Add Condition";
-                addConditionBtn.AddToClassList("button-condition");
-                addConditionBtn.style.marginBottom = 10;
-                addConditionBtn.style.alignSelf = Align.FlexStart;
-                contentContainer.Add(addConditionBtn);
-            }
-
-            if (hasActions)
-            {
-                var actionBuilder = new ActionBuilder(context);
-                actionBuilder.SetActions(rule.Do);
-                actionBuilder.OnActionsChanged += actions =>
-                {
-                    controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
-                };
-                actionBuilder.style.marginTop = 10;
-                contentContainer.Add(actionBuilder);
-            }
-            else
-            {
-                var addActionBtn = new Button(() =>
-                {
-                    controller.AddRuleAction(context.selectedActorIndex, ruleIndex);
-                    // Rebuild directly (see Add Condition above): the guarded UpdateUI path can skip the
-                    // refresh right after adding a rule, leaving the new action invisible until reselection.
-                    UpdateRulesList();
-                });
-                addActionBtn.text = "+ Add Action";
-                addActionBtn.AddToClassList("button-action");
-                addActionBtn.style.marginBottom = 10;
-                addActionBtn.style.alignSelf = Align.FlexStart;
-                contentContainer.Add(addActionBtn);
-            }
+            var overview = new VisualElement();
+            overview.AddToClassList("rule-overview");
+            overview.style.flexDirection = FlexDirection.Row;
+            overview.style.alignItems = Align.FlexStart;
+            overview.style.minWidth = 730;
+            overview.Add(CreateConditionColumn(rule, ruleIndex, hasCondition));
+            overview.Add(CreateActionColumn(rule, ruleIndex, hasActions));
+            contentContainer.Add(overview);
 
             return container;
+        }
+
+        private VisualElement CreateConditionColumn(SentenceJson rule, int ruleIndex, bool hasCondition)
+        {
+            var column = CreateOverviewColumn("WHEN", "condition-overview");
+            if (hasCondition)
+            {
+                var terms = RuleConditionSequence.Parse(rule.When[0]);
+                bool pending = IsPending(ruleIndex, RuleElementKind.Condition, terms.Count);
+                int count = terms.Count + (pending ? 1 : 0);
+                for (int i = 0; i < count; i++)
+                {
+                    int index = i;
+                    bool isPending = i == terms.Count;
+                    string join = isPending ? context.PendingConditionJoin : terms[i].JoinBefore;
+                    if (i > 0)
+                    {
+                        var connector = new TooltipPopupField(RuleTooltips.LogicalOptions(),
+                            join == "OR" ? "OR" : "AND", RuleTooltips.Logical(join),
+                            RuleDropdownPalette.Condition);
+                        connector.AddToClassList("button-condition");
+                        connector.style.width = 75;
+                        connector.style.alignSelf = Align.Center;
+                        connector.style.marginTop = 3;
+                        connector.style.marginBottom = 3;
+                        connector.RegisterValueChangedCallback(value =>
+                        {
+                            if (isPending) context.SetPendingConditionJoin(value);
+                            else
+                            {
+                                var latest = RuleConditionSequence.Parse(rule.When[0]);
+                                if (index >= latest.Count) return;
+                                latest[index].JoinBefore = value;
+                                controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                                    new List<string> { RuleConditionSequence.Build(latest) });
+                            }
+                        });
+                        column.Add(connector);
+                    }
+
+                    string source = isPending ? string.Empty : terms[i].Source;
+                    var row = new VisualElement();
+                    row.AddToClassList("rule-summary-row");
+                    row.style.flexDirection = FlexDirection.Row;
+                    row.style.alignItems = Align.Center;
+                    row.EnableInClassList("condition-negated",
+                        RuleConditionSequence.IsNegated(source));
+                    if (string.IsNullOrWhiteSpace(source))
+                    {
+                        var types = ConditionTypes();
+                        var selector = new TooltipPopupField(RuleTooltips.ConditionOptions(types),
+                            "Select condition", "Choose a condition that must be true.",
+                            RuleDropdownPalette.Condition);
+                        selector.AddToClassList("button-condition");
+                        selector.style.flexGrow = 1;
+                        selector.RegisterValueChangedCallback(type =>
+                            SetConditionType(rule, ruleIndex, index, type, isPending, types));
+                        row.Add(selector);
+                    }
+                    else
+                    {
+                        var select = new Button(() =>
+                            context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, index))
+                        {
+                            text = Summarize(source),
+                            tooltip = RuleTooltips.Condition(GameRuleParser.ParseFunction(
+                                RuleConditionSequence.WithoutNot(source)).Name)
+                        };
+                        select.AddToClassList("rule-summary-card");
+                        select.AddToClassList("button-condition");
+                        MarkSelected(select, ruleIndex, RuleElementKind.Condition, index);
+                        row.Add(select);
+
+                        var notButton = new Button(() =>
+                        {
+                            var latest = RuleConditionSequence.Parse(rule.When[0]);
+                            if (index >= latest.Count) return;
+                            string body = RuleConditionSequence.WithoutNot(latest[index].Source);
+                            latest[index].Source = RuleConditionSequence.IsNegated(latest[index].Source)
+                                ? body : "NOT " + body;
+                            controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                                new List<string> { RuleConditionSequence.Build(latest) });
+                        }) { text = "NOT", tooltip = "Invert this condition" };
+                        notButton.AddToClassList("button-negation");
+                        notButton.EnableInClassList("button-negation--active",
+                            RuleConditionSequence.IsNegated(source));
+                        notButton.style.marginLeft = 5;
+                        row.Add(notButton);
+                    }
+
+                    var remove = CreateSmallButton("×", "Remove Condition", () =>
+                        RemoveCondition(rule, ruleIndex, index, isPending));
+                    row.Add(remove);
+                    column.Add(row);
+                }
+
+                var add = new Button(() => AddCondition(rule, ruleIndex))
+                { text = "+ Add Condition", tooltip = "Add another condition to this rule." };
+                add.AddToClassList("button-condition");
+                add.style.alignSelf = Align.Center;
+                add.style.marginTop = 8;
+                column.Add(add);
+            }
+            else
+            {
+                var add = new Button(() => AddCondition(rule, ruleIndex))
+                { text = "+ Add Condition" };
+                add.AddToClassList("button-condition");
+                column.Add(add);
+            }
+            return column;
+        }
+
+        private VisualElement CreateActionColumn(SentenceJson rule, int ruleIndex, bool hasActions)
+        {
+            var column = CreateOverviewColumn("DO", "action-overview");
+            int storedCount = hasActions ? rule.Do.Count : 0;
+            bool pending = IsPending(ruleIndex, RuleElementKind.Action, storedCount);
+            int count = storedCount + (pending ? 1 : 0);
+            for (int i = 0; i < count; i++)
+            {
+                int index = i;
+                bool isPending = i == storedCount;
+                string source = isPending ? string.Empty : rule.Do[i];
+                var row = new VisualElement();
+                row.AddToClassList("rule-summary-row");
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+
+                if (string.IsNullOrWhiteSpace(source))
+                {
+                    var types = ActionTypes();
+                    var selector = new TooltipPopupField(RuleTooltips.ActionOptions(types),
+                        "Select action", "Choose an action to run.", RuleDropdownPalette.Action);
+                    selector.AddToClassList("button-action");
+                    selector.style.flexGrow = 1;
+                    selector.RegisterValueChangedCallback(type =>
+                        SetActionType(rule, ruleIndex, index, type, isPending, types));
+                    row.Add(selector);
+                }
+                else
+                {
+                    var select = new Button(() =>
+                        context.SelectRuleElement(ruleIndex, RuleElementKind.Action, index))
+                    {
+                        text = $"{index + 1}.  {Summarize(source)}",
+                        tooltip = RuleTooltips.Action(GameRuleParser.ParseFunction(source).Name)
+                    };
+                    select.AddToClassList("rule-summary-card");
+                    select.AddToClassList("button-action");
+                    MarkSelected(select, ruleIndex, RuleElementKind.Action, index);
+                    row.Add(select);
+
+                    var up = CreateSmallButton("↑", "Move action up", () => MoveAction(rule, ruleIndex, index, -1), false);
+                    up.SetEnabled(index > 0);
+                    row.Add(up);
+                    var down = CreateSmallButton("↓", "Move action down", () => MoveAction(rule, ruleIndex, index, 1), false);
+                    down.SetEnabled(index < storedCount - 1);
+                    row.Add(down);
+                }
+
+                row.Add(CreateSmallButton("×", "Remove Action", () =>
+                    RemoveAction(rule, ruleIndex, index, isPending)));
+                column.Add(row);
+            }
+
+            var addButton = new Button(() => AddAction(rule, ruleIndex))
+            { text = "+ Add Action", tooltip = "Add another action to this rule." };
+            addButton.AddToClassList("button-action");
+            addButton.style.alignSelf = Align.Center;
+            addButton.style.marginTop = 8;
+            column.Add(addButton);
+            return column;
+        }
+
+        private static VisualElement CreateOverviewColumn(string heading, string className)
+        {
+            var column = new VisualElement();
+            column.AddToClassList("rule-overview-column");
+            column.AddToClassList(className);
+            column.style.flexGrow = 1;
+            column.style.flexBasis = 0;
+            column.style.minWidth = 350;
+            var label = new Label(heading);
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            label.style.marginBottom = 8;
+            column.Add(label);
+            return column;
+        }
+
+        private static Button CreateSmallButton(string text, string tooltip, System.Action clicked,
+                                                bool destructive = true)
+        {
+            var button = new Button(clicked) { text = text, tooltip = tooltip };
+            button.AddToClassList(destructive ? "button-danger" : "button-primary");
+            if (destructive) button.AddToClassList("button-danger-icon");
+            button.style.width = 27;
+            button.style.height = 27;
+            button.style.flexShrink = 0;
+            button.style.marginLeft = 4;
+            return button;
+        }
+
+        private void MarkSelected(VisualElement element, int ruleIndex, RuleElementKind kind, int index)
+        {
+            element.EnableInClassList("rule-summary-selected",
+                context.selectedScriptIndex == ruleIndex &&
+                context.SelectedRuleElementKind == kind &&
+                context.SelectedRuleElementIndex == index);
+        }
+
+        private bool IsPending(int ruleIndex, RuleElementKind kind, int index)
+        {
+            return context.PendingRuleElement && context.selectedScriptIndex == ruleIndex &&
+                   context.SelectedRuleElementKind == kind && context.SelectedRuleElementIndex == index;
+        }
+
+        private static List<string> ConditionTypes() => typeof(global::Condition)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.ReturnType == typeof(bool)).Select(method => method.Name).ToList();
+
+        private static List<string> ActionTypes() => typeof(global::Action)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.ReturnType == typeof(void)).Select(method => method.Name).ToList();
+
+        private string Summarize(string source)
+        {
+            bool negated = RuleConditionSequence.IsNegated(source);
+            var parsed = GameRuleParser.ParseFunction(RuleConditionSequence.WithoutNot(source));
+            string details;
+            if (parsed.Name == "Spawn")
+            {
+                string prefab = parsed.Params != null && parsed.Params.Count > 0
+                    ? parsed.Params[0] : string.Empty;
+                details = string.IsNullOrWhiteSpace(prefab) ? "No prefab selected" : prefab;
+            }
+            else
+            {
+                string[] labels = SummaryLabels(parsed.Name);
+                details = parsed.Params == null ? string.Empty : string.Join(" · ",
+                    parsed.Params.Select((value, index) => new { value, index })
+                        .Where(item => !string.IsNullOrWhiteSpace(item.value))
+                        .Take(2)
+                        .Select(item => item.index < labels.Length
+                            ? labels[item.index] + " " + item.value : item.value));
+            }
+            details = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, details);
+            if (details.Length > 54) details = details.Substring(0, 51) + "…";
+            return (negated ? "NOT " : string.Empty) + parsed.Name +
+                   (string.IsNullOrEmpty(details) ? string.Empty : " · " + details);
+        }
+
+        private static string[] SummaryLabels(string type)
+        {
+            switch (type)
+            {
+                case "Edit": return new[] { "Property", "Value" };
+                case "Move": return new[] { "Speed", "Rotation X" };
+                case "MoveTo":
+                case "NavigateTo": return new[] { "Speed", "Target X" };
+                case "Rotate": return new[] { "Turn speed", "Rotation X" };
+                case "RotateTo": return new[] { "Turn speed", "Target X" };
+                case "Push": return new[] { "Force", "Rotation X" };
+                case "PushTo": return new[] { "Force", "Target X" };
+                case "Torque": return new[] { "Torque X", "Torque Y" };
+                default: return System.Array.Empty<string>();
+            }
+        }
+
+        private void AddCondition(SentenceJson rule, int ruleIndex)
+        {
+            if (rule.When == null || rule.When.Count == 0)
+            {
+                controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
+                context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, 0);
+            }
+            else
+            {
+                int count = RuleConditionSequence.Parse(rule.When[0]).Count;
+                if (string.IsNullOrWhiteSpace(rule.When[0]))
+                    context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, 0);
+                else
+                    context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, count, true, "AND");
+            }
+            UpdateRulesList();
+        }
+
+        private void AddAction(SentenceJson rule, int ruleIndex)
+        {
+            if (rule.Do == null || rule.Do.Count == 0)
+            {
+                controller.AddRuleAction(context.selectedActorIndex, ruleIndex);
+                context.SelectRuleElement(ruleIndex, RuleElementKind.Action, 0);
+            }
+            else if (string.IsNullOrWhiteSpace(rule.Do[rule.Do.Count - 1]))
+                context.SelectRuleElement(ruleIndex, RuleElementKind.Action, rule.Do.Count - 1);
+            else
+                context.SelectRuleElement(ruleIndex, RuleElementKind.Action, rule.Do.Count, true);
+            UpdateRulesList();
+        }
+
+        private void SetConditionType(SentenceJson rule, int ruleIndex, int index, string type,
+                                      bool pending, List<string> types)
+        {
+            if (!types.Contains(type)) return;
+            var element = new ConditionElement(context, types);
+            element.SetFromSource(type + "()");
+            var terms = RuleConditionSequence.Parse(rule.When[0]);
+            if (index < terms.Count) terms[index].Source = element.GetString();
+            else if (pending && index == terms.Count)
+                terms.Add(new RuleConditionTerm(context.PendingConditionJoin, element.GetString()));
+            else return;
+            context.CommitPendingRuleElementSelection();
+            controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                new List<string> { RuleConditionSequence.Build(terms) });
+            context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, index);
+            UpdateRulesList();
+        }
+
+        private void SetActionType(SentenceJson rule, int ruleIndex, int index, string type,
+                                   bool pending, List<string> types)
+        {
+            if (!types.Contains(type)) return;
+            var element = new ActionElement(context, types);
+            element.SetFromSource(type + "()");
+            var actions = rule.Do != null ? new List<string>(rule.Do) : new List<string>();
+            if (index < actions.Count) actions[index] = element.GetActionString();
+            else if (pending && index == actions.Count) actions.Add(element.GetActionString());
+            else return;
+            context.CommitPendingRuleElementSelection();
+            controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            context.SelectRuleElement(ruleIndex, RuleElementKind.Action, index);
+            UpdateRulesList();
+        }
+
+        private void RemoveCondition(SentenceJson rule, int ruleIndex, int index, bool pending)
+        {
+            if (pending) { context.ClearRuleElementSelection(); return; }
+            var terms = RuleConditionSequence.Parse(rule.When[0]);
+            if (index >= terms.Count) return;
+            terms.RemoveAt(index);
+            context.ClearRuleElementSelection();
+            if (terms.Count == 0) controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
+            else
+            {
+                terms[0].JoinBefore = null;
+                controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                    new List<string> { RuleConditionSequence.Build(terms) });
+            }
+            UpdateRulesList();
+        }
+
+        private void RemoveAction(SentenceJson rule, int ruleIndex, int index, bool pending)
+        {
+            if (pending) { context.ClearRuleElementSelection(); return; }
+            var actions = rule.Do != null ? new List<string>(rule.Do) : new List<string>();
+            if (index >= actions.Count) return;
+            actions.RemoveAt(index);
+            context.ClearRuleElementSelection();
+            controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            UpdateRulesList();
+        }
+
+        private void MoveAction(SentenceJson rule, int ruleIndex, int index, int offset)
+        {
+            var actions = rule.Do != null ? new List<string>(rule.Do) : new List<string>();
+            int other = index + offset;
+            if (index < 0 || other < 0 || index >= actions.Count || other >= actions.Count) return;
+            (actions[index], actions[other]) = (actions[other], actions[index]);
+            controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            context.SelectRuleElement(ruleIndex, RuleElementKind.Action, other);
+            UpdateRulesList();
         }
 
         private void AddEmptyRule()

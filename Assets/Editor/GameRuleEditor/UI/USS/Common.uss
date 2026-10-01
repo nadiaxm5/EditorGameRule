@@ -1687,3 +1687,42 @@ ToolbarButton:active {
     background-color: rgb(59, 39, 107);
     color: rgb(255, 255, 255);
 }
+
+/* Compact WHEN/DO overview. Editing controls live in Rule Details. */
+.rule-overview-column {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.condition-overview {
+    border-right-width: 1px;
+    border-right-color: rgb(75, 72, 79);
+}
+
+.gamerule-light .condition-overview {
+    border-right-color: rgb(190, 190, 190);
+}
+
+.rule-summary-row { margin-bottom: 6px; }
+
+.rule-summary-card {
+    flex-grow: 1;
+    min-height: 36px;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    padding-left: 9px;
+    padding-right: 9px;
+}
+
+.rule-summary-selected {
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-color: rgb(255, 174, 3);
+    border-bottom-color: rgb(255, 174, 3);
+    border-left-color: rgb(255, 174, 3);
+    border-right-color: rgb(255, 174, 3);
+}

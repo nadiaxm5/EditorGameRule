@@ -15,6 +15,13 @@ namespace GameRuleEditor.Core
         ActorRules
     }
 
+    public enum RuleElementKind
+    {
+        None,
+        Condition,
+        Action
+    }
+
     /// <summary>
     /// ScriptableObject that maintains the global state of the GameRule Editor.
     /// This allows different panels to communicate and stay synchronized.
@@ -28,6 +35,17 @@ namespace GameRuleEditor.Core
         [Header("Selection State")]
         public int selectedActorIndex = -1;
         public int selectedScriptIndex = -1;
+        [SerializeField] private RuleElementKind selectedRuleElementKind = RuleElementKind.None;
+        [SerializeField] private int selectedRuleElementIndex = -1;
+        [NonSerialized] private bool pendingRuleElement;
+        [NonSerialized] private string pendingConditionJoin;
+        [NonSerialized] private bool rulesTabVisible = true;
+
+        public RuleElementKind SelectedRuleElementKind => selectedRuleElementKind;
+        public int SelectedRuleElementIndex => selectedRuleElementIndex;
+        public bool PendingRuleElement => pendingRuleElement;
+        public string PendingConditionJoin => pendingConditionJoin ?? "AND";
+        public bool RulesTabVisible => rulesTabVisible;
 
         [Header("Inspector State")]
         [SerializeField]
@@ -52,6 +70,8 @@ namespace GameRuleEditor.Core
         public event System.Action<int> OnActorSelected;
         public event System.Action OnActorListChanged;
         public event System.Action<int> OnScriptSelected;
+        public event System.Action OnRuleElementSelected;
+        public event System.Action OnRulesTabVisibilityChanged;
         public event System.Action<GRInspectorMode> OnInspectorModeChanged;
 
         /// <summary>
@@ -101,10 +121,12 @@ namespace GameRuleEditor.Core
             currentProject = project;
             selectedActorIndex = -1;
             selectedScriptIndex = -1;
+            ClearRuleElementSelection(false);
 
             OnProjectLoaded?.Invoke();
             OnActorSelected?.Invoke(selectedActorIndex);
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -120,6 +142,7 @@ namespace GameRuleEditor.Core
         /// </summary>
         public void SelectActor(int index)
         {
+            ClearRuleElementSelection(false);
             if (currentProject == null || index < 0 || index >= currentProject.actors.Count)
             {
                 selectedActorIndex = -1;
@@ -132,6 +155,7 @@ namespace GameRuleEditor.Core
             }
 
             OnActorSelected?.Invoke(selectedActorIndex);
+            OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -139,6 +163,7 @@ namespace GameRuleEditor.Core
         /// </summary>
         public void SelectScript(int index)
         {
+            ClearRuleElementSelection(false);
             if (SelectedActor == null || index < 0 || index >= SelectedActor.Script.Count)
             {
                 selectedScriptIndex = -1;
@@ -149,6 +174,53 @@ namespace GameRuleEditor.Core
             }
 
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void SelectRuleElement(int ruleIndex, RuleElementKind kind, int elementIndex,
+                                      bool pending = false, string conditionJoin = "AND")
+        {
+            if (SelectedActor?.Script == null || ruleIndex < 0 ||
+                ruleIndex >= SelectedActor.Script.Count || elementIndex < 0 ||
+                kind == RuleElementKind.None)
+            {
+                ClearRuleElementSelection();
+                return;
+            }
+
+            selectedScriptIndex = ruleIndex;
+            selectedRuleElementKind = kind;
+            selectedRuleElementIndex = elementIndex;
+            pendingRuleElement = pending;
+            pendingConditionJoin = conditionJoin == "OR" ? "OR" : "AND";
+            OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void SetPendingConditionJoin(string join)
+        {
+            pendingConditionJoin = join == "OR" ? "OR" : "AND";
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void CommitPendingRuleElementSelection()
+        {
+            pendingRuleElement = false;
+        }
+
+        public void SetRulesTabVisible(bool visible)
+        {
+            rulesTabVisible = visible;
+            OnRulesTabVisibilityChanged?.Invoke();
+        }
+
+        public void ClearRuleElementSelection(bool notify = true)
+        {
+            selectedRuleElementKind = RuleElementKind.None;
+            selectedRuleElementIndex = -1;
+            pendingRuleElement = false;
+            pendingConditionJoin = null;
+            if (notify) OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -168,6 +240,7 @@ namespace GameRuleEditor.Core
             OnProjectChanged?.Invoke();
             OnActorSelected?.Invoke(selectedActorIndex);
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
             OnInspectorModeChanged?.Invoke(_activeInspectorMode);
         }
 

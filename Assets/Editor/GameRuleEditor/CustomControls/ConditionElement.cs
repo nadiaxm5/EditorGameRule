@@ -19,6 +19,7 @@ namespace GameRuleEditor.CustomControls
 
         private readonly EditorContext context;
         private readonly List<string> availableTypes;
+        private readonly bool detailsMode;
         private readonly List<VisualElement> inputElements = new List<VisualElement>();
         private readonly HashSet<VisualElement> selfReferenceFields = new HashSet<VisualElement>();
         private TooltipPopupField typeDropdown;
@@ -37,6 +38,8 @@ namespace GameRuleEditor.CustomControls
 
         public System.Action OnChanged;
         public System.Action OnRemove;
+        public Func<string, string, bool> BeforeTypeChange;
+        public VisualElement TypeSelector => typeDropdown;
         public string JoinOperatorBefore => joinOperatorBefore;
 
         private static readonly Dictionary<string, string> EventDisplayNames = new Dictionary<string, string>
@@ -45,10 +48,12 @@ namespace GameRuleEditor.CustomControls
             { "tap", "Tapped" }, { "isOver", "Pointer Over" }
         };
 
-        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null)
+        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null,
+                                bool detailsMode = false)
         {
             context = ctx;
             availableTypes = conditionTypes;
+            this.detailsMode = detailsMode;
             style.flexDirection = FlexDirection.Row;
             style.marginBottom = 5;
             style.flexShrink = 0;
@@ -77,6 +82,7 @@ namespace GameRuleEditor.CustomControls
                 OnChanged?.Invoke();
             }) { text = "NOT", tooltip = "Invert this condition" };
             negationButton.AddToClassList("button-negation");
+            if (detailsMode) negationButton.style.display = DisplayStyle.None;
             Add(negationButton);
 
             typeDropdown = new TooltipPopupField(
@@ -93,6 +99,12 @@ namespace GameRuleEditor.CustomControls
             typeDropdown.RegisterValueChangedCallback(newValue =>
             {
                 if (!availableTypes.Contains(newValue)) return;
+                if (!string.IsNullOrEmpty(selectedConditionType) &&
+                    BeforeTypeChange != null && !BeforeTypeChange(selectedConditionType, newValue))
+                {
+                    typeDropdown.SetValueWithoutNotify(selectedConditionType);
+                    return;
+                }
                 selectedConditionType = newValue;
                 UpdateNegationVisual();
                 UpdateParameterFields();
@@ -104,6 +116,7 @@ namespace GameRuleEditor.CustomControls
                 style = { flexDirection = FlexDirection.Row, flexGrow = 1, alignItems = Align.Center }
             };
             parametersContainer.style.flexShrink = 0;
+            if (detailsMode) parametersContainer.style.flexWrap = Wrap.Wrap;
             Add(parametersContainer);
             Add(new VisualElement { style = { flexGrow = 1 } });
 
@@ -116,6 +129,7 @@ namespace GameRuleEditor.CustomControls
             removeButton.AddToClassList("button-danger-icon");
             removeButton.style.width = 28;
             removeButton.style.height = 26;
+            if (detailsMode) removeButton.style.display = DisplayStyle.None;
             Add(removeButton);
 
             UpdateNegationVisual();

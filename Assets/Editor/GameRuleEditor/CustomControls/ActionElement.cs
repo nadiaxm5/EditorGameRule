@@ -16,6 +16,7 @@ namespace GameRuleEditor.CustomControls
         private const string SelectActionLabel = "Select action";
 
         private EditorContext context;
+        private readonly bool detailsMode;
         private TooltipPopupField typeDropdown;
         private VisualElement parametersContainer;
         private List<string> availableTypes;
@@ -26,11 +27,14 @@ namespace GameRuleEditor.CustomControls
         public System.Action OnRemove;
         public System.Action OnMoveUp;
         public System.Action OnMoveDown;
+        public Func<string, string, bool> BeforeTypeChange;
+        public VisualElement TypeSelector => typeDropdown;
 
-        public ActionElement(EditorContext ctx, List<string> actionTypes)
+        public ActionElement(EditorContext ctx, List<string> actionTypes, bool detailsMode = false)
         {
             context = ctx;
             availableTypes = actionTypes;
+            this.detailsMode = detailsMode;
             style.marginBottom = 5;
             style.flexShrink = 0;
             style.backgroundColor = GameRuleTheme.BrightHeader;
@@ -63,6 +67,7 @@ namespace GameRuleEditor.CustomControls
         private void CreateUI()
         {
             var mainRow = new VisualElement() { style = { flexDirection = FlexDirection.Row, alignItems = Align.FlexStart } };
+            if (detailsMode) mainRow.style.flexDirection = FlexDirection.Column;
             mainRow.style.flexShrink = 0;
 
             selectedActionType = null;
@@ -80,6 +85,12 @@ namespace GameRuleEditor.CustomControls
             typeDropdown.RegisterValueChangedCallback(newValue =>
             {
                 if (!availableTypes.Contains(newValue)) return;
+                if (!string.IsNullOrEmpty(selectedActionType) &&
+                    BeforeTypeChange != null && !BeforeTypeChange(selectedActionType, newValue))
+                {
+                    typeDropdown.SetValueWithoutNotify(selectedActionType);
+                    return;
+                }
 
                 selectedActionType = newValue;
                 UpdateParameterFields();
@@ -100,6 +111,7 @@ namespace GameRuleEditor.CustomControls
             removeBtn.AddToClassList("button-danger");
             removeBtn.AddToClassList("button-danger-icon");
             removeBtn.style.width = 28; removeBtn.style.height = 26;
+            if (detailsMode) removeBtn.style.display = DisplayStyle.None;
 
             mainRow.Add(removeBtn);
 

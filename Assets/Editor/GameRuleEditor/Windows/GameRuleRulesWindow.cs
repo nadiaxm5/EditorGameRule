@@ -4,6 +4,8 @@ using UnityEditor;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.Panels;
+using System.Collections;
+using System.Reflection;
 
 namespace GameRuleEditor.Windows
 {
@@ -18,10 +20,25 @@ namespace GameRuleEditor.Windows
         [SerializeField] private string currentGroupId;
         [SerializeField] private string currentGroupName;
 
+        internal static bool IsRulesTabActive()
+        {
+            var window = Resources.FindObjectsOfTypeAll<GameRuleRulesWindow>();
+            if (window.Length == 0) return false;
+
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var parent = typeof(EditorWindow).GetField("m_Parent", flags)?.GetValue(window[0]);
+            if (parent == null) return false;
+            var panes = parent.GetType().GetField("m_Panes", flags)?.GetValue(parent) as IList;
+            var selected = parent.GetType().GetProperty("selected", flags)?.GetValue(parent);
+            if (panes == null || !(selected is int index)) return true;
+            return index >= 0 && index < panes.Count && ReferenceEquals(panes[index], window[0]);
+        }
+
         public static GameRuleRulesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl, string groupId = null, string groupName = null)
         {
             var window = GetWindow<GameRuleRulesWindow>("Rules", false);
             window.minSize = new Vector2(400, 300);
+            if (window.currentGroupId != groupId) ctx?.ClearRuleElementSelection();
             window.currentGroupId = groupId;
             window.currentGroupName = groupName;
             window.NormalizeGroupFilter();
@@ -68,6 +85,16 @@ namespace GameRuleEditor.Windows
         private void OnDisable()
         {
             if (context != null) context.OnActorSelected -= OnActorSelected;
+        }
+
+        private void OnBecameVisible()
+        {
+            context?.SetRulesTabVisible(true);
+        }
+
+        private void OnBecameInvisible()
+        {
+            context?.SetRulesTabVisible(false);
         }
 
         private void OnActorSelected(int index)
