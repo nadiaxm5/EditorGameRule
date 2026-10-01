@@ -29,6 +29,7 @@ namespace GameRuleEditor.Core
         public static Color PreviewText => IsLight ? Rgb(34, 67, 97) : Rgb(204, 230, 255);
         public static Color AccentText => IsLight ? Rgb(59, 39, 107) : Rgb(208, 221, 255);
         public static Color IconTint => IsLight ? Rgb(72, 110, 160) : Rgb(184, 209, 255);
+        public static Color PrefabIconTint => IsLight ? Color.white : MutedText;
 
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
 

@@ -422,7 +422,7 @@ namespace GameRuleEditor.Panels
             var iconImage = this.Q<Image>("PrefabColorImage");
             if (iconImage != null)
             {
-                Color c = GameRuleTheme.MutedText;
+                Color c = GameRuleTheme.PrefabIconTint;
                 if (!string.IsNullOrEmpty(actor.IconColorHex))
                     ColorUtility.TryParseHtmlString(actor.IconColorHex, out c);
                 iconImage.tintColor = c;

@@ -487,11 +487,11 @@ namespace GameRuleEditor.Windows
             icon.style.height = 16;
             icon.style.marginRight = 4;
               
-            Color iconColor = GameRuleTheme.MutedText;
+            Color iconColor = GameRuleTheme.PrefabIconTint;
             if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
             icon.tintColor = iconColor;
             } else {
-            icon.tintColor = GameRuleTheme.MutedText;
+            icon.tintColor = GameRuleTheme.PrefabIconTint;
             }
             item.Add(icon);
             

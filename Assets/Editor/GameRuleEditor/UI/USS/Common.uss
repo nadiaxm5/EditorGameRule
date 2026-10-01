@@ -1420,6 +1420,7 @@ ToolbarButton:active {
 /* Light Unity skin. Keep action/condition/selection colours, but use light neutral
    surfaces and dark text. The root class is updated when Unity changes skin. */
 #unity-content-container.gamerule-light,
+.gamerule-light #unity-content-container,
 .gamerule-light,
 .gamerule-light ScrollView,
 .gamerule-light .panel-container {

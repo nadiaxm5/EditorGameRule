@@ -205,8 +205,9 @@ MonoBehaviour:
     Script:
     - Name: Rule 1
       When:
-      - NOT Compare(0 + 0 == )
-      Do: []
+      - Collision(Untagged) OR Compare(this.z < )
+      Do:
+      - Spawn(,this,0,0,0,0,0,0)
       groupId: g416cb4ae
     Components:
     - type: Properties

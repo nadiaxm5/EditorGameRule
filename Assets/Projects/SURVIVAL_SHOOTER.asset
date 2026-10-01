@@ -71,9 +71,18 @@ MonoBehaviour:
       PrefabName: Environment
       Tag: Obstacle
       IconColorHex: 
-      Position: []
-      Rotation: []
-      Scale: []
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
       Velocity: []
       AngularVelocity: []
       Density: 0
@@ -86,7 +95,10 @@ MonoBehaviour:
       OverrideDrag: 0
       Properties: []
       Script: []
-      Components: []
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
     - ActorName: Player
       Active: 1
       PrefabName: Player
@@ -243,13 +255,13 @@ MonoBehaviour:
         groupId: g754e79de
       Components:
       - type: Properties
-        name: Properties
+        name: Custom Properties
         id: 
       - type: Rules
-        name: Rules
+        name: Rules Set
         id: g754e79de
     - ActorName: Hellephant
-      Active: 0
+      Active: 1
       PrefabName: Hellephant
       Tag: Hellephant
       IconColorHex: 
@@ -259,67 +271,76 @@ MonoBehaviour:
       - 32
       Rotation:
       - 0
-      - -130
+      - 230
       - 0
-      Scale: []
+      Scale:
+      - 1
+      - 1
+      - 1
       Velocity: []
       AngularVelocity: []
       Density: 0
       Friction: 0
       Bounciness: 0
-      Drag: 0
+      Drag: 3.4028235e+38
       OverrideDensity: 0
       OverrideFriction: 0
       OverrideBounciness: 0
-      OverrideDrag: 0
+      OverrideDrag: 1
       Properties:
       - speed=2
       - health=300
       - damage=0.3
       - moving=0
       Script:
-      - Name: 
+      - Name: Rule 1
         When: []
         Do:
         - Edit(this.moving,1)
         - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-        groupId: 
-      - Name: 
+        groupId: g3a9190cf
+      - Name: Rule 2
         When:
         - Compare(Player.health<0)
         Do:
         - Edit(this.moving,0)
         - Edit(this.speed,0)
-        groupId: 
-      - Name: 
+        groupId: g3a9190cf
+      - Name: Rule 3
         When:
         - Collision(Bullet)
         Do:
         - Edit(this.health,this.health-Bullet.damage)
         - PlaySound(HellephantHurt)
         - PlayParticles(HitParticles)
-        groupId: 
-      - Name: 
+        groupId: g3a9190cf
+      - Name: Rule 4
         When:
         - Compare(this.health<=0)
         Do:
         - Edit(#Score,#Score+50)
         - Spawn(HellephantDead,this)
         - Delete(this)
-        groupId: 
-      - Name: 
+        groupId: g3a9190cf
+      - Name: Rule 5
         When:
         - NOT Check(this.moving)
         Do:
         - Animate(Idle)
-        groupId: 
-      - Name: 
+        groupId: g3a9190cf
+      - Name: Rule 6
         When:
         - Check(this.moving)
         Do:
         - Animate(Move)
-        groupId: 
-      Components: []
+        groupId: g3a9190cf
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
+      - type: Rules
+        name: Rules Set
+        id: g3a9190cf
     - ActorName: ZomBear
       Active: 0
       PrefabName: ZomBear
@@ -1060,7 +1081,7 @@ MonoBehaviour:
       name: Rules Set
       id: g754e79de
   - ActorName: Hellephant
-    Active: 0
+    Active: 1
     PrefabName: Hellephant
     Tag: Hellephant
     IconColorHex: 
@@ -1070,67 +1091,76 @@ MonoBehaviour:
     - 32
     Rotation:
     - 0
-    - -130
+    - 230
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
     Friction: 0
     Bounciness: 0
-    Drag: 0
+    Drag: 3.4028235e+38
     OverrideDensity: 0
     OverrideFriction: 0
     OverrideBounciness: 0
-    OverrideDrag: 0
+    OverrideDrag: 1
     Properties:
     - speed=2
     - health=300
     - damage=0.3
     - moving=0
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(this.moving,1)
       - NavigateTo(this.speed,Player.x,Player.y,Player.z)
-      groupId: 
-    - Name: 
+      groupId: g3a9190cf
+    - Name: Rule 2
       When:
       - Compare(Player.health<0)
       Do:
       - Edit(this.moving,0)
       - Edit(this.speed,0)
-      groupId: 
-    - Name: 
+      groupId: g3a9190cf
+    - Name: Rule 3
       When:
       - Collision(Bullet)
       Do:
       - Edit(this.health,this.health-Bullet.damage)
       - PlaySound(HellephantHurt)
       - PlayParticles(HitParticles)
-      groupId: 
-    - Name: 
+      groupId: g3a9190cf
+    - Name: Rule 4
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(#Score,#Score+50)
       - Spawn(HellephantDead,this)
       - Delete(this)
-      groupId: 
-    - Name: 
+      groupId: g3a9190cf
+    - Name: Rule 5
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(Idle)
-      groupId: 
-    - Name: 
+      groupId: g3a9190cf
+    - Name: Rule 6
       When:
       - Check(this.moving)
       Do:
       - Animate(Move)
-      groupId: 
-    Components: []
+      groupId: g3a9190cf
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rules Set
+      id: g3a9190cf
   - ActorName: ZomBear
     Active: 0
     PrefabName: ZomBear
