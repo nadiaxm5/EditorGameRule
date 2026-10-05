@@ -662,6 +662,26 @@ namespace GameRuleEditor.Panels
                 details = string.Join(" · ", new[] { key, keyboardEvent }
                     .Where(value => !string.IsNullOrWhiteSpace(value)));
             }
+            else if (parsed.Name == "Edit")
+            {
+                details = string.Join(" · ", parsed.Params.Take(2)
+                    .Where(value => !string.IsNullOrWhiteSpace(value)));
+            }
+            else if (parsed.Name == "Move" || parsed.Name == "Rotate")
+            {
+                string speed = parsed.Params.Count > 0
+                    ? ActionDefaults.Fill(parsed.Name, 0, parsed.Params[0]) : ActionDefaults.Get(parsed.Name, 0);
+                details = (parsed.Name == "Move" ? "Speed " : "Turn Speed ") + speed;
+            }
+            else if (parsed.Name == "MoveTo" || parsed.Name == "NavigateTo" ||
+                     parsed.Name == "RotateTo" || parsed.Name == "PushTo")
+            {
+                details = SummarizeTarget(parsed.Name, parsed.Params);
+            }
+            else if (parsed.Name == "Torque")
+            {
+                details = string.Empty;
+            }
             else
             {
                 string[] labels = SummaryLabels(parsed.Name);
@@ -678,19 +698,45 @@ namespace GameRuleEditor.Panels
                    (string.IsNullOrEmpty(details) ? string.Empty : " · " + details);
         }
 
+        private string SummarizeTarget(string actionName, List<string> parameters)
+        {
+            var coordinates = Enumerable.Range(1, 3)
+                .Select(index => ActionDefaults.Fill(actionName, index,
+                    parameters != null && index < parameters.Count ? parameters[index] : string.Empty))
+                .ToList();
+            var actorNames = coordinates.Select(TargetActorName)
+                .Where(name => !string.IsNullOrEmpty(name))
+                .Distinct(System.StringComparer.OrdinalIgnoreCase).ToList();
+
+            // Any of the three target fields can refer to an actor's x, y or z.
+            // If different actors are mixed, show the actual fields rather than naming
+            // just one of them as the destination.
+            return "Target " + (actorNames.Count == 1
+                ? actorNames[0]
+                : string.Join(",", coordinates));
+        }
+
+        private string TargetActorName(string coordinate)
+        {
+            if (string.IsNullOrWhiteSpace(coordinate)) return null;
+            string reference = coordinate.Trim();
+            int dot = reference.LastIndexOf('.');
+            if (dot <= 0 || dot == reference.Length - 1) return null;
+            string property = reference.Substring(dot + 1);
+            if (property != "x" && property != "y" && property != "z") return null;
+
+            string name = reference.Substring(0, dot);
+            if (string.Equals(name, "this", System.StringComparison.OrdinalIgnoreCase))
+                return context.SelectedActor?.ActorName;
+            return context.currentProject?.actors?.FirstOrDefault(actor =>
+                string.Equals(actor.ActorName, name, System.StringComparison.OrdinalIgnoreCase))?.ActorName;
+        }
+
         private static string[] SummaryLabels(string type)
         {
             switch (type)
             {
-                case "Edit": return new[] { "Property", "Value" };
-                case "Move": return new[] { "Speed", "Rotation X" };
-                case "MoveTo":
-                case "NavigateTo": return new[] { "Speed", "Target X" };
-                case "Rotate": return new[] { "Turn speed", "Rotation X" };
-                case "RotateTo": return new[] { "Turn speed", "Target X" };
                 case "Push": return new[] { "Force", "Rotation X" };
-                case "PushTo": return new[] { "Force", "Target X" };
-                case "Torque": return new[] { "Torque X", "Torque Y" };
                 default: return System.Array.Empty<string>();
             }
         }

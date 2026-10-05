@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using GameRuleEditor.Core;
@@ -29,6 +30,8 @@ namespace GameRuleEditor.CustomControls
         private ExpressionOperandControl compareRightOperand;
         private TooltipPopupField compareOperatorDropdown;
         private Button keyboardKeyButton;
+        private VisualElement keyboardMenuOverlay;
+        private VisualElement keyboardMenu;
         private Button checkPropertyButton;
         private string selectedKeyboardKey;
         private string checkPropertyValue;
@@ -61,6 +64,7 @@ namespace GameRuleEditor.CustomControls
             style.paddingRight = 5;
             style.alignItems = detailsMode ? Align.Stretch : Align.Center;
             CreateUI(joinOperatorBefore);
+            RegisterCallback<DetachFromPanelEvent>(_ => CloseKeyboardMenu());
         }
 
         private void CreateUI(string initialJoinOperator)
@@ -167,6 +171,7 @@ namespace GameRuleEditor.CustomControls
 
         private void UpdateParameterFields(bool notifyChange = true)
         {
+            CloseKeyboardMenu();
             parametersContainer.Clear();
             inputElements.Clear();
             selfReferenceFields.Clear();
@@ -188,11 +193,18 @@ namespace GameRuleEditor.CustomControls
                     break;
                 case "Collision":
                     var projectTags = Loader.GetProjectTags(context?.currentProject?.actors);
-                    parametersContainer.Add(CreateFieldTag("Tag"));
-                    var tagDropdown = new PopupField<string>(projectTags, 0);
+                    var tagContainer = CreateInlineParameter("Tag");
+                    var tagDropdown = new TooltipPopupField(
+                        projectTags.Select(tag => new TooltipDropdownOption(tag, tag,
+                            "Match actors with the " + tag + " tag.")),
+                        projectTags[0], RuleTooltips.Parameter("Collision", "Tag"),
+                        RuleDropdownPalette.Condition);
                     tagDropdown.AddToClassList("collision-tag-dropdown");
-                    tagDropdown.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(tagDropdown);
+                    tagDropdown.AddToClassList("button-condition");
+                    tagDropdown.AddToClassList("rule-selector-dropdown");
+                    tagDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+                    tagContainer.Add(tagDropdown);
+                    parametersContainer.Add(tagContainer);
                     inputElements.Add(tagDropdown);
                     break;
                 case "Timer":
@@ -200,10 +212,11 @@ namespace GameRuleEditor.CustomControls
                     break;
                 case "Touch":
                     var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
-                    parametersContainer.Add(CreateFieldTag("Event"));
+                    var touchEventContainer = CreateInlineParameter("Event");
                     var touchMode = CreateEventDropdown("Touch", touchModes, 92);
-                    touchMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(touchMode);
+                    touchMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+                    touchEventContainer.Add(touchMode);
+                    parametersContainer.Add(touchEventContainer);
                     inputElements.Add(touchMode);
                     var onActorToggle = new Toggle("On This Actor");
                     onActorToggle.tooltip = RuleTooltips.Parameter("Touch", "On This Actor");
@@ -254,44 +267,131 @@ namespace GameRuleEditor.CustomControls
 
         private void AddKeyboardFields()
         {
-            var keyContainer = new VisualElement
-            {
-                style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginRight = 3 }
-            };
-            keyContainer.style.flexShrink = 0;
-            keyContainer.Add(CreateFieldTag("Key"));
+            var keyContainer = CreateInlineParameter("Key");
             keyboardKeyButton = new Button(ShowKeyboardMenu);
             keyboardKeyButton.AddToClassList("keyboard-key-picker");
+            keyboardKeyButton.AddToClassList("tooltip-popup-field");
+            keyboardKeyButton.AddToClassList("button-condition");
+            keyboardKeyButton.AddToClassList("rule-selector-dropdown");
             UpdateKeyboardButton();
             keyContainer.Add(keyboardKeyButton);
             parametersContainer.Add(keyContainer);
 
-            parametersContainer.Add(CreateFieldTag("Event"));
-            var keyMode = CreateEventDropdown("Keyboard", new List<string> { "press", "down", "up" }, 82);
-            keyMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-            parametersContainer.Add(keyMode);
+            var eventContainer = CreateInlineParameter("Event");
+            var keyMode = CreateEventDropdown("Keyboard", new List<string> { "press", "down", "up" }, 130);
+            keyMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+            eventContainer.Add(keyMode);
+            parametersContainer.Add(eventContainer);
             inputElements.Add(keyMode);
         }
 
         private void ShowKeyboardMenu()
         {
-            var menu = new GenericMenu();
-            string[] groupOrder = { "Letters", "Numbers", "Arrows", "Other" };
-            var groupedKeys = GetKeyboardGroups();
-
-            foreach (string groupName in groupOrder)
+            CloseKeyboardMenu();
+            VisualElement root = this;
+            VisualElement styledRoot = null;
+            for (VisualElement current = this; current != null; current = current.parent)
             {
-                foreach (string keyName in groupedKeys[groupName])
+                root = current;
+                if (current.styleSheets.count > 0) styledRoot = current;
+            }
+            if (styledRoot != null) root = styledRoot;
+
+            keyboardMenuOverlay = new VisualElement { focusable = true };
+            keyboardMenuOverlay.AddToClassList("tooltip-dropdown-overlay");
+            keyboardMenuOverlay.style.position = Position.Absolute;
+            keyboardMenuOverlay.style.left = 0;
+            keyboardMenuOverlay.style.top = 0;
+            keyboardMenuOverlay.style.right = 0;
+            keyboardMenuOverlay.style.bottom = 0;
+            keyboardMenuOverlay.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.target == keyboardMenuOverlay) CloseKeyboardMenu();
+            });
+            keyboardMenuOverlay.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Escape) CloseKeyboardMenu();
+            });
+
+            keyboardMenu = new VisualElement();
+            keyboardMenu.AddToClassList("tooltip-dropdown-menu");
+            keyboardMenu.style.position = Position.Absolute;
+            keyboardMenuOverlay.Add(keyboardMenu);
+            root.Add(keyboardMenuOverlay);
+            keyboardMenuOverlay.BringToFront();
+            ShowKeyboardGroup(null);
+            keyboardMenuOverlay.Focus();
+        }
+
+        private void ShowKeyboardGroup(string groupName)
+        {
+            if (keyboardMenu == null || keyboardKeyButton == null) return;
+            keyboardMenu.Clear();
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.style.flexGrow = 1;
+            var groups = GetKeyboardGroups();
+            string[] groupOrder = { "Letters", "Numbers", "Arrows", "Other" };
+            int itemCount = groupName == null ? groupOrder.Length : groups[groupName].Count + 1;
+
+            if (groupName == null)
+            {
+                foreach (string group in groupOrder)
                 {
-                    string capturedKey = keyName;
-                    menu.AddItem(
-                        new GUIContent($"{groupName}/{FormatKeyName(keyName)}"),
-                        string.Equals(selectedKeyboardKey, keyName, StringComparison.OrdinalIgnoreCase),
-                        () => SetKeyboardKey(capturedKey));
+                    string selectedGroup = group;
+                    AddKeyboardMenuItem(scroll, group + "  ▸", () => ShowKeyboardGroup(selectedGroup));
+                }
+            }
+            else
+            {
+                AddKeyboardMenuItem(scroll, "‹  Groups", () => ShowKeyboardGroup(null));
+                foreach (string keyName in groups[groupName])
+                {
+                    string selectedKey = keyName;
+                    string label = FormatKeyName(keyName);
+                    if (string.Equals(selectedKeyboardKey, keyName, StringComparison.OrdinalIgnoreCase))
+                        label = "✓  " + label;
+                    AddKeyboardMenuItem(scroll, label, () =>
+                    {
+                        CloseKeyboardMenu();
+                        SetKeyboardKey(selectedKey);
+                    });
                 }
             }
 
-            menu.ShowAsContext();
+            keyboardMenu.Add(scroll);
+            VisualElement root = keyboardMenuOverlay.parent;
+            Vector2 anchorPosition = root.WorldToLocal(keyboardKeyButton.worldBound.position);
+            Rect anchor = new Rect(anchorPosition, keyboardKeyButton.worldBound.size);
+            float rootWidth = root.resolvedStyle.width;
+            float rootHeight = root.resolvedStyle.height;
+            if (float.IsNaN(rootWidth) || rootWidth <= 0f) rootWidth = root.worldBound.width;
+            if (float.IsNaN(rootHeight) || rootHeight <= 0f) rootHeight = root.worldBound.height;
+            float menuWidth = Mathf.Min(190f, Mathf.Max(100f, rootWidth - 8f));
+            float menuHeight = Mathf.Min(itemCount * 29f + 8f, Mathf.Max(38f, rootHeight - 8f), 340f);
+            const float gap = 3f;
+            float x = Mathf.Clamp(anchor.xMin, 4f, Mathf.Max(4f, rootWidth - menuWidth - 4f));
+            float y = anchor.yMax + gap;
+            if (y + menuHeight > rootHeight - 4f) y = anchor.yMin - menuHeight - gap;
+            y = Mathf.Clamp(y, 4f, Mathf.Max(4f, rootHeight - menuHeight - 4f));
+            keyboardMenu.style.left = x;
+            keyboardMenu.style.top = y;
+            keyboardMenu.style.width = menuWidth;
+            keyboardMenu.style.height = menuHeight;
+        }
+
+        private static void AddKeyboardMenuItem(VisualElement parent, string label, System.Action onClick)
+        {
+            var button = new Button(onClick) { text = label };
+            button.AddToClassList("button-condition");
+            button.AddToClassList("tooltip-dropdown-option");
+            parent.Add(button);
+        }
+
+        private void CloseKeyboardMenu()
+        {
+            keyboardMenuOverlay?.RemoveFromHierarchy();
+            keyboardMenuOverlay = null;
+            keyboardMenu = null;
         }
 
         private void SetKeyboardKey(string keyName)
@@ -305,8 +405,8 @@ namespace GameRuleEditor.CustomControls
         {
             if (keyboardKeyButton == null) return;
             keyboardKeyButton.text = string.IsNullOrEmpty(selectedKeyboardKey)
-                ? PickKeyLabel
-                : FormatKeyName(selectedKeyboardKey);
+                ? PickKeyLabel + "  ▾"
+                : FormatKeyName(selectedKeyboardKey) + "  ▾";
             keyboardKeyButton.tooltip = string.IsNullOrEmpty(selectedKeyboardKey)
                 ? "Choose a keyboard key"
                 : FormatKeyName(selectedKeyboardKey);
@@ -369,6 +469,18 @@ namespace GameRuleEditor.CustomControls
             dropdown.AddToClassList("button-condition");
             dropdown.AddToClassList("rule-selector-dropdown");
             return dropdown;
+        }
+
+        private VisualElement CreateInlineParameter(string label)
+        {
+            var container = new VisualElement
+            {
+                style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginRight = 3 }
+            };
+            container.style.alignSelf = Align.FlexStart;
+            container.style.flexShrink = 0;
+            container.Add(CreateFieldTag(label));
+            return container;
         }
 
         internal static string FormatEventName(string value)
@@ -550,6 +662,11 @@ namespace GameRuleEditor.CustomControls
                 {
                     string value = parameters[parameterIndex++];
                     if (popupField.choices.Contains(value)) popupField.SetValueWithoutNotify(value);
+                }
+                else if (inputElements[i] is TooltipPopupField dropdown)
+                {
+                    string value = parameters[parameterIndex++];
+                    if (dropdown.ContainsOption(value)) dropdown.SetValueWithoutNotify(value);
                 }
                 else if (inputElements[i] is Toggle toggle &&
                          bool.TryParse(parameters[parameterIndex++], out bool value))

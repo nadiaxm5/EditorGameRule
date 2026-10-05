@@ -883,7 +883,7 @@ Button:disabled {
 .keyboard-key-picker {
     width: 130px;
     min-width: 130px;
-    height: 22px;
+    height: 27px;
     flex-shrink: 0;
     -unity-text-align: middle-left;
 }
@@ -897,8 +897,9 @@ Button:disabled {
 }
 
 .collision-tag-dropdown {
-    width: 135px;
-    min-width: 135px;
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
     flex-shrink: 0;
 }
 

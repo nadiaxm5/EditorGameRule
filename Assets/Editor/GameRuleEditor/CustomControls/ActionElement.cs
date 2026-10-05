@@ -21,6 +21,7 @@ namespace GameRuleEditor.CustomControls
         private VisualElement parametersContainer;
         private List<string> availableTypes;
         private readonly List<ParameterBinding> parameterBindings = new List<ParameterBinding>();
+        private readonly List<Label> detailParameterLabels = new List<Label>();
         private string selectedActionType;
 
         public System.Action OnChanged;
@@ -125,6 +126,7 @@ namespace GameRuleEditor.CustomControls
         {
             parametersContainer.Clear();
             parameterBindings.Clear();
+            detailParameterLabels.Clear();
             string type = selectedActionType;
 
             switch (type)
@@ -158,6 +160,8 @@ namespace GameRuleEditor.CustomControls
                 case "Push": AddScalarParameter("Force", 0); AddScalarParameter("Rotation X", 1, true); AddScalarParameter("Rotation Y", 2, true); break;
                 case "PushTo": AddScalarParameter("Force", 0); AddScalarParameter("Target X", 1); AddScalarParameter("Target Y", 2); AddScalarParameter("Target Z", 3); break;
             }
+
+            if (detailsMode) SizeDetailParameterLabels();
         }
 
         private void AddPropertyParameter(string label, int sourceIndex)
@@ -202,11 +206,13 @@ namespace GameRuleEditor.CustomControls
             var fieldTag = CreateFieldTag(label);
             if (detailsMode)
             {
-                container.style.flexDirection = FlexDirection.Column;
-                container.style.alignItems = Align.Stretch;
+                container.style.flexDirection = FlexDirection.Row;
+                container.style.alignItems = Align.FlexStart;
                 container.style.minWidth = 0;
-                fieldTag.style.alignSelf = Align.FlexStart;
-                fieldTag.style.marginBottom = 5;
+                fieldTag.style.flexShrink = 0;
+                fieldTag.style.marginTop = 5;
+                fieldTag.style.marginRight = 8;
+                detailParameterLabels.Add(fieldTag);
             }
             container.Add(fieldTag);
             container.Add((VisualElement)control);
@@ -215,7 +221,23 @@ namespace GameRuleEditor.CustomControls
                 ActionDefaults.Get(selectedActionType, sourceIndex)));
         }
 
-        private VisualElement CreateFieldTag(string text)
+        private void SizeDetailParameterLabels()
+        {
+            if (detailParameterLabels.Count == 0) return;
+            float width = 62f;
+            foreach (Label label in detailParameterLabels)
+                // Rule Details can be rebuilt during OnEnable, before EditorStyles exists.
+                width = Mathf.Max(width, label.text.Length * 6f + 16f);
+
+            foreach (Label label in detailParameterLabels)
+            {
+                label.style.width = width;
+                label.style.minWidth = width;
+                label.style.maxWidth = width;
+            }
+        }
+
+        private Label CreateFieldTag(string text)
         {
             var tag = new Label(text);
             tag.tooltip = RuleTooltips.Parameter(selectedActionType, text);
@@ -414,7 +436,7 @@ namespace GameRuleEditor.CustomControls
             private readonly string defaultValue;
             private readonly bool showDegrees;
             private readonly System.Action changed;
-            private readonly PopupField<string> picker;
+            private readonly TooltipPopupField picker;
             private readonly VisualElement selectionContainer;
             private ScalarKind kind;
             private string textValue;
@@ -441,14 +463,14 @@ namespace GameRuleEditor.CustomControls
                 this.changed = changed;
                 AddToClassList("action-scalar-control");
 
-                picker = new PopupField<string>(new List<string> { "Pick Property", "Pick Number" }, 0);
-                picker.SetValueWithoutNotify(PickValueLabel);
+                picker = new TooltipPopupField(
+                    RuleTooltips.ValueSourceOptions(), PickValueLabel,
+                    "Choose a property or a number.", RuleDropdownPalette.Property);
                 picker.AddToClassList("button-property-picker");
                 picker.AddToClassList("rule-selector-dropdown");
                 picker.AddToClassList("action-value-picker");
-                picker.RegisterValueChangedCallback(evt =>
+                picker.RegisterValueChangedCallback(choice =>
                 {
-                    string choice = evt.newValue;
                     picker.SetValueWithoutNotify(PickValueLabel);
                     if (choice == "Pick Property") OpenPropertyPicker(picker);
                     else SetNumber(0f, true);
@@ -564,7 +586,7 @@ namespace GameRuleEditor.CustomControls
             private readonly string defaultValue;
             private readonly System.Action changed;
             private readonly List<ExpressionTerm> terms = new List<ExpressionTerm>();
-            private readonly PopupField<string> valuePicker;
+            private readonly TooltipPopupField valuePicker;
             private readonly PopupField<string> operationPicker;
             private readonly VisualElement selectionContainer;
             private string pendingOperator;
@@ -594,14 +616,14 @@ namespace GameRuleEditor.CustomControls
                 this.changed = changed;
                 AddToClassList("action-expression-control");
 
-                valuePicker = new PopupField<string>(new List<string> { "Pick Property", "Pick Number" }, 0);
-                valuePicker.SetValueWithoutNotify(PickValueLabel);
+                valuePicker = new TooltipPopupField(
+                    RuleTooltips.ValueSourceOptions(), PickValueLabel,
+                    "Choose a property or a number.", RuleDropdownPalette.Property);
                 valuePicker.AddToClassList("button-property-picker");
                 valuePicker.AddToClassList("rule-selector-dropdown");
                 valuePicker.AddToClassList("action-value-picker");
-                valuePicker.RegisterValueChangedCallback(evt =>
+                valuePicker.RegisterValueChangedCallback(choice =>
                 {
-                    string choice = evt.newValue;
                     valuePicker.SetValueWithoutNotify(PickValueLabel);
                     if (choice == "Pick Property") PickPropertyForToolbar();
                     else ApplyPickedTerm(new ExpressionTerm { Kind = TermKind.Number, Number = 0f });
