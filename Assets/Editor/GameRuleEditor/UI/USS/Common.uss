@@ -719,6 +719,49 @@ Button:disabled {
     flex-shrink: 0;
 }
 
+/* Rule Details has a narrow column: keep each parameter and its controls stacked. */
+.rule-detail-action .action-parameter-row {
+    min-width: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+}
+
+.rule-detail-action .action-single-picker,
+.rule-detail-action .action-scalar-control {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.rule-detail-action .action-picker-value-display,
+.rule-detail-action .action-value-selection {
+    margin-right: 0;
+    margin-bottom: 5px;
+}
+
+.rule-detail-action .action-expression-control {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+}
+
+.rule-detail-action .action-expression-selection {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 30px;
+    flex-wrap: wrap;
+    margin-right: 0;
+    margin-bottom: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.rule-detail-action .action-expression-term {
+    margin-bottom: 3px;
+}
+
 /* ── Compare expression builder ── */
 .compare-operand {
     margin-left: 4px;

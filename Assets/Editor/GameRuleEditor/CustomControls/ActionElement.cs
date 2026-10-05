@@ -35,6 +35,7 @@ namespace GameRuleEditor.CustomControls
             context = ctx;
             availableTypes = actionTypes;
             this.detailsMode = detailsMode;
+            if (detailsMode) AddToClassList("rule-detail-action");
             style.marginBottom = 5;
             style.flexShrink = 0;
             style.backgroundColor = GameRuleTheme.BrightHeader;
@@ -99,7 +100,8 @@ namespace GameRuleEditor.CustomControls
             mainRow.Add(typeDropdown);
 
             parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Column, flexGrow = 1, flexWrap = Wrap.NoWrap } };
-            parametersContainer.style.flexShrink = 0;
+            parametersContainer.style.flexShrink = detailsMode ? 1 : 0;
+            if (detailsMode) parametersContainer.style.minWidth = 0;
             parametersContainer.style.marginRight = 4;
             mainRow.Add(parametersContainer);
 
@@ -197,7 +199,16 @@ namespace GameRuleEditor.CustomControls
         {
             var container = new VisualElement();
             container.AddToClassList("action-parameter-row");
-            container.Add(CreateFieldTag(label));
+            var fieldTag = CreateFieldTag(label);
+            if (detailsMode)
+            {
+                container.style.flexDirection = FlexDirection.Column;
+                container.style.alignItems = Align.Stretch;
+                container.style.minWidth = 0;
+                fieldTag.style.alignSelf = Align.FlexStart;
+                fieldTag.style.marginBottom = 5;
+            }
+            container.Add(fieldTag);
             container.Add((VisualElement)control);
             parametersContainer.Add(container);
             parameterBindings.Add(new ParameterBinding(control, sourceIndex,

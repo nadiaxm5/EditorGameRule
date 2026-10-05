@@ -48,7 +48,7 @@ namespace GameRuleEditor.CustomControls
             context = ctx;
             availableTypes = conditionTypes;
             this.detailsMode = detailsMode;
-            style.flexDirection = FlexDirection.Row;
+            style.flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row;
             style.marginBottom = 5;
             style.flexShrink = 0;
             style.borderTopLeftRadius = 3;
@@ -59,7 +59,7 @@ namespace GameRuleEditor.CustomControls
             style.paddingBottom = 5;
             style.paddingLeft = 5;
             style.paddingRight = 5;
-            style.alignItems = Align.Center;
+            style.alignItems = detailsMode ? Align.Stretch : Align.Center;
             CreateUI(joinOperatorBefore);
         }
 
@@ -107,10 +107,14 @@ namespace GameRuleEditor.CustomControls
 
             parametersContainer = new VisualElement
             {
-                style = { flexDirection = FlexDirection.Row, flexGrow = 1, alignItems = Align.Center }
+                style = {
+                    flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row,
+                    flexGrow = 1,
+                    alignItems = detailsMode ? Align.Stretch : Align.Center
+                }
             };
-            parametersContainer.style.flexShrink = 0;
-            if (detailsMode) parametersContainer.style.flexWrap = Wrap.Wrap;
+            parametersContainer.style.flexShrink = detailsMode ? 1 : 0;
+            if (detailsMode) parametersContainer.style.minWidth = 0;
             Add(parametersContainer);
             Add(new VisualElement { style = { flexGrow = 1 } });
 
@@ -217,7 +221,7 @@ namespace GameRuleEditor.CustomControls
 
         private void AddCompareFields()
         {
-            compareLeftOperand = new ExpressionOperandControl(context, "Property 1");
+            compareLeftOperand = new ExpressionOperandControl(context, "Property 1", detailsMode);
             compareLeftOperand.Changed += () => OnChanged?.Invoke();
             parametersContainer.Add(compareLeftOperand);
 
@@ -232,10 +236,18 @@ namespace GameRuleEditor.CustomControls
             compareOperatorDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
             var operatorContainer = new VisualElement();
             operatorContainer.AddToClassList("compare-operator-container");
+            if (detailsMode)
+            {
+                operatorContainer.style.alignSelf = Align.Center;
+                operatorContainer.style.justifyContent = Justify.Center;
+                operatorContainer.style.paddingBottom = 0;
+                operatorContainer.style.marginTop = 8;
+                operatorContainer.style.marginBottom = 8;
+            }
             operatorContainer.Add(compareOperatorDropdown);
             parametersContainer.Add(operatorContainer);
 
-            compareRightOperand = new ExpressionOperandControl(context, "Property 2");
+            compareRightOperand = new ExpressionOperandControl(context, "Property 2", detailsMode);
             compareRightOperand.Changed += () => OnChanged?.Invoke();
             parametersContainer.Add(compareRightOperand);
         }
@@ -712,6 +724,7 @@ namespace GameRuleEditor.CustomControls
             }
 
             private readonly EditorContext context;
+            private readonly bool compactLayout;
             private readonly List<ExpressionTerm> terms = new List<ExpressionTerm>();
             private readonly VisualElement termsContainer;
             private readonly TooltipPopupField valuePickerDropdown;
@@ -721,20 +734,36 @@ namespace GameRuleEditor.CustomControls
             private bool suppressChanged;
             public System.Action Changed;
 
-            public ExpressionOperandControl(EditorContext context, string label)
+            public ExpressionOperandControl(EditorContext context, string label, bool compactLayout)
             {
                 this.context = context;
+                this.compactLayout = compactLayout;
                 AddToClassList("compare-operand");
-                style.flexGrow = 1;
-                style.minWidth = 300;
+                style.flexGrow = compactLayout ? 0 : 1;
+                style.minWidth = compactLayout ? 0 : 300;
                 style.flexDirection = FlexDirection.Column;
 
                 var toolbar = new VisualElement();
                 toolbar.AddToClassList("compare-operand-toolbar");
+                if (compactLayout)
+                {
+                    toolbar.style.flexDirection = FlexDirection.Column;
+                    toolbar.style.alignItems = Align.Stretch;
+                    toolbar.style.height = StyleKeyword.Auto;
+                }
                 var fieldTag = new Label(label);
                 fieldTag.AddToClassList("compare-operand-label");
                 fieldTag.tooltip = RuleTooltips.Parameter("Compare", label);
+                if (compactLayout) fieldTag.style.marginBottom = 5;
                 toolbar.Add(fieldTag);
+
+                var pickerRow = compactLayout ? new VisualElement() : toolbar;
+                if (compactLayout)
+                {
+                    pickerRow.style.flexDirection = FlexDirection.Row;
+                    pickerRow.style.alignItems = Align.Center;
+                    toolbar.Add(pickerRow);
+                }
 
                 valuePickerDropdown = new TooltipPopupField(
                     RuleTooltips.ValueSourceOptions(),
@@ -756,7 +785,7 @@ namespace GameRuleEditor.CustomControls
                         ApplyPickedTerm(new ExpressionTerm { Kind = TermKind.Number, Number = 0f });
                     }
                 });
-                toolbar.Add(valuePickerDropdown);
+                pickerRow.Add(valuePickerDropdown);
 
                 operationDropdown = new TooltipPopupField(
                     RuleTooltips.ArithmeticOptions(),
@@ -776,7 +805,7 @@ namespace GameRuleEditor.CustomControls
                     }
                     else operationDropdown.SetValueWithoutNotify(PickOperationLabel);
                 });
-                toolbar.Add(operationDropdown);
+                pickerRow.Add(operationDropdown);
                 Add(toolbar);
 
                 termsContainer = new VisualElement();
@@ -869,6 +898,13 @@ namespace GameRuleEditor.CustomControls
                 termsContainer.Clear();
                 var expressionContainer = new VisualElement();
                 expressionContainer.AddToClassList("compare-terms-content");
+                if (compactLayout)
+                {
+                    termsContainer.style.height = StyleKeyword.Auto;
+                    expressionContainer.style.height = StyleKeyword.Auto;
+                    expressionContainer.style.flexDirection = FlexDirection.Column;
+                    expressionContainer.style.alignItems = Align.FlexStart;
+                }
                 termsContainer.Add(expressionContainer);
                 bool canAddOperation = terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression;
                 operationDropdown.SetEnabled(canAddOperation);
@@ -893,6 +929,7 @@ namespace GameRuleEditor.CustomControls
                     ExpressionTerm term = terms[i];
                     var row = new VisualElement();
                     row.AddToClassList("compare-term");
+                    if (compactLayout && i > 0) row.style.marginTop = 3;
 
                     if (i > 0)
                     {

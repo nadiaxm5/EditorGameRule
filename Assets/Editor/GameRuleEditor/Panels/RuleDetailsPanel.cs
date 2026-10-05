@@ -25,13 +25,12 @@ namespace GameRuleEditor.Panels
             this.controller = controller;
             style.flexGrow = 1;
 
-            var scroll = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.style.flexGrow = 1;
             scroll.contentViewport.style.height = Length.Percent(100);
-            scroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             scroll.verticalScrollerVisibility = ScrollerVisibility.Auto;
             content = new VisualElement();
-            content.style.minWidth = 300;
+            content.style.minWidth = 0;
             content.style.paddingLeft = 12;
             content.style.paddingRight = 12;
             content.style.paddingTop = 12;
