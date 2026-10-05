@@ -63,6 +63,29 @@ namespace GameRuleEditor.Core
             return string.Join(" ", parts);
         }
 
+        public static void Move(List<RuleConditionTerm> terms, int from, int to)
+        {
+            if (terms == null || from < 0 || to < 0 ||
+                from >= terms.Count || to >= terms.Count || from == to) return;
+
+            RuleConditionTerm moved = terms[from];
+            // The connector belongs to the condition after it. When an item crosses
+            // the first position, transfer that connector to the new second item.
+            if (to == 0)
+            {
+                terms[0].JoinBefore = moved.JoinBefore;
+                moved.JoinBefore = null;
+            }
+            else if (from == 0)
+            {
+                moved.JoinBefore = terms[1].JoinBefore;
+                terms[1].JoinBefore = null;
+            }
+
+            terms.RemoveAt(from);
+            terms.Insert(to, moved);
+        }
+
         public static string WithoutNot(string source)
         {
             return source != null && source.StartsWith("NOT ", System.StringComparison.Ordinal)

@@ -127,7 +127,7 @@ namespace GameRuleEditor.Panels
             }
         }
 
-        private VisualElement CreateHeading(string breadcrumb)
+        private VisualElement CreateHeading(string breadcrumb, string kindLabel)
         {
             content.Clear();
             var heading = new Label(breadcrumb);
@@ -136,7 +136,7 @@ namespace GameRuleEditor.Panels
             heading.style.marginBottom = 12;
             content.Add(heading);
 
-            var typeLabel = new Label("TYPE");
+            var typeLabel = new Label(kindLabel);
             typeLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             typeLabel.style.fontSize = 11;
             typeLabel.style.marginBottom = 5;
@@ -187,7 +187,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            var selectorRow = CreateHeading($"{rule.Name}  /  WHEN  /  Condition {index + 1}");
+            var selectorRow = CreateHeading($"{rule.Name}  /  WHEN  /  Condition {index + 1}", "CONDITION");
             element.TypeSelector.style.width = 190;
             selectorRow.Add(element.TypeSelector);
             content.Add(element);
@@ -224,7 +224,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            var selectorRow = CreateHeading($"{rule.Name}  /  DO  /  Action {index + 1}");
+            var selectorRow = CreateHeading($"{rule.Name}  /  DO  /  Action {index + 1}", "ACTION");
             element.TypeSelector.style.width = 190;
             selectorRow.Add(element.TypeSelector);
             content.Add(element);

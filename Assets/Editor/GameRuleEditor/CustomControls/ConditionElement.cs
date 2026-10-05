@@ -54,14 +54,21 @@ namespace GameRuleEditor.CustomControls
             style.flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row;
             style.marginBottom = 5;
             style.flexShrink = 0;
-            style.borderTopLeftRadius = 3;
-            style.borderTopRightRadius = 3;
-            style.borderBottomLeftRadius = 3;
-            style.borderBottomRightRadius = 3;
-            style.paddingTop = 5;
-            style.paddingBottom = 5;
-            style.paddingLeft = 5;
-            style.paddingRight = 5;
+            if (detailsMode)
+            {
+                AddToClassList("rule-overview-column");
+            }
+            else
+            {
+                style.borderTopLeftRadius = 3;
+                style.borderTopRightRadius = 3;
+                style.borderBottomLeftRadius = 3;
+                style.borderBottomRightRadius = 3;
+                style.paddingTop = 5;
+                style.paddingBottom = 5;
+                style.paddingLeft = 5;
+                style.paddingRight = 5;
+            }
             style.alignItems = detailsMode ? Align.Stretch : Align.Center;
             CreateUI(joinOperatorBefore);
             RegisterCallback<DetachFromPanelEvent>(_ => CloseKeyboardMenu());
@@ -69,7 +76,7 @@ namespace GameRuleEditor.CustomControls
 
         private void CreateUI(string initialJoinOperator)
         {
-            style.backgroundColor = GameRuleTheme.BrightHeader;
+            if (!detailsMode) style.backgroundColor = GameRuleTheme.BrightHeader;
             SetJoinOperator(initialJoinOperator);
 
             negationButton = new Button(() =>
@@ -449,11 +456,13 @@ namespace GameRuleEditor.CustomControls
             return null;
         }
 
-        private static string FormatKeyName(string value)
+        internal static string FormatKeyName(string value)
         {
             if (string.IsNullOrEmpty(value) || value == PickKeyLabel) return PickKeyLabel;
+            if (Regex.IsMatch(value, @"^Digit[0-9]$", RegexOptions.IgnoreCase))
+                return value.Substring(value.Length - 1);
             string spaced = Regex.Replace(value, @"([a-z0-9])([A-Z])", "$1 $2");
-            return Regex.Replace(spaced, @"^Digit([0-9])$", "Number $1");
+            return spaced;
         }
 
         private static TooltipPopupField CreateEventDropdown(string conditionType, List<string> choices, float width)
@@ -1152,7 +1161,8 @@ namespace GameRuleEditor.CustomControls
                     else
                     {
                         bool property = Regex.IsMatch(value,
-                            @"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+$");
+                            @"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+$") ||
+                            GameRuleEditor.Windows.PropertyPickerDialog.IsGlobalReference(context, value);
                         string text = terms.Count == 0 && part.Operator == "-" ? "-" + value : value;
                         terms.Add(new ExpressionTerm
                         {

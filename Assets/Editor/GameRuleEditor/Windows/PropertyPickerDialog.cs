@@ -12,39 +12,47 @@ namespace GameRuleEditor.Windows
     {
         // --- CONFIGURATION ---
         private struct PropDef
-        { public string Label; public string Suffix; public bool IsBool; }
+        { public string Label; public string Suffix; public bool IsBool; public string Tooltip; }
+
+        private static readonly HashSet<string> BuiltInGlobalNames = new HashSet<string>
+        {
+            "GameName", "ScreenResolution", "CameraPosition", "CameraRotation",
+            "SunPosition", "SunRotation", "SunColor", "SunAmbientColor",
+            "BackgroundColor", "Gravity", "SoundTrack", "FPS", "Time",
+            "DeltaTime", "Mouse", "MouseWorld"
+        };
 
         private readonly Dictionary<string, List<PropDef>> propertyDefinitions = new Dictionary<string, List<PropDef>>
         {
             { "Transform", new List<PropDef> {
-                new PropDef { Label = "Pos X", Suffix = "x", IsBool = false },
-                new PropDef { Label = "Pos Y", Suffix = "y", IsBool = false },
-                new PropDef { Label = "Pos Z", Suffix = "z", IsBool = false },
-                new PropDef { Label = "Rot X", Suffix = "rx", IsBool = false },
-                new PropDef { Label = "Rot Y", Suffix = "ry", IsBool = false },
-                new PropDef { Label = "Rot Z", Suffix = "rz", IsBool = false },
-                new PropDef { Label = "Scale X", Suffix = "sx", IsBool = false },
-                new PropDef { Label = "Scale Y", Suffix = "sy", IsBool = false },
-                new PropDef { Label = "Scale Z", Suffix = "sz", IsBool = false }
+                new PropDef { Label = "Position X", Suffix = "x", Tooltip = "Actor's world position on the X axis." },
+                new PropDef { Label = "Position Y", Suffix = "y", Tooltip = "Actor's world position on the Y axis." },
+                new PropDef { Label = "Position Z", Suffix = "z", Tooltip = "Actor's world position on the Z axis." },
+                new PropDef { Label = "Rotation X", Suffix = "rx", Tooltip = "Actor's rotation around the X axis, in degrees." },
+                new PropDef { Label = "Rotation Y", Suffix = "ry", Tooltip = "Actor's rotation around the Y axis, in degrees." },
+                new PropDef { Label = "Rotation Z", Suffix = "rz", Tooltip = "Actor's rotation around the Z axis, in degrees." },
+                new PropDef { Label = "Scale X", Suffix = "sx", Tooltip = "Actor's scale on the X axis." },
+                new PropDef { Label = "Scale Y", Suffix = "sy", Tooltip = "Actor's scale on the Y axis." },
+                new PropDef { Label = "Scale Z", Suffix = "sz", Tooltip = "Actor's scale on the Z axis." }
             }},
             { "Physics", new List<PropDef> {
-                new PropDef { Label = "Velocity X", Suffix = "Velocity.x", IsBool = false },
-                new PropDef { Label = "Velocity Y", Suffix = "Velocity.y", IsBool = false },
-                new PropDef { Label = "Velocity Z", Suffix = "Velocity.z", IsBool = false },
-                new PropDef { Label = "Ang.Vel X", Suffix = "AngularVelocity.x", IsBool = false },
-                new PropDef { Label = "Ang.Vel Y", Suffix = "AngularVelocity.y", IsBool = false },
-                new PropDef { Label = "Ang.Vel Z", Suffix = "AngularVelocity.z", IsBool = false },
-                new PropDef { Label = "Density", Suffix = "Density", IsBool = false },
-                new PropDef { Label = "Friction", Suffix = "Friction", IsBool = false },
-                new PropDef { Label = "Bounciness", Suffix = "Bounciness", IsBool = false },
-                new PropDef { Label = "Drag", Suffix = "Drag", IsBool = false }
+                new PropDef { Label = "Velocity X", Suffix = "Velocity.x", Tooltip = "Actor's movement speed on the X axis." },
+                new PropDef { Label = "Velocity Y", Suffix = "Velocity.y", Tooltip = "Actor's movement speed on the Y axis." },
+                new PropDef { Label = "Velocity Z", Suffix = "Velocity.z", Tooltip = "Actor's movement speed on the Z axis." },
+                new PropDef { Label = "Ang.Vel X", Suffix = "AngularVelocity.x", Tooltip = "Actor's rotation speed around the X axis." },
+                new PropDef { Label = "Ang.Vel Y", Suffix = "AngularVelocity.y", Tooltip = "Actor's rotation speed around the Y axis." },
+                new PropDef { Label = "Ang.Vel Z", Suffix = "AngularVelocity.z", Tooltip = "Actor's rotation speed around the Z axis." },
+                new PropDef { Label = "Density", Suffix = "Density", Tooltip = "Actor's physics mass (shown as Density)." },
+                new PropDef { Label = "Friction", Suffix = "Friction", Tooltip = "How strongly the actor resists sliding on surfaces." },
+                new PropDef { Label = "Bounciness", Suffix = "Bounciness", Tooltip = "How much the actor rebounds from collisions." },
+                new PropDef { Label = "Drag", Suffix = "Drag", Tooltip = "How strongly the actor's motion is slowed." }
             }},
             { "State", new List<PropDef> {
-                new PropDef { Label = "Active", Suffix = "Active", IsBool = true }
+                new PropDef { Label = "Active", Suffix = "Active", IsBool = true, Tooltip = "Whether this actor is active in the scene." }
             }},
             { "UI", new List<PropDef> {
-                new PropDef { Label = "Slider Value", Suffix = "sliderValue", IsBool = false },
-                new PropDef { Label = "Text Content", Suffix = "text", IsBool = false }
+                new PropDef { Label = "Slider Value", Suffix = "sliderValue", Tooltip = "Current value of the actor's UI slider." },
+                new PropDef { Label = "Text Content", Suffix = "text", Tooltip = "Text shown by the actor's UI text element." }
             }}
         };
 
@@ -220,7 +228,13 @@ namespace GameRuleEditor.Windows
         public static string ToDisplayReference(EditorContext ctx, string value)
         {
             string actorName = ctx?.SelectedActor?.ActorName;
-            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(actorName)) return value;
+            if (string.IsNullOrEmpty(value)) return value;
+
+            // Keep the global marker in the serialized rule, but not in editor controls.
+            value = Regex.Replace(value, @"(?<![A-Za-z0-9_])#(?<name>[A-Za-z_][A-Za-z0-9_]*)",
+                match => IsGlobalName(ctx, match.Groups["name"].Value)
+                    ? match.Groups["name"].Value : match.Value);
+            if (string.IsNullOrEmpty(actorName)) return value;
 
             return Regex.Replace(value, @"(?<![A-Za-z0-9_])this\.", actorName + ".",
                 RegexOptions.IgnoreCase);
@@ -229,10 +243,32 @@ namespace GameRuleEditor.Windows
         public static string ToStoredReference(EditorContext ctx, string value)
         {
             string actorName = ctx?.SelectedActor?.ActorName;
-            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(actorName)) return value;
+            if (string.IsNullOrEmpty(value)) return value;
 
-            string actorReference = @"(?<![A-Za-z0-9_])" + Regex.Escape(actorName) + @"\.";
-            return Regex.Replace(value, actorReference, "this.", RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(actorName))
+            {
+                string actorReference = @"(?<![A-Za-z0-9_])" + Regex.Escape(actorName) + @"\.";
+                value = Regex.Replace(value, actorReference, "this.", RegexOptions.IgnoreCase);
+            }
+
+            return Regex.Replace(value,
+                @"(?<![A-Za-z0-9_.#])(?<name>[A-Za-z_][A-Za-z0-9_]*)",
+                match => IsGlobalName(ctx, match.Groups["name"].Value)
+                    ? "#" + match.Value : match.Value);
+        }
+
+        public static bool IsGlobalReference(EditorContext ctx, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            Match match = Regex.Match(value.Trim(),
+                @"^#?(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\.[xyz])?$");
+            return match.Success && IsGlobalName(ctx, match.Groups["name"].Value);
+        }
+
+        private static bool IsGlobalName(EditorContext ctx, string name)
+        {
+            return BuiltInGlobalNames.Contains(name) ||
+                ctx?.currentProject?.sceneData?.CustomVariables?.Any(variable => variable.name == name) == true;
         }
 
         private void OnGUI()
@@ -289,6 +325,7 @@ namespace GameRuleEditor.Windows
                     if (!boolOnly)
                     {
                         DrawGroupSelectable("Camera", "Camera");
+                        DrawGroupSelectable("Mouse", "Mouse");
                         DrawGroupSelectable("Sun", "Sun");
                         DrawGroupSelectable("Physics", "Physics");
                     }
@@ -686,9 +723,15 @@ namespace GameRuleEditor.Windows
 
             if (!boolOnly)
             {
-                if (selectedGroup == "Camera") { DrawVector3Group("CameraPosition", prefix + "CameraPosition"); DrawVector3Group("CameraRotation", prefix + "CameraRotation"); }
-                else if (selectedGroup == "Sun") { DrawVector3Group("SunPosition", prefix + "SunPosition"); DrawVector3Group("SunRotation", prefix + "SunRotation"); }
-                else if (selectedGroup == "Physics") { DrawVector3Group("Gravity", prefix + "Gravity"); }
+                if (selectedGroup == "Camera") { DrawVector3Group("CameraPosition", prefix + "CameraPosition", "Camera position in world space"); DrawVector3Group("CameraRotation", prefix + "CameraRotation", "Camera rotation in degrees"); }
+                else if (selectedGroup == "Mouse")
+                {
+                    // GameManager.Mouse is the screen-space vector; MouseWorld is world-space.
+                    DrawVector3Group("Mouse Screen", prefix + "Mouse", "Mouse position in screen coordinates");
+                    DrawVector3Group("Mouse World", prefix + "MouseWorld", "Mouse position in world space");
+                }
+                else if (selectedGroup == "Sun") { DrawVector3Group("SunPosition", prefix + "SunPosition", "Sun position in world space"); DrawVector3Group("SunRotation", prefix + "SunRotation", "Sun rotation in degrees"); }
+                else if (selectedGroup == "Physics") { DrawVector3Group("Gravity", prefix + "Gravity", "Gravity applied to the scene"); }
             }
         }
 
@@ -702,7 +745,7 @@ namespace GameRuleEditor.Windows
                 var props = propertyDefinitions[selectedGroup];
                 foreach (var prop in props)
                 {
-                    if (!boolOnly || prop.IsBool) DrawFinalItem(prop.Label, prefix + prop.Suffix);
+                    if (!boolOnly || prop.IsBool) DrawFinalItem(prop.Label, prefix + prop.Suffix, prop.Tooltip);
                 }
             }
 
@@ -716,14 +759,16 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        private void DrawVector3Group(string name, string fullPrefix)
+        private void DrawVector3Group(string name, string fullPrefix, string description)
         {
-            DrawFinalItem(name + " X", fullPrefix + ".x"); DrawFinalItem(name + " Y", fullPrefix + ".y"); DrawFinalItem(name + " Z", fullPrefix + ".z");
+            DrawFinalItem(name + " X", fullPrefix + ".x", description + " on the X axis.");
+            DrawFinalItem(name + " Y", fullPrefix + ".y", description + " on the Y axis.");
+            DrawFinalItem(name + " Z", fullPrefix + ".z", description + " on the Z axis.");
         }
 
-        private void DrawFinalItem(string label, string result)
+        private void DrawFinalItem(string label, string result, string tooltip = null)
         {
-            if (DrawTintedButton(label, propertyButtonStyle, propertyColoredLabelStyle, false))
+            if (DrawTintedButton(label, propertyButtonStyle, propertyColoredLabelStyle, false, tooltip))
             {
                 onPick?.Invoke(result);
                 Close();
@@ -779,9 +824,8 @@ namespace GameRuleEditor.Windows
             return style;
         }
 
-        private bool DrawTintedButton(string label, GUIStyle buttonStyle, GUIStyle coloredLabelStyle, bool selected)
+        private bool DrawTintedButton(string label, GUIStyle buttonStyle, GUIStyle coloredLabelStyle, bool selected, string tooltip = null)
         {
-            var content = new GUIContent(label);
             Rect buttonRect = GUILayoutUtility.GetRect(
                 GUIContent.none,
                 buttonStyle,
@@ -794,7 +838,12 @@ namespace GameRuleEditor.Windows
             bool hovered = visibleButtonScreenRect.Contains(mouseScreenPosition);
             bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
             bool colored = selected || hovered;
-            bool clicked = GUI.Button(buttonRect, colored ? GUIContent.none : content, buttonStyle);
+            // Register the tooltip only over the visible part of this column's button.
+            // The colored button draws its label separately, but still needs GUIContent for hover help.
+            var content = new GUIContent(label, hovered ? tooltip : null);
+            bool clicked = GUI.Button(buttonRect,
+                colored ? new GUIContent(string.Empty, hovered ? tooltip : null) : content,
+                buttonStyle);
 
             if (colored)
             {

@@ -36,12 +36,19 @@ namespace GameRuleEditor.CustomControls
             context = ctx;
             availableTypes = actionTypes;
             this.detailsMode = detailsMode;
-            if (detailsMode) AddToClassList("rule-detail-action");
+            if (detailsMode)
+            {
+                AddToClassList("rule-detail-action");
+                AddToClassList("rule-overview-column");
+            }
             style.marginBottom = 5;
             style.flexShrink = 0;
-            style.backgroundColor = GameRuleTheme.BrightHeader;
-            style.paddingTop = 5; style.paddingBottom = 5;
-            style.paddingLeft = 5; style.paddingRight = 5;
+            if (!detailsMode)
+            {
+                style.backgroundColor = GameRuleTheme.BrightHeader;
+                style.paddingTop = 5; style.paddingBottom = 5;
+                style.paddingLeft = 5; style.paddingRight = 5;
+            }
             CreateUI();
         }
 
@@ -500,6 +507,7 @@ namespace GameRuleEditor.CustomControls
                     textValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, normalized);
                     kind = Regex.IsMatch(textValue,
                         @"^(?:#[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)$")
+                        || GameRuleEditor.Windows.PropertyPickerDialog.IsGlobalReference(context, textValue)
                         ? ScalarKind.Property
                         : ScalarKind.Legacy;
                 }
@@ -834,7 +842,8 @@ namespace GameRuleEditor.CustomControls
                     else
                     {
                         bool property = Regex.IsMatch(value,
-                            @"^(?:#[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)$");
+                            @"^(?:#[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)$") ||
+                            GameRuleEditor.Windows.PropertyPickerDialog.IsGlobalReference(context, value);
                         string text = terms.Count == 0 && part.Operator == "-" ? "-" + value : value;
                         terms.Add(new ExpressionTerm
                         {
