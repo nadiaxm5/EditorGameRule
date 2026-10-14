@@ -814,7 +814,7 @@ namespace GameRuleEditor.Windows
             float diffY = evt.position.y - dragStartPos.y;
             if (UnityEngine.Mathf.Abs(diffY) > 5f)
             {
-                item.transform.position = new Vector3(0f, diffY, 0f);
+                item.style.translate = new Translate(0f, diffY, 0f);
             }
         }   
 
@@ -829,7 +829,7 @@ namespace GameRuleEditor.Windows
             isDraggingActor = false;
             draggedItem = null;
             // Ensure visual offset from drag preview is cleared.
-            item.transform.position = Vector3.zero;
+            item.style.translate = new Translate(0f, 0f, 0f);
 
             if (pointerEvt == null) return;
             
