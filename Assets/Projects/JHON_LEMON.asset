@@ -536,8 +536,14 @@ MonoBehaviour:
     - 18
     - 1
     - 1.5
-    Rotation: []
-    Scale: []
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -550,7 +556,10 @@ MonoBehaviour:
     OverrideDrag: 0
     Properties: []
     Script: []
-    Components: []
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
   - ActorName: Won
     Active: 0
     PrefabName: Won

@@ -25,7 +25,16 @@
             "PrefabName": "GameEnding",
             "Tag": "End",
             "IconColorHex": "",
-            "Position": [18.0, 1.0, 1.5]
+            "Position": [18.0, 1.0, 1.5],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                }
+            ]
         },
         {
             "ActorName": "Won",

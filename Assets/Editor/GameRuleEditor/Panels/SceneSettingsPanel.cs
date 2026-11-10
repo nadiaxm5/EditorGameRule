@@ -255,15 +255,13 @@ namespace GameRuleEditor.Panels
             creationTitle.style.marginBottom = 5;
             creationBox.Add(creationTitle);
 
-            var nameInput = new TextField("Name:");
+            var nameInput = CreateTextField(creationBox, "Name:", VariableLabelWidth);
             nameInput.value = "NewVariable";
-            creationBox.Add(nameInput);
 
-            var typeInput = new PopupField<string>("Type:", variableTypes, 0);
-            creationBox.Add(typeInput);
+            var typeInput = new PopupField<string>(variableTypes, 0);
+            AddFieldRow(creationBox, "Type:", typeInput, VariableLabelWidth);
 
             valueFieldContainer = new VisualElement();
-            valueFieldContainer.style.marginTop = 5;
             creationBox.Add(valueFieldContainer);
 
             CreateValueField("Int"); // Default int
@@ -304,37 +302,37 @@ namespace GameRuleEditor.Panels
             switch (type)
             {
                 case "Int":
-                    var intField = new IntegerField("Initial Value:");
+                    var intField = new IntegerField();
                     intField.value = 0;
-                    valueFieldContainer.Add(intField);
+                    AddFieldRow(valueFieldContainer, "Initial Value:", intField, VariableLabelWidth);
                     activeValueGetter = () => intField.value;
                     break;
 
                 case "Float":
-                    var floatField = new FloatField("Initial Value:");
+                    var floatField = new FloatField();
                     floatField.value = 0f;
-                    valueFieldContainer.Add(floatField);
+                    AddFieldRow(valueFieldContainer, "Initial Value:", floatField, VariableLabelWidth);
                     activeValueGetter = () => floatField.value;
                     break;
 
                 case "Bool":
-                    var boolField = new Toggle("Initial Value:");
+                    var boolField = new Toggle();
                     boolField.value = false;
-                    valueFieldContainer.Add(boolField);
+                    AddFieldRow(valueFieldContainer, "Initial Value:", boolField, VariableLabelWidth);
                     activeValueGetter = () => boolField.value;
                     break;
 
                 case "Vector2":
-                    var v2Field = new Vector2Field("Initial Value:");
+                    var v2Field = new Vector2Field();
                     v2Field.value = Vector2.zero;
-                    valueFieldContainer.Add(v2Field);
+                    AddFieldRow(valueFieldContainer, "Initial Value:", v2Field, VariableLabelWidth);
                     activeValueGetter = () => v2Field.value;
                     break;
 
                 case "Vector3":
-                    var v3Field = new Vector3Field("Initial Value:");
+                    var v3Field = new Vector3Field();
                     v3Field.value = Vector3.zero;
-                    valueFieldContainer.Add(v3Field);
+                    AddFieldRow(valueFieldContainer, "Initial Value:", v3Field, VariableLabelWidth);
                     activeValueGetter = () => v3Field.value;
                     break;
             }
@@ -373,53 +371,55 @@ namespace GameRuleEditor.Panels
             return section;
         }
 */
-        private TextField CreateTextField(VisualElement parent, string label)
+        private const int VariableLabelWidth = 100;
+
+        private static void AddFieldRow(VisualElement parent, string label, VisualElement field, int labelWidth = 150)
         {
-            var field = new TextField(label);
-            field.style.marginBottom = 5;
-            parent.Add(field);
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.marginBottom = 5;
+            row.Add(new Label(label) { style = { minWidth = labelWidth } });
+            field.style.flexGrow = 1;
+            field.style.minWidth = 0;
+            row.Add(field);
+            parent.Add(row);
+        }
+
+        private TextField CreateTextField(VisualElement parent, string label, int labelWidth = 150)
+        {
+            var field = new TextField();
+            field.style.backgroundColor = Color.clear;
+            field.style.borderTopWidth = 0;
+            field.style.borderBottomWidth = 0;
+            field.style.borderLeftWidth = 0;
+            field.style.borderRightWidth = 0;
+            field.style.paddingTop = 0;
+            field.style.paddingBottom = 0;
+            field.style.paddingLeft = 0;
+            field.style.paddingRight = 0;
+            AddFieldRow(parent, label, field, labelWidth);
             return field;
         }
 
         private Vector2Field CreateVector2Field(VisualElement parent, string label)
         {
-            var container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.alignItems = Align.Center;
-            container.style.marginBottom = 5;
-            var labelElement = new Label(label) { style = { minWidth = 150 } };
-            container.Add(labelElement);
-            var field = new Vector2Field() { style = { flexGrow = 1 } };
-            container.Add(field);
-            parent.Add(container);
+            var field = new Vector2Field();
+            AddFieldRow(parent, label, field);
             return field;
         }
 
         private Vector3Field CreateVector3Field(VisualElement parent, string label)
         {
-            var container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.alignItems = Align.Center;
-            container.style.marginBottom = 5;
-            var labelElement = new Label(label) { style = { minWidth = 150 } };
-            container.Add(labelElement);
-            var field = new Vector3Field() { style = { flexGrow = 1 } };
-            container.Add(field);
-            parent.Add(container);
+            var field = new Vector3Field();
+            AddFieldRow(parent, label, field);
             return field;
         }
 
         private ColorField CreateColorField(VisualElement parent, string label)
         {
-            var container = new VisualElement();
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.alignItems = Align.Center;
-            container.style.marginBottom = 5;
-            var labelElement = new Label(label) { style = { minWidth = 150 } };
-            container.Add(labelElement);
-            var field = new ColorField() { style = { flexGrow = 1 } };
-            container.Add(field);
-            parent.Add(container);
+            var field = new ColorField();
+            AddFieldRow(parent, label, field);
             return field;
         }
 
