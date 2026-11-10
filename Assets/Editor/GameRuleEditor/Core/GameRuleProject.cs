@@ -333,7 +333,7 @@ namespace GameRuleEditor.Core
                     new ActorComponentMeta
                     {
                         type = "Rules",
-                        name = "Rules Set",
+                        name = "Rule Set",
                         id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
                     }
                 }

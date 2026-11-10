@@ -38,8 +38,8 @@ namespace GameRuleEditor.Panels
         private Button revertPhysicsButton;
         private readonly Dictionary<string, Label> physicsLabels = new Dictionary<string, Label>();
 
-        private VisualElement componentsContainer;
-        private Button addRulesSetButton;
+        private VisualElement ruleSetsContainer;
+        private VisualElement customPropertiesContainer;
 
         private class VectorRow
         {
@@ -264,25 +264,25 @@ namespace GameRuleEditor.Panels
             revertPhysicsButton.style.marginTop = 3;
             physicsContainer.Add(revertPhysicsButton);
 
-            // ─── Dynamic components ───
-            componentsContainer = new VisualElement();
-            componentsContainer.style.marginTop = 5;
-            scrollView.Add(componentsContainer);
+            customPropertiesContainer = new VisualElement();
+            scrollView.Add(customPropertiesContainer);
 
-            // Only shown as a recovery action when the actor has no Rules Set.
-            addRulesSetButton = new Button(AddRulesComponent) { text = "Add Rules Set" };
-            addRulesSetButton.style.marginTop = 14;
-            addRulesSetButton.style.marginBottom = 8;
-            addRulesSetButton.style.paddingTop = 5;
-            addRulesSetButton.style.paddingBottom = 5;
+            var ruleSetsSection = new Foldout { text = "Rule Sets", value = true };
+            GameRuleTheme.StylePropertySection(ruleSetsSection);
+            var ruleSetsContent = new VisualElement
+            {
+                style = { paddingLeft = 15, paddingRight = 8, marginTop = 5, marginBottom = 8 }
+            };
+            ruleSetsContainer = new VisualElement();
+            ruleSetsContent.Add(ruleSetsContainer);
+
+            var addRulesSetButton = new Button(AddRulesComponent) { text = "+ Add Rule Set" };
+            addRulesSetButton.AddToClassList("button-primary");
             addRulesSetButton.style.alignSelf = Align.Center;
-            addRulesSetButton.style.width = 200;
-            addRulesSetButton.style.backgroundColor = GameRuleTheme.Surface;
-            addRulesSetButton.style.borderTopLeftRadius = 4;
-            addRulesSetButton.style.borderTopRightRadius = 4;
-            addRulesSetButton.style.borderBottomLeftRadius = 4;
-            addRulesSetButton.style.borderBottomRightRadius = 4;
-            scrollView.Add(addRulesSetButton);
+            ruleSetsContent.Add(addRulesSetButton);
+
+            ruleSetsSection.Add(ruleSetsContent);
+            scrollView.Add(ruleSetsSection);
         }
 
         // ──────────────────────────────────
@@ -317,17 +317,21 @@ namespace GameRuleEditor.Panels
             }
 
             // 1. Ensure every Rules component has an id and use the current default name.
+            int ruleSetNumber = 0;
             foreach (var comp in actor.Components)
             {
-                if (comp.type == "Rules" && string.IsNullOrEmpty(comp.id))
+                if (comp.type != "Rules") continue;
+                ruleSetNumber++;
+
+                if (string.IsNullOrEmpty(comp.id))
                 {
                     comp.id = NewGroupId();
                     dirty = true;
                 }
 
-                if (comp.type == "Rules" && TryGetDefaultRulesSetName(comp.name, out string rulesSetName))
+                if (IsLegacyRuleSetName(comp.name))
                 {
-                    comp.name = rulesSetName;
+                    comp.name = NextRuleSetName(actor, ruleSetNumber);
                     dirty = true;
                 }
             }
@@ -368,7 +372,7 @@ namespace GameRuleEditor.Panels
             // 3. Add default Rules component if needed, then assign groupIds to ungrouped rules
             if (actor.Script != null && actor.Script.Count > 0 && !HasComponentOfType(actor, "Rules"))
             {
-                var defaultComp = new ActorComponentMeta { type = "Rules", name = "Rules Set", id = NewGroupId() };
+                var defaultComp = new ActorComponentMeta { type = "Rules", name = "Rule Set", id = NewGroupId() };
                 actor.Components.Add(defaultComp);
                 dirty = true;
             }
@@ -435,7 +439,8 @@ namespace GameRuleEditor.Panels
         // ──────────────────────────────────
         private void RebuildComponents()
         {
-            componentsContainer.Clear();
+            customPropertiesContainer.Clear();
+            ruleSetsContainer.Clear();
             var actor = context.SelectedActor;
             if (actor?.Components == null) return;
 
@@ -443,20 +448,22 @@ namespace GameRuleEditor.Panels
             {
                 int compIndex = i;
                 var comp = actor.Components[i];
-                var card = comp.type == "Properties"
-                    ? BuildPropertiesComponent(comp, compIndex)
-                    : BuildRulesComponent(comp, compIndex);
+                if (comp.type == "Properties")
+                {
+                    customPropertiesContainer.Add(BuildPropertiesComponent(comp, compIndex));
+                    continue;
+                }
+                if (comp.type != "Rules") continue;
+
+                var card = BuildRulesComponent(comp, compIndex);
 
                 card.RegisterCallback<PointerMoveEvent>(evt => OnCompDragMove(evt, card));
                 card.RegisterCallback<PointerUpEvent>(evt => OnCompDragEnd(evt, card));
                 card.RegisterCallback<PointerCaptureOutEvent>(evt => OnCompDragEnd(evt, card));
 
-                componentsContainer.Add(card);
+                ruleSetsContainer.Add(card);
             }
 
-            addRulesSetButton.style.display = HasComponentOfType(actor, "Rules")
-                ? DisplayStyle.None
-                : DisplayStyle.Flex;
         }
 
         /// <summary>
@@ -606,6 +613,7 @@ namespace GameRuleEditor.Panels
             }
 
             var foldout = BuildComponentShell(comp, compIndex, () => RemoveComponent(compIndex, comp.id), renameable: true);
+            foldout.style.backgroundColor = GameRuleTheme.InsetSurface;
             var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
             foldout.Add(content);
 
@@ -666,9 +674,9 @@ namespace GameRuleEditor.Panels
             compDragSpacer.style.borderBottomLeftRadius = 5;
             compDragSpacer.style.borderBottomRightRadius = 5;
 
-            int insertAt = componentsContainer.IndexOf(card);
+            int insertAt = ruleSetsContainer.IndexOf(card);
             if (insertAt < 0) return;
-            componentsContainer.Insert(insertAt, compDragSpacer);
+            ruleSetsContainer.Insert(insertAt, compDragSpacer);
 
             card.style.position = Position.Absolute;
             card.style.top = card.layout.y;
@@ -691,7 +699,7 @@ namespace GameRuleEditor.Panels
             float draggedCenterY = card.layout.y + diffY + card.layout.height / 2f;
 
             int newTargetIndex = 0;
-            foreach (var child in componentsContainer.Children())
+            foreach (var child in ruleSetsContainer.Children())
             {
                 if (child == card || child == compDragSpacer) continue;
                 if (draggedCenterY < child.layout.y + child.layout.height / 2f) break;
@@ -699,7 +707,7 @@ namespace GameRuleEditor.Panels
             }
 
             int currentSpacerIndex = 0;
-            foreach (var child in componentsContainer.Children())
+            foreach (var child in ruleSetsContainer.Children())
             {
                 if (child == compDragSpacer) break;
                 if (child == card) continue;
@@ -708,16 +716,16 @@ namespace GameRuleEditor.Panels
 
             if (newTargetIndex != currentSpacerIndex)
             {
-                componentsContainer.Remove(compDragSpacer);
+                ruleSetsContainer.Remove(compDragSpacer);
                 int physicalInsert = 0;
                 int logical = 0;
-                foreach (var child in componentsContainer.Children())
+                foreach (var child in ruleSetsContainer.Children())
                 {
                     if (logical == newTargetIndex) break;
                     if (child != card) logical++;
                     physicalInsert++;
                 }
-                componentsContainer.Insert(physicalInsert, compDragSpacer);
+                ruleSetsContainer.Insert(physicalInsert, compDragSpacer);
             }
 
             evt.StopPropagation();
@@ -742,15 +750,15 @@ namespace GameRuleEditor.Panels
             card.style.left = StyleKeyword.Null;
             card.style.width = StyleKeyword.Null;
 
-            int newIndex = originalIndex;
+            int targetRuleSetIndex = -1;
             if (compDragSpacer != null && compDragSpacer.parent != null)
             {
-                newIndex = 0;
-                foreach (var child in componentsContainer.Children())
+                targetRuleSetIndex = 0;
+                foreach (var child in ruleSetsContainer.Children())
                 {
                     if (child == compDragSpacer) break;
                     if (child == card) continue;
-                    newIndex++;
+                    targetRuleSetIndex++;
                 }
                 compDragSpacer.parent.Remove(compDragSpacer);
                 compDragSpacer = null;
@@ -763,16 +771,26 @@ namespace GameRuleEditor.Panels
             }
 
             var actor = context.SelectedActor;
-            // Index 0 is permanently reserved for Custom Properties.
-            int clamped = Mathf.Clamp(newIndex, 1, (actor?.Components?.Count ?? 2) - 1);
-            if (actor?.Components != null && actor.Components.Count > 1 &&
-                originalIndex >= 0 && originalIndex < actor.Components.Count &&
-                originalIndex != clamped)
+            int newIndex = -1;
+            if (actor?.Components != null && targetRuleSetIndex >= 0)
+            {
+                for (int i = 0; i < actor.Components.Count; i++)
+                {
+                    if (actor.Components[i].type != "Rules") continue;
+                    if (targetRuleSetIndex-- == 0)
+                    {
+                        newIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (newIndex >= 0 && originalIndex >= 0 && originalIndex < actor.Components.Count &&
+                originalIndex != newIndex)
             {
                 Undo.RecordObject(context.currentProject, "Reorder Components");
                 var compToMove = actor.Components[originalIndex];
                 actor.Components.RemoveAt(originalIndex);
-                actor.Components.Insert(clamped, compToMove);
+                actor.Components.Insert(newIndex, compToMove);
                 EditorUtility.SetDirty(context.currentProject);
             }
 
@@ -868,13 +886,13 @@ namespace GameRuleEditor.Panels
             if (actor == null) return;
             if (actor.Components == null)
                 actor.Components = new List<ActorComponentMeta>();
-            if (HasComponentOfType(actor, "Rules")) return;
+            int nextNumber = actor.Components.FindAll(component => component.type == "Rules").Count + 1;
 
-            Undo.RecordObject(context.currentProject, "Add Rules Set");
+            Undo.RecordObject(context.currentProject, "Add Rule Set");
             actor.Components.Add(new ActorComponentMeta
             {
                 type = "Rules",
-                name = "Rules Set",
+                name = NextRuleSetName(actor, nextNumber),
                 id = NewGroupId()
             });
             EditorUtility.SetDirty(context.currentProject);
@@ -931,24 +949,29 @@ namespace GameRuleEditor.Panels
         private static string NewGroupId() =>
             "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
 
-        private static bool TryGetDefaultRulesSetName(string currentName, out string rulesSetName)
+        private static bool IsLegacyRuleSetName(string name)
         {
-            rulesSetName = null;
-            if (string.IsNullOrEmpty(currentName) || currentName == "Rules")
-            {
-                rulesSetName = "Rules Set";
-                return currentName != rulesSetName;
-            }
-
-            const string oldPrefix = "Rules ";
-            if (currentName.StartsWith(oldPrefix) &&
-                int.TryParse(currentName.Substring(oldPrefix.Length), out int suffix))
-            {
-                rulesSetName = $"Rules Set {suffix}";
+            if (string.IsNullOrWhiteSpace(name) || name == "Rules" || name == "Rules Set")
                 return true;
-            }
-
+            foreach (string prefix in new[] { "Rules ", "Rules Set " })
+                if (name.StartsWith(prefix, System.StringComparison.Ordinal) &&
+                    int.TryParse(name.Substring(prefix.Length), out _))
+                    return true;
             return false;
+        }
+
+        private static string NextRuleSetName(ActorJson actor, int number)
+        {
+            string name;
+            do
+            {
+                name = number == 1 ? "Rule Set" : $"Rule Set {number}";
+                number++;
+            }
+            while (actor.Components.Exists(component => component.type == "Rules" &&
+                string.Equals(component.name, name, System.StringComparison.OrdinalIgnoreCase)));
+
+            return name;
         }
 
         // ──────────────────────────────────
