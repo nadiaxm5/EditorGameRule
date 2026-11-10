@@ -1,8 +1,6 @@
 ﻿using B83.LogicExpressionParser;
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 public static class Action
 {
@@ -29,65 +27,12 @@ public static class Action
         Vector3 offsetPos = new(ParseNum(offsetXExp), ParseNum(offsetYExp), ParseNum(offsetZExp));
         Vector3 offsetRot = new(ParseNum(offsetRxExp), ParseNum(offsetRyExp), ParseNum(offsetRzExp));
 
-        var prefab = Resources.Load<GameObject>($"Prefabs/{prefabName}");
-        if (!prefab)
-        {
-            Debug.LogWarning($"Prefab '{prefabName}' no encontrado en Resources/Prefabs.");
-            return;
-        }
-
-        var newObj = Object.Instantiate(prefab);
-        newObj.name = prefab.name;
-        newObj.SetActive(true);
-
-        // Copy the tag from the original scene instance (including inactive objects set up by Loader)
-        string actorTag = FindTagForActor(prefabName);
-        if (!string.IsNullOrEmpty(actorTag))
-        {
-            try { newObj.tag = actorTag; }
-            catch (UnityException) { /* Tag not registered */ }
-        }
-
-        newObj.transform.position = spawnerObj.transform.TransformPoint(offsetPos);
-        newObj.transform.rotation = spawnerObj.transform.rotation * Quaternion.Euler(offsetRot);
-        newObj.transform.localScale = prefab.transform.localScale;
-
-        var scriptType = System.Type.GetType(prefabName);
-        if (scriptType?.IsSubclassOf(typeof(MonoBehaviour)) == true)
-        {
-            var script = newObj.AddComponent(scriptType);
-            scriptType.GetField("Active")?.SetValue(script, true);
-
-            if (scriptType.GetField("propertyList")?.GetValue(script) is Dictionary<string, float> props)
-                foreach (var (prop, val) in props)
-                    scriptType.GetField(prop)?.SetValue(script, val);
-
-            // Runtime-spawned actors are appended to the deterministic order after
-            // the current scheduler pass, preserving spawn order.
-            if (script is IGameRuleActor spawnedActor)
-                ActorScheduler.RegisterSpawned(spawnedActor);
-        }
-
-        if (newObj.TryGetComponent(out LineRenderer lr))
-        {
-            Vector3 start = newObj.transform.position;
-            Vector3 dir = newObj.transform.forward;
-            Vector3 end = Physics.Raycast(start, dir, out RaycastHit hit, 100f)
-                ? hit.point
-                : start + dir * 100f;
-            lr.SetPosition(0, start);
-            lr.SetPosition(1, end);
-        }
+        Utils.SpawnActor(prefabName, spawnerObj, offsetPos, offsetRot);
     }
 
     public static void Animate(string animationName, GameObject obj)
     {
-        Animator animator = obj.GetComponent<Animator>();
-        if (animator != null)
-        {
-            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
-            if (!currentState.IsName(animationName)) animator.Play(animationName);
-        }
+        Utils.PlayAnimation(animationName, obj);
     }
 
     public static void Move(string vExp, string rxExp, string ryExp, string rzExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -102,7 +47,7 @@ public static class Action
         float rz = (float)parser.ParseNumber(rzExp).GetNumber() * Mathf.Deg2Rad;
 
         Vector3 direction = new Vector3(Mathf.Cos(rx) * Mathf.Sin(ry), Mathf.Sin(rx), Mathf.Cos(rx) * Mathf.Cos(ry)).normalized;
-        Vector3 delta = direction * v * Time.deltaTime;
+        Vector3 delta = direction * v * Utils.DeltaTime;
         Utils.SetPosition(obj, Utils.GetPosition(obj) + delta);
     }
 
@@ -120,7 +65,7 @@ public static class Action
         Vector3 currentPos = Utils.GetPosition(obj);
         Vector3 targetPos = new Vector3(targetX, targetY, targetZ);
         Vector3 direction = (targetPos - currentPos).normalized;
-        Vector3 step = direction * speed * Time.deltaTime;
+        Vector3 step = direction * speed * Utils.DeltaTime;
 
         if (step.magnitude > Vector3.Distance(currentPos, targetPos))
             step = targetPos - currentPos;
@@ -140,80 +85,32 @@ public static class Action
         float z = (float)parser.ParseNumber(zExp).GetNumber();
         float speed = (float)parser.ParseNumber(speedExp).GetNumber();
 
-        NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
-        if (agent == null) return;
-
-        agent.speed = speed;
-        Vector3 target = new Vector3(x, y, z); //If the NavMesh is on a plain terrain, y will be ignored
-
-        if (agent.isOnNavMesh) agent.SetDestination(target);
-        else Debug.LogWarning($"'{obj.name}' is not on the NavMesh, it cannot be navigated");
+        Utils.SetNavigationTarget(obj, speed, new Vector3(x, y, z));
     }
 
     public static void LoadScene()
     {
-        SceneManager.LoadScene(0);
+        Utils.LoadFirstScene();
     }
 
     public static void QuitGame()
     {
-        Application.Quit();
+        Utils.QuitApplication();
     }
 
     public static void PlaySound(string audioClip, GameObject obj)
     {
-        AudioSource[] audios = obj.GetComponents<AudioSource>();
-        foreach (AudioSource audio in audios)
-        {
-            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
-            {
-                audio.Play();
-                return;
-            }
-        }
-
-        AudioSource[] childAudios = obj.GetComponentsInChildren<AudioSource>();
-        foreach (AudioSource audio in childAudios)
-        {
-            if (audio.gameObject == obj) continue;
-            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
-            {
-                audio.Play();
-                return;
-            }
-        }
+        Utils.PlaySound(audioClip, obj);
     }
 
     public static void PlayParticles(string particleSystemName, GameObject obj)
     {
-        ParticleSystem ps = obj.GetComponent<ParticleSystem>();
-        if (ps != null && obj.name == particleSystemName && !ps.isPlaying)
-        {
-            ps.Play();
-            return;
-        }
-
-        ParticleSystem[] systems = obj.GetComponentsInChildren<ParticleSystem>();
-        foreach (ParticleSystem childPs in systems)
-        {
-            if (childPs.gameObject == obj) continue;
-            if (childPs.gameObject.name == particleSystemName && !childPs.isPlaying)
-            {
-                childPs.Play();
-            }
-        }
+        Utils.PlayParticles(particleSystemName, obj);
     }
 
     public static void Delete(GameObject me)
     {
-        Utils.RemoveFromCollisions(me);
-
-        // Keep the actor set fixed during the current scheduler pass. The entry
-        // is removed when the pass finishes; Unity destroys the object afterwards.
-        if (me.TryGetComponent(out IGameRuleActor actor))
-            ActorScheduler.Unregister(actor);
-
-        Object.Destroy(me);
+        Utils.DeleteActor(me);
     }
 
     public static void Rotate(string angleExp, string rxExp, string ryExp, string rzExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -227,7 +124,7 @@ public static class Action
         float ry = (float)parser.ParseNumber(ryExp).GetNumber();
         float rz = (float)parser.ParseNumber(rzExp).GetNumber();
 
-        float angleDelta = angleSpeed * Time.deltaTime;
+        float angleDelta = angleSpeed * Utils.DeltaTime;
 
         Vector3 localAxis = new Vector3(rx, ry, rz).normalized;
         if (localAxis == Vector3.zero) localAxis = Vector3.up;
@@ -254,7 +151,7 @@ public static class Action
         Vector3 currentDir = Utils.GetPosition(obj) - pivot;
 
         Quaternion targetRot = Quaternion.LookRotation(targetDir.normalized, Vector3.up);
-        Quaternion newRotation = Quaternion.RotateTowards(Utils.GetRotation(obj), targetRot, a * Time.deltaTime);
+        Quaternion newRotation = Quaternion.RotateTowards(Utils.GetRotation(obj), targetRot, a * Utils.DeltaTime);
         Utils.SetRotation(obj, newRotation);
 
         Vector3 rotatedPos = pivot + targetRot * currentDir.normalized * currentDir.magnitude;
@@ -279,10 +176,7 @@ public static class Action
         ).normalized;
 
         Vector3 forceVector = direction * force;
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-
-        if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
-        else obj.transform.position += forceVector * 0.02f;
+        Utils.ApplyForce(obj, forceVector);
     }
 
     public static void PushTo(string forceExp, string xExp, string yExp, string zExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -300,9 +194,7 @@ public static class Action
         Vector3 direction = (targetPos - Utils.GetPosition(obj)).normalized;
         Vector3 forceVector = direction * force;
 
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-        if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
-        else obj.transform.position += forceVector * 0.02f;
+        Utils.ApplyForce(obj, forceVector);
     }
 
     public static void Torque(string rxExp, string ryExp, string rzExp, GameObject obj, Dictionary<string, GameObject> scopeList)
@@ -316,32 +208,7 @@ public static class Action
         float rz = (float)parser.ParseNumber(rzExp).GetNumber();
 
         Vector3 torqueVector = new Vector3(rx, ry, rz);
-        Rigidbody rb = obj.GetComponent<Rigidbody>();
-        if (rb != null) rb.AddTorque(torqueVector, ForceMode.Force);
-        else obj.transform.Rotate(torqueVector * Time.deltaTime, Space.Self);
-
-        Utils.SetProperty(obj.name + ".rx", obj.transform.eulerAngles.x, obj);
-        Utils.SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
-        Utils.SetProperty(obj.name + ".rz", obj.transform.eulerAngles.z, obj);
+        Utils.ApplyTorque(obj, torqueVector);
     }
 
-    /// <summary>
-    /// Finds the tag assigned to an actor by searching all root GameObjects (including inactive)
-    /// for one with the matching name. The tag was set by Loader.LoadPrefabs from the actor's Tag field.
-    /// </summary>
-    private static string FindTagForActor(string actorName)
-    {
-        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
-        {
-            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
-            if (!scene.isLoaded) continue;
-
-            foreach (var rootObj in scene.GetRootGameObjects())
-            {
-                if (rootObj.name == actorName && !rootObj.CompareTag("Untagged"))
-                    return rootObj.tag;
-            }
-        }
-        return null;
-    }
 }

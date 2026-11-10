@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: SURVIVAL_SHOOTER
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
   projectName: SURVIVAL_SHOOTER
+  jsonFileName: SURVIVAL_SHOOTER.json
   sceneData:
     GameName: SURVIVAL_SHOOTER
     ScreenResolution:
@@ -76,7 +77,7 @@ MonoBehaviour:
       - 0
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -109,7 +110,7 @@ MonoBehaviour:
       - 0
       - 0
       Rotation:
-      - -0
+      - 0
       - 0
       - 0
       Scale:
@@ -896,7 +897,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -929,7 +930,7 @@ MonoBehaviour:
     - 0
     - 0
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:

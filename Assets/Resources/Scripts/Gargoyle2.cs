@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class LightingReflection : MonoBehaviour, IGameRuleActor {
+public class Gargoyle2 : MonoBehaviour, IGameRuleActor {
     public bool Active = true;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){

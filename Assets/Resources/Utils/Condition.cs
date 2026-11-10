@@ -24,16 +24,7 @@ public static class Condition
 
     public static bool Collision(string tag, GameObject obj)
     {
-        var script = obj.GetComponent(obj.name);
-        var tagCollisionsField = script.GetType().GetField("TagCollisions");
-        if (tagCollisionsField == null) return false;
-
-        var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
-        if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
-
-        tagCollisions[tag].RemoveWhere(o => o == null);
-
-        return tagCollisions[tag].Count > 0;
+        return Utils.HasCollision(tag, obj);
     }
 
     public static bool Keyboard(string key, string keyMode)
@@ -51,13 +42,7 @@ public static class Condition
 
         if (onActor.Contains("true"))
         {
-            bool isOverActor = false;
-            Camera camera = Camera.main;
-            if (camera == null) return false;
-
-            Ray ray = camera.ScreenPointToRay(GameRuleInput.PointerPosition(type));
-            if (Physics.Raycast(ray, out RaycastHit hit))
-                isOverActor = hit.collider.gameObject == obj;
+            bool isOverActor = Utils.IsPointerOverActor(obj, GameRuleInput.PointerPosition(type));
 
             return isOverMode ? isOverActor : isOverActor && inputMatches;
         }
@@ -69,26 +54,22 @@ public static class Condition
     {
         float seconds = float.Parse(secondsString, System.Globalization.CultureInfo.InvariantCulture);
 
-        var script = obj.GetComponent(obj.name);
-        var field = script.GetType().GetField("timers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (field == null) return false;
-
-        var timers = field.GetValue(script) as Dictionary<string, float>;
+        var timers = Utils.GetActorTimers(obj);
         if (timers == null) return false;
 
         string key = "timer_" + secondsString;
 
         if (!timers.ContainsKey(key))
         {
-            timers[key] = Time.time;
+            timers[key] = Utils.ElapsedTime;
             return false;
         }
 
         float lastTime = timers[key];
 
-        if (Time.time - lastTime >= seconds)
+        if (Utils.ElapsedTime - lastTime >= seconds)
         {
-            timers[key] = Time.time;
+            timers[key] = Utils.ElapsedTime;
             return true;
         }
 

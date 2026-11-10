@@ -1,10 +1,223 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using System.Linq;
 
 public static class Utils
 {
+    // Runtime bridge: Unity access lives here; Action and Condition keep rule semantics.
+    // Calls stay synchronous and keep the scheduler's existing execution order.
+    public static float DeltaTime => Time.deltaTime;
+    public static float ElapsedTime => Time.time;
+
+    public static void SpawnActor(string prefabName, GameObject spawnerObj, Vector3 offsetPos, Vector3 offsetRot)
+    {
+        var prefab = Resources.Load<GameObject>($"Prefabs/{prefabName}");
+        if (!prefab)
+        {
+            Debug.LogWarning($"Prefab '{prefabName}' no encontrado en Resources/Prefabs.");
+            return;
+        }
+
+        var newObj = UnityEngine.Object.Instantiate(prefab);
+        newObj.name = prefab.name;
+        newObj.SetActive(true);
+
+        // Copy the tag from the original scene instance (including inactive objects set up by Loader)
+        string actorTag = FindTagForActor(prefabName);
+        if (!string.IsNullOrEmpty(actorTag))
+        {
+            try { newObj.tag = actorTag; }
+            catch (UnityException) { /* Tag not registered */ }
+        }
+
+        newObj.transform.position = spawnerObj.transform.TransformPoint(offsetPos);
+        newObj.transform.rotation = spawnerObj.transform.rotation * Quaternion.Euler(offsetRot);
+        newObj.transform.localScale = prefab.transform.localScale;
+
+        var scriptType = System.Type.GetType(prefabName);
+        if (scriptType?.IsSubclassOf(typeof(MonoBehaviour)) == true)
+        {
+            var script = newObj.AddComponent(scriptType);
+            scriptType.GetField("Active")?.SetValue(script, true);
+
+            if (scriptType.GetField("propertyList")?.GetValue(script) is Dictionary<string, float> props)
+                foreach (var (prop, val) in props)
+                    scriptType.GetField(prop)?.SetValue(script, val);
+
+            // Runtime-spawned actors are appended to the deterministic order after
+            // the current scheduler pass, preserving spawn order.
+            if (script is IGameRuleActor spawnedActor)
+                ActorScheduler.RegisterSpawned(spawnedActor);
+        }
+
+        if (newObj.TryGetComponent(out LineRenderer lr))
+        {
+            Vector3 start = newObj.transform.position;
+            Vector3 dir = newObj.transform.forward;
+            Vector3 end = Physics.Raycast(start, dir, out RaycastHit hit, 100f)
+                ? hit.point
+                : start + dir * 100f;
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+    }
+
+    public static void PlayAnimation(string animationName, GameObject obj)
+    {
+        Animator animator = obj.GetComponent<Animator>();
+        if (animator != null)
+        {
+            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
+            if (!currentState.IsName(animationName)) animator.Play(animationName);
+        }
+    }
+
+    public static void PlaySound(string audioClip, GameObject obj)
+    {
+        AudioSource[] audios = obj.GetComponents<AudioSource>();
+        foreach (AudioSource audio in audios)
+        {
+            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
+            {
+                audio.Play();
+                return;
+            }
+        }
+
+        AudioSource[] childAudios = obj.GetComponentsInChildren<AudioSource>();
+        foreach (AudioSource audio in childAudios)
+        {
+            if (audio.gameObject == obj) continue;
+            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
+            {
+                audio.Play();
+                return;
+            }
+        }
+    }
+
+    public static void PlayParticles(string particleSystemName, GameObject obj)
+    {
+        ParticleSystem ps = obj.GetComponent<ParticleSystem>();
+        if (ps != null && obj.name == particleSystemName && !ps.isPlaying)
+        {
+            ps.Play();
+            return;
+        }
+
+        ParticleSystem[] systems = obj.GetComponentsInChildren<ParticleSystem>();
+        foreach (ParticleSystem childPs in systems)
+        {
+            if (childPs.gameObject == obj) continue;
+            if (childPs.gameObject.name == particleSystemName && !childPs.isPlaying)
+            {
+                childPs.Play();
+            }
+        }
+    }
+
+    public static void DeleteActor(GameObject me)
+    {
+        RemoveFromCollisions(me);
+
+        // Keep the actor set fixed during the current scheduler pass. The entry
+        // is removed when the pass finishes; Unity destroys the object afterwards.
+        if (me.TryGetComponent(out IGameRuleActor actor))
+            ActorScheduler.Unregister(actor);
+
+        UnityEngine.Object.Destroy(me);
+    }
+
+    public static void LoadFirstScene()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public static void QuitApplication()
+    {
+        Application.Quit();
+    }
+
+    public static void SetNavigationTarget(GameObject obj, float speed, Vector3 target)
+    {
+        NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
+        if (agent == null) return;
+
+        agent.speed = speed;
+
+        if (agent.isOnNavMesh) agent.SetDestination(target);
+        else Debug.LogWarning($"'{obj.name}' is not on the NavMesh, it cannot be navigated");
+    }
+
+    public static void ApplyForce(GameObject obj, Vector3 forceVector)
+    {
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+
+        if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
+        else obj.transform.position += forceVector * 0.02f;
+    }
+
+    public static void ApplyTorque(GameObject obj, Vector3 torqueVector)
+    {
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null) rb.AddTorque(torqueVector, ForceMode.Force);
+        else obj.transform.Rotate(torqueVector * Time.deltaTime, Space.Self);
+
+        SetProperty(obj.name + ".rx", obj.transform.eulerAngles.x, obj);
+        SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
+        SetProperty(obj.name + ".rz", obj.transform.eulerAngles.z, obj);
+    }
+
+    // Tags are inherited from scene actors, including inactive root objects.
+    private static string FindTagForActor(string actorName)
+    {
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+            if (!scene.isLoaded) continue;
+
+            foreach (var rootObj in scene.GetRootGameObjects())
+            {
+                if (rootObj.name == actorName && !rootObj.CompareTag("Untagged"))
+                    return rootObj.tag;
+            }
+        }
+        return null;
+    }
+
+    public static bool HasCollision(string tag, GameObject obj)
+    {
+        var script = obj.GetComponent(obj.name);
+        var tagCollisionsField = script.GetType().GetField("TagCollisions");
+        if (tagCollisionsField == null) return false;
+
+        var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
+        if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
+
+        tagCollisions[tag].RemoveWhere(o => o == null);
+
+        return tagCollisions[tag].Count > 0;
+    }
+
+    public static bool IsPointerOverActor(GameObject obj, Vector2 pointerPosition)
+    {
+        Camera camera = Camera.main;
+        if (camera == null) return false;
+
+        Ray ray = camera.ScreenPointToRay(pointerPosition);
+        return Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject == obj;
+    }
+
+    public static Dictionary<string, float> GetActorTimers(GameObject obj)
+    {
+        var script = obj.GetComponent(obj.name);
+        var field = script.GetType().GetField("timers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        return field?.GetValue(script) as Dictionary<string, float>;
+    }
+
     public static Vector3 GetPosition(GameObject obj)
     {
         if (obj == null) return Vector3.zero;

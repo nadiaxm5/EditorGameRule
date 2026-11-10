@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: TANKS
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
   projectName: TANKS
+  jsonFileName: TANKS.json
   sceneData:
     GameName: TANKS
     ScreenResolution:
