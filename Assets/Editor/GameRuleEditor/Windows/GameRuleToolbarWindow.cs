@@ -115,15 +115,12 @@ namespace GameRuleEditor.Windows
             leftGroup.style.alignItems = Align.Center;
 
             var projectMenu = new ToolbarMenu();
-            projectMenu.text = "Project";
-            projectMenu.menu.AppendAction("New Project", a => OnNewProject());
-            projectMenu.menu.AppendAction("Open Project", a => OnOpenProject());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Import JSON", a => OnImportJson());
-            projectMenu.menu.AppendAction("Export to JSON", a => OnExportJson());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Close Project", a => OnCloseProject());
+            projectMenu.text = "Project Actions";
+            GameRuleTopMenuActions.PopulateProjectMenu(projectMenu.menu);
+            var jsonMenu = new ToolbarMenu { text = "JSON Actions" };
+            GameRuleTopMenuActions.PopulateJsonMenu(jsonMenu.menu);
             leftGroup.Add(projectMenu);
+            leftGroup.Add(jsonMenu);
 
             // Grupo centro (antes estaba a la derecha)
             var middleGroup = new VisualElement();
@@ -204,100 +201,12 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        private void OnNewProject()
-        {
-            ProjectController.EnsureProjectsFolder();
-            string newPath = EditorUtility.SaveFilePanelInProject(
-                "Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project",
-                ProjectController.ProjectsAssetFolder);
-            if (!string.IsNullOrEmpty(newPath))
-            {
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-                
-                string projectName = Path.GetFileNameWithoutExtension(newPath);
-                controller.CreateAndGenerateProject(projectName, newPath);
-            }
-        }
-
-        private void OnOpenProject()
-        {
-            ProjectController.EnsureProjectsFolder();
-            string path = EditorUtility.OpenFilePanel(
-                "Open Project", ProjectController.ProjectsAbsoluteFolder, "asset");
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (path.StartsWith(Application.dataPath))
-                {
-                    path = "Assets" + path.Substring(Application.dataPath.Length);
-                }
-                var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(path);
-                if (project != null)
-                {
-                    if (controller == null)
-                        controller = GameRuleLayoutManager.GetOrCreateController(context);
-                    controller.OpenAndGenerateProject(project);
-                }
-                else
-                {
-                    EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
-                }
-            }
-        }
-
-        private void OnImportJson()
-        {
-            if (controller == null)
-                controller = GameRuleLayoutManager.GetOrCreateController(context);
-
-            string jsonPath = EditorUtility.OpenFilePanel("Import JSON", Application.dataPath + "/Resources/Games", "json");
-            if (string.IsNullOrEmpty(jsonPath)) return;
-
-            controller.ImportJsonAsProject(jsonPath);
-            Rebuild();
-        }
-
-        private void OnExportJson()
-        {
-            if (context?.currentProject == null) return;
-            string path = EditorUtility.SaveFilePanel("Export to JSON", Application.dataPath + "/Resources/Games", context.currentProject.projectName + ".json", "json");
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-                controller.SaveProjectToJson(path);
-                EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
-            }
-        }
-
-        private void OnCloseProject()
-        {
-            if (context == null) return;
-            context.currentProject = null;
-            context.CloseInspector();
-            Rebuild();
-        }
-
-        private void OnSaveProject()
-        {
-            if (context?.currentProject != null)
-            {
-                EditorUtility.SetDirty(context.currentProject);
-                AssetDatabase.SaveAssets();
-
-                string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
-                if (!Directory.Exists(gamesFolder))
-                    Directory.CreateDirectory(gamesFolder);
-
-                string jsonPath = Path.Combine(gamesFolder, context.currentProject.projectName + ".json");
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-
-                controller.SaveProjectToJson(jsonPath);
-                AssetDatabase.Refresh();
-                Debug.Log($"Project saved and JSON exported: {jsonPath}");
-            }
-        }
+        private void OnNewProject() => GameRuleTopMenuActions.NewProject();
+        private void OnOpenProject() => GameRuleTopMenuActions.OpenProject();
+        private void OnImportJson() => GameRuleTopMenuActions.ImportJson();
+        private void OnExportJson() => GameRuleTopMenuActions.ExportJson();
+        private void OnCloseProject() => GameRuleTopMenuActions.CloseProject();
+        private void OnSaveProject() => GameRuleTopMenuActions.SaveProject();
 
         private void OnPlayButton()
         {

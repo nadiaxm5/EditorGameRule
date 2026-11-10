@@ -16,6 +16,22 @@ namespace GameRuleEditor.Core
         [Header("Project Info")]
         public string projectName = "NewProject";
 
+        // Editor bookkeeping; deliberately excluded from JSON export and save-point comparisons.
+        [SerializeField, HideInInspector] internal string jsonFileName;
+
+        [System.Serializable]
+        private class EditableState
+        {
+            public string projectName;
+            public SceneJson sceneData;
+            public List<ActorJson> actors;
+        }
+
+        internal string SerializeEditableState() => JsonUtility.ToJson(new EditableState
+        {
+            projectName = projectName, sceneData = sceneData, actors = actors
+        });
+
         [Header("Scene Configuration")]
         public SceneJson sceneData = new SceneJson();
 
@@ -27,8 +43,11 @@ namespace GameRuleEditor.Core
         /// </summary>
         public string ExportToJson()
         {
+            // Export cleanup must not mutate the editable project or its save point.
+            var exportScene = JsonUtility.FromJson<SceneJson>(JsonUtility.ToJson(this.sceneData));
+            exportScene.Cast = actors;
+            var sceneData = JsonUtility.FromJson<SceneJson>(JsonUtility.ToJson(exportScene));
             // Sync Actors
-            sceneData.Cast = new List<ActorJson>(actors);
 
             // Backup and temp cleanup of variables
             var realVariables = sceneData.CustomVariables;
@@ -194,8 +213,18 @@ namespace GameRuleEditor.Core
         public void SaveToJsonFile(string path)
         {
             string json = ExportToJson();
-            System.IO.File.WriteAllText(path, json);
-            Debug.Log($"Project saved to: {path}");
+            string temporaryPath = path + "." + System.Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                System.IO.File.WriteAllText(temporaryPath, json);
+                if (System.IO.File.Exists(path)) System.IO.File.Replace(temporaryPath, path, null);
+                else System.IO.File.Move(temporaryPath, path);
+            }
+            finally
+            {
+                if (System.IO.File.Exists(temporaryPath)) System.IO.File.Delete(temporaryPath);
+            }
+            Debug.Log($"Project saved to: {path.Replace('\\', '/')}");
         }
 
         public static GameRuleProject ImportFromJson(string jsonPath)
@@ -208,6 +237,8 @@ namespace GameRuleEditor.Core
 
             string json = System.IO.File.ReadAllText(jsonPath);
             SceneJson sceneData = JsonUtility.FromJson<SceneJson>(json);
+            if (sceneData == null || string.IsNullOrWhiteSpace(sceneData.GameName))
+                throw new System.FormatException("The JSON must describe a GameRule project with a GameName.");
 
             // --- SANITIZE & DEFAULTS ---
             // Si el JSON importado no ten�a estos campos, JsonUtility los deja null.

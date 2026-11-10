@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
   m_Name: NewProject2
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
-  projectName: NewProject2
+  projectName: NewProjectPrueba
+  jsonFileName: NewProjectPrueba.json
   sceneData:
-    GameName: NewProject2
+    GameName: NewProjectPrueba
     ScreenResolution:
     - 1920
     - 1080

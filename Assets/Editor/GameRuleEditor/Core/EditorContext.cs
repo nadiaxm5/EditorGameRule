@@ -32,6 +32,11 @@ namespace GameRuleEditor.Core
         [Header("Current Project")]
         public GameRuleProject currentProject;
 
+        // Persist the explicit save point across script/domain reloads. Unity may save
+        // dirty assets elsewhere, so its dirty flag alone cannot implement Discard.
+        [SerializeField, HideInInspector] internal GameRuleProject savedProject;
+        [SerializeField, HideInInspector] internal string savedProjectState;
+
         [Header("Selection State")]
         public int selectedActorIndex = -1;
         public int selectedScriptIndex = -1;
@@ -316,9 +321,11 @@ namespace GameRuleEditor.Core
         /// </summary>
         public void Clear()
         {
-            currentProject = null;
-            selectedActorIndex = -1;
-            selectedScriptIndex = -1;
+            savedProject = null;
+            savedProjectState = null;
+            CloseInspector();
+            LoadProject(null);
+            NotifyAll();
         }
     }
 }

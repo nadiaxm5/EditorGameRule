@@ -1,152 +1,115 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.Core;
 
 namespace GameRuleEditor.Windows
 {
-    /// <summary>
-    /// Unity top menu integration for GameRule actions.
-    /// Mirrors the Project toolbar menu so actions are available from the main menu bar.
-    /// </summary>
+    /// <summary>Shared entry points for the main menu, Cast and Tools.</summary>
     public static class GameRuleTopMenuActions
     {
-        [MenuItem("GameRule/Actions/New Project", priority = 20)]
-        public static void NewProject()
+        [MenuItem("GameRule/Project Actions/New Project", priority = 10)]
+        public static void NewProject() => Run(() =>
         {
-            if (!TryGetContextAndController(out var context, out var controller)) return;
+            if (TryGetContextAndController(out _, out var controller))
+                GameRuleProjectDialog.ShowNew(controller);
+        });
 
-            ProjectController.EnsureProjectsFolder();
-            string newPath = EditorUtility.SaveFilePanelInProject(
-                "Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project",
-                ProjectController.ProjectsAssetFolder);
-            if (string.IsNullOrEmpty(newPath)) return;
-
-            string projectName = Path.GetFileNameWithoutExtension(newPath);
-            controller.CreateAndGenerateProject(projectName, newPath);
-        }
-
-        [MenuItem("GameRule/Actions/Open Project", priority = 21)]
-        public static void OpenProject()
+        [MenuItem("GameRule/Project Actions/Open Project", priority = 11)]
+        public static void OpenProject() => Run(() =>
         {
-            if (!TryGetContextAndController(out _, out var controller)) return;
+            if (TryGetContextAndController(out _, out var controller))
+                GameRuleProjectDialog.ShowOpen(controller);
+        });
 
-            ProjectController.EnsureProjectsFolder();
-            string path = EditorUtility.OpenFilePanel(
-                "Open Project", ProjectController.ProjectsAbsoluteFolder, "asset");
-            if (string.IsNullOrEmpty(path)) return;
+        [MenuItem("GameRule/Project Actions/Save Project", priority = 12)]
+        public static void SaveProject() => Run(() =>
+        {
+            if (TryGetContextAndController(out _, out var controller)) controller.SaveProject();
+        });
 
-            if (path.StartsWith(Application.dataPath))
-            {
-                path = "Assets" + path.Substring(Application.dataPath.Length);
-            }
+        [MenuItem("GameRule/Project Actions/Close Project", priority = 13)]
+        public static void CloseProject() => Run(() =>
+        {
+            if (TryGetContextAndController(out _, out var controller)) controller.CloseProject();
+        });
 
-            var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(path);
-            if (project != null)
-            {
-                controller.OpenAndGenerateProject(project);
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
-            }
-        }
-
-        [MenuItem("GameRule/Actions/Import version", priority = 23)]
-        public static void ImportJson()
+        [MenuItem("GameRule/JSON Actions/Import JSON", priority = 30)]
+        public static void ImportJson() => Run(() =>
         {
             if (!TryGetContextAndController(out _, out var controller)) return;
+            string path = EditorUtility.OpenFilePanel("Import JSON",
+                Path.Combine(Application.dataPath, "Resources/Games"), "json");
+            if (!string.IsNullOrEmpty(path)) controller.ImportJsonAsProject(path);
+        });
 
-            string jsonPath = EditorUtility.OpenFilePanel(
-                "Import version", Application.dataPath + "/Resources/Games", "json");
-            if (string.IsNullOrEmpty(jsonPath)) return;
-
-            controller.ImportJsonAsProject(jsonPath);
-        }
-
-        [MenuItem("GameRule/Actions/Export version", priority = 24)]
-        public static void ExportJson()
+        [MenuItem("GameRule/JSON Actions/Export JSON", priority = 31)]
+        public static void ExportJson() => Run(() =>
         {
-            if (!TryGetContextAndController(out var context, out var controller)) return;
-            if (context.currentProject == null)
-            {
-                EditorUtility.DisplayDialog("No Project", "Load or create a project first.", "OK");
-                return;
-            }
-
-            string path = EditorUtility.SaveFilePanel(
-                "Export version",
-                Application.dataPath + "/Resources/Games",
-                context.currentProject.projectName + ".json",
-                "json");
+            if (!TryGetContextAndController(out var context, out var controller) ||
+                context.currentProject == null) return;
+            string path = EditorUtility.SaveFilePanel("Export JSON",
+                Path.Combine(Application.dataPath, "Resources/Games"),
+                context.currentProject.projectName + ".json", "json");
             if (string.IsNullOrEmpty(path)) return;
-
+            // Export is a snapshot, not an implicit Save or a new save destination.
             controller.SaveProjectToJson(path);
-            SaveProject();
-            EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
-        }
-
-        [MenuItem("GameRule/Actions/Save Project", priority = 25)]
-        public static void SaveProject()
-        {
-            if (!TryGetContextAndController(out var context, out var controller)) return;
-            if (context.currentProject == null)
-            {
-                EditorUtility.DisplayDialog("No Project", "Load or create a project first.", "OK");
-                return;
-            }
-
-            EditorUtility.SetDirty(context.currentProject);
-            AssetDatabase.SaveAssets();
-
-            string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
-            if (!Directory.Exists(gamesFolder))
-            {
-                Directory.CreateDirectory(gamesFolder);
-            }
-
-            string jsonPath = Path.Combine(gamesFolder, context.currentProject.projectName + ".json");
-            controller.SaveProjectToJson(jsonPath);
             AssetDatabase.Refresh();
-            Debug.Log($"Project saved and JSON exported: {jsonPath}");
+            EditorUtility.DisplayDialog("Export JSON", "Project exported successfully.", "OK");
+        });
+
+        [MenuItem("GameRule/Project Actions/New Project", true)]
+        [MenuItem("GameRule/Project Actions/Open Project", true)]
+        [MenuItem("GameRule/JSON Actions/Import JSON", true)]
+        public static bool CanManageProjects() =>
+            !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling;
+
+        [MenuItem("GameRule/Project Actions/Save Project", true)]
+        [MenuItem("GameRule/Project Actions/Close Project", true)]
+        [MenuItem("GameRule/JSON Actions/Export JSON", true)]
+        public static bool HasEditableProject() => CanManageProjects() &&
+            AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath)?.currentProject != null;
+
+        public static void PopulateProjectMenu(DropdownMenu menu)
+        {
+            menu.AppendAction("New Project", _ => NewProject(), _ => Status(CanManageProjects()));
+            menu.AppendAction("Open Project", _ => OpenProject(), _ => Status(CanManageProjects()));
+            menu.AppendAction("Save Project", _ => SaveProject(), _ => Status(HasEditableProject()));
+            menu.AppendAction("Close Project", _ => CloseProject(), _ => Status(HasEditableProject()));
         }
 
-        [MenuItem("GameRule/Actions/Close Project", priority = 27)]
-        public static void CloseProject()
+        public static void PopulateJsonMenu(DropdownMenu menu)
         {
-            if (!TryGetContextAndController(out var context, out _)) return;
-            context.currentProject = null;
-            context.CloseInspector();
-            EditorUtility.SetDirty(context);
-            AssetDatabase.SaveAssets();
+            menu.AppendAction("Import JSON", _ => ImportJson(), _ => Status(CanManageProjects()));
+            menu.AppendAction("Export JSON", _ => ExportJson(), _ => Status(HasEditableProject()));
+        }
+
+        private static DropdownMenuAction.Status Status(bool enabled) =>
+            enabled ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled;
+
+        internal static void Run(System.Action operation)
+        {
+            if (!CanManageProjects()) return;
+            try { operation(); }
+            catch (System.Exception error)
+            {
+                Debug.LogException(error);
+                EditorUtility.DisplayDialog("GameRule", error.Message, "OK");
+            }
         }
 
         private static bool TryGetContextAndController(out EditorContext context, out ProjectController controller)
         {
             context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
-            controller = null;
-
             if (context == null)
             {
-                GameRuleLayoutManager.OpenLayout();
+                GameRuleLayoutManager.OpenLayout(false);
                 context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
             }
-
-            if (context == null)
-            {
-                EditorUtility.DisplayDialog("GameRule", "Could not initialize EditorContext.", "OK");
-                return false;
-            }
-
-            controller = GameRuleLayoutManager.GetOrCreateController(context);
-            if (controller == null)
-            {
-                EditorUtility.DisplayDialog("GameRule", "Could not initialize ProjectController.", "OK");
-                return false;
-            }
-
-            return true;
+            controller = context == null ? null : GameRuleLayoutManager.GetOrCreateController(context);
+            return controller != null;
         }
     }
 }

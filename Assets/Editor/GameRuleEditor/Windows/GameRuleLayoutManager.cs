@@ -50,7 +50,7 @@ namespace GameRuleEditor.Windows
         /// <summary>
         /// Main entry point: opens all GameRule windows and arranges them.
         /// </summary>
-        public static void OpenLayout()
+        public static void OpenLayout(bool promptForProject = true)
         {
             var context = EnsureEditorContext();
             var controller = GetOrCreateController(context);
@@ -99,9 +99,9 @@ namespace GameRuleEditor.Windows
             };
             
             // If no project loaded, show modal dialog
-            if (context.currentProject == null)
+            if (promptForProject && context.currentProject == null)
             {
-                ShowStartDialog(context, controller, hierarchyWindow);
+                ShowStartDialog(controller);
             }
         }
 
@@ -201,7 +201,7 @@ namespace GameRuleEditor.Windows
         /// <summary>
         /// Shows a modal start dialog to create or open a project.
         /// </summary>
-        private static void ShowStartDialog(EditorContext context, ProjectController controller, GameRuleHierarchyWindow hierarchyWindow)
+        private static void ShowStartDialog(ProjectController controller)
         {
             int choice = EditorUtility.DisplayDialogComplex(
                 "GameRule Editor",
@@ -211,49 +211,8 @@ namespace GameRuleEditor.Windows
                 "Open Existing Project"
             );
 
-            switch (choice)
-            {
-                case 0: // Create New
-                    ProjectController.EnsureProjectsFolder();
-                    string newPath = EditorUtility.SaveFilePanelInProject(
-                        "Create New GameRule Project", "NewProject", "asset",
-                        "Choose where to save the new project",
-                        ProjectController.ProjectsAssetFolder);
-                    if (!string.IsNullOrEmpty(newPath))
-                    {
-                        string projectName = Path.GetFileNameWithoutExtension(newPath);
-                        controller.CreateAndGenerateProject(projectName, newPath);
-                        // Re-init hierarchy
-                        hierarchyWindow.Init(context, controller);
-                    }
-                    break;
-
-                case 2: // Open Existing
-                    ProjectController.EnsureProjectsFolder();
-                    string openPath = EditorUtility.OpenFilePanel(
-                        "Open GameRule Project", ProjectController.ProjectsAbsoluteFolder, "asset");
-                    if (!string.IsNullOrEmpty(openPath))
-                    {
-                        if (openPath.StartsWith(Application.dataPath))
-                            openPath = "Assets" + openPath.Substring(Application.dataPath.Length);
-
-                        var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(openPath);
-                        if (project != null)
-                        {
-                            controller.OpenAndGenerateProject(project);
-                            hierarchyWindow.Init(context, controller);
-                        }
-                        else
-                        {
-                            EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
-                        }
-                    }
-                    break;
-
-                case 1: // Cancel
-                default:
-                    break;
-            }
+            if (choice == 0) GameRuleProjectDialog.ShowNew(controller);
+            else if (choice == 2) GameRuleProjectDialog.ShowOpen(controller);
         }
 
         /// <summary>

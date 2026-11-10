@@ -13,6 +13,19 @@ MonoBehaviour:
   m_Name: EditorContext
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.EditorContext
   currentProject: {fileID: 11400000, guid: ab5a8449a8e1bb641bd0fd24888879c1, type: 2}
+  savedProject: {fileID: 11400000, guid: ab5a8449a8e1bb641bd0fd24888879c1, type: 2}
+  savedProjectState: '{"projectName":"NewProjectPrueba","sceneData":{"GameName":"NewProjectPrueba","ScreenResolution":[1920.0,1080.0],"CameraPosition":[0.0,1.0,-10.0],"CameraRotation":[0.0,0.0,0.0],"SunPosition":[0.0,3.0,0.0],"SunRotation":[50.0,-30.0,0.0],"SunColor":[255,255,255],"SunAmbientColor":[128,128,128],"BackgroundColor":[0,0,0],"Gravity":[0.0,-9.8100004196167,0.0],"SoundTrack":"","Mouse":[],"MouseWorld":[],"Cast":[{"ActorName":"NewActor","Active":true,"PrefabName":"BlueTank","Tag":"Untagged","IconColorHex":"","Position":[0.0,0.0,0.0],"Rotation":[0.0000025044780613825425,0.0,0.0],"Scale":[1.0,1.0,1.0],"Velocity":[],"AngularVelocity":[],"Density":0.0,"Friction":0.0,"Bounciness":0.0,"Drag":0.0,"OverrideDensity":false,"OverrideFriction":false,"OverrideBounciness":false,"OverrideDrag":false,"Properties":[],"Script":[{"Name":"Rule
+    1","When":["Timer(0)"],"Do":[""],"groupId":"gb8cf3a3b"}],"Components":[{"type":"Properties","name":"Custom
+    Properties","id":""},{"type":"Rules","name":"Rules Set","id":"gb8cf3a3b"}]},{"ActorName":"NewActor_1","Active":true,"PrefabName":"Empty","Tag":"Custom","IconColorHex":"","Position":[0.0,0.0,0.0],"Rotation":[0.0,0.0,0.0],"Scale":[1.0,1.0,1.0],"Velocity":[],"AngularVelocity":[],"Density":0.0,"Friction":0.0,"Bounciness":0.0,"Drag":0.0,"OverrideDensity":false,"OverrideFriction":false,"OverrideBounciness":false,"OverrideDrag":false,"Properties":["NewProp=0"],"Script":[{"Name":"Rule
+    1","When":["NOT Compare(0 + 0 == )"],"Do":[],"groupId":"g416cb4ae"}],"Components":[{"type":"Properties","name":"Custom
+    Properties","id":""},{"type":"Rules","name":"Rules Set","id":"g416cb4ae"}]}],"CustomVariables":[]},"actors":[{"ActorName":"NewActor","Active":true,"PrefabName":"BlueTank","Tag":"Untagged","IconColorHex":"","Position":[0.0,0.0,0.0],"Rotation":[0.0000025044780613825425,0.0,0.0],"Scale":[1.0,1.0,1.0],"Velocity":[],"AngularVelocity":[],"Density":0.0,"Friction":0.0,"Bounciness":0.0,"Drag":0.0,"OverrideDensity":false,"OverrideFriction":false,"OverrideBounciness":false,"OverrideDrag":false,"Properties":[],"Script":[{"Name":"Rule
+    1","When":["Compare( < ) AND Check(this.Active) AND Collision(Untagged) AND Keyboard(A,down)
+    AND Touch(press,false) AND Timer(0)"],"Do":["Edit(,)","Spawn(,this,0,0,0,0,0,0)","Animate()","Move(0,0,0,0)","MoveTo(0,0,0,0)","NavigateTo(0,0,0,0)","LoadScene()","QuitGame()","PlaySound()","PlayParticles()","Delete()","Rotate(0,0,0,0)","RotateTo(0,0,0,0,this.x,this.y,this.z)","Push(0,0,0,0)","PushTo(0,0,0,0)","Torque(0,0,0)"],"groupId":"gb8cf3a3b"}],"Components":[{"type":"Properties","name":"Custom
+    Properties","id":""},{"type":"Rules","name":"Rules Set","id":"gb8cf3a3b"}]},{"ActorName":"NewActor_1","Active":true,"PrefabName":"Empty","Tag":"Custom","IconColorHex":"","Position":[0.0,0.0,0.0],"Rotation":[0.0,0.0,0.0],"Scale":[1.0,1.0,1.0],"Velocity":[],"AngularVelocity":[],"Density":0.0,"Friction":0.0,"Bounciness":0.0,"Drag":0.0,"OverrideDensity":false,"OverrideFriction":false,"OverrideBounciness":false,"OverrideDrag":false,"Properties":["NewProp=0"],"Script":[{"Name":"Rule
+    1","When":["Collision(Untagged) OR Compare(this.z < )"],"Do":["Spawn(,this,0,0,0,0,0,0)","Edit(,)"],"groupId":"g416cb4ae"}],"Components":[{"type":"Properties","name":"Custom
+    Properties","id":""},{"type":"Rules","name":"Rules Set","id":"g416cb4ae"}]}]}'
   selectedActorIndex: 1
-  selectedScriptIndex: -1
+  selectedScriptIndex: 0
+  selectedRuleElementKind: 2
+  selectedRuleElementIndex: 0
   _activeInspectorMode: 2

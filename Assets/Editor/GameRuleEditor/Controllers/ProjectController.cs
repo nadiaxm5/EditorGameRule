@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameRuleEditor.Core;
 
 namespace GameRuleEditor.Controllers
@@ -21,6 +22,7 @@ namespace GameRuleEditor.Controllers
         public ProjectController(GameRuleEditor.Core.EditorContext editorContext)
         {
             context = editorContext;
+            EnsureSavePoint();
         }
 
         // Enable update loop listener
@@ -100,6 +102,7 @@ namespace GameRuleEditor.Controllers
         /// </summary>
         public void CreateNewProject(string projectName)
         {
+            context.CloseInspector();
             context.CreateNewProject(projectName);
             SyncGravityToScene();
             EditorUtility.SetDirty(context);
@@ -109,17 +112,22 @@ namespace GameRuleEditor.Controllers
         /// Creates and saves a new project, then generates its scene and scripts without entering Play mode.
         /// Keeping the whole operation here ensures every New Project entry point behaves like Open Project.
         /// </summary>
-        public void CreateAndGenerateProject(string projectName, string assetPath)
+        public bool CreateAndGenerateProject(string projectName)
         {
-            if (string.IsNullOrEmpty(assetPath)) return;
+            if (string.IsNullOrWhiteSpace(projectName) || !ConfirmLeaveProject()) return false;
+            EnsureProjectsFolder();
+            projectName = UniqueProjectName(projectName);
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath(
+                $"{ProjectsAssetFolder}/{SanitizeFileName(projectName)}.asset");
 
             CreateNewProject(projectName);
             AssetDatabase.CreateAsset(context.currentProject, assetPath);
-            AssetDatabase.SaveAssets();
+            SaveProject();
 
             // A New Project operation must never inherit a pending auto-play request.
             EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
             GenerateScene();
+            return true;
         }
 
         /// <summary>
@@ -127,8 +135,9 @@ namespace GameRuleEditor.Controllers
         /// </summary>
         public void LoadProject(GameRuleEditor.Core.GameRuleProject project)
         {
-            Undo.RecordObject(context, "Load Project");
+            context.CloseInspector();
             context.LoadProject(project);
+            CaptureSavePoint();
             SyncGravityToScene();
             SyncSoundTrackToScene();
             EditorUtility.SetDirty(context);
@@ -138,14 +147,15 @@ namespace GameRuleEditor.Controllers
         /// Loads a project and generates its scene and scripts without entering Play mode.
         /// Script attachment still happens after Unity finishes compiling them.
         /// </summary>
-        public void OpenAndGenerateProject(GameRuleEditor.Core.GameRuleProject project)
+        public bool OpenAndGenerateProject(GameRuleEditor.Core.GameRuleProject project)
         {
-            if (project == null) return;
+            if (project == null || !ConfirmLeaveProject()) return false;
 
             // An Open Project operation must never inherit a pending auto-play request.
             EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
             LoadProject(project);
             GenerateScene();
+            return true;
         }
 
         public void SyncGravityToScene()
@@ -177,15 +187,197 @@ namespace GameRuleEditor.Controllers
         {
             var project = GameRuleEditor.Core.GameRuleProject.ImportFromJson(jsonPath);
             if (project == null) return;
-
-            string safeName = SanitizeFileName(project.projectName);
-            string savePath = $"Assets/{safeName}.asset";
-            savePath = AssetDatabase.GenerateUniqueAssetPath(savePath);
-
-            AssetDatabase.CreateAsset(project, savePath);
-            AssetDatabase.SaveAssets();
-            LoadProject(project);
+            try
+            {
+                if (!ConfirmLeaveProject()) return;
+                EnsureProjectsFolder();
+                project.projectName = UniqueProjectName(project.projectName);
+                project.sceneData.GameName = project.projectName;
+                string savePath = AssetDatabase.GenerateUniqueAssetPath(
+                    $"{ProjectsAssetFolder}/{SanitizeFileName(project.projectName)}.asset");
+                AssetDatabase.CreateAsset(project, savePath);
+                LoadProject(project);
+                SaveProject();
+                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+                GenerateScene();
+            }
+            finally
+            {
+                if (!AssetDatabase.Contains(project)) Object.DestroyImmediate(project);
+            }
         }
+
+        public List<GameRuleProject> GetProjects()
+        {
+            return AssetDatabase.FindAssets("t:GameRuleProject", new[] { "Assets" })
+                .Select(guid => AssetDatabase.LoadAssetAtPath<GameRuleProject>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(project => project != null)
+                .OrderBy(project => project.projectName, System.StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        private string UniqueProjectName(string requested)
+        {
+            string baseName = SanitizeFileName(requested.Trim()).TrimEnd('.', ' ');
+            if (string.IsNullOrWhiteSpace(baseName)) baseName = "New Project";
+            var names = new HashSet<string>(GetProjects().Select(project => project.projectName),
+                System.StringComparer.OrdinalIgnoreCase);
+            string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
+            if (Directory.Exists(gamesFolder))
+                foreach (string json in Directory.GetFiles(gamesFolder, "*.json"))
+                    names.Add(Path.GetFileNameWithoutExtension(json));
+            string name = baseName;
+            for (int suffix = 2; names.Contains(name); suffix++) name = baseName + " (" + suffix + ")";
+            return name;
+        }
+
+        private void EnsureSavePoint()
+        {
+            if (context.currentProject != null && (context.savedProject != context.currentProject ||
+                string.IsNullOrEmpty(context.savedProjectState))) CaptureSavePoint();
+        }
+
+        private void CaptureSavePoint()
+        {
+            context.savedProject = context.currentProject;
+            context.savedProjectState = context.currentProject == null ? null : context.currentProject.SerializeEditableState();
+            EditorUtility.SetDirty(context);
+            AssetDatabase.SaveAssetIfDirty(context);
+        }
+
+        public bool HasUnsavedChanges
+        {
+            get
+            {
+                EnsureSavePoint();
+                return context.currentProject != null &&
+                    context.currentProject.SerializeEditableState() != context.savedProjectState;
+            }
+        }
+
+        public void SaveProject()
+        {
+            if (context.currentProject == null) return;
+            context.currentProject.sceneData.GameName = context.currentProject.projectName;
+            WriteProjectJson();
+            EditorUtility.SetDirty(context.currentProject);
+            AssetDatabase.SaveAssetIfDirty(context.currentProject);
+            CaptureSavePoint();
+            AssetDatabase.Refresh();
+        }
+
+        private bool ConfirmLeaveProject()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new System.InvalidOperationException("Stop Play mode before changing projects.");
+            if (!HasUnsavedChanges) return true;
+            int choice = EditorUtility.DisplayDialogComplex("Unsaved changes",
+                $"Save changes to '{context.currentProject.projectName}'?", "Save", "Cancel", "Discard");
+            if (choice == 1) return false;
+            if (choice == 0) SaveProject();
+            else
+            {
+                JsonUtility.FromJsonOverwrite(context.savedProjectState, context.currentProject);
+                Undo.ClearUndo(context.currentProject);
+                // Other Unity operations may already have flushed the edited asset to disk.
+                EditorUtility.SetDirty(context.currentProject);
+                AssetDatabase.SaveAssetIfDirty(context.currentProject);
+                WriteProjectJson();
+                AssetDatabase.Refresh();
+            }
+            return true;
+        }
+
+        public bool CloseProject()
+        {
+            if (!ConfirmLeaveProject()) return false;
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            context.Clear();
+            EditorUtility.SetDirty(context);
+            AssetDatabase.SaveAssetIfDirty(context);
+            return true;
+        }
+
+        private string WriteProjectJson()
+        {
+            const string gamesFolder = "Assets/Resources/Games";
+            var project = context.currentProject;
+            string assetPath = AssetDatabase.GetAssetPath(project);
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            if (string.IsNullOrEmpty(guid))
+                throw new System.InvalidOperationException("Save the project locally before generating its JSON.");
+            string name = project.projectName;
+            if (string.IsNullOrWhiteSpace(name) || name != SanitizeFileName(name) ||
+                name.EndsWith(".") || name.EndsWith(" "))
+                throw new System.InvalidOperationException("Choose a Game Name that is a valid file name before saving.");
+            string fileName = name + ".json";
+            var projects = GetProjects();
+            if (projects.Any(other => other != project &&
+                (SameJsonName(other.jsonFileName, fileName) || SameJsonName(other.projectName + ".json", fileName))))
+                throw new System.InvalidOperationException($"Another project uses '{name}'. Choose a different Game Name.");
+
+            string folder = Path.Combine(Application.dataPath, "Resources/Games");
+            Directory.CreateDirectory(folder);
+            string previous = project.jsonFileName;
+            if (!string.IsNullOrEmpty(previous) && previous != Path.GetFileName(previous))
+                throw new System.InvalidOperationException("The project's saved JSON file name is invalid.");
+
+            // Migrate the named JSON used before file ownership was recorded. Only claim
+            // a file matching this asset's original name and the GameName inside the JSON.
+            if (string.IsNullOrEmpty(previous))
+            {
+                string legacyName = Path.GetFileNameWithoutExtension(assetPath);
+                string legacyFile = legacyName + ".json";
+                string legacyPath = Path.Combine(folder, legacyFile);
+                bool claimed = projects.Any(other => other != project &&
+                    (SameJsonName(other.jsonFileName, legacyFile) ||
+                     SameJsonName(Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(other)) + ".json", legacyFile)));
+                if (!claimed && File.Exists(legacyPath))
+                {
+                    try
+                    {
+                        var legacyScene = JsonUtility.FromJson<SceneJson>(File.ReadAllText(legacyPath));
+                        if (legacyScene != null && legacyScene.GameName == legacyName) previous = legacyFile;
+                    }
+                    catch (System.ArgumentException) { /* An unrelated/invalid JSON is never adopted. */ }
+                }
+            }
+
+            string destination = gamesFolder + "/" + fileName;
+            string fullPath = Path.Combine(folder, fileName);
+            if (File.Exists(fullPath) && !SameJsonName(previous, fileName))
+                throw new System.InvalidOperationException($"'{fileName}' already exists in Resources/Games. Choose a different Game Name to avoid replacing it.");
+
+            string generated = gamesFolder + "/Generated/" + guid + ".json";
+            string source = !string.IsNullOrEmpty(previous) && File.Exists(Path.Combine(folder, previous))
+                ? gamesFolder + "/" + previous : File.Exists(Path.Combine(Application.dataPath, "Resources/Games/Generated", guid + ".json"))
+                    ? generated : null;
+            bool moved = source != null && !SameJsonName(source, destination);
+            if (moved)
+            {
+                string error = AssetDatabase.MoveAsset(source, destination);
+                if (!string.IsNullOrEmpty(error)) throw new System.IO.IOException(error);
+            }
+            try { project.SaveToJsonFile(fullPath); }
+            catch
+            {
+                if (moved) AssetDatabase.MoveAsset(destination, source);
+                throw;
+            }
+            project.jsonFileName = fileName;
+            EditorUtility.SetDirty(project);
+            AssetDatabase.SaveAssetIfDirty(project);
+
+            // Remove only this project's obsolete generated copy, after the named file is saved.
+            if (File.Exists(Path.Combine(folder, "Generated", guid + ".json")))
+                AssetDatabase.DeleteAsset(generated);
+            string generatedFolder = Path.Combine(folder, "Generated");
+            if (Directory.Exists(generatedFolder) && !Directory.EnumerateFileSystemEntries(generatedFolder).Any())
+                AssetDatabase.DeleteAsset(gamesFolder + "/Generated");
+            return fileName;
+        }
+
+        private static bool SameJsonName(string first, string second) =>
+            string.Equals(first, second, System.StringComparison.OrdinalIgnoreCase);
 
         private static string SanitizeFileName(string name)
         {
@@ -211,13 +403,7 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            string gamesFolder = Application.dataPath + "/Resources/Games";
-            if (!Directory.Exists(gamesFolder))
-                Directory.CreateDirectory(gamesFolder);
-
-            string fileName = context.currentProject.projectName + ".json";
-            string fullPath = gamesFolder + "/" + fileName;
-            context.currentProject.SaveToJsonFile(fullPath);
+            string fileName = WriteProjectJson();
             AssetDatabase.Refresh();
 
             Loader.LoadJson(fileName);
