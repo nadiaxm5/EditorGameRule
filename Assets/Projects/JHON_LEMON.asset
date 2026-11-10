@@ -65,6 +65,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: End
@@ -89,6 +90,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: Won
@@ -110,6 +112,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -137,6 +140,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -170,6 +174,7 @@ MonoBehaviour:
       - speed=1
       - offset=5.6
       - moving=0
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -267,6 +272,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: Gargoyle2
@@ -294,6 +300,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: Ghost1
@@ -322,6 +329,7 @@ MonoBehaviour:
       - zTarget=6.4
       - z0=-4.5
       - z1=6.4
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -367,6 +375,7 @@ MonoBehaviour:
       - zTarget=7.6
       - z0=-3.5
       - z1=7.6
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -416,6 +425,7 @@ MonoBehaviour:
       - x1=6.5
       - z0=5.7
       - z1=12.3
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -481,6 +491,7 @@ MonoBehaviour:
       - x1=7.4
       - z0=-5
       - z1=-2
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -525,6 +536,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: End
@@ -537,7 +549,7 @@ MonoBehaviour:
     - 1
     - 1.5
     Rotation:
-    - -0
+    - 0
     - 0
     - 0
     Scale:
@@ -555,6 +567,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components:
     - type: Properties
@@ -579,6 +592,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When:
@@ -609,6 +623,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When:
@@ -642,6 +657,7 @@ MonoBehaviour:
     - speed=1
     - offset=5.6
     - moving=0
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -739,6 +755,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: Gargoyle2
@@ -766,6 +783,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: Ghost1
@@ -794,6 +812,7 @@ MonoBehaviour:
     - zTarget=6.4
     - z0=-4.5
     - z1=6.4
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -839,6 +858,7 @@ MonoBehaviour:
     - zTarget=7.6
     - z0=-3.5
     - z1=7.6
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When: []
@@ -894,6 +914,7 @@ MonoBehaviour:
     - x1=6.5
     - z0=5.7
     - z1=12.3
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -959,6 +980,7 @@ MonoBehaviour:
     - x1=7.4
     - z0=-5
     - z1=-2
+    CustomProperties: []
     Script:
     - Name: 
       When: []

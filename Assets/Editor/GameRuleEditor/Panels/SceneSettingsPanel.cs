@@ -3,7 +3,6 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
-using System;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 
@@ -40,16 +39,7 @@ namespace GameRuleEditor.Panels
         private Vector3Field gravityField;
         private ObjectField soundTrackField;
 
-        // Variable List Container
-        private VisualElement customVariablesContainer;
-
-        // Creation Section References
-        private VisualElement valueFieldContainer;
-
-        private Func<object> activeValueGetter;
-
-        // Available types
-        private List<string> variableTypes = new List<string> { "Int", "Float", "Bool", "Vector2", "Vector3" };
+        private CustomPropertyList customVariables;
 
         public SceneSettingsPanel(EditorContext editorContext, ProjectController projectController)
         {
@@ -237,141 +227,31 @@ namespace GameRuleEditor.Panels
             });
             audioSection.Add(soundTrackField);
 
-            // Custom Variables section
-            var customVarSection = CreateSection("Custom Global Variables");
+            var customVarSection = CreateSection("Custom Global Variables", insetContent: false);
+            customVariables = new CustomPropertyList(
+                () => context.currentProject,
+                () => context.currentProject?.sceneData?.CustomVariables,
+                context.NotifyProjectChanged,
+                addButtonText: "+ Add Global Variable");
+            customVarSection.Add(customVariables);
             scrollView.Add(customVarSection);
-
-            // Variable creation
-            var creationBox = new VisualElement();
-            creationBox.style.backgroundColor = GameRuleTheme.InsetSurface;
-            creationBox.style.paddingTop = 10; creationBox.style.paddingBottom = 10;
-            creationBox.style.paddingLeft = 10; creationBox.style.paddingRight = 10;
-            creationBox.style.borderTopLeftRadius = 5; creationBox.style.borderTopRightRadius = 5;
-            creationBox.style.borderBottomLeftRadius = 5; creationBox.style.borderBottomRightRadius = 5;
-            creationBox.style.marginBottom = 10;
-
-            var creationTitle = new Label("Add New Variable");
-            creationTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
-            creationTitle.style.marginBottom = 5;
-            creationBox.Add(creationTitle);
-
-            var nameInput = CreateTextField(creationBox, "Name:", VariableLabelWidth);
-            nameInput.value = "NewVariable";
-
-            var typeInput = new PopupField<string>(variableTypes, 0);
-            AddFieldRow(creationBox, "Type:", typeInput, VariableLabelWidth);
-
-            valueFieldContainer = new VisualElement();
-            creationBox.Add(valueFieldContainer);
-
-            CreateValueField("Int"); // Default int
-
-            typeInput.RegisterValueChangedCallback(evt => CreateValueField(evt.newValue));
-
-            var addButton = new Button(() =>
-            {
-                string varName = nameInput.value;
-                if (string.IsNullOrEmpty(varName))
-                {
-                    EditorUtility.DisplayDialog("Error", "Variable name cannot be empty.", "OK");
-                    return;
-                }
-
-                object value = activeValueGetter?.Invoke();
-                string typeStr = typeInput.value.ToLower();
-
-                controller.AddCustomVariable(varName, typeStr, value);
-                nameInput.value = "NewVariable";
-            });
-            addButton.text = "+ Add Variable";
-            addButton.AddToClassList("button-success");
-            addButton.style.marginTop = 10;
-            creationBox.Add(addButton);
-
-            customVarSection.Add(creationBox);
-
-            customVariablesContainer = new VisualElement();
-            customVarSection.Add(customVariablesContainer);
-
             Add(scrollView);
-        }
-
-        private void CreateValueField(string type)
-        {
-            valueFieldContainer.Clear();
-            switch (type)
-            {
-                case "Int":
-                    var intField = new IntegerField();
-                    intField.value = 0;
-                    AddFieldRow(valueFieldContainer, "Initial Value:", intField, VariableLabelWidth);
-                    activeValueGetter = () => intField.value;
-                    break;
-
-                case "Float":
-                    var floatField = new FloatField();
-                    floatField.value = 0f;
-                    AddFieldRow(valueFieldContainer, "Initial Value:", floatField, VariableLabelWidth);
-                    activeValueGetter = () => floatField.value;
-                    break;
-
-                case "Bool":
-                    var boolField = new Toggle();
-                    boolField.value = false;
-                    AddFieldRow(valueFieldContainer, "Initial Value:", boolField, VariableLabelWidth);
-                    activeValueGetter = () => boolField.value;
-                    break;
-
-                case "Vector2":
-                    var v2Field = new Vector2Field();
-                    v2Field.value = Vector2.zero;
-                    AddFieldRow(valueFieldContainer, "Initial Value:", v2Field, VariableLabelWidth);
-                    activeValueGetter = () => v2Field.value;
-                    break;
-
-                case "Vector3":
-                    var v3Field = new Vector3Field();
-                    v3Field.value = Vector3.zero;
-                    AddFieldRow(valueFieldContainer, "Initial Value:", v3Field, VariableLabelWidth);
-                    activeValueGetter = () => v3Field.value;
-                    break;
-            }
         }
 
         #region UI Helpers
 
-        private Foldout CreateSection(string title)
+        private static Foldout CreateSection(string title, bool insetContent = true)
         {
-            var section = new Foldout();
-            section.text = title;
-            section.value = true; // Empieza extendido por defecto
-            section.AddToClassList("panel-section");
-            
-            // Buscar la etiqueta del título (que es parte del Toggle interno de Foldout) para aplicarle estilo
-            var titleLabel = section.Q<Label>();
-            if (titleLabel != null)
+            var section = new Foldout { text = title, value = true };
+            GameRuleTheme.StylePropertySection(section);
+            if (insetContent)
             {
-                titleLabel.style.fontSize = 14;
-                titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-                titleLabel.style.marginBottom = 8;
+                section.contentContainer.style.paddingLeft = 15;
+                section.contentContainer.style.marginTop = 5;
+                section.contentContainer.style.marginBottom = 8;
             }
-            
             return section;
         }
-/*
-        private VisualElement CreateSection(string title)
-        {
-            var section = new VisualElement();
-            section.AddToClassList("panel-section");
-            var titleLabel = new Label(title);
-            titleLabel.style.fontSize = 14;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.marginBottom = 8;
-            section.Add(titleLabel);
-            return section;
-        }
-*/
-        private const int VariableLabelWidth = 100;
 
         private static void AddFieldRow(VisualElement parent, string label, VisualElement field, int labelWidth = 150)
         {
@@ -484,7 +364,8 @@ namespace GameRuleEditor.Panels
             if (sunAmbientField.value != BytesToColor(scene.SunAmbientColor))
                 sunAmbientField.SetValueWithoutNotify(BytesToColor(scene.SunAmbientColor));
 
-            UpdateCustomVariablesList();
+            scene.CustomVariables ??= new List<CustomVariable>();
+            customVariables.Refresh();
         }
 
         private void UpdateVector3Field(Vector3Field field, float[] data)
@@ -493,215 +374,6 @@ namespace GameRuleEditor.Panels
             {
                 var vec = new Vector3(data[0], data[1], data[2]);
                 if (field.value != vec) field.SetValueWithoutNotify(vec);
-            }
-        }
-
-        private void UpdateCustomVariablesList()
-        {
-            if (context?.currentProject?.sceneData?.CustomVariables == null) return;
-            var variables = context.currentProject.sceneData.CustomVariables;
-
-            // Determina si es necesario reconstruir las filas para no perder el foco de escritura
-            bool needsRebuild = customVariablesContainer.childCount != variables.Count;
-            if (!needsRebuild)
-            {
-                for (int i = 0; i < variables.Count; i++)
-                {
-                    var row = customVariablesContainer[i];
-                    string expectedType = variables[i].type.ToLower();
-                    bool hasCorrectField = false;
-
-                    // Comprueba si el campo de valor visual coincide con el tipo de la variable real
-                    switch (expectedType)
-                    {
-                        case "int": hasCorrectField = row.Q<IntegerField>("VarValue") != null; break;
-                        case "float": hasCorrectField = row.Q<FloatField>("VarValue") != null; break;
-                        case "bool": hasCorrectField = row.Q<Toggle>("VarValue") != null; break;
-                        case "vector2": hasCorrectField = row.Q<Vector2Field>("VarValue") != null; break;
-                        case "vector3": hasCorrectField = row.Q<Vector3Field>("VarValue") != null; break;
-                    }
-
-                    if (!hasCorrectField)
-                    {
-                        needsRebuild = true;
-                        break;
-                    }
-                }
-            }
-
-            if (needsRebuild)
-            {
-                customVariablesContainer.Clear();
-                for (int i = 0; i < variables.Count; i++)
-                {
-                    int index = i;
-                    var customVar = variables[index];
-
-                    var item = new VisualElement();
-                    item.AddToClassList("list-item");
-                    item.style.marginTop = 5;
-                    item.style.flexDirection = FlexDirection.Row;
-                    item.style.alignItems = Align.Center;
-
-                    // Campo para el nombre
-                    var nameField = new TextField { name = "VarName", value = customVar.name, style = { width = 120, marginRight = 5 } };
-                    nameField.RegisterValueChangedCallback(evt =>
-                    {
-                        Undo.RecordObject(context.currentProject, "Change Var Name");
-                        context.currentProject.sceneData.CustomVariables[index].name = evt.newValue;
-                        EditorUtility.SetDirty(context.currentProject);
-                        context.NotifyProjectChanged();
-                    });
-                    item.Add(nameField);
-
-                    // Desplegable de tipo
-                    string currentTypeStr = customVar.type?.ToLower() ?? "int";
-                    string matchType = variableTypes.Find(t => t.ToLower() == currentTypeStr) ?? "Int";
-
-                    var typeDropdown = new PopupField<string>(variableTypes, variableTypes.IndexOf(matchType)) { name = "VarType", style = { width = 80, marginRight = 5 } };
-                    typeDropdown.RegisterValueChangedCallback(evt =>
-                    {
-                        Undo.RecordObject(context.currentProject, "Change Var Type");
-                        var v = context.currentProject.sceneData.CustomVariables[index];
-                        v.type = evt.newValue.ToLower();
-                        v.intValue = 0; v.floatValue = 0f; v.boolValue = false;
-                        if (v.type == "vector2") v.arrayValue = new float[2];
-                        if (v.type == "vector3") v.arrayValue = new float[3];
-                        EditorUtility.SetDirty(context.currentProject);
-                        context.NotifyProjectChanged();
-                    });
-                    item.Add(typeDropdown);
-
-                    // Contenedor din�mico de valor
-                    var valueContainer = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, marginRight = 5 } };
-
-                    switch (currentTypeStr)
-                    {
-                        case "int":
-                            var intF = new IntegerField { name = "VarValue", value = customVar.intValue, style = { flexGrow = 1 } };
-                            intF.RegisterValueChangedCallback(evt =>
-                            {
-                                Undo.RecordObject(context.currentProject, "Change Var Value");
-                                context.currentProject.sceneData.CustomVariables[index].intValue = evt.newValue;
-                                EditorUtility.SetDirty(context.currentProject);
-                                context.NotifyProjectChanged();
-                            });
-                            valueContainer.Add(intF);
-                            break;
-
-                        case "float":
-                            var floatF = new FloatField { name = "VarValue", value = customVar.floatValue, style = { flexGrow = 1 } };
-                            floatF.RegisterValueChangedCallback(evt =>
-                            {
-                                Undo.RecordObject(context.currentProject, "Change Var Value");
-                                context.currentProject.sceneData.CustomVariables[index].floatValue = evt.newValue;
-                                EditorUtility.SetDirty(context.currentProject);
-                                context.NotifyProjectChanged();
-                            });
-                            valueContainer.Add(floatF);
-                            break;
-
-                        case "bool":
-                            var boolF = new Toggle { name = "VarValue", value = customVar.boolValue, style = { flexGrow = 1 } };
-                            boolF.RegisterValueChangedCallback(evt =>
-                            {
-                                Undo.RecordObject(context.currentProject, "Change Var Value");
-                                context.currentProject.sceneData.CustomVariables[index].boolValue = evt.newValue;
-                                EditorUtility.SetDirty(context.currentProject);
-                                context.NotifyProjectChanged();
-                            });
-                            valueContainer.Add(boolF);
-                            break;
-
-                        case "vector2":
-                            Vector2 v2 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 2) ? new Vector2(customVar.arrayValue[0], customVar.arrayValue[1]) : Vector2.zero;
-                            var v2F = new Vector2Field { name = "VarValue", value = v2, style = { flexGrow = 1 } };
-                            v2F.RegisterValueChangedCallback(evt =>
-                            {
-                                // Manual Undo: Vector2Field (Vector2) -> float[] (type mismatch)
-                                Undo.RecordObject(context.currentProject, "Change Var Value");
-                                context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y };
-                                EditorUtility.SetDirty(context.currentProject);
-                                context.NotifyProjectChanged();
-                            });
-                            valueContainer.Add(v2F);
-                            break;
-
-                        case "vector3":
-                            Vector3 v3 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 3) ? new Vector3(customVar.arrayValue[0], customVar.arrayValue[1], customVar.arrayValue[2]) : Vector3.zero;
-                            var v3F = new Vector3Field { name = "VarValue", value = v3, style = { flexGrow = 1 } };
-                            v3F.RegisterValueChangedCallback(evt =>
-                            {
-                                // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
-                                Undo.RecordObject(context.currentProject, "Change Var Value");
-                                context.currentProject.sceneData.CustomVariables[index].arrayValue = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
-                                EditorUtility.SetDirty(context.currentProject);
-                                context.NotifyProjectChanged();
-                            });
-                            valueContainer.Add(v3F);
-                            break;
-                    }
-
-                    item.Add(valueContainer);
-
-                    // Bot�n para eliminar la variable
-                    var removeBtn = new Button(() => controller.RemoveCustomVariable(index)) { text = "Remove" };
-                    removeBtn.AddToClassList("button-danger");
-                    removeBtn.style.width = 70;
-                    item.Add(removeBtn);
-
-                    customVariablesContainer.Add(item);
-                }
-            }
-            else
-            {
-                // Solo actualiza los valores de forma silenciosa para no interrumpir si el usuario est� escribiendo
-                for (int i = 0; i < variables.Count; i++)
-                {
-                    var customVar = variables[i];
-                    var row = customVariablesContainer[i];
-
-                    var nameField = row.Q<TextField>("VarName");
-                    if (nameField != null && nameField.value != customVar.name)
-                        nameField.SetValueWithoutNotify(customVar.name ?? "");
-
-                    string safeType = customVar.type?.ToLower() ?? "int";
-                    switch (safeType)
-                    {
-                        case "int":
-                            var intF = row.Q<IntegerField>("VarValue");
-                            if (intF != null && intF.value != customVar.intValue) intF.SetValueWithoutNotify(customVar.intValue);
-                            break;
-
-                        case "float":
-                            var floatF = row.Q<FloatField>("VarValue");
-                            if (floatF != null && floatF.value != customVar.floatValue) floatF.SetValueWithoutNotify(customVar.floatValue);
-                            break;
-
-                        case "bool":
-                            var boolF = row.Q<Toggle>("VarValue");
-                            if (boolF != null && boolF.value != customVar.boolValue) boolF.SetValueWithoutNotify(customVar.boolValue);
-                            break;
-
-                        case "vector2":
-                            var v2F = row.Q<Vector2Field>("VarValue");
-                            if (v2F != null)
-                            {
-                                Vector2 v2 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 2) ? new Vector2(customVar.arrayValue[0], customVar.arrayValue[1]) : Vector2.zero;
-                                if (v2F.value != v2) v2F.SetValueWithoutNotify(v2);
-                            }
-                            break;
-
-                        case "vector3":
-                            var v3F = row.Q<Vector3Field>("VarValue");
-                            if (v3F != null)
-                            {
-                                Vector3 v3 = (customVar.arrayValue != null && customVar.arrayValue.Length >= 3) ? new Vector3(customVar.arrayValue[0], customVar.arrayValue[1], customVar.arrayValue[2]) : Vector3.zero;
-                                if (v3F.value != v3) v3F.SetValueWithoutNotify(v3);
-                            }
-                            break;
-                    }
-                }
             }
         }
 

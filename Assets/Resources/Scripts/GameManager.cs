@@ -13,18 +13,18 @@ public class GameManager : MonoBehaviour
     private Quaternion previousCameraRotation;
     private Quaternion currentCameraRotation;
 
-    private static readonly string[] ActorOrder = new string[] { "NewActor", "NewActor_1" };
+    private static readonly string[] ActorOrder = new string[] { "BlueTank", "RedTank" };
 
-    public string GameName = "NewProjectPrueba";
+    public string GameName = "TypedActorPropertiesTest";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
-    public Vector3 CameraPosition = new Vector3(0f, 1f, -10f);
-    public Vector3 CameraRotation = new Vector3(0f, 0f, 0f);
-    public Vector3 SunPosition = new Vector3(0f, 3f, 0f);
+    public Vector3 CameraPosition = new Vector3(0f, 14f, -13f);
+    public Vector3 CameraRotation = new Vector3(50f, 0f, 0f);
+    public Vector3 SunPosition = new Vector3(0f, 10f, 0f);
     public Vector3 SunRotation = new Vector3(50f, -30f, 0f);
     public Color SunColor = new Color32(255, 255, 255, 255);
-    public Color SunAmbientColor = new Color32(128, 128, 128, 255);
-    public Color BackgroundColor = new Color32(0, 0, 0, 255);
-    public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);
+    public Color SunAmbientColor = new Color32(180, 180, 180, 255);
+    public Color BackgroundColor = new Color32(34, 49, 63, 255);
+    public Vector3 Gravity = new Vector3(0f, 0f, 0f);
     public string SoundTrack = "";
     public float FPS { get; private set; }
     public float Time { get; private set; }
@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public Vector3 Mouse = Vector3.zero;
     public Vector3 MouseWorld = Vector3.zero;
 
+    // Custom Global Variables
+    public bool TypedTestPassed = false;
     void Start()
     {
         if (Instance == null)

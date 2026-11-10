@@ -31,7 +31,7 @@ public static class Loader
             {
                 ActorPhysicsUtility.NormalizeLegacyOverrides(actor);
                 if (actor.Script == null) actor.Script = new List<SentenceJson>();
-                if (actor.Properties == null) actor.Properties = new List<string>();
+                actor.GetCustomProperties();
                 foreach (var sentence in actor.Script)
                 {
                     if (sentence.When == null) sentence.When = new List<string>();

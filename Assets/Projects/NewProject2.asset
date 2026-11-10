@@ -74,6 +74,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When:
@@ -117,6 +118,7 @@ MonoBehaviour:
       OverrideDrag: 0
       Properties:
       - NewProp=0
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When:
@@ -160,6 +162,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When:
@@ -217,8 +220,14 @@ MonoBehaviour:
     OverrideFriction: 0
     OverrideBounciness: 0
     OverrideDrag: 0
-    Properties:
-    - NewProp=0
+    Properties: []
+    CustomProperties:
+    - name: NewProp
+      type: float
+      intValue: 0
+      floatValue: 0.5
+      boolValue: 0
+      arrayValue: []
     Script:
     - Name: Rule 1
       When:
@@ -234,3 +243,51 @@ MonoBehaviour:
     - type: Rules
       name: Rules Set
       id: g416cb4ae
+  - ActorName: NewActor_2
+    Active: 1
+    PrefabName: Empty
+    Tag: Untagged
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
+    Properties: []
+    CustomProperties:
+    - name: NewProp
+      type: bool
+      intValue: 0
+      floatValue: 0
+      boolValue: 1
+      arrayValue:
+      - 0
+      - 0
+    - name: NewProp2
+      type: float
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Check(this.Active)
+      Do:
+      - Edit(this.Active,5)
+      groupId: g3ed0f708
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rules Set
+      id: g3ed0f708

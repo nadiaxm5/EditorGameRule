@@ -746,12 +746,7 @@ namespace GameRuleEditor.Controllers
             Undo.RecordObject(context.currentProject, "Add Actor Property");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
-            if (actor.Properties == null)
-            {
-                actor.Properties = new List<string>();
-            }
-
-            actor.Properties.Add(propertyDefinition);
+            actor.GetCustomProperties().Add(CustomVariable.FromLegacyActorProperty(propertyDefinition));
 
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
@@ -770,15 +765,14 @@ namespace GameRuleEditor.Controllers
             }
 
             ActorJson actor = context.currentProject.actors[actorIndex];
-            if (actor.Properties == null ||
-                propertyIndex < 0 ||
-                propertyIndex >= actor.Properties.Count)
+            var properties = actor.GetCustomProperties();
+            if (propertyIndex < 0 || propertyIndex >= properties.Count)
             {
                 return;
             }
 
             Undo.RecordObject(context.currentProject, "Remove Actor Property");
-            actor.Properties.RemoveAt(propertyIndex);
+            properties.RemoveAt(propertyIndex);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }

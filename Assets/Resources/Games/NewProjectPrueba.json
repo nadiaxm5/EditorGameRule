@@ -70,8 +70,13 @@
             "Position": [0.0, 0.0, 0.0],
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
-            "Properties": [
-                "NewProp=0"
+            "CustomProperties": [
+                {
+                    "name": "NewProp",
+                    "type": "float",
+                    "floatValue": 0.5,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -96,6 +101,53 @@
                     "type": "Rules",
                     "name": "Rules Set",
                     "id": "g416cb4ae"
+                }
+            ]
+        },
+        {
+            "ActorName": "NewActor_2",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "CustomProperties": [
+                {
+                    "name": "NewProp",
+                    "type": "bool",
+                    "boolValue": true,
+                    "arrayValue": [
+                        0.0,
+                        0.0
+                    ]
+                },
+                {
+                    "name": "NewProp2",
+                    "type": "float",
+                    "boolValue": false
+                }
+            ],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Check(this.Active)"
+                    ],
+                    "Do": [
+                        "Edit(this.Active,5)"
+                    ],
+                    "groupId": "g3ed0f708"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "g3ed0f708"
                 }
             ]
         }

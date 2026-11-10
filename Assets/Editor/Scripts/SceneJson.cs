@@ -50,7 +50,26 @@ public class ActorJson
     public bool OverrideFriction;
     public bool OverrideBounciness;
     public bool OverrideDrag;
+    // Legacy entries are retained in the schema so old assets and JSON can be loaded.
     public List<string> Properties;
+    public List<CustomVariable> CustomProperties = new List<CustomVariable>();
+
+    public List<CustomVariable> GetCustomProperties()
+    {
+        if (CustomProperties == null) CustomProperties = new List<CustomVariable>();
+        if (Properties != null && Properties.Count > 0)
+        {
+            foreach (string entry in Properties)
+            {
+                if (string.IsNullOrWhiteSpace(entry)) continue;
+                CustomVariable property = CustomVariable.FromLegacyActorProperty(entry);
+                if (!CustomProperties.Exists(existing => existing.name == property.name))
+                    CustomProperties.Add(property);
+            }
+            Properties.Clear();
+        }
+        return CustomProperties;
+    }
     public List<SentenceJson> Script = new List<SentenceJson>();
     public List<ActorComponentMeta> Components = new List<ActorComponentMeta>();
 }
@@ -73,6 +92,18 @@ public class CustomVariable
     public float floatValue;
     public bool boolValue;
     public float[] arrayValue;
+
+    public static CustomVariable FromLegacyActorProperty(string entry)
+    {
+        var parts = entry.Split(new[] { '=' }, 2);
+        float value = 0f;
+        if (parts.Length == 2)
+        {
+            float.TryParse(parts[1].Trim().Replace(',', '.'), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out value);
+        }
+        return new CustomVariable { name = parts[0].Trim(), type = "float", floatValue = value };
+    }
 
     public object GetValue()
     {

@@ -88,10 +88,24 @@
             "Tag": "",
             "IconColorHex": "",
             "Position": [-9.800000190734864, 0.0, -3.200000047683716],
-            "Properties": [
-                "speed=1",
-                "offset=5.6",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 1.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offset",
+                    "type": "float",
+                    "floatValue": 5.599999904632568,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -228,11 +242,31 @@
             "Tag": "Enemy",
             "IconColorHex": "",
             "Position": [-5.5, 0.0, -4.5],
-            "Properties": [
-                "speed=1.0",
-                "zTarget=6.4",
-                "z0=-4.5",
-                "z1=6.4"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 1.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "zTarget",
+                    "type": "float",
+                    "floatValue": 6.400000095367432,
+                    "boolValue": false
+                },
+                {
+                    "name": "z0",
+                    "type": "float",
+                    "floatValue": -4.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "z1",
+                    "type": "float",
+                    "floatValue": 6.400000095367432,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -271,11 +305,31 @@
             "Tag": "Enemy",
             "IconColorHex": "",
             "Position": [0.8999999761581421, 0.0, -3.5],
-            "Properties": [
-                "speed=1.0",
-                "zTarget=7.6",
-                "z0=-3.5",
-                "z1=7.6"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 1.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "zTarget",
+                    "type": "float",
+                    "floatValue": 7.599999904632568,
+                    "boolValue": false
+                },
+                {
+                    "name": "z0",
+                    "type": "float",
+                    "floatValue": -3.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "z1",
+                    "type": "float",
+                    "floatValue": 7.599999904632568,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -326,15 +380,55 @@
             "Tag": "Enemy",
             "IconColorHex": "",
             "Position": [3.299999952316284, 0.0, 5.800000190734863],
-            "Properties": [
-                "delta=0.5",
-                "speed=1.0",
-                "xTarget=3.2",
-                "zTarget=12.3",
-                "x0=3.2",
-                "x1=6.5",
-                "z0=5.7",
-                "z1=12.3"
+            "CustomProperties": [
+                {
+                    "name": "delta",
+                    "type": "float",
+                    "floatValue": 0.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 1.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "xTarget",
+                    "type": "float",
+                    "floatValue": 3.200000047683716,
+                    "boolValue": false
+                },
+                {
+                    "name": "zTarget",
+                    "type": "float",
+                    "floatValue": 12.300000190734864,
+                    "boolValue": false
+                },
+                {
+                    "name": "x0",
+                    "type": "float",
+                    "floatValue": 3.200000047683716,
+                    "boolValue": false
+                },
+                {
+                    "name": "x1",
+                    "type": "float",
+                    "floatValue": 6.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "z0",
+                    "type": "float",
+                    "floatValue": 5.699999809265137,
+                    "boolValue": false
+                },
+                {
+                    "name": "z1",
+                    "type": "float",
+                    "floatValue": 12.300000190734864,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -393,15 +487,55 @@
             "Tag": "Enemy",
             "IconColorHex": "",
             "Position": [3.200000047683716, 0.0, -5.0],
-            "Properties": [
-                "delta=0.5",
-                "speed=1.0",
-                "xTarget=7.4",
-                "zTarget=-2.0",
-                "x0=3.2",
-                "x1=7.4",
-                "z0=-5",
-                "z1=-2"
+            "CustomProperties": [
+                {
+                    "name": "delta",
+                    "type": "float",
+                    "floatValue": 0.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 1.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "xTarget",
+                    "type": "float",
+                    "floatValue": 7.400000095367432,
+                    "boolValue": false
+                },
+                {
+                    "name": "zTarget",
+                    "type": "float",
+                    "floatValue": -2.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "x0",
+                    "type": "float",
+                    "floatValue": 3.200000047683716,
+                    "boolValue": false
+                },
+                {
+                    "name": "x1",
+                    "type": "float",
+                    "floatValue": 7.400000095367432,
+                    "boolValue": false
+                },
+                {
+                    "name": "z0",
+                    "type": "float",
+                    "floatValue": -5.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "z1",
+                    "type": "float",
+                    "floatValue": -2.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {

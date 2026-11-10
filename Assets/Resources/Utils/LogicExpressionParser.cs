@@ -928,7 +928,7 @@ namespace B83.LogicExpressionParser
             {
                 if (aExpression.StartsWith("#")) // GameManager
                 {
-                    return new NumberToBool { val = new GameManagerVariable(aExpression.Substring(1)) };
+                    return new NumberToBool { val = ResolveGlobalNumber(aExpression) };
                 }
                 return context.GetVariable(aExpression.Trim());
             }
@@ -1050,7 +1050,8 @@ namespace B83.LogicExpressionParser
             }
 
             double doubleValue;
-            if (double.TryParse(aExpression.Trim(), out doubleValue))
+            if (double.TryParse(aExpression.Trim(), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out doubleValue))
             {
                 return new ConstantNumber { constantValue = doubleValue };
             }
@@ -1059,8 +1060,7 @@ namespace B83.LogicExpressionParser
             {
                 if (aExpression.StartsWith("#")) // GameManager
                 {
-                    string propertyPath = aExpression.Substring(1);
-                    return new GameManagerVariable(propertyPath);
+                    return ResolveGlobalNumber(aExpression);
                 }
                 return context.GetVariable(aExpression.Trim());
             }
@@ -1068,6 +1068,13 @@ namespace B83.LogicExpressionParser
             if (aMaxRecursion > 0)
                 return new BoolToNumber { val = ParseLogicResult(aExpression, aMaxRecursion) };
             throw new ParseException("Unexpected end / expression");
+        }
+
+        private INumberProvider ResolveGlobalNumber(string expression)
+        {
+            var variable = context.FindVariable(expression);
+            if (variable != null) return variable;
+            return new GameManagerVariable(expression.Substring(1));
         }
 
         public LogicExpression Parse(string aExpressionString, ExpressionContext aContext = null)
@@ -1192,6 +1199,7 @@ namespace B83.LogicExpressionParser
             if (currentValue is float f) return f;
             if (currentValue is int i) return i;
             if (currentValue is double d) return d;
+            if (currentValue is bool flag) return flag ? 1d : 0d;
 
             if (currentValue.GetType().Name == "Vector2")
             {

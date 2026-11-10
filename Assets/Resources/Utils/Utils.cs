@@ -43,9 +43,9 @@ public static class Utils
             var script = newObj.AddComponent(scriptType);
             scriptType.GetField("Active")?.SetValue(script, true);
 
-            if (scriptType.GetField("propertyList")?.GetValue(script) is Dictionary<string, float> props)
-                foreach (var (prop, val) in props)
-                    scriptType.GetField(prop)?.SetValue(script, val);
+            if (scriptType.GetField("propertyList")?.GetValue(script) is System.Collections.IDictionary defaults)
+                foreach (System.Collections.DictionaryEntry entry in defaults)
+                    scriptType.GetField((string)entry.Key)?.SetValue(script, entry.Value);
 
             // Runtime-spawned actors are appended to the deterministic order after
             // the current scheduler pass, preserving spawn order.
@@ -300,7 +300,7 @@ public static class Utils
                 default:
                     {
                         var script = obj.GetComponent(obj.name);
-                        value = (float)script.GetType().GetField(elements[1]).GetValue(script);
+                        value = ReadNumericMember(script, elements[1], elements.Length == 3 ? elements[2] : null);
                         break;
                     }
             }
@@ -310,97 +310,29 @@ public static class Utils
 
     private static float GetGameManagerProperty(string propertyPath, GameObject gameManagerObj)
     {
-        GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
-        if (gameManager == null)
+        var parts = propertyPath.Split('.');
+        return ReadNumericMember(gameManagerObj.GetComponent<GameManager>(), parts[0],
+            parts.Length == 2 ? parts[1] : null);
+    }
+
+    private static float ReadNumericMember(Component script, string name, string axis)
+    {
+        if (script == null) return float.NaN;
+        var type = script.GetType();
+        var field = type.GetField(name);
+        object value = field != null ? field.GetValue(script) : type.GetProperty(name)?.GetValue(script);
+        switch (value)
         {
-            Debug.Log("GameManager component not found");
-            return float.NaN;
+            case float number: return number;
+            case int integer: return integer;
+            case bool flag: return flag ? 1f : 0f;
+            case Vector2 vector2 when axis == "x": return vector2.x;
+            case Vector2 vector2 when axis == "y": return vector2.y;
+            case Vector3 vector3 when axis == "x": return vector3.x;
+            case Vector3 vector3 when axis == "y": return vector3.y;
+            case Vector3 vector3 when axis == "z": return vector3.z;
+            default: return float.NaN;
         }
-
-        string[] parts = propertyPath.Split('.');
-
-        // Simple property
-        if (parts.Length == 1)
-        {
-            string mainProperty = parts[0];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var property = typeof(GameManager).GetProperty(mainProperty);
-
-            object value = null;
-
-            if (field != null)
-                value = field.GetValue(gameManager);
-            else if (property != null)
-                value = property.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return float.NaN;
-            }
-
-            // Float
-            if (value is float f) return f;
-
-            // Int
-            if (value is int i) return i;
-
-            // Bool
-            if (value is bool b) return b ? 1f : 0f;
-
-            Debug.LogError($"Unsupported GameManager property type for '{mainProperty}': {value.GetType()}");
-            return float.NaN;
-        }
-
-        // Compound property
-        if (parts.Length == 2)
-        {
-            string mainProperty = parts[0];
-            string subProperty = parts[1];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var property = typeof(GameManager).GetProperty(mainProperty);
-
-            object value = null;
-            if (field != null)
-                value = field.GetValue(gameManager);
-            else if (property != null)
-                value = property.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return float.NaN;
-            }
-
-            // Vector3
-            if (value is Vector3 vector3)
-            {
-                if (subProperty == "x") return vector3.x;
-                if (subProperty == "y") return vector3.y;
-                if (subProperty == "z") return vector3.z;
-            }
-
-            // Vector2
-            if (value is Vector2 vector2)
-            {
-                if (subProperty == "x") return vector2.x;
-                if (subProperty == "y") return vector2.y;
-            }
-
-            // Float
-            if (value is float f) return f;
-
-            // Int
-            if (value is int i) return i;
-
-            // Bool
-            if (value is bool b) return b ? 1f : 0f;
-
-            Debug.LogError($"Unsupported GameManager property type: {value.GetType()}");
-            return float.NaN;
-        }
-
-        return float.NaN;
     }
 
     public static void SetProperty(string property, float value, GameObject obj)
@@ -443,7 +375,8 @@ public static class Utils
 
                 default:
                     {
-                        script.GetType().GetField(elements[1]).SetValue(script, value); break;
+                        WriteNumericMember(script, elements[1], elements.Length == 3 ? elements[2] : null, value);
+                        break;
                     }
             }
         }
@@ -451,147 +384,38 @@ public static class Utils
 
     private static void SetGameManagerProperty(string propertyPath, float value, GameObject gameManagerObj)
     {
-        GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
-        if (gameManager == null)
+        var parts = propertyPath.Split('.');
+        WriteNumericMember(gameManagerObj.GetComponent<GameManager>(), parts[0],
+            parts.Length == 2 ? parts[1] : null, value);
+    }
+
+    private static void WriteNumericMember(Component script, string name, string axis, float value)
+    {
+        if (script == null) return;
+        var type = script.GetType();
+        var field = type.GetField(name);
+        var property = field == null ? type.GetProperty(name) : null;
+        if (field == null && (property == null || !property.CanWrite)) return;
+
+        object current = field != null ? field.GetValue(script) : property.GetValue(script);
+        object updated;
+        switch (current)
         {
-            Debug.LogError("GameManager component not found");
-            return;
+            case float _: updated = value; break;
+            case int _: updated = Mathf.RoundToInt(value); break;
+            case bool _: updated = value != 0f; break;
+            case Vector2 vector2 when axis == "x" || axis == "y":
+                vector2[axis == "x" ? 0 : 1] = value;
+                updated = vector2;
+                break;
+            case Vector3 vector3 when axis == "x" || axis == "y" || axis == "z":
+                vector3[axis == "x" ? 0 : axis == "y" ? 1 : 2] = value;
+                updated = vector3;
+                break;
+            default: return;
         }
-
-        string[] parts = propertyPath.Split('.');
-
-        // Simple property
-        if (parts.Length == 1)
-        {
-            string mainProperty = parts[0];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
-
-            // Float
-            if (field != null && field.FieldType == typeof(float))
-            {
-                field.SetValue(gameManager, value);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
-            {
-                propertyInfo.SetValue(gameManager, value);
-                return;
-            }
-
-            // Int
-            if (field != null && field.FieldType == typeof(int))
-            {
-                field.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
-            {
-                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-
-            // Bool
-            if (field != null && field.FieldType == typeof(bool))
-            {
-                field.SetValue(gameManager, value != 0f);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(gameManager, value != 0f);
-                return;
-            }
-
-            Debug.LogError($"Property '{mainProperty}' not found or unsupported type in GameManager.");
-            return;
-        }
-
-        // Compound property
-        if (parts.Length == 2)
-        {
-            string mainProperty = parts[0];
-            string subProperty = parts[1];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
-
-            object mainValue = null;
-
-            if (field != null)
-                mainValue = field.GetValue(gameManager);
-            else if (propertyInfo != null)
-                mainValue = propertyInfo.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return;
-            }
-
-            // Vector3
-            if (mainValue is Vector3 v3)
-            {
-                if (subProperty == "x") v3.x = value;
-                else if (subProperty == "y") v3.y = value;
-                else if (subProperty == "z") v3.z = value;
-
-                if (field != null) field.SetValue(gameManager, v3);
-                else propertyInfo.SetValue(gameManager, v3);
-
-                return;
-            }
-
-            // Vector2
-            if (mainValue is Vector2 v2)
-            {
-                if (subProperty == "x") v2.x = value;
-                else if (subProperty == "y") v2.y = value;
-
-                if (field != null) field.SetValue(gameManager, v2);
-                else propertyInfo.SetValue(gameManager, v2);
-
-                return;
-            }
-
-            // Float
-            if (field != null && field.FieldType == typeof(float))
-            {
-                field.SetValue(gameManager, value);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
-            {
-                propertyInfo.SetValue(gameManager, value);
-                return;
-            }
-
-            // Int
-            if (field != null && field.FieldType == typeof(int))
-            {
-                field.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
-            {
-                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-
-            // Bool
-            if (field != null && field.FieldType == typeof(bool))
-            {
-                field.SetValue(gameManager, value != 0f);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(gameManager, value != 0f);
-                return;
-            }
-
-            Debug.LogError($"Unsupported property type for '{mainProperty}'");
-        }
+        if (field != null) field.SetValue(script, updated);
+        else property.SetValue(script, updated);
     }
 
     public static Dictionary<string, GameObject> CreateScope(int objID, string scope)
@@ -609,20 +433,21 @@ public static class Utils
                 var script = obj.GetComponent(obj.name);
                 List<string> properties = new List<string>(baseProperties);
 
-                if (script != null && script.GetType().GetField("propertyList") != null)
-                {
-                    var propertyList = (Dictionary<string, float>)script.GetType().GetField("propertyList").GetValue(script);
-                    properties.AddRange(propertyList.Keys);
-                }
-
-                // Also discover public float fields via reflection (handles inactive objects
-                // where Awake never ran and propertyList is still empty)
                 if (script != null)
                 {
                     foreach (var field in script.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
                     {
-                        if (field.FieldType == typeof(float) && !properties.Contains(field.Name))
+                        if (field.FieldType == typeof(Vector2) || field.FieldType == typeof(Vector3))
+                        {
+                            properties.Add(field.Name + ".x");
+                            properties.Add(field.Name + ".y");
+                            if (field.FieldType == typeof(Vector3)) properties.Add(field.Name + ".z");
+                        }
+                        else if (field.FieldType == typeof(float) || field.FieldType == typeof(int) ||
+                            field.FieldType == typeof(bool))
+                        {
                             properties.Add(field.Name);
+                        }
                     }
                 }
 

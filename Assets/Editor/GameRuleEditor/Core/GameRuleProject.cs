@@ -56,6 +56,7 @@ namespace GameRuleEditor.Core
             // Temp cleanup of "when"
             foreach (var actor in sceneData.Cast)
             {
+                actor.GetCustomProperties();
                 if (actor.Script == null) continue;
                 foreach (var sentence in actor.Script)
                 {
@@ -291,7 +292,7 @@ namespace GameRuleEditor.Core
                             if (sentence.Do == null) sentence.Do = new List<string>();
                         }
                     }
-                    if (actor.Properties == null) actor.Properties = new List<string>();
+                    actor.GetCustomProperties();
                     if (actor.Components == null) actor.Components = new List<ActorComponentMeta>();
                 }
             }

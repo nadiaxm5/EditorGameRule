@@ -18,7 +18,7 @@ public static class Scripts
             List<string> tags = new List<string>(projectTags);
             List<string> scope = new List<string>();
             List<string> spawns = new List<string>();
-            List<string> properties = new List<string>();
+            var propertyDefaults = new List<string>();
             string scriptsPath = "Assets/Resources/Scripts/" + actor.ActorName + ".cs";
             StreamWriter outfile = new StreamWriter(scriptsPath);
             bool hasCollision = false;
@@ -31,20 +31,25 @@ public static class Scripts
 
             // Properties
             outfile.WriteLine("    public bool Active = " + actor.Active.ToString().ToLower() + ";");
-            foreach (string p in actor.Properties)
+            foreach (CustomVariable property in actor.GetCustomProperties())
             {
-                properties.Add(p);
-                outfile.WriteLine("    public float " + p + "f;");
+                string declaration = GenerateCustomVariableDeclaration(property, out string initializer);
+                if (declaration == null) continue;
+                outfile.WriteLine("    " + declaration);
+                propertyDefaults.Add($"        {{ nameof({property.name}), {initializer} }},");
             }
 
             // Structure Accumulators
-            string joinProperties = string.Join(";", properties);
             string joinSpawns = string.Join(",", spawns);
             string joinScope = "";
 
             // Dictionaries
-            if (joinProperties.Length > 0)
-                outfile.WriteLine("    public Dictionary<string, float> propertyList = new Dictionary<string, float>();");
+            if (propertyDefaults.Count > 0)
+            {
+                outfile.WriteLine("    public Dictionary<string, object> propertyList = new Dictionary<string, object> {");
+                foreach (string entry in propertyDefaults) outfile.WriteLine(entry);
+                outfile.WriteLine("    };");
+            }
             outfile.WriteLine("    private Dictionary<string, float> timers = new Dictionary<string, float>();");
 
             // Every rule is evaluated in declaration order during one deterministic fixed tick.
@@ -97,8 +102,6 @@ public static class Scripts
 
             // Awake
             List<string> awakeLines = new List<string>();
-            if (joinProperties.Length != 0)
-                awakeLines.Add("        propertyList = Utils.CreateProperties(\"" + joinProperties + "\");");
             if (spawns.Count > 0)
             {
                 string joinSpawnsNow = string.Join(",", spawns);
@@ -363,7 +366,7 @@ public static class Scripts
                 {
                     if (!string.IsNullOrEmpty(customVar.name) && !string.IsNullOrEmpty(customVar.type))
                     {
-                        string fieldDeclaration = GenerateCustomVariableDeclaration(customVar);
+                        string fieldDeclaration = GenerateCustomVariableDeclaration(customVar, out _);
                         if (!string.IsNullOrEmpty(fieldDeclaration))
                         {
                             outfile.WriteLine($"    {fieldDeclaration}");
@@ -552,38 +555,43 @@ public static class Scripts
         }
     }
 
-    private static string GenerateCustomVariableDeclaration(CustomVariable customVar)
+    private static string GenerateCustomVariableDeclaration(CustomVariable customVar, out string initializer)
     {
-        string name = customVar.name;
-        string type = customVar.type.ToLower();
-
+        string type = customVar.type?.ToLowerInvariant();
+        initializer = null;
         switch (type)
         {
             case "int":
-                return $"public int {name} = {customVar.intValue};";
+                initializer = customVar.intValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                break;
             case "float":
-                return $"public float {name} = {customVar.floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}f;";
+                initializer = FloatLiteral(customVar.floatValue);
+                break;
             case "bool":
-                return $"public bool {name} = {customVar.boolValue.ToString().ToLower()};";
+                initializer = customVar.boolValue ? "true" : "false";
+                break;
             case "vector2":
-                if (customVar.arrayValue != null && customVar.arrayValue.Length >= 2)
-                {
-                    string x = customVar.arrayValue[0].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string y = customVar.arrayValue[1].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    return $"public Vector2 {name} = new Vector2({x}f, {y}f);";
-                }
+                var vector2 = (UnityEngine.Vector2)customVar.GetValue();
+                initializer = $"new Vector2({FloatLiteral(vector2.x)}, {FloatLiteral(vector2.y)})";
+                type = "Vector2";
                 break;
-
             case "vector3":
-                if (customVar.arrayValue != null && customVar.arrayValue.Length >= 3)
-                {
-                    string x = customVar.arrayValue[0].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string y = customVar.arrayValue[1].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string z = customVar.arrayValue[2].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    return $"public Vector3 {name} = new Vector3({x}f, {y}f, {z}f);";
-                }
+                var vector3 = (UnityEngine.Vector3)customVar.GetValue();
+                initializer = $"new Vector3({FloatLiteral(vector3.x)}, {FloatLiteral(vector3.y)}, {FloatLiteral(vector3.z)})";
+                type = "Vector3";
                 break;
+            default:
+                return null;
         }
-        return null;
+
+        return $"public {type} {customVar.name} = {initializer};";
+    }
+
+    private static string FloatLiteral(float value)
+    {
+        if (float.IsNaN(value)) return "float.NaN";
+        if (float.IsPositiveInfinity(value)) return "float.PositiveInfinity";
+        if (float.IsNegativeInfinity(value)) return "float.NegativeInfinity";
+        return value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "f";
     }
 }

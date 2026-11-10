@@ -86,9 +86,13 @@ namespace GameRuleEditor.Windows
                     // touches project data, so without this an actor added after generation would be
                     // missing on Play (the scene is not regenerated).
                     var currentScene = EditorSceneManager.GetActiveScene();
-                    bool sceneAlreadyGenerated =
-                        currentScene.name == context.currentProject.projectName
-                        && GameObject.Find("GameManager") != null
+                    // Unity can clear the name of an unsaved scene when scripts reload.
+                    var managerObject = GameObject.Find("GameManager");
+                    var generatedManager = managerObject != null ? managerObject.GetComponent<GameManager>() : null;
+                    string projectName = context.currentProject.projectName;
+                    bool sceneAlreadyGenerated = generatedManager != null
+                        && (currentScene.name == projectName ||
+                            (string.IsNullOrEmpty(currentScene.name) && generatedManager.GameName == projectName))
                         && AllActorsPresentInScene();
 
                     if (sceneAlreadyGenerated)

@@ -49,13 +49,6 @@ namespace GameRuleEditor.Panels
         }
         private Dictionary<string, VectorRow> rows = new Dictionary<string, VectorRow>();
 
-        // ── Property drag (spacer-based) ──
-        private bool isDraggingProp;
-        private Vector2 dragStartPosProp;
-        private VisualElement draggedPropItem;
-        private int draggedPropIndex = -1;
-        private VisualElement propDragSpacer;
-
         // ── Component drag (spacer-based) ──
         private bool isDraggingComp;
         private Vector2 dragStartPosComp;
@@ -215,8 +208,7 @@ namespace GameRuleEditor.Panels
 
             // ─── Transform (always-on) ───
             var transformSection = new Foldout { text = "Transform", value = true };
-            transformSection.style.unityFontStyleAndWeight = FontStyle.Bold;
-            transformSection.style.marginBottom = 10;
+            GameRuleTheme.StylePropertySection(transformSection);
 
             var transformIcon = new Image { image = EditorGUIUtility.IconContent("Transform Icon").image, style = { width = 16, height = 16, marginRight = 4 } };
             var headerLabel = transformSection.Q<Label>();
@@ -234,8 +226,7 @@ namespace GameRuleEditor.Panels
 
             // ─── Physics (inherited from the prefab until edited) ───
             var physicsSection = new Foldout { text = "Physics", value = true };
-            physicsSection.style.unityFontStyleAndWeight = FontStyle.Bold;
-            physicsSection.style.marginBottom = 10;
+            GameRuleTheme.StylePropertySection(physicsSection);
 
             var physicsIcon = new Image { image = EditorGUIUtility.IconContent("Rigidbody Icon").image, style = { width = 16, height = 16, marginRight = 4 } };
             var physicsHeaderLabel = physicsSection.Q<Label>();
@@ -319,9 +310,9 @@ namespace GameRuleEditor.Panels
             if (ActorPhysicsUtility.NormalizeLegacyOverrides(actor))
                 dirty = true;
 
-            if (actor.Properties == null)
+            if (actor.CustomProperties == null || (actor.Properties?.Count ?? 0) > 0)
             {
-                actor.Properties = new List<string>();
+                actor.GetCustomProperties();
                 dirty = true;
             }
 
@@ -493,13 +484,7 @@ namespace GameRuleEditor.Panels
                 else
                     collapsedComponents.Add(comp);
             });
-            foldout.style.unityFontStyleAndWeight = FontStyle.Bold;
-            foldout.style.marginBottom = 10;
-            foldout.style.backgroundColor = GameRuleTheme.Surface;
-            foldout.style.borderTopLeftRadius = 4;
-            foldout.style.borderTopRightRadius = 4;
-            foldout.style.borderBottomLeftRadius = 4;
-            foldout.style.borderBottomRightRadius = 4;
+            GameRuleTheme.StylePropertySection(foldout);
 
             var toggle = foldout.Q<Toggle>();
             if (toggle == null) return foldout;
@@ -606,100 +591,9 @@ namespace GameRuleEditor.Panels
         private VisualElement BuildPropertiesComponent(ActorComponentMeta comp, int compIndex)
         {
             var foldout = BuildComponentShell(comp, compIndex, null, draggable: false);
-            var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
-            foldout.Add(content);
-            RebuildPropertiesList(content);
-            return foldout;
-        }
-
-        private void RebuildPropertiesList(VisualElement content)
-        {
-            content.Clear();
             var actor = context.SelectedActor;
-            if (actor == null) return;
-
-            if (actor.Properties != null)
-            {
-                for (int i = 0; i < actor.Properties.Count; i++)
-                {
-                    int idx = i;
-                    string p = actor.Properties[i];
-                    string[] parts = p.Split('=');
-                    string pName = parts[0];
-                    string pVal = parts.Length > 1 ? parts[1] : "";
-
-                    var row = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 2, alignItems = Align.Center } };
-
-                    // Drag handle
-                    var handle = new Label("\u2261");
-                    handle.tooltip = "Drag to reorder";
-                    handle.pickingMode = PickingMode.Position;
-                    handle.style.fontSize = 16;
-                    handle.style.width = 16;
-                    handle.style.unityTextAlign = TextAnchor.MiddleCenter;
-                    handle.style.color = GameRuleTheme.SubtleText;
-                    handle.style.marginRight = 4;
-                    row.Add(handle);
-
-                    // Name field
-                    var nameField = new TextField { value = pName };
-                    nameField.style.flexGrow = 1;
-                    nameField.style.marginRight = 4;
-                    HideTextFieldLabel(nameField);
-                    nameField.RegisterValueChangedCallback(evt =>
-                    {
-                        UpdateActorProp(idx, evt.newValue, pVal);
-                        pName = evt.newValue;
-                    });
-                    row.Add(nameField);
-
-                    // Value field
-                    var valField = new TextField { value = pVal };
-                    valField.style.width = 60;
-                    valField.style.marginRight = 4;
-                    HideTextFieldLabel(valField);
-                    valField.RegisterValueChangedCallback(evt =>
-                    {
-                        UpdateActorProp(idx, pName, evt.newValue);
-                        pVal = evt.newValue;
-                    });
-                    row.Add(valField);
-
-                    // Delete button
-                    var delBtn = new Button(() =>
-                    {
-                        controller.RemoveActorProperty(context.selectedActorIndex, idx);
-                        RebuildPropertiesList(content);
-                    }) { text = "×", tooltip = "Remove Property" };
-                    delBtn.AddToClassList("button-danger");
-                    delBtn.AddToClassList("button-danger-icon");
-                    delBtn.style.width = 28;
-                    delBtn.style.height = 26;
-                    row.Add(delBtn);
-
-                    // Spacer-based drag registration
-                    handle.RegisterCallback<PointerDownEvent>(evt => OnPropDragStart(evt, row, idx, content));
-                    row.RegisterCallback<PointerMoveEvent>(evt => OnPropDragMove(evt, row));
-                    row.RegisterCallback<PointerUpEvent>(evt => OnPropDragEnd(evt, row, content));
-                    row.RegisterCallback<PointerCaptureOutEvent>(evt => OnPropDragEnd(evt, row, content));
-
-                    content.Add(row);
-                }
-            }
-
-            var addBtn = new Button(() =>
-            {
-                if (actor.Properties == null) actor.Properties = new List<string>();
-                actor.Properties.Add("NewProp=0");
-                EditorUtility.SetDirty(context.currentProject);
-                RebuildPropertiesList(content);
-            }) { text = "+ Add Property" };
-            addBtn.AddToClassList("button-property-picker");
-            addBtn.style.marginTop = 10;
-            addBtn.style.paddingTop = 4;
-            addBtn.style.paddingBottom = 4;
-            addBtn.style.alignSelf = Align.Center;
-            content.Add(addBtn);
+            foldout.Add(new CustomPropertyList(() => context.currentProject, () => actor.GetCustomProperties()));
+            return foldout;
         }
 
         private VisualElement BuildRulesComponent(ActorComponentMeta comp, int compIndex)
@@ -742,153 +636,6 @@ namespace GameRuleEditor.Panels
         // ──────────────────────────────────
         //  PROPERTY DRAG (spacer-based)
         // ──────────────────────────────────
-        private void OnPropDragStart(PointerDownEvent evt, VisualElement row, int index, VisualElement content)
-        {
-            if (evt.button != 0) return;
-
-            isDraggingProp = true;
-            dragStartPosProp = evt.position;
-            draggedPropItem = row;
-            draggedPropIndex = index;
-
-            propDragSpacer = new VisualElement();
-            propDragSpacer.style.height = Mathf.Max(24f, row.layout.height);
-            propDragSpacer.style.marginBottom = row.resolvedStyle.marginBottom;
-            propDragSpacer.style.marginTop = row.resolvedStyle.marginTop;
-            propDragSpacer.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.2f);
-            propDragSpacer.style.borderTopWidth = 2;
-            propDragSpacer.style.borderBottomWidth = 2;
-            propDragSpacer.style.borderLeftWidth = 2;
-            propDragSpacer.style.borderRightWidth = 2;
-            propDragSpacer.style.borderTopColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            propDragSpacer.style.borderBottomColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            propDragSpacer.style.borderLeftColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            propDragSpacer.style.borderRightColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            propDragSpacer.style.borderTopLeftRadius = 3;
-            propDragSpacer.style.borderTopRightRadius = 3;
-            propDragSpacer.style.borderBottomLeftRadius = 3;
-            propDragSpacer.style.borderBottomRightRadius = 3;
-
-            int insertAt = content.IndexOf(row);
-            if (insertAt < 0) return;
-            content.Insert(insertAt, propDragSpacer);
-
-            row.style.position = Position.Absolute;
-            row.style.top = row.layout.y;
-            row.style.left = row.layout.x;
-            row.style.width = row.layout.width;
-            row.style.opacity = 0.8f;
-            row.BringToFront();
-
-            row.CapturePointer(evt.pointerId);
-            evt.StopPropagation();
-        }
-
-        private void OnPropDragMove(PointerMoveEvent evt, VisualElement row)
-        {
-            if (!isDraggingProp || row != draggedPropItem) return;
-
-            float diffY = evt.position.y - dragStartPosProp.y;
-            row.style.translate = new Translate(0f, diffY, 0f);
-
-            var content = propDragSpacer?.parent;
-            if (content == null) return;
-
-            float draggedCenterY = row.layout.y + diffY + row.layout.height / 2f;
-
-            // Determine target logical index (skip row, spacer, and the Add button)
-            int newTargetIndex = 0;
-            foreach (var child in content.Children())
-            {
-                if (child == row || child == propDragSpacer || child is Button) continue;
-                if (draggedCenterY < child.layout.y + child.layout.height / 2f) break;
-                newTargetIndex++;
-            }
-
-            int currentSpacerIndex = 0;
-            foreach (var child in content.Children())
-            {
-                if (child == propDragSpacer) break;
-                if (child == row || child is Button) continue;
-                currentSpacerIndex++;
-            }
-
-            if (newTargetIndex != currentSpacerIndex)
-            {
-                content.Remove(propDragSpacer);
-                int physicalInsert = 0;
-                int logical = 0;
-                foreach (var child in content.Children())
-                {
-                    if (logical == newTargetIndex) break;
-                    if (child != row && !(child is Button)) logical++;
-                    physicalInsert++;
-                }
-                content.Insert(physicalInsert, propDragSpacer);
-            }
-
-            evt.StopPropagation();
-        }
-
-        private void OnPropDragEnd(EventBase evt, VisualElement row, VisualElement content)
-        {
-            if (!isDraggingProp || row != draggedPropItem) return;
-
-            int originalIndex = draggedPropIndex;
-            isDraggingProp = false;
-            draggedPropItem = null;
-            draggedPropIndex = -1;
-
-            IPointerEvent pointerEvt = evt as IPointerEvent;
-            if (pointerEvt != null) row.ReleasePointer(pointerEvt.pointerId);
-
-            row.style.translate = new Translate(0f, 0f, 0f);
-            row.style.opacity = StyleKeyword.Null;
-            row.style.position = StyleKeyword.Null;
-            row.style.top = StyleKeyword.Null;
-            row.style.left = StyleKeyword.Null;
-            row.style.width = StyleKeyword.Null;
-
-            // Read new index from spacer position before removing it
-            int newIndex = originalIndex;
-            if (propDragSpacer != null && propDragSpacer.parent != null)
-            {
-                newIndex = 0;
-                foreach (var child in content.Children())
-                {
-                    if (child == propDragSpacer) break;
-                    if (child == row || child is Button) continue;
-                    newIndex++;
-                }
-                propDragSpacer.parent.Remove(propDragSpacer);
-                propDragSpacer = null;
-            }
-
-            if (!(evt is PointerUpEvent))
-            {
-                RebuildPropertiesList(content);
-                return;
-            }
-
-            var actor = context.SelectedActor;
-            int clamped = Mathf.Clamp(newIndex, 0, (actor?.Properties?.Count ?? 1) - 1);
-            if (actor?.Properties != null && actor.Properties.Count > 1 &&
-                originalIndex >= 0 && originalIndex < actor.Properties.Count &&
-                originalIndex != clamped)
-            {
-                var focused = this.focusController?.focusedElement;
-                if (focused != null) focused.Blur();
-
-                var propToMove = actor.Properties[originalIndex];
-                actor.Properties.RemoveAt(originalIndex);
-                actor.Properties.Insert(clamped, propToMove);
-                EditorUtility.SetDirty(context.currentProject);
-            }
-
-            RebuildPropertiesList(content);
-            evt.StopPropagation();
-        }
-
         // ──────────────────────────────────
         //  COMPONENT DRAG (spacer-based)
         // ──────────────────────────────────
@@ -1145,7 +892,7 @@ namespace GameRuleEditor.Panels
             bool isProperties = comp.type == "Properties";
 
             bool hasData = isProperties
-                ? (actor.Properties != null && actor.Properties.Count > 0)
+                ? (actor.GetCustomProperties().Count > 0)
                 : (actor.Script != null && actor.Script.Exists(r => r.groupId == groupId));
 
             if (hasData)
@@ -1158,7 +905,7 @@ namespace GameRuleEditor.Panels
 
                 Undo.RecordObject(context.currentProject, "Remove Component");
                 if (isProperties)
-                    actor.Properties.Clear();
+                    actor.GetCustomProperties().Clear();
                 else
                     actor.Script.RemoveAll(r => r.groupId == groupId);
             }
@@ -1382,13 +1129,6 @@ namespace GameRuleEditor.Panels
             s.minWidth = 0;
             s.marginLeft = 0; s.marginRight = 0; s.marginTop = 0; s.marginBottom = 0;
             s.paddingLeft = 0; s.paddingRight = 0; s.paddingTop = 0; s.paddingBottom = 0;
-        }
-
-        private void UpdateActorProp(int index, string newName, string newVal)
-        {
-            if (context.SelectedActor?.Properties == null || index >= context.SelectedActor.Properties.Count) return;
-            context.SelectedActor.Properties[index] = $"{newName}={newVal}";
-            EditorUtility.SetDirty(context.currentProject);
         }
 
         private string GetUniqueActorName(string baseName, int currentActorIndex)

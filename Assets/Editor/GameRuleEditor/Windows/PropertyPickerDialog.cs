@@ -749,12 +749,22 @@ namespace GameRuleEditor.Windows
                 }
             }
 
-            if (selectedGroup == "Custom" && targetData?.Properties != null)
+            if (selectedGroup == "Custom" && targetData != null)
             {
-                foreach (var prop in targetData.Properties)
+                foreach (var property in targetData.GetCustomProperties())
                 {
-                    string propName = prop.Contains("=") ? prop.Split('=')[0] : prop;
-                    DrawFinalItem(propName, prefix + propName);
+                    if (property.type == "vector2" || property.type == "vector3")
+                    {
+                        if (boolOnly) continue;
+                        DrawFinalItem(property.name + ".x", prefix + property.name + ".x");
+                        DrawFinalItem(property.name + ".y", prefix + property.name + ".y");
+                        if (property.type == "vector3")
+                            DrawFinalItem(property.name + ".z", prefix + property.name + ".z");
+                    }
+                    else
+                    {
+                        DrawFinalItem(property.name, prefix + property.name);
+                    }
                 }
             }
         }
