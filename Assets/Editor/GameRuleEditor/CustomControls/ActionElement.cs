@@ -216,6 +216,8 @@ namespace GameRuleEditor.CustomControls
                 container.style.flexDirection = FlexDirection.Row;
                 container.style.alignItems = Align.FlexStart;
                 container.style.minWidth = 0;
+                if (control is ExpressionValueControl)
+                    container.AddToClassList("action-expression-parameter-row");
                 fieldTag.style.flexShrink = 0;
                 fieldTag.style.marginTop = 5;
                 fieldTag.style.marginRight = 8;
@@ -653,8 +655,11 @@ namespace GameRuleEditor.CustomControls
                 selectionContainer = new VisualElement();
                 selectionContainer.AddToClassList("action-expression-selection");
                 Add(selectionContainer);
-                Add(valuePicker);
-                Add(operationPicker);
+                var toolbar = new VisualElement();
+                toolbar.AddToClassList("action-expression-toolbar");
+                toolbar.Add(valuePicker);
+                toolbar.Add(operationPicker);
+                Add(toolbar);
                 SetStoredValue(defaultValue ?? string.Empty);
             }
 

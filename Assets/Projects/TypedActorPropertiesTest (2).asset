@@ -305,6 +305,12 @@ MonoBehaviour:
       floatValue: 2
       boolValue: 0
       arrayValue: []
+    - name: NewProp
+      type: bool
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
     Script:
     - Name: 1. Space writes typed values
       When:
@@ -333,10 +339,10 @@ MonoBehaviour:
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rules Set
+      name: Rule Set
       id: typed-blue
   - ActorName: RedTank
-    Active: 0
+    Active: 1
     PrefabName: RedTank
     Tag: Untagged
     IconColorHex: 
@@ -414,5 +420,5 @@ MonoBehaviour:
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rules
+      name: Rule Set
       id: typed-red

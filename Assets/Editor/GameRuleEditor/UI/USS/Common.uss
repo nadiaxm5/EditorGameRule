@@ -665,8 +665,8 @@ Button:disabled {
 }
 
 .action-operation-picker {
-    width: 54px;
-    min-width: 54px;
+    width: 66px;
+    min-width: 66px;
     height: 28px;
     margin-left: 6px;
     margin-right: 0;
@@ -676,7 +676,14 @@ Button:disabled {
 }
 
 .action-operation-picker > .unity-base-field__input {
-    min-width: 50px;
+    min-width: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.action-expression-toolbar {
+    flex-direction: row;
+    align-items: center;
 }
 
 .action-expression-term {
@@ -738,14 +745,40 @@ Button:disabled {
     margin-bottom: 5px;
 }
 
-.rule-detail-action .action-expression-control {
-    flex-direction: row;
+.rule-detail-action .action-expression-parameter-row {
     flex-wrap: wrap;
-    align-items: center;
+}
+
+.rule-detail-action .action-expression-control {
+    flex-direction: column;
+    align-items: stretch;
+    flex-basis: 184px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rule-detail-action .action-expression-toolbar {
+    flex-wrap: wrap;
     min-width: 0;
 }
 
-.rule-detail-action .action-expression-selection {
+.rule-detail-action .action-expression-toolbar .action-value-picker {
+    max-width: 100%;
+    min-width: 0;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.rule-detail-action .action-expression-toolbar .action-value-picker > .unity-base-field__input {
+    min-width: 0;
+}
+
+.rule-detail-action .action-expression-toolbar .action-operation-picker {
+    margin-left: 0;
+    margin-bottom: 4px;
+}
+
+.rule-detail-action .action-expression-control .action-expression-selection {
     width: 100%;
     min-width: 0;
     max-width: 100%;
@@ -754,8 +787,15 @@ Button:disabled {
     flex-wrap: wrap;
     margin-right: 0;
     margin-bottom: 5px;
+    padding-left: 0;
+    padding-right: 0;
     padding-top: 2px;
     padding-bottom: 2px;
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
 }
 
 .rule-detail-action .action-expression-term {
@@ -885,7 +925,7 @@ Button:disabled {
     min-width: 130px;
     height: 27px;
     flex-shrink: 0;
-    -unity-text-align: middle-left;
+    -unity-text-align: middle-center;
 }
 
 .check-property-field {
