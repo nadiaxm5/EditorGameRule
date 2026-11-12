@@ -104,7 +104,7 @@ namespace GameRuleEditor.Panels
             scrollView.style.display = DisplayStyle.None;
             scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             scrollView.verticalScrollerVisibility = ScrollerVisibility.Auto;
-            scrollView.contentContainer.style.minWidth = 760;
+            scrollView.contentContainer.style.minWidth = 0;
 
             // Header
             var header = new VisualElement();
@@ -382,8 +382,6 @@ namespace GameRuleEditor.Panels
                 removeIconBtn.tooltip = "Remove Rule";
                 removeIconBtn.AddToClassList("button-danger");
                 removeIconBtn.AddToClassList("button-danger-icon");
-                removeIconBtn.style.width = 28;
-                removeIconBtn.style.height = 26;
                 removeIconBtn.style.marginLeft = 4;
                 removeIconBtn.style.paddingLeft = 0;
                 removeIconBtn.style.paddingRight = 0;
@@ -399,9 +397,6 @@ namespace GameRuleEditor.Panels
 
             var overview = new VisualElement();
             overview.AddToClassList("rule-overview");
-            overview.style.flexDirection = FlexDirection.Row;
-            overview.style.alignItems = Align.FlexStart;
-            overview.style.minWidth = 730;
             overview.Add(CreateConditionColumn(rule, ruleIndex));
             overview.Add(CreateActionColumn(rule, ruleIndex));
             contentContainer.Add(overview);
@@ -411,7 +406,7 @@ namespace GameRuleEditor.Panels
 
         private VisualElement CreateConditionColumn(SentenceJson rule, int ruleIndex)
         {
-            var column = CreateOverviewColumn("WHEN", "condition-overview");
+            var column = CreateOverviewColumn("WHEN");
             string expression = rule.When != null && rule.When.Count > 0 ? rule.When[0] : null;
             var terms = RuleConditionSequence.Parse(expression);
             for (int i = 0; i < terms.Count; i++)
@@ -427,10 +422,7 @@ namespace GameRuleEditor.Panels
                         join == "OR" ? "OR" : "AND", RuleTooltips.Logical(join),
                         RuleDropdownPalette.Condition);
                     connector.AddToClassList("button-condition");
-                    connector.style.width = 75;
-                    connector.style.alignSelf = Align.Center;
-                    connector.style.marginTop = 3;
-                    connector.style.marginBottom = 3;
+                    connector.AddToClassList("rule-join-selector");
                     connector.RegisterValueChangedCallback(value =>
                     {
                         var latest = RuleConditionSequence.Parse(rule.When[0]);
@@ -444,6 +436,7 @@ namespace GameRuleEditor.Panels
 
                 var row = new VisualElement();
                 row.AddToClassList("rule-summary-row");
+                row.AddToClassList("rule-editor-card");
                 // The connector already has 3px above and below; the generic row's
                 // bottom margin would otherwise make the gap above it larger.
                 row.style.marginBottom = 0;
@@ -483,8 +476,7 @@ namespace GameRuleEditor.Panels
                 "+ Add Condition", "Choose a condition to add to this rule.",
                 RuleDropdownPalette.Condition);
             add.AddToClassList("button-condition");
-            add.style.alignSelf = Align.Center;
-            add.style.marginTop = 8;
+            add.AddToClassList("rule-add-element");
             add.RegisterValueChangedCallback(type => AddConditionOfType(rule, ruleIndex, type, types));
             column.Add(add);
             return column;
@@ -492,7 +484,7 @@ namespace GameRuleEditor.Panels
 
         private VisualElement CreateActionColumn(SentenceJson rule, int ruleIndex)
         {
-            var column = CreateOverviewColumn("DO", "action-overview");
+            var column = CreateOverviewColumn("DO");
             int storedCount = rule.Do?.Count ?? 0;
             for (int i = 0; i < storedCount; i++)
             {
@@ -502,6 +494,7 @@ namespace GameRuleEditor.Panels
                 var item = CreateDraggableElementItem();
                 var row = new VisualElement();
                 row.AddToClassList("rule-summary-row");
+                row.AddToClassList("rule-editor-card");
                 row.style.flexDirection = FlexDirection.Row;
                 row.style.alignItems = Align.Center;
                 row.Add(CreateElementDragHandle(item, ruleIndex,
@@ -520,24 +513,19 @@ namespace GameRuleEditor.Panels
                 "+ Add Action", "Choose an action to add to this rule.",
                 RuleDropdownPalette.Action);
             addButton.AddToClassList("button-action");
-            addButton.style.alignSelf = Align.Center;
-            addButton.style.marginTop = 8;
+            addButton.AddToClassList("rule-add-element");
             addButton.RegisterValueChangedCallback(type => AddActionOfType(rule, ruleIndex, type, types));
             column.Add(addButton);
             return column;
         }
 
-        private static VisualElement CreateOverviewColumn(string heading, string className)
+        private static VisualElement CreateOverviewColumn(string heading)
         {
             var column = new VisualElement();
             column.AddToClassList("rule-overview-column");
-            column.AddToClassList(className);
-            column.style.flexGrow = 1;
-            column.style.flexBasis = 0;
-            column.style.minWidth = 350;
+            column.AddToClassList("rule-overview-responsive-column");
             var label = new Label(heading);
-            label.style.unityFontStyleAndWeight = FontStyle.Bold;
-            label.style.marginBottom = 8;
+            label.AddToClassList("rule-block-heading");
             column.Add(label);
             return column;
         }
@@ -548,9 +536,12 @@ namespace GameRuleEditor.Panels
             var button = new Button(clicked) { text = text, tooltip = tooltip };
             button.AddToClassList(destructive ? "button-danger" : "button-primary");
             if (destructive) button.AddToClassList("button-danger-icon");
-            button.style.width = 27;
-            button.style.height = 27;
-            button.style.flexShrink = 0;
+            else
+            {
+                button.style.width = 27;
+                button.style.height = 27;
+                button.style.flexShrink = 0;
+            }
             button.style.marginLeft = 4;
             return button;
         }
@@ -828,11 +819,11 @@ namespace GameRuleEditor.Panels
             elementDragSpacer.style.height = Mathf.Max(30f, item.layout.height);
             elementDragSpacer.style.marginTop = item.resolvedStyle.marginTop;
             elementDragSpacer.style.marginBottom = item.resolvedStyle.marginBottom;
-            elementDragSpacer.style.backgroundColor = new Color(0.3f, 0.6f, 1f, 0.14f);
+            elementDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.AccentText, 0.14f);
             elementDragSpacer.style.borderTopWidth = 2;
             elementDragSpacer.style.borderBottomWidth = 2;
-            elementDragSpacer.style.borderTopColor = new Color(96f / 255f, 68f / 255f, 165f / 255f);
-            elementDragSpacer.style.borderBottomColor = new Color(96f / 255f, 68f / 255f, 165f / 255f);
+            elementDragSpacer.style.borderTopColor = GameRuleTheme.AccentText;
+            elementDragSpacer.style.borderBottomColor = GameRuleTheme.AccentText;
             column.Insert(column.IndexOf(item), elementDragSpacer);
 
             item.style.position = Position.Absolute;
@@ -987,15 +978,15 @@ namespace GameRuleEditor.Panels
             ruleDragSpacer.style.height = Mathf.Max(30f, ruleContainer.layout.height);
             ruleDragSpacer.style.marginBottom = ruleContainer.resolvedStyle.marginBottom;
             ruleDragSpacer.style.marginTop = ruleContainer.resolvedStyle.marginTop;
-            ruleDragSpacer.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.2f);
+            ruleDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.AccentText, 0.14f);
             ruleDragSpacer.style.borderTopWidth = 2;
             ruleDragSpacer.style.borderBottomWidth = 2;
             ruleDragSpacer.style.borderLeftWidth = 2;
             ruleDragSpacer.style.borderRightWidth = 2;
-            ruleDragSpacer.style.borderTopColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderBottomColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderLeftColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderRightColor = new Color(0.3f, 0.6f, 1f, 0.8f);
+            ruleDragSpacer.style.borderTopColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderBottomColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderLeftColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderRightColor = GameRuleTheme.AccentText;
             ruleDragSpacer.style.borderTopLeftRadius = 5;
             ruleDragSpacer.style.borderTopRightRadius = 5;
             ruleDragSpacer.style.borderBottomLeftRadius = 5;

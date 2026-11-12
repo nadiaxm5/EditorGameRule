@@ -61,6 +61,11 @@
                     "type": "float",
                     "floatValue": 2.0,
                     "boolValue": false
+                },
+                {
+                    "name": "NewProp",
+                    "type": "bool",
+                    "boolValue": false
                 }
             ],
             "Script": [
@@ -100,14 +105,14 @@
                 },
                 {
                     "type": "Rules",
-                    "name": "Rules Set",
+                    "name": "Rule Set",
                     "id": "typed-blue"
                 }
             ]
         },
         {
             "ActorName": "RedTank",
-            "Active": false,
+            "Active": true,
             "PrefabName": "RedTank",
             "Tag": "Untagged",
             "IconColorHex": "",
@@ -169,7 +174,7 @@
                 },
                 {
                     "type": "Rules",
-                    "name": "Rules",
+                    "name": "Rule Set",
                     "id": "typed-red"
                 }
             ]

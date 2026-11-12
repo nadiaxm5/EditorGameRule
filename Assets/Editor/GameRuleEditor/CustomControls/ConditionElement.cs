@@ -54,11 +54,7 @@ namespace GameRuleEditor.CustomControls
             style.flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row;
             style.marginBottom = 5;
             style.flexShrink = 0;
-            if (detailsMode)
-            {
-                AddToClassList("rule-overview-column");
-            }
-            else
+            if (!detailsMode)
             {
                 style.borderTopLeftRadius = 3;
                 style.borderTopRightRadius = 3;
@@ -136,8 +132,6 @@ namespace GameRuleEditor.CustomControls
             };
             removeButton.AddToClassList("button-danger");
             removeButton.AddToClassList("button-danger-icon");
-            removeButton.style.width = 28;
-            removeButton.style.height = 26;
             if (detailsMode) removeButton.style.display = DisplayStyle.None;
             Add(removeButton);
 
@@ -207,6 +201,7 @@ namespace GameRuleEditor.CustomControls
                         projectTags[0], RuleTooltips.Parameter("Collision", "Tag"),
                         RuleDropdownPalette.Condition);
                     tagDropdown.AddToClassList("collision-tag-dropdown");
+                    tagDropdown.AddToClassList("parameter-selector");
                     tagDropdown.AddToClassList("button-condition");
                     tagDropdown.AddToClassList("rule-selector-dropdown");
                     tagDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
@@ -253,6 +248,7 @@ namespace GameRuleEditor.CustomControls
             compareOperatorDropdown.AddToClassList("button-number-picker");
             compareOperatorDropdown.AddToClassList("rule-selector-dropdown");
             compareOperatorDropdown.AddToClassList("compare-operator-dropdown");
+            compareOperatorDropdown.AddToClassList("parameter-selector");
             compareOperatorDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
             var operatorContainer = new VisualElement();
             operatorContainer.AddToClassList("compare-operator-container");
@@ -277,6 +273,7 @@ namespace GameRuleEditor.CustomControls
             var keyContainer = CreateInlineParameter("Key");
             keyboardKeyButton = new Button(ShowKeyboardMenu);
             keyboardKeyButton.AddToClassList("keyboard-key-picker");
+            keyboardKeyButton.AddToClassList("parameter-selector");
             keyboardKeyButton.AddToClassList("tooltip-popup-field");
             keyboardKeyButton.AddToClassList("button-condition");
             keyboardKeyButton.AddToClassList("rule-selector-dropdown");
@@ -477,6 +474,7 @@ namespace GameRuleEditor.CustomControls
             };
             dropdown.AddToClassList("button-condition");
             dropdown.AddToClassList("rule-selector-dropdown");
+            dropdown.AddToClassList("parameter-selector");
             return dropdown;
         }
 
@@ -488,6 +486,11 @@ namespace GameRuleEditor.CustomControls
             };
             container.style.alignSelf = Align.FlexStart;
             container.style.flexShrink = 0;
+            if (detailsMode)
+            {
+                container.style.alignSelf = Align.Stretch;
+                container.style.flexWrap = Wrap.Wrap;
+            }
             container.Add(CreateFieldTag(label));
             return container;
         }
@@ -506,6 +509,7 @@ namespace GameRuleEditor.CustomControls
                 style = { flexDirection = FlexDirection.Row, marginRight = 3, alignItems = Align.Center }
             };
             container.style.flexShrink = 0;
+            if (detailsMode) container.style.flexWrap = Wrap.Wrap;
             container.Add(CreateFieldTag(label));
 
             checkPropertyButton = null;
@@ -541,6 +545,11 @@ namespace GameRuleEditor.CustomControls
                 style = { flexDirection = FlexDirection.Row, marginRight = 3, minWidth = 190, alignItems = Align.Center }
             };
             container.style.flexShrink = 0;
+            if (detailsMode)
+            {
+                container.style.minWidth = 0;
+                container.style.flexWrap = Wrap.Wrap;
+            }
             VisualElement fieldTag = CreateFieldTag(label);
             fieldTag.tooltip = RuleTooltips.Parameter(selectedConditionType, label) +
                                " Drag horizontally to change the value.";
@@ -886,8 +895,7 @@ namespace GameRuleEditor.CustomControls
                 var pickerRow = compactLayout ? new VisualElement() : toolbar;
                 if (compactLayout)
                 {
-                    pickerRow.style.flexDirection = FlexDirection.Row;
-                    pickerRow.style.alignItems = Align.Center;
+                    pickerRow.AddToClassList("compare-compact-picker-row");
                     toolbar.Add(pickerRow);
                 }
 
@@ -899,6 +907,7 @@ namespace GameRuleEditor.CustomControls
                 valuePickerDropdown.AddToClassList("button-property-picker");
                 valuePickerDropdown.AddToClassList("rule-selector-dropdown");
                 valuePickerDropdown.AddToClassList("compare-value-picker");
+                valuePickerDropdown.AddToClassList("parameter-selector");
                 valuePickerDropdown.RegisterValueChangedCallback(choice =>
                 {
                     valuePickerDropdown.SetValueWithoutNotify(PickValueLabel);
@@ -921,6 +930,7 @@ namespace GameRuleEditor.CustomControls
                 operationDropdown.AddToClassList("button-number-picker");
                 operationDropdown.AddToClassList("rule-selector-dropdown");
                 operationDropdown.AddToClassList("compare-operation-dropdown");
+                operationDropdown.AddToClassList("parameter-selector");
                 operationDropdown.RegisterValueChangedCallback(newValue =>
                 {
                     if (terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression)
@@ -1066,6 +1076,7 @@ namespace GameRuleEditor.CustomControls
                             RuleDropdownPalette.Number);
                         operatorDropdown.AddToClassList("button-number-picker");
                         operatorDropdown.AddToClassList("compare-term-operator");
+                        operatorDropdown.AddToClassList("parameter-selector");
                         operatorDropdown.RegisterValueChangedCallback(newValue =>
                         {
                             term.OperatorBefore = newValue;

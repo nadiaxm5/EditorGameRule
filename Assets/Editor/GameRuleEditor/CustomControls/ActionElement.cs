@@ -39,7 +39,6 @@ namespace GameRuleEditor.CustomControls
             if (detailsMode)
             {
                 AddToClassList("rule-detail-action");
-                AddToClassList("rule-overview-column");
             }
             style.marginBottom = 5;
             style.flexShrink = 0;
@@ -120,7 +119,6 @@ namespace GameRuleEditor.CustomControls
             };
             removeBtn.AddToClassList("button-danger");
             removeBtn.AddToClassList("button-danger-icon");
-            removeBtn.style.width = 28; removeBtn.style.height = 26;
             if (detailsMode) removeBtn.style.display = DisplayStyle.None;
 
             mainRow.Add(removeBtn);
@@ -335,6 +333,7 @@ namespace GameRuleEditor.CustomControls
                 pickerButton = new Button(() => OpenPicker(pickerButton)) { text = "Pick Property", tooltip = "Pick Property" };
                 pickerButton.AddToClassList("button-property-picker");
                 pickerButton.AddToClassList("action-resource-picker");
+                pickerButton.AddToClassList("parameter-selector");
                 Add(pickerButton);
                 UpdateButton();
             }
@@ -395,6 +394,7 @@ namespace GameRuleEditor.CustomControls
                 pickerButton = new Button(() => OpenPicker(pickerButton)) { text = pickerLabel, tooltip = pickerLabel };
                 pickerButton.AddToClassList("button-property-picker");
                 pickerButton.AddToClassList("action-resource-picker");
+                pickerButton.AddToClassList("parameter-selector");
                 Add(pickerButton);
                 UpdateButton();
             }
@@ -478,6 +478,7 @@ namespace GameRuleEditor.CustomControls
                 picker.AddToClassList("button-property-picker");
                 picker.AddToClassList("rule-selector-dropdown");
                 picker.AddToClassList("action-value-picker");
+                picker.AddToClassList("parameter-selector");
                 picker.RegisterValueChangedCallback(choice =>
                 {
                     picker.SetValueWithoutNotify(PickValueLabel);
@@ -632,6 +633,7 @@ namespace GameRuleEditor.CustomControls
                 valuePicker.AddToClassList("button-property-picker");
                 valuePicker.AddToClassList("rule-selector-dropdown");
                 valuePicker.AddToClassList("action-value-picker");
+                valuePicker.AddToClassList("parameter-selector");
                 valuePicker.RegisterValueChangedCallback(choice =>
                 {
                     valuePicker.SetValueWithoutNotify(PickValueLabel);
@@ -643,6 +645,7 @@ namespace GameRuleEditor.CustomControls
                 operationPicker.AddToClassList("button-number-picker");
                 operationPicker.AddToClassList("rule-selector-dropdown");
                 operationPicker.AddToClassList("action-operation-picker");
+                operationPicker.AddToClassList("parameter-selector");
                 operationPicker.RegisterValueChangedCallback(evt =>
                 {
                     if (terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression)
@@ -759,6 +762,7 @@ namespace GameRuleEditor.CustomControls
                             new List<string> { "+", "-" }, term.OperatorBefore == "-" ? 1 : 0);
                         termOperator.AddToClassList("button-number-picker");
                         termOperator.AddToClassList("action-term-operator");
+                        termOperator.AddToClassList("parameter-selector");
                         termOperator.RegisterValueChangedCallback(evt =>
                         {
                             term.OperatorBefore = evt.newValue;

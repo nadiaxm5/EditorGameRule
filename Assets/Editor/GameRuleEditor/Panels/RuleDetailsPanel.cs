@@ -127,26 +127,32 @@ namespace GameRuleEditor.Panels
             }
         }
 
-        private VisualElement CreateHeading(string breadcrumb, string kindLabel)
+        private void ShowElement(string breadcrumb, string sectionName, VisualElement typeSelector, VisualElement element)
         {
             content.Clear();
             var heading = new Label(breadcrumb);
+            heading.style.whiteSpace = WhiteSpace.Normal;
             heading.style.color = GameRuleTheme.MutedText;
             heading.style.fontSize = 12;
             heading.style.marginBottom = 12;
             content.Add(heading);
 
-            var typeLabel = new Label(kindLabel);
-            typeLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            typeLabel.style.fontSize = 11;
-            typeLabel.style.marginBottom = 5;
-            content.Add(typeLabel);
+            var section = new VisualElement();
+            section.AddToClassList("rule-overview-column");
+            var sectionHeading = new Label(sectionName);
+            sectionHeading.AddToClassList("rule-block-heading");
+            section.Add(sectionHeading);
 
-            var selectorRow = new VisualElement();
-            selectorRow.style.flexDirection = FlexDirection.Row;
-            selectorRow.style.marginBottom = 14;
-            content.Add(selectorRow);
-            return selectorRow;
+            var card = new VisualElement();
+            card.AddToClassList("rule-editor-card");
+            card.AddToClassList("rule-detail-card");
+            typeSelector.style.width = StyleKeyword.Null;
+            typeSelector.style.marginRight = StyleKeyword.Null;
+            typeSelector.AddToClassList("rule-detail-type");
+            card.Add(typeSelector);
+            card.Add(element);
+            section.Add(card);
+            content.Add(section);
         }
 
         private void BuildConditionDetails(SentenceJson rule, int index, List<RuleConditionTerm> terms)
@@ -187,11 +193,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            var selectorRow = CreateHeading($"{rule.Name}  /  WHEN  /  Condition {index + 1}", "CONDITION");
-            element.TypeSelector.style.width = 190;
-            selectorRow.Add(element.TypeSelector);
-            content.Add(element);
-            AddTypeHint();
+            ShowElement($"{rule.Name}  /  Condition {index + 1}", "WHEN", element.TypeSelector, element);
         }
 
         private void BuildActionDetails(SentenceJson rule, int index)
@@ -224,20 +226,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            var selectorRow = CreateHeading($"{rule.Name}  /  DO  /  Action {index + 1}", "ACTION");
-            element.TypeSelector.style.width = 190;
-            selectorRow.Add(element.TypeSelector);
-            content.Add(element);
-            AddTypeHint();
-        }
-
-        private void AddTypeHint()
-        {
-            var hint = new Label("Use the type menu above to replace this condition or action.");
-            hint.style.whiteSpace = WhiteSpace.Normal;
-            hint.style.color = GameRuleTheme.SubtleText;
-            hint.style.marginTop = 12;
-            content.Add(hint);
+            ShowElement($"{rule.Name}  /  Action {index + 1}", "DO", element.TypeSelector, element);
         }
 
         private bool ConfirmReplacement(string source, string oldType, bool condition)

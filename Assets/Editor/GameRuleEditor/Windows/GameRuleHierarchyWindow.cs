@@ -304,7 +304,7 @@ namespace GameRuleEditor.Windows
             addActorBtn.style.paddingTop = 6;
             addActorBtn.style.paddingBottom = 6;
             addActorBtn.style.backgroundColor = GameRuleTheme.Surface;
-            addActorBtn.style.color = GameRuleTheme.Text;
+            addActorBtn.style.color = GameRuleTheme.AccentText;
             addActorBtn.style.borderTopWidth = 1;
             addActorBtn.style.borderBottomWidth = 1;
             addActorBtn.style.borderLeftWidth = 1;
@@ -485,10 +485,10 @@ namespace GameRuleEditor.Windows
                 textInput.style.borderBottomWidth = 1;
                 textInput.style.borderLeftWidth = 1;
                 textInput.style.borderRightWidth = 1;
-                textInput.style.borderTopColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderBottomColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderLeftColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderRightColor = new Color(0.28f, 0.56f, 0.95f);
+                textInput.style.borderTopColor = GameRuleTheme.AccentText;
+                textInput.style.borderBottomColor = GameRuleTheme.AccentText;
+                textInput.style.borderLeftColor = GameRuleTheme.AccentText;
+                textInput.style.borderRightColor = GameRuleTheme.AccentText;
                 textInput.style.borderTopLeftRadius = 3;
                 textInput.style.borderTopRightRadius = 3;
                 textInput.style.borderBottomLeftRadius = 3;

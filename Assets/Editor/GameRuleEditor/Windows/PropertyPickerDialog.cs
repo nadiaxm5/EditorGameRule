@@ -61,9 +61,6 @@ namespace GameRuleEditor.Windows
         private System.Action<string> onPick;
         private EditorContext context;
 
-        private static readonly Color PickerYellow = new Color32(255, 174, 3, 255);
-        private static readonly Color PickerYellowHover = new Color32(255, 193, 61, 255);
-        private static readonly Color PickerYellowActive = new Color32(217, 146, 0, 255);
 
         private GUIStyle navigationButtonStyle;
         private GUIStyle propertyButtonStyle;
@@ -550,8 +547,8 @@ namespace GameRuleEditor.Windows
             bool clicked = GUI.Button(cardRect, new GUIContent(string.Empty, tooltip), GUIStyle.none);
 
             Color cardColor = pressed
-                ? PickerYellowActive
-                : hovered ? PickerYellowHover : GameRuleTheme.Header;
+                ? GameRuleTheme.Panel
+                : hovered ? GameRuleTheme.Field : GameRuleTheme.Header;
             EditorGUI.DrawRect(cardRect, cardColor);
 
             float previewSize = Mathf.Min(width - 12f, 76f);
@@ -575,7 +572,7 @@ namespace GameRuleEditor.Windows
             };
             if (hovered || pressed)
             {
-                Color hoveredTextColor = new Color32(30, 30, 30, 255);
+                Color hoveredTextColor = GameRuleTheme.PropertyAccent;
                 labelStyle.normal.textColor = hoveredTextColor;
                 labelStyle.hover.textColor = hoveredTextColor;
                 labelStyle.active.textColor = hoveredTextColor;
@@ -657,8 +654,8 @@ namespace GameRuleEditor.Windows
             bool clicked = GUI.Button(rect, GUIContent.none, style);
 
             Color fillColor = pressed || selected
-                ? PickerYellowActive
-                : hovered ? PickerYellowHover : PickerYellow;
+                ? GameRuleTheme.Panel
+                : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
             EditorGUI.DrawRect(new Rect(rect.x + 2f, rect.y + 2f,
                 Mathf.Max(0f, rect.width - 4f), Mathf.Max(0f, rect.height - 4f)), fillColor);
 
@@ -822,7 +819,7 @@ namespace GameRuleEditor.Windows
                 alignment = alignment,
                 padding = padding
             };
-            Color textColor = new Color32(30, 30, 30, 255);
+            Color textColor = GameRuleTheme.PropertyAccent;
             style.normal.textColor = textColor;
             style.hover.textColor = textColor;
             style.active.textColor = textColor;
@@ -858,8 +855,8 @@ namespace GameRuleEditor.Windows
             if (colored)
             {
                 Color fillColor = pressed
-                    ? PickerYellowActive
-                    : hovered ? PickerYellowHover : PickerYellow;
+                    ? GameRuleTheme.Panel
+                    : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
                 var fillRect = new Rect(
                     buttonRect.x + 2f,
                     buttonRect.y + 2f,

@@ -169,7 +169,7 @@ MonoBehaviour:
       - Compare( < ) AND Check(this.Active) AND Collision(Untagged) AND Keyboard(A,down)
         AND Touch(press,false) AND Timer(0)
       Do:
-      - Edit(,)
+      - Edit(this.x,)
       - Spawn(,this,0,0,0,0,0,0)
       - Animate()
       - Move(0,0,0,0)
@@ -177,7 +177,6 @@ MonoBehaviour:
       - NavigateTo(0,0,0,0)
       - LoadScene()
       - QuitGame()
-      - PlaySound()
       - PlayParticles()
       - Delete()
       - Rotate(0,0,0,0)
@@ -186,12 +185,17 @@ MonoBehaviour:
       - PushTo(0,0,0,0)
       - Torque(0,0,0)
       groupId: gb8cf3a3b
+    - Name: Rule 2
+      When: []
+      Do:
+      - Delete()
+      groupId: gb8cf3a3b
     Components:
     - type: Properties
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rules Set
+      name: Rule Set
       id: gb8cf3a3b
   - ActorName: NewActor_1
     Active: 1
@@ -241,16 +245,25 @@ MonoBehaviour:
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rules Set
+      name: Rule Set
       id: g416cb4ae
   - ActorName: NewActor_2
     Active: 1
     PrefabName: Empty
     Tag: Untagged
     IconColorHex: 
-    Position: []
-    Rotation: []
-    Scale: []
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -289,5 +302,5 @@ MonoBehaviour:
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rules Set
+      name: Rule Set
       id: g3ed0f708

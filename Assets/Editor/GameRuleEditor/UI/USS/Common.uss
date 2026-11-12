@@ -1,12 +1,12 @@
 /* Common.uss - Shared styles for GameRule Editor */
-/* Design System: Material Design 3 + Unity Dark Theme */
+/* Neutral surfaces and semantic accents for GameRule Studio. */
 
 /* ═══════════════════════════════════════════
    ROOT & WINDOW BACKGROUNDS
    ═══════════════════════════════════════════ */
 
 #unity-content-container {
-    background-color: rgb(30, 30, 30); /* backgroundBase #1e1e1e */
+    background-color: rgb(29, 32, 38);
 }
 
 /* ═══════════════════════════════════════════
@@ -14,7 +14,7 @@
    ═══════════════════════════════════════════ */
 
 ScrollView {
-    background-color: rgb(37, 37, 38); /* panelBackground #252526 */
+    background-color: rgb(37, 42, 50);
 }
 
 /* ═══════════════════════════════════════════
@@ -22,7 +22,7 @@ ScrollView {
    ═══════════════════════════════════════════ */
 
 Label {
-    color: rgb(229, 231, 235); /* textPrimary #e5e7eb */
+    color: rgb(231, 235, 240);
     font-size: 12px;
 }
 
@@ -31,12 +31,12 @@ Label {
    ═══════════════════════════════════════════ */
 
 TextField {
-    background-color: rgb(30, 30, 30);  /* inputBackground #1e1e1e */
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(68, 68, 68); /* borderLight #444444 */
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(59, 66, 78);
+    color: rgb(231, 235, 240);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -54,15 +54,15 @@ TextField {
 }
 
 TextField:focus {
-    border-left-color: rgb(208, 188, 255); /* primaryFixedDim #D0BCFF */
-    border-right-color: rgb(208, 188, 255);
-    border-top-color: rgb(208, 188, 255);
-    border-bottom-color: rgb(208, 188, 255);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
 TextField > TextInput {
-    background-color: rgb(30, 30, 30);
-    color: rgb(255, 255, 255);
+    background-color: rgb(59, 66, 78);
+    color: rgb(231, 235, 240);
 }
 
 /* ═══════════════════════════════════════════
@@ -70,12 +70,12 @@ TextField > TextInput {
    ═══════════════════════════════════════════ */
 
 Button {
-    background-color: rgb(56, 56, 56);  /* hoverBackground #383838 */
-    color: rgb(229, 231, 235);          /* textPrimary */
-    border-left-color: rgb(26, 26, 26); /* borderDark #1a1a1a */
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(48, 54, 64);
+    color: rgb(231, 235, 240);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -92,16 +92,16 @@ Button {
 }
 
 Button:hover {
-    background-color: rgb(68, 68, 68); /* hoverBackgroundLighter #444444 */
+    background-color: rgb(59, 66, 78);
 }
 
 Button:active {
-    background-color: rgb(85, 85, 85); /* hoverBackgroundDarker #555555 */
+    background-color: rgb(37, 42, 50);
 }
 
 Button:disabled {
-    background-color: rgb(45, 45, 45);
-    color: rgb(107, 114, 128); /* textMuted #6b7280 */
+    background-color: rgb(48, 54, 64);
+    color: rgb(171, 179, 191);
 }
 
 /* ── Shared purple palette ── */
@@ -110,12 +110,12 @@ Button:disabled {
 .list-item.list-item-selected,
 .actor-list-item.actor-list-item--selected,
 .fab-create {
-    background-color: rgb(79, 55, 139);  /* light purple #4F378B */
-    color: rgb(234, 221, 255);           /* primaryFixed #EADDFF */
-    border-left-color: rgb(59, 39, 107); /* dark purple #3B276B */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    background-color: rgb(48, 54, 64);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
 .button-primary:hover,
@@ -123,51 +123,51 @@ Button:disabled {
 .list-item.list-item-selected:hover,
 .actor-list-item.actor-list-item--selected:hover,
 .fab-create:hover {
-    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
+    background-color: rgb(59, 66, 78);
 }
 
 .button-primary:active,
 .button-success:active,
 .fab-create:active {
-    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+    background-color: rgb(37, 42, 50);
 }
 
 .button-primary > .unity-base-field__input {
-    background-color: rgb(79, 55, 139);  /* light purple #4F378B */
-    color: rgb(234, 221, 255);
-    border-left-color: rgb(59, 39, 107);
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    background-color: rgb(48, 54, 64);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
 .button-primary:hover > .unity-base-field__input {
-    background-color: rgb(96, 68, 165); /* light purple hover #6044A5 */
+    background-color: rgb(59, 66, 78);
 }
 
 .button-primary:active > .unity-base-field__input {
-    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
+    background-color: rgb(37, 42, 50);
 }
 
 .button-primary .unity-base-popup-field__text {
-    color: rgb(234, 221, 255);
+    color: rgb(161, 138, 224);
 }
 
 .button-secondary {
-    background-color: rgb(59, 39, 107); /* dark purple #3B276B */
-    color: rgb(234, 221, 255);
-    border-left-color: rgb(50, 31, 95);
-    border-right-color: rgb(50, 31, 95);
-    border-top-color: rgb(50, 31, 95);
-    border-bottom-color: rgb(50, 31, 95);
+    background-color: rgb(48, 54, 64);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
 }
 
 .button-secondary:hover {
-    background-color: rgb(72, 50, 125); /* dark purple hover #48327D */
+    background-color: rgb(59, 66, 78);
 }
 
 .button-secondary:active {
-    background-color: rgb(59, 39, 107);
+    background-color: rgb(37, 42, 50);
 }
 
 /* ── Logical negation ── */
@@ -206,7 +206,7 @@ Button:disabled {
 }
 
 .button-negation.button-negation--active {
-    background-color: rgb(204, 0, 31); /* same red as the remove buttons */
+    background-color: rgb(204, 0, 31);
     color: rgb(255, 255, 255);
     border-left-color: rgb(143, 0, 22);
     border-right-color: rgb(143, 0, 22);
@@ -227,25 +227,52 @@ Button:disabled {
     border-left-color: rgb(204, 0, 31);
 }
 
-/* ── Destructive / trash ── */
+/* ── Destructive controls ── */
 .button-danger {
-    background-color: rgb(204, 0, 31);   /* #CC001F */
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(143, 0, 22);
-    border-right-color: rgb(143, 0, 22);
-    border-top-color: rgb(143, 0, 22);
-    border-bottom-color: rgb(143, 0, 22);
+    background-color: transparent;
+    color: rgb(171, 179, 191);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
 }
 
-.button-danger:hover {
-    background-color: rgb(226, 26, 54);  /* #E21A36 */
+.gamerule-light .button-danger {
+    background-color: transparent;
+    color: rgb(92, 92, 92);
 }
 
-.button-danger:active {
-    background-color: rgb(168, 0, 25);
+.button-danger:focus,
+.gamerule-light .button-danger:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.button-danger:hover,
+.gamerule-light .button-danger:hover {
+    background-color: rgb(222, 112, 120);
+    color: rgb(29, 32, 38);
+}
+
+.button-danger:active,
+.gamerule-light .button-danger:active {
+    background-color: rgb(194, 87, 97);
+    color: rgb(29, 32, 38);
+}
+
+.button-danger:disabled,
+.gamerule-light .button-danger:disabled {
+    background-color: transparent;
+    color: rgb(107, 114, 128);
 }
 
 .button-danger-icon {
+    width: 28px;
+    min-width: 28px;
+    height: 26px;
+    flex-shrink: 0;
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
@@ -258,51 +285,51 @@ Button:disabled {
 /* ── Rule conditions ── */
 .button-condition,
 .button-condition > .unity-base-field__input {
-    background-color: rgb(5, 168, 170);  /* #05A8AA */
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(3, 122, 124);
-    border-right-color: rgb(3, 122, 124);
-    border-top-color: rgb(3, 122, 124);
-    border-bottom-color: rgb(3, 122, 124);
+    background-color: rgb(48, 54, 64);
+    color: rgb(56, 185, 207);
+    border-left-color: rgb(56, 185, 207);
+    border-right-color: rgb(56, 185, 207);
+    border-top-color: rgb(56, 185, 207);
+    border-bottom-color: rgb(56, 185, 207);
 }
 
 .button-condition:hover,
 .button-condition:hover > .unity-base-field__input {
-    background-color: rgb(22, 190, 192); /* #16BEC0 */
+    background-color: rgb(59, 66, 78);
 }
 
 .button-condition:active,
 .button-condition:active > .unity-base-field__input {
-    background-color: rgb(4, 136, 138);
+    background-color: rgb(37, 42, 50);
 }
 
 .button-condition .unity-base-popup-field__text {
-    color: rgb(255, 255, 255);
+    color: rgb(56, 185, 207);
 }
 
 /* ── Rule actions ── */
 .button-action,
 .button-action > .unity-base-field__input {
-    background-color: rgb(248, 94, 37);  /* #F85E25 */
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(182, 63, 18);
-    border-right-color: rgb(182, 63, 18);
-    border-top-color: rgb(182, 63, 18);
-    border-bottom-color: rgb(182, 63, 18);
+    background-color: rgb(48, 54, 64);
+    color: rgb(240, 153, 89);
+    border-left-color: rgb(240, 153, 89);
+    border-right-color: rgb(240, 153, 89);
+    border-top-color: rgb(240, 153, 89);
+    border-bottom-color: rgb(240, 153, 89);
 }
 
 .button-action:hover,
 .button-action:hover > .unity-base-field__input {
-    background-color: rgb(255, 119, 70); /* #FF7746 */
+    background-color: rgb(59, 66, 78);
 }
 
 .button-action:active,
 .button-action:active > .unity-base-field__input {
-    background-color: rgb(211, 72, 24);  /* #D34818 */
+    background-color: rgb(37, 42, 50);
 }
 
 .button-action .unity-base-popup-field__text {
-    color: rgb(255, 255, 255);
+    color: rgb(240, 153, 89);
 }
 
 /* Dropdowns that visually match the spacing of the standard + Add Rule button. */
@@ -330,15 +357,15 @@ Button:disabled {
 
 .tooltip-dropdown-menu {
     padding: 4px;
-    background-color: rgb(43, 43, 43);
+    background-color: rgb(48, 54, 64);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: rgb(90, 90, 90);
-    border-right-color: rgb(90, 90, 90);
-    border-top-color: rgb(90, 90, 90);
-    border-bottom-color: rgb(90, 90, 90);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -359,63 +386,63 @@ Button:disabled {
 /* ── Property picker ── */
 .button-property-picker,
 .button-property-picker > .unity-base-field__input {
-    background-color: rgb(255, 174, 3);  /* #FFAE03 */
-    color: rgb(30, 30, 30);
-    border-left-color: rgb(181, 121, 0);
-    border-right-color: rgb(181, 121, 0);
-    border-top-color: rgb(181, 121, 0);
-    border-bottom-color: rgb(181, 121, 0);
+    background-color: rgb(48, 54, 64);
+    color: rgb(217, 182, 92);
+    border-left-color: rgb(217, 182, 92);
+    border-right-color: rgb(217, 182, 92);
+    border-top-color: rgb(217, 182, 92);
+    border-bottom-color: rgb(217, 182, 92);
     -unity-font-style: bold;
 }
 
 .button-property-picker:hover,
 .button-property-picker:hover > .unity-base-field__input {
-    background-color: rgb(255, 193, 61); /* #FFC13D */
-    color: rgb(30, 30, 30);
+    background-color: rgb(59, 66, 78);
+    color: rgb(217, 182, 92);
 }
 
 .button-property-picker:active,
 .button-property-picker:active > .unity-base-field__input {
-    background-color: rgb(217, 146, 0);
+    background-color: rgb(37, 42, 50);
 }
 
 .button-property-picker .unity-base-popup-field__text {
-    color: rgb(30, 30, 30);
+    color: rgb(217, 182, 92);
 }
 
 .button-property-picker .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: rgb(30, 30, 30);
+    -unity-background-image-tint-color: rgb(217, 182, 92);
 }
 
 /* ── Numeric values ── */
 .button-number-picker,
 .button-number-picker > .unity-base-field__input {
-    background-color: rgb(100, 203, 118); /* #64CB76 */
-    color: rgb(20, 45, 25);
-    border-left-color: rgb(66, 153, 81);
-    border-right-color: rgb(66, 153, 81);
-    border-top-color: rgb(66, 153, 81);
-    border-bottom-color: rgb(66, 153, 81);
+    background-color: rgb(48, 54, 64);
+    color: rgb(101, 185, 155);
+    border-left-color: rgb(101, 185, 155);
+    border-right-color: rgb(101, 185, 155);
+    border-top-color: rgb(101, 185, 155);
+    border-bottom-color: rgb(101, 185, 155);
     -unity-font-style: bold;
 }
 
 .button-number-picker:hover,
 .button-number-picker:hover > .unity-base-field__input {
-    background-color: rgb(121, 215, 137);
-    color: rgb(20, 45, 25);
+    background-color: rgb(59, 66, 78);
+    color: rgb(101, 185, 155);
 }
 
 .button-number-picker:active,
 .button-number-picker:active > .unity-base-field__input {
-    background-color: rgb(76, 177, 94);
+    background-color: rgb(37, 42, 50);
 }
 
 .button-number-picker .unity-base-popup-field__text {
-    color: rgb(20, 45, 25);
+    color: rgb(101, 185, 155);
 }
 
 .button-number-picker .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: rgb(20, 45, 25);
+    -unity-background-image-tint-color: rgb(101, 185, 155);
 }
 
 .numeric-stepper {
@@ -427,26 +454,6 @@ Button:disabled {
     min-width: 66px;
     margin-left: 1px;
     margin-right: 1px;
-}
-
-.numeric-stepper-field > .unity-base-field__input {
-    min-height: 20px;
-    background-color: rgb(30, 30, 30);
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    padding-left: 6px;
-    padding-right: 6px;
 }
 
 .numeric-stepper-button {
@@ -497,41 +504,15 @@ Button:disabled {
     width: 150px;
     min-width: 150px;
     max-width: 150px;
-    height: 24px;
-    min-height: 24px;
     margin-left: 0;
     margin-right: 6px;
     margin-top: 0;
     margin-bottom: 0;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: rgb(30, 30, 30);
-    color: rgb(229, 231, 235);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    -unity-text-align: middle-left;
     flex-shrink: 0;
 }
 
-.action-picker-value-display:hover {
-    background-color: rgb(56, 56, 56);
-    color: rgb(255, 255, 255);
-}
-
 .action-picker-value-display.action-empty-value {
-    color: rgb(145, 145, 145);
+    color: rgb(171, 179, 191);
     -unity-font-style: italic;
 }
 
@@ -571,11 +552,11 @@ Button:disabled {
     min-height: 30px;
     padding-left: 4px;
     padding-right: 4px;
-    background-color: rgb(32, 32, 32);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(37, 42, 50);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -588,7 +569,7 @@ Button:disabled {
 }
 
 .action-empty-expression {
-    color: rgb(145, 145, 145);
+    color: rgb(171, 179, 191);
     font-size: 10px;
     -unity-font-style: italic;
     margin-left: 5px;
@@ -598,39 +579,7 @@ Button:disabled {
 .action-legacy-value {
     min-width: 92px;
     max-width: 160px;
-    height: 24px;
-    min-height: 24px;
     margin: 0;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: rgb(30, 30, 30);
-    color: rgb(229, 231, 235);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    -unity-text-align: middle-left;
-}
-
-.action-selected-value:hover,
-.action-legacy-value:hover {
-    background-color: rgb(56, 56, 56);
-    color: rgb(255, 255, 255);
-}
-
-.action-legacy-value {
-    color: rgb(190, 190, 190);
-    -unity-font-style: italic;
 }
 
 .action-number-degree-suffix {
@@ -642,7 +591,7 @@ Button:disabled {
     min-width: 9px;
     margin: 0;
     padding: 0;
-    color: rgb(229, 231, 235);
+    color: rgb(231, 235, 240);
     font-size: 11px;
     -unity-text-align: middle-center;
 }
@@ -652,15 +601,19 @@ Button:disabled {
 }
 
 .action-clear-value {
-    width: 22px;
-    min-width: 22px;
-    height: 22px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
     margin-left: 4px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 1px;
     font-size: 14px;
+    -unity-text-align: middle-center;
     flex-shrink: 0;
 }
 
@@ -731,12 +684,15 @@ Button:disabled {
     min-width: 0;
     margin-right: 0;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 
 .rule-detail-action .action-single-picker,
 .rule-detail-action .action-scalar-control {
     flex-direction: column;
     align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .rule-detail-action .action-picker-value-display,
@@ -799,6 +755,8 @@ Button:disabled {
 }
 
 .rule-detail-action .action-expression-term {
+    min-width: 0;
+    max-width: 100%;
     margin-bottom: 3px;
 }
 
@@ -810,11 +768,11 @@ Button:disabled {
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    background-color: rgb(42, 42, 42);
-    border-left-color: rgb(74, 74, 74);
-    border-right-color: rgb(74, 74, 74);
-    border-top-color: rgb(74, 74, 74);
-    border-bottom-color: rgb(74, 74, 74);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -844,8 +802,8 @@ Button:disabled {
     padding-right: 6px;
     padding-top: 0;
     padding-bottom: 0;
-    background-color: rgb(46, 46, 46);
-    color: rgb(217, 217, 217);
+    background-color: rgb(48, 54, 64);
+    color: rgb(231, 235, 240);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -932,7 +890,6 @@ Button:disabled {
     width: 150px;
     min-width: 150px;
     max-width: 150px;
-    height: 22px;
     flex-shrink: 0;
 }
 
@@ -944,17 +901,17 @@ Button:disabled {
 }
 
 .compare-terms {
-    height: 30px;
-    min-height: 30px;
+    height: 34px;
+    min-height: 34px;
     flex-direction: row;
     align-items: center;
     padding-left: 4px;
     padding-right: 4px;
-    background-color: rgb(32, 32, 32);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -976,7 +933,7 @@ Button:disabled {
 }
 
 .compare-empty-expression {
-    color: rgb(145, 145, 145);
+    color: rgb(171, 179, 191);
     font-size: 10px;
     -unity-font-style: italic;
     margin-left: 5px;
@@ -987,6 +944,7 @@ Button:disabled {
     align-items: center;
     margin-right: 4px;
     margin-bottom: 0;
+    max-width: 100%;
 }
 
 .compare-term-operator {
@@ -1023,60 +981,15 @@ Button:disabled {
 .compare-property-term {
     min-width: 92px;
     max-width: 180px;
-    height: 24px;
-    min-height: 24px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 2px;
-    padding-bottom: 2px;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    background-color: rgb(30, 30, 30);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    color: rgb(229, 231, 235);
-    -unity-text-align: middle-left;
-}
-
-.compare-property-term:hover {
-    background-color: rgb(56, 56, 56);
-    color: rgb(255, 255, 255);
 }
 
 .compare-legacy-term {
     min-width: 92px;
     max-width: 180px;
-    height: 24px;
-    min-height: 24px;
-    padding-left: 7px;
-    padding-right: 7px;
-    background-color: rgb(30, 30, 30);
-    color: rgb(229, 231, 235);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    -unity-text-align: middle-left;
 }
 
 .compare-remove-term {
@@ -1093,6 +1006,7 @@ Button:disabled {
     padding-top: 0;
     padding-bottom: 1px;
     font-size: 14px;
+    -unity-text-align: middle-center;
 }
 
 /* ═══════════════════════════════════════════
@@ -1121,7 +1035,7 @@ Foldout {
 }
 
 Foldout > Toggle {
-    background-color: rgb(56, 56, 56);
+    background-color: rgb(48, 54, 64);
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 5px;
@@ -1133,7 +1047,7 @@ Foldout > Toggle {
 }
 
 Foldout > Toggle:hover {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(59, 66, 78);
 }
 
 /* ═══════════════════════════════════════════
@@ -1141,11 +1055,11 @@ Foldout > Toggle:hover {
    ═══════════════════════════════════════════ */
 
 PopupField {
-    background-color: rgb(30, 30, 30);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(59, 66, 78);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1162,7 +1076,7 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .panel-container {
-    background-color: rgb(37, 37, 38); /* panelBackground */
+    background-color: rgb(37, 42, 50);
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
@@ -1171,11 +1085,11 @@ PopupField {
 }
 
 .panel-section {
-    background-color: rgb(45, 45, 45); /* footerBackground #2d2d2d */
-    border-left-color: rgb(26, 26, 26);
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1195,7 +1109,7 @@ PopupField {
 .panel-header {
     font-size: 14px;
     -unity-font-style: bold;
-    color: rgb(229, 231, 235);
+    color: rgb(231, 235, 240);
     margin-bottom: 10px;
 }
 
@@ -1204,11 +1118,11 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .list-item {
-    background-color: rgb(56, 56, 56);
-    border-left-color: rgb(26, 26, 26);
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1228,22 +1142,22 @@ PopupField {
 }
 
 .list-item:hover {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(59, 66, 78);
 }
 
 .list-item-selected {
-    color: rgb(234, 221, 255);          /* primaryFixed */
-    border-left-color: rgb(59, 39, 107);
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
-.actor-prefab-label { color: rgb(156, 163, 175); }
-.actor-rule-count { color: rgb(204, 230, 255); }
+.actor-prefab-label { color: rgb(171, 179, 191); }
+.actor-rule-count { color: rgb(161, 138, 224); }
 .list-item-selected Label,
 .list-item-selected .actor-prefab-label,
-.list-item-selected .actor-rule-count { color: rgb(255, 255, 255); }
+.list-item-selected .actor-rule-count { color: rgb(161, 138, 224); }
 
 /* ═══════════════════════════════════════════
    ACTOR LIST ITEM  (Hierarchy window)
@@ -1255,11 +1169,11 @@ PopupField {
 }
 
 .actor-list-item:hover {
-    background-color: rgb(56, 56, 56); /* hoverBackground #383838 */
+    background-color: rgb(48, 54, 64);
 }
 
 .actor-list-item--selected > Label {
-    color: rgb(234, 221, 255); /* primaryFixed */
+    color: rgb(161, 138, 224);
 }
 
 /* 3-dot menu button */
@@ -1272,7 +1186,7 @@ PopupField {
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
-    color: rgb(107, 114, 128); /* textMuted */
+    color: rgb(171, 179, 191);
     padding: 0;
     margin: 0;
     -unity-text-align: middle-center;
@@ -1285,8 +1199,8 @@ PopupField {
 }
 
 .actor-menu-btn:hover {
-    background-color: rgb(68, 68, 68);
-    color: rgb(229, 231, 235);
+    background-color: rgb(59, 66, 78);
+    color: rgb(231, 235, 240);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
@@ -1304,11 +1218,11 @@ PopupField {
     border-top-right-radius: 20px;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    color: rgb(234, 221, 255);           /* primaryFixed */
-    border-left-color: rgb(59, 39, 107); /* borderPrimary */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1324,11 +1238,11 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .help-box {
-    background-color: rgb(45, 40, 60);    /* dark purple tint */
-    border-left-color: rgb(96, 68, 165);  /* light purple */
-    border-right-color: rgb(96, 68, 165);
-    border-top-color: rgb(96, 68, 165);
-    border-bottom-color: rgb(96, 68, 165);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1348,11 +1262,11 @@ PopupField {
 }
 
 .help-box-warning {
-    background-color: rgb(55, 48, 40);
-    border-left-color: rgb(220, 160, 58);
-    border-right-color: rgb(220, 160, 58);
-    border-top-color: rgb(220, 160, 58);
-    border-bottom-color: rgb(220, 160, 58);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(217, 182, 92);
+    border-right-color: rgb(217, 182, 92);
+    border-top-color: rgb(217, 182, 92);
+    border-bottom-color: rgb(217, 182, 92);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1360,11 +1274,11 @@ PopupField {
 }
 
 .help-box-error {
-    background-color: rgb(40, 35, 55);    /* dark purple tint */
-    border-left-color: rgb(59, 39, 107);  /* dark purple */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    background-color: rgb(48, 54, 64);
+    border-left-color: rgb(222, 112, 120);
+    border-right-color: rgb(222, 112, 120);
+    border-top-color: rgb(222, 112, 120);
+    border-bottom-color: rgb(222, 112, 120);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1376,14 +1290,14 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 Toolbar {
-    background-color: rgb(51, 51, 51); /* toolbarBackground #333333 */
+    background-color: rgb(48, 54, 64);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(26, 26, 26);
+    border-bottom-color: rgb(74, 82, 96);
 }
 
 ToolbarButton {
     background-color: transparent;
-    color: rgb(229, 231, 235);
+    color: rgb(231, 235, 240);
     border-width: 0;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -1392,11 +1306,11 @@ ToolbarButton {
 }
 
 ToolbarButton:hover {
-    background-color: rgb(56, 56, 56);
+    background-color: rgb(48, 54, 64);
 }
 
 ToolbarButton:active {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(74, 82, 96);
 }
 
 /* ═══════════════════════════════════════════
@@ -1405,13 +1319,13 @@ ToolbarButton:active {
 
 .separator {
     height: 1px;
-    background-color: rgb(26, 26, 26);
+    background-color: rgb(74, 82, 96);
     margin: 10px 0;
 }
 
 .separator-vertical {
     width: 1px;
-    background-color: rgb(26, 26, 26);
+    background-color: rgb(74, 82, 96);
     margin: 0 10px;
 }
 
@@ -1498,7 +1412,7 @@ ToolbarButton:active {
 }
 
 .text-muted {
-    color: rgb(107, 114, 128); /* textMuted #6b7280 */
+    color: rgb(171, 179, 191);
 }
 
 /* Light Unity skin. Keep action/condition/selection colours, but use light neutral
@@ -1525,13 +1439,7 @@ ToolbarButton:active {
 
 .gamerule-light TextField,
 .gamerule-light TextField > TextInput,
-.gamerule-light PopupField,
-.gamerule-light .numeric-stepper-field > .unity-base-field__input,
-.gamerule-light .action-picker-value-display,
-.gamerule-light .action-selected-value,
-.gamerule-light .action-legacy-value,
-.gamerule-light .compare-property-term,
-.gamerule-light .compare-legacy-term {
+.gamerule-light PopupField {
     background-color: rgb(255, 255, 255);
     color: rgb(35, 35, 35);
     border-left-color: rgb(182, 182, 182);
@@ -1550,10 +1458,10 @@ ToolbarButton:active {
 }
 
 .gamerule-light TextField:focus {
-    border-left-color: rgb(79, 55, 139);
-    border-right-color: rgb(79, 55, 139);
-    border-top-color: rgb(79, 55, 139);
-    border-bottom-color: rgb(79, 55, 139);
+    border-left-color: rgb(88, 64, 150);
+    border-right-color: rgb(88, 64, 150);
+    border-top-color: rgb(88, 64, 150);
+    border-bottom-color: rgb(88, 64, 150);
 }
 
 .gamerule-light Button,
@@ -1610,10 +1518,6 @@ ToolbarButton:active {
 .gamerule-light .action-empty-expression,
 .gamerule-light .compare-empty-expression,
 .gamerule-light .action-empty-value,
-.gamerule-light .action-legacy-value {
-    color: rgb(107, 107, 107);
-}
-
 .gamerule-light .action-number-degree-suffix {
     color: rgb(35, 35, 35);
 }
@@ -1652,114 +1556,111 @@ ToolbarButton:active {
 .gamerule-light .button-success,
 .gamerule-light .list-item.list-item-selected,
 .gamerule-light .actor-list-item.actor-list-item--selected {
-    background-color: rgb(79, 55, 139);
-    color: rgb(255, 255, 255);
+    background-color: rgb(236, 238, 243);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .fab-create:hover,
 .gamerule-light .button-primary:hover,
 .gamerule-light .button-success:hover,
 .gamerule-light .list-item.list-item-selected:hover,
 .gamerule-light .actor-list-item.actor-list-item--selected:hover {
-    background-color: rgb(96, 68, 165);
-    color: rgb(255, 255, 255);
+    background-color: rgb(223, 226, 233);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .button-secondary {
-    background-color: rgb(59, 39, 107);
-    color: rgb(255, 255, 255);
+    background-color: rgb(236, 238, 243);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .button-secondary:hover {
-    background-color: rgb(72, 50, 125);
-    color: rgb(255, 255, 255);
+    background-color: rgb(223, 226, 233);
+    color: rgb(88, 64, 150);
 }
-.gamerule-light .button-danger,
 .gamerule-light .button-negation.button-negation--active {
     background-color: rgb(204, 0, 31);
     color: rgb(255, 255, 255);
 }
-.gamerule-light .button-danger:hover,
 .gamerule-light .button-negation.button-negation--active:hover {
     background-color: rgb(226, 26, 54);
     color: rgb(255, 255, 255);
 }
 .gamerule-light .button-condition,
 .gamerule-light .button-condition > .unity-base-field__input {
-    background-color: rgb(5, 168, 170);
-    color: rgb(30, 30, 30);
+    background-color: rgb(236, 238, 243);
+    color: rgb(15, 103, 120);
 }
 .gamerule-light .button-condition:hover,
 .gamerule-light .button-condition:hover > .unity-base-field__input {
-    background-color: rgb(22, 190, 192);
+    background-color: rgb(223, 226, 233);
 }
 .gamerule-light .button-condition:active,
 .gamerule-light .button-condition:active > .unity-base-field__input {
-    background-color: rgb(4, 136, 138);
+    background-color: rgb(208, 213, 224);
 }
 .gamerule-light .button-action,
 .gamerule-light .button-action > .unity-base-field__input {
-    background-color: rgb(248, 94, 37);
-    color: rgb(30, 30, 30);
+    background-color: rgb(236, 238, 243);
+    color: rgb(145, 68, 23);
 }
 .gamerule-light .button-action:hover,
 .gamerule-light .button-action:hover > .unity-base-field__input {
-    background-color: rgb(255, 119, 70);
+    background-color: rgb(223, 226, 233);
 }
 .gamerule-light .button-action:active,
 .gamerule-light .button-action:active > .unity-base-field__input {
-    background-color: rgb(211, 72, 24);
+    background-color: rgb(208, 213, 224);
 }
 .gamerule-light .button-property-picker,
 .gamerule-light .button-property-picker > .unity-base-field__input {
-    background-color: rgb(255, 174, 3);
+    background-color: rgb(236, 238, 243);
 }
 .gamerule-light .button-property-picker:hover,
 .gamerule-light .button-property-picker:hover > .unity-base-field__input {
-    background-color: rgb(255, 193, 61);
+    background-color: rgb(223, 226, 233);
 }
 .gamerule-light .button-property-picker:active,
 .gamerule-light .button-property-picker:active > .unity-base-field__input {
-    background-color: rgb(217, 146, 0);
+    background-color: rgb(208, 213, 224);
 }
 .gamerule-light .button-number-picker,
 .gamerule-light .button-number-picker > .unity-base-field__input {
-    background-color: rgb(100, 203, 118);
+    background-color: rgb(236, 238, 243);
 }
 .gamerule-light .button-number-picker:hover,
 .gamerule-light .button-number-picker:hover > .unity-base-field__input {
-    background-color: rgb(121, 215, 137);
+    background-color: rgb(223, 226, 233);
 }
 .gamerule-light .button-number-picker:active,
 .gamerule-light .button-number-picker:active > .unity-base-field__input {
-    background-color: rgb(76, 177, 94);
+    background-color: rgb(208, 213, 224);
 }
 .gamerule-light .button-condition .unity-base-popup-field__text,
 .gamerule-light .button-action .unity-base-popup-field__text {
-    color: rgb(30, 30, 30);
+    color: rgb(15, 103, 120);
 }
 .gamerule-light .button-condition .unity-base-popup-field__arrow,
 .gamerule-light .button-action .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: rgb(30, 30, 30);
+    -unity-background-image-tint-color: rgb(15, 103, 120);
 }
 .gamerule-light .button-primary .unity-base-popup-field__text {
-    color: rgb(255, 255, 255);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .button-primary > .unity-base-field__input {
-    color: rgb(255, 255, 255);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .button-primary .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: rgb(255, 255, 255);
+    -unity-background-image-tint-color: rgb(88, 64, 150);
 }
 
 .gamerule-light .actor-list-item--selected > Label,
 .gamerule-light .list-item-selected {
-    color: rgb(255, 255, 255);
+    color: rgb(88, 64, 150);
 }
 .gamerule-light .actor-prefab-label { color: rgb(92, 92, 92); }
-.gamerule-light .actor-rule-count { color: rgb(34, 67, 97); }
+.gamerule-light .actor-rule-count { color: rgb(88, 64, 150); }
 .gamerule-light .list-item-selected Label,
 .gamerule-light .list-item-selected .actor-prefab-label,
-.gamerule-light .list-item-selected .actor-rule-count { color: rgb(255, 255, 255); }
+.gamerule-light .list-item-selected .actor-rule-count { color: rgb(88, 64, 150); }
 
-.gamerule-light .button-danger:active,
 .gamerule-light .button-negation.button-negation--active:active {
     background-color: rgb(168, 0, 25);
     color: rgb(255, 255, 255);
@@ -1768,88 +1669,492 @@ ToolbarButton:active {
 .gamerule-light .button-secondary:active,
 .gamerule-light .fab-create:active,
 .gamerule-light .button-primary:active {
-    background-color: rgb(59, 39, 107);
-    color: rgb(255, 255, 255);
+    background-color: rgb(208, 213, 224);
+    color: rgb(88, 64, 150);
 }
 
-/* Compact WHEN/DO overview. Editing controls live in Rule Details. */
-.rule-overview-column {
-    background-color: rgb(56, 56, 56);
+/* Shared sections and cards for Rules and Rule Details. */
+.rule-overview {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    min-width: 0;
+    margin-left: -4px;
+    margin-right: -4px;
+}
+
+.rule-overview-responsive-column {
+    flex-grow: 1;
+    flex-basis: 340px;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-bottom: 8px;
+}
+
+.rule-overview-column,
+.rule-editor-card {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-left: 10px;
-    padding-right: 10px;
 }
 
-.condition-overview {
-    margin-right: 5px;
+.rule-overview-column {
+    background-color: rgb(37, 42, 50);
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
-.action-overview {
-    margin-left: 5px;
+.rule-block-heading {
+    color: rgb(231, 235, 240);
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
 }
 
-.gamerule-light .rule-overview-column {
-    background-color: rgb(226, 226, 226);
+.rule-editor-card {
+    background-color: rgb(48, 54, 64);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
 }
 
-.rule-summary-row { margin-bottom: 6px; }
+.rule-summary-row.rule-editor-card {
+    margin-bottom: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.rule-summary-row.rule-editor-card.condition-negated {
+    border-left-width: 3px;
+    border-left-color: rgb(204, 0, 31);
+}
+
+.rule-summary-card.button-condition,
+.rule-summary-card.button-action {
+    background-color: transparent;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
 
 .rule-summary-card {
     flex-grow: 1;
-    min-height: 36px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-right-width: 2px;
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: 32px;
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
-    padding-left: 9px;
-    padding-right: 9px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.rule-summary-name,
+.rule-detail-type {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
 }
 
 .rule-summary-name {
-    width: 108px;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
     white-space: nowrap;
-    -unity-text-align: middle-left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-right: 5px;
+}
+
+.rule-detail-card {
+    padding-top: 6px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    min-width: 0;
+}
+
+.rule-detail-type {
+    align-self: flex-start;
+    max-width: 100%;
+    margin-bottom: 7px;
+}
+
+.button-condition .rule-summary-name,
+.rule-detail-type.button-condition {
+    color: rgb(56, 185, 207);
+    background-color: rgb(37, 62, 72);
+}
+
+.button-action .rule-summary-name,
+.rule-detail-type.button-action {
+    color: rgb(240, 153, 89);
+    background-color: rgb(67, 53, 48);
 }
 
 .rule-summary-detail {
     flex-grow: 1;
-    flex-basis: 0;
+    flex-basis: 64px;
     flex-shrink: 1;
     min-width: 0;
+    max-width: 100%;
     white-space: normal;
     -unity-text-align: middle-left;
-    color: rgb(255, 255, 255);
-    background-color: rgb(43, 43, 43);
+    color: rgb(231, 235, 240);
+    background-color: rgb(59, 66, 78);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    margin-left: 7px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
-.rule-summary-selected {
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-color: rgb(255, 174, 3);
-    border-bottom-color: rgb(255, 174, 3);
-    border-left-color: rgb(255, 174, 3);
-    border-right-color: rgb(255, 174, 3);
+.rule-summary-card:hover,
+.rule-detail-type:hover,
+.rule-join-selector:hover,
+.rule-add-element:hover {
+    background-color: rgb(59, 66, 78);
+}
+
+.rule-summary-card.rule-summary-selected,
+.rule-summary-card:focus,
+.rule-detail-type:focus,
+.rule-join-selector:focus,
+.rule-add-element:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.rule-join-selector,
+.rule-add-element {
+    align-self: center;
+}
+
+.rule-join-selector {
+    min-height: 22px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    font-size: 10px;
+}
+
+.rule-add-element {
+    margin-top: 7px;
+    max-width: 100%;
+}
+
+.gamerule-light .rule-overview-column { background-color: rgb(226, 226, 226); }
+.gamerule-light .rule-editor-card { background-color: rgb(250, 250, 250); }
+.gamerule-light .rule-block-heading { color: rgb(35, 35, 35); }
+.gamerule-light .button-condition .rule-summary-name,
+.gamerule-light .rule-detail-type.button-condition {
+    background-color: rgb(226, 241, 244);
+    color: rgb(15, 103, 120);
+}
+.gamerule-light .button-action .rule-summary-name,
+.gamerule-light .rule-detail-type.button-action {
+    background-color: rgb(250, 237, 225);
+    color: rgb(145, 68, 23);
+}
+.gamerule-light .rule-summary-detail {
+    background-color: rgb(226, 226, 226);
+    color: rgb(35, 35, 35);
+}
+
+.button-condition .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(56, 185, 207); }
+.button-action .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(240, 153, 89); }
+.button-primary .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(161, 138, 224); }
+.gamerule-light .button-property-picker .unity-base-popup-field__text { color: rgb(121, 88, 18); }
+.gamerule-light .button-property-picker .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(121, 88, 18); }
+.gamerule-light .button-number-picker .unity-base-popup-field__text { color: rgb(29, 109, 81); }
+.gamerule-light .button-number-picker .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(29, 109, 81); }
+
+/* Native field inputs, in windows that load this stylesheet. */
+.unity-integer-field > .unity-base-field__input,
+.unity-float-field > .unity-base-field__input,
+.unity-object-field > .unity-base-field__input,
+PopupField > .unity-base-field__input,
+.unity-dropdown-field > .unity-base-field__input {
+    background-color: rgb(59, 66, 78);
+    color: rgb(231, 235, 240);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
+}
+
+.gamerule-light .unity-integer-field > .unity-base-field__input,
+.gamerule-light .unity-float-field > .unity-base-field__input,
+.gamerule-light .unity-object-field > .unity-base-field__input,
+.gamerule-light PopupField > .unity-base-field__input,
+.gamerule-light .unity-dropdown-field > .unity-base-field__input {
+    background-color: rgb(255, 255, 255);
+    color: rgb(35, 35, 35);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+
+/* Shared treatment for editable inputs, parameter selectors and displayed values. */
+.numeric-stepper-field > .unity-base-field__input,
+.action-picker-value-display,
+.action-selected-value,
+.action-legacy-value,
+.compare-property-term,
+.compare-legacy-term,
+.parameter-selector,
+.parameter-selector > .unity-base-field__input {
+    min-height: 28px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(59, 66, 78);
+    border-left-color: rgb(74, 82, 96);
+    border-right-color: rgb(74, 82, 96);
+    border-top-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(74, 82, 96);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.numeric-stepper-field > .unity-base-field__input {
+    color: rgb(231, 235, 240);
+}
+
+.action-picker-value-display,
+.action-selected-value,
+.action-legacy-value,
+.compare-property-term,
+.compare-legacy-term {
+    color: rgb(231, 235, 240);
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
+
+.action-legacy-value,
+.compare-legacy-term,
+.action-picker-value-display.action-empty-value {
+    color: rgb(171, 179, 191);
+    -unity-font-style: italic;
+}
+
+.action-picker-value-display:hover,
+.action-selected-value:hover,
+.action-legacy-value:hover,
+.compare-property-term:hover,
+.numeric-stepper-field > .unity-base-field__input:hover,
+.parameter-selector:hover,
+.parameter-selector:hover > .unity-base-field__input {
+    background-color: rgb(48, 54, 64);
+}
+
+.parameter-selector:active,
+.parameter-selector:active > .unity-base-field__input {
+    background-color: rgb(37, 42, 50);
+}
+
+.numeric-stepper-field:focus > .unity-base-field__input,
+.numeric-stepper-field > .unity-base-field__input:focus,
+.unity-integer-field > .unity-base-field__input:focus,
+.unity-float-field > .unity-base-field__input:focus,
+.unity-object-field:focus > .unity-base-field__input,
+.unity-dropdown-field:focus > .unity-base-field__input,
+.action-picker-value-display:focus,
+.action-selected-value:focus,
+.action-legacy-value:focus,
+.compare-property-term:focus,
+.parameter-selector:focus,
+.parameter-selector:focus > .unity-base-field__input {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.action-picker-value-display:disabled,
+.action-selected-value:disabled,
+.action-legacy-value:disabled,
+.compare-property-term:disabled,
+.numeric-stepper-field:disabled > .unity-base-field__input,
+.parameter-selector:disabled,
+.parameter-selector:disabled > .unity-base-field__input,
+.parameter-selector:disabled .unity-base-popup-field__text {
+    background-color: rgb(48, 54, 64);
+    color: rgb(171, 179, 191);
+}
+
+.parameter-selector:disabled .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(171, 179, 191);
+}
+
+/* Native arithmetic dropdowns draw the frame on the inner input only. */
+PopupField.parameter-selector {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.action-term-operator.parameter-selector > .unity-base-field__input {
+    min-width: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.action-operation-picker.parameter-selector > .unity-base-field__input {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.compare-operation-dropdown.parameter-selector,
+.compare-operator-dropdown.parameter-selector,
+.compare-term-operator.parameter-selector {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.compare-compact-picker-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.compare-compact-picker-row .compare-value-picker {
+    flex-basis: 172px;
+    max-width: 100%;
+}
+
+.compare-compact-picker-row .compare-operation-dropdown {
+    margin-left: 0;
+}
+
+.compare-compact-picker-row .parameter-selector {
+    margin-right: 4px;
+    margin-bottom: 3px;
+}
+
+.gamerule-light .numeric-stepper-field > .unity-base-field__input,
+.gamerule-light .action-picker-value-display,
+.gamerule-light .action-selected-value,
+.gamerule-light .action-legacy-value,
+.gamerule-light .compare-property-term,
+.gamerule-light .compare-legacy-term,
+.gamerule-light .parameter-selector,
+.gamerule-light .parameter-selector > .unity-base-field__input {
+    background-color: rgb(250, 250, 250);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .numeric-stepper-field > .unity-base-field__input,
+.gamerule-light .action-picker-value-display,
+.gamerule-light .action-selected-value,
+.gamerule-light .compare-property-term {
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .action-legacy-value,
+.gamerule-light .compare-legacy-term,
+.gamerule-light .action-picker-value-display.action-empty-value {
+    color: rgb(92, 92, 92);
+}
+
+.gamerule-light PopupField.parameter-selector {
+    background-color: transparent;
+}
+
+.gamerule-light .parameter-selector:hover,
+.gamerule-light .parameter-selector:hover > .unity-base-field__input,
+.gamerule-light .action-picker-value-display:hover,
+.gamerule-light .action-selected-value:hover,
+.gamerule-light .action-legacy-value:hover,
+.gamerule-light .compare-property-term:hover,
+.gamerule-light .numeric-stepper-field > .unity-base-field__input:hover {
+    background-color: rgb(231, 231, 231);
+}
+
+.gamerule-light .parameter-selector:active,
+.gamerule-light .parameter-selector:active > .unity-base-field__input {
+    background-color: rgb(223, 226, 233);
+}
+
+.gamerule-light .action-picker-value-display:disabled,
+.gamerule-light .action-selected-value:disabled,
+.gamerule-light .action-legacy-value:disabled,
+.gamerule-light .compare-property-term:disabled,
+.gamerule-light .numeric-stepper-field:disabled > .unity-base-field__input,
+.gamerule-light .parameter-selector:disabled,
+.gamerule-light .parameter-selector:disabled > .unity-base-field__input,
+.gamerule-light .parameter-selector:disabled .unity-base-popup-field__text {
+    background-color: rgb(234, 234, 234);
+    color: rgb(92, 92, 92);
+}
+
+.gamerule-light .parameter-selector:disabled .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(92, 92, 92);
+}
+
+.gamerule-light .numeric-stepper-field:focus > .unity-base-field__input,
+.gamerule-light .numeric-stepper-field > .unity-base-field__input:focus,
+.gamerule-light .unity-integer-field > .unity-base-field__input:focus,
+.gamerule-light .unity-float-field > .unity-base-field__input:focus,
+.gamerule-light .unity-object-field:focus > .unity-base-field__input,
+.gamerule-light .unity-dropdown-field:focus > .unity-base-field__input,
+.gamerule-light .action-picker-value-display:focus,
+.gamerule-light .action-selected-value:focus,
+.gamerule-light .action-legacy-value:focus,
+.gamerule-light .compare-property-term:focus,
+.gamerule-light .parameter-selector:focus,
+.gamerule-light .parameter-selector:focus > .unity-base-field__input {
+    border-left-color: rgb(88, 64, 150);
+    border-right-color: rgb(88, 64, 150);
+    border-top-color: rgb(88, 64, 150);
+    border-bottom-color: rgb(88, 64, 150);
 }
