@@ -6,7 +6,7 @@
    ═══════════════════════════════════════════ */
 
 #unity-content-container {
-    background-color: rgb(29, 32, 38);
+    background-color: rgb(30, 30, 30);
 }
 
 /* ═══════════════════════════════════════════
@@ -14,7 +14,7 @@
    ═══════════════════════════════════════════ */
 
 ScrollView {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 /* ═══════════════════════════════════════════
@@ -22,7 +22,7 @@ ScrollView {
    ═══════════════════════════════════════════ */
 
 Label {
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     font-size: 12px;
 }
 
@@ -31,12 +31,12 @@ Label {
    ═══════════════════════════════════════════ */
 
 TextField {
-    background-color: rgb(59, 66, 78);
-    color: rgb(231, 235, 240);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -61,8 +61,8 @@ TextField:focus {
 }
 
 TextField > TextInput {
-    background-color: rgb(59, 66, 78);
-    color: rgb(231, 235, 240);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
 }
 
 /* ═══════════════════════════════════════════
@@ -70,12 +70,12 @@ TextField > TextInput {
    ═══════════════════════════════════════════ */
 
 Button {
-    background-color: rgb(48, 54, 64);
-    color: rgb(231, 235, 240);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(51, 51, 51);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -92,16 +92,16 @@ Button {
 }
 
 Button:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 Button:active {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 Button:disabled {
-    background-color: rgb(48, 54, 64);
-    color: rgb(171, 179, 191);
+    background-color: rgb(51, 51, 51);
+    color: rgb(181, 181, 181);
 }
 
 /* ── Shared purple palette ── */
@@ -110,7 +110,7 @@ Button:disabled {
 .list-item.list-item-selected,
 .actor-list-item.actor-list-item--selected,
 .fab-create {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(161, 138, 224);
     border-left-color: rgb(161, 138, 224);
     border-right-color: rgb(161, 138, 224);
@@ -123,17 +123,17 @@ Button:disabled {
 .list-item.list-item-selected:hover,
 .actor-list-item.actor-list-item--selected:hover,
 .fab-create:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .button-primary:active,
 .button-success:active,
 .fab-create:active {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-primary > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(161, 138, 224);
     border-left-color: rgb(161, 138, 224);
     border-right-color: rgb(161, 138, 224);
@@ -142,11 +142,11 @@ Button:disabled {
 }
 
 .button-primary:hover > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .button-primary:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-primary .unity-base-popup-field__text {
@@ -154,20 +154,20 @@ Button:disabled {
 }
 
 .button-secondary {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(161, 138, 224);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
 }
 
 .button-secondary:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .button-secondary:active {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 /* ── Logical negation ── */
@@ -230,7 +230,7 @@ Button:disabled {
 /* ── Destructive controls ── */
 .button-danger {
     background-color: transparent;
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     border-left-color: transparent;
     border-right-color: transparent;
     border-top-color: transparent;
@@ -253,13 +253,13 @@ Button:disabled {
 .button-danger:hover,
 .gamerule-light .button-danger:hover {
     background-color: rgb(222, 112, 120);
-    color: rgb(29, 32, 38);
+    color: rgb(30, 30, 30);
 }
 
 .button-danger:active,
 .gamerule-light .button-danger:active {
     background-color: rgb(194, 87, 97);
-    color: rgb(29, 32, 38);
+    color: rgb(30, 30, 30);
 }
 
 .button-danger:disabled,
@@ -285,7 +285,7 @@ Button:disabled {
 /* ── Rule conditions ── */
 .button-condition,
 .button-condition > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(56, 185, 207);
     border-left-color: rgb(56, 185, 207);
     border-right-color: rgb(56, 185, 207);
@@ -295,12 +295,12 @@ Button:disabled {
 
 .button-condition:hover,
 .button-condition:hover > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .button-condition:active,
 .button-condition:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-condition .unity-base-popup-field__text {
@@ -310,7 +310,7 @@ Button:disabled {
 /* ── Rule actions ── */
 .button-action,
 .button-action > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(240, 153, 89);
     border-left-color: rgb(240, 153, 89);
     border-right-color: rgb(240, 153, 89);
@@ -320,12 +320,12 @@ Button:disabled {
 
 .button-action:hover,
 .button-action:hover > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .button-action:active,
 .button-action:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-action .unity-base-popup-field__text {
@@ -357,15 +357,15 @@ Button:disabled {
 
 .tooltip-dropdown-menu {
     padding: 4px;
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -386,7 +386,7 @@ Button:disabled {
 /* ── Property picker ── */
 .button-property-picker,
 .button-property-picker > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(217, 182, 92);
     border-left-color: rgb(217, 182, 92);
     border-right-color: rgb(217, 182, 92);
@@ -397,13 +397,13 @@ Button:disabled {
 
 .button-property-picker:hover,
 .button-property-picker:hover > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
     color: rgb(217, 182, 92);
 }
 
 .button-property-picker:active,
 .button-property-picker:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-property-picker .unity-base-popup-field__text {
@@ -417,7 +417,7 @@ Button:disabled {
 /* ── Numeric values ── */
 .button-number-picker,
 .button-number-picker > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     color: rgb(101, 185, 155);
     border-left-color: rgb(101, 185, 155);
     border-right-color: rgb(101, 185, 155);
@@ -428,13 +428,13 @@ Button:disabled {
 
 .button-number-picker:hover,
 .button-number-picker:hover > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
     color: rgb(101, 185, 155);
 }
 
 .button-number-picker:active,
 .button-number-picker:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .button-number-picker .unity-base-popup-field__text {
@@ -512,7 +512,7 @@ Button:disabled {
 }
 
 .action-picker-value-display.action-empty-value {
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     -unity-font-style: italic;
 }
 
@@ -552,11 +552,11 @@ Button:disabled {
     min-height: 30px;
     padding-left: 4px;
     padding-right: 4px;
-    background-color: rgb(37, 42, 50);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(37, 37, 37);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -569,7 +569,7 @@ Button:disabled {
 }
 
 .action-empty-expression {
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     font-size: 10px;
     -unity-font-style: italic;
     margin-left: 5px;
@@ -591,7 +591,7 @@ Button:disabled {
     min-width: 9px;
     margin: 0;
     padding: 0;
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     font-size: 11px;
     -unity-text-align: middle-center;
 }
@@ -768,15 +768,7 @@ Button:disabled {
     padding-right: 5px;
     padding-top: 5px;
     padding-bottom: 5px;
-    background-color: rgb(48, 54, 64);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
+    background-color: rgb(51, 51, 51);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
@@ -802,8 +794,8 @@ Button:disabled {
     padding-right: 6px;
     padding-top: 0;
     padding-bottom: 0;
-    background-color: rgb(48, 54, 64);
-    color: rgb(231, 235, 240);
+    background-color: rgb(51, 51, 51);
+    color: rgb(230, 230, 230);
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -907,11 +899,11 @@ Button:disabled {
     align-items: center;
     padding-left: 4px;
     padding-right: 4px;
-    background-color: rgb(48, 54, 64);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -933,7 +925,7 @@ Button:disabled {
 }
 
 .compare-empty-expression {
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     font-size: 10px;
     -unity-font-style: italic;
     margin-left: 5px;
@@ -1035,7 +1027,7 @@ Foldout {
 }
 
 Foldout > Toggle {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 5px;
@@ -1047,7 +1039,7 @@ Foldout > Toggle {
 }
 
 Foldout > Toggle:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 /* ═══════════════════════════════════════════
@@ -1055,11 +1047,11 @@ Foldout > Toggle:hover {
    ═══════════════════════════════════════════ */
 
 PopupField {
-    background-color: rgb(59, 66, 78);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(56, 56, 56);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1076,7 +1068,7 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .panel-container {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
@@ -1085,11 +1077,11 @@ PopupField {
 }
 
 .panel-section {
-    background-color: rgb(48, 54, 64);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1109,7 +1101,7 @@ PopupField {
 .panel-header {
     font-size: 14px;
     -unity-font-style: bold;
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     margin-bottom: 10px;
 }
 
@@ -1118,11 +1110,11 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .list-item {
-    background-color: rgb(48, 54, 64);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1142,7 +1134,7 @@ PopupField {
 }
 
 .list-item:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .list-item-selected {
@@ -1153,7 +1145,7 @@ PopupField {
     border-bottom-color: rgb(161, 138, 224);
 }
 
-.actor-prefab-label { color: rgb(171, 179, 191); }
+.actor-prefab-label { color: rgb(181, 181, 181); }
 .actor-rule-count { color: rgb(161, 138, 224); }
 .list-item-selected Label,
 .list-item-selected .actor-prefab-label,
@@ -1169,7 +1161,7 @@ PopupField {
 }
 
 .actor-list-item:hover {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
 }
 
 .actor-list-item--selected > Label {
@@ -1186,7 +1178,7 @@ PopupField {
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     padding: 0;
     margin: 0;
     -unity-text-align: middle-center;
@@ -1199,8 +1191,8 @@ PopupField {
 }
 
 .actor-menu-btn:hover {
-    background-color: rgb(59, 66, 78);
-    color: rgb(231, 235, 240);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
@@ -1238,7 +1230,7 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .help-box {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     border-left-color: rgb(161, 138, 224);
     border-right-color: rgb(161, 138, 224);
     border-top-color: rgb(161, 138, 224);
@@ -1262,7 +1254,7 @@ PopupField {
 }
 
 .help-box-warning {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     border-left-color: rgb(217, 182, 92);
     border-right-color: rgb(217, 182, 92);
     border-top-color: rgb(217, 182, 92);
@@ -1274,7 +1266,7 @@ PopupField {
 }
 
 .help-box-error {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     border-left-color: rgb(222, 112, 120);
     border-right-color: rgb(222, 112, 120);
     border-top-color: rgb(222, 112, 120);
@@ -1290,14 +1282,14 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 Toolbar {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(74, 82, 96);
+    border-bottom-color: rgb(66, 66, 66);
 }
 
 ToolbarButton {
     background-color: transparent;
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     border-width: 0;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -1306,11 +1298,11 @@ ToolbarButton {
 }
 
 ToolbarButton:hover {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
 }
 
 ToolbarButton:active {
-    background-color: rgb(74, 82, 96);
+    background-color: rgb(66, 66, 66);
 }
 
 /* ═══════════════════════════════════════════
@@ -1319,13 +1311,13 @@ ToolbarButton:active {
 
 .separator {
     height: 1px;
-    background-color: rgb(74, 82, 96);
+    background-color: rgb(66, 66, 66);
     margin: 10px 0;
 }
 
 .separator-vertical {
     width: 1px;
-    background-color: rgb(74, 82, 96);
+    background-color: rgb(66, 66, 66);
     margin: 0 10px;
 }
 
@@ -1412,7 +1404,7 @@ ToolbarButton:active {
 }
 
 .text-muted {
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
 }
 
 /* Light Unity skin. Keep action/condition/selection colours, but use light neutral
@@ -1556,7 +1548,7 @@ ToolbarButton:active {
 .gamerule-light .button-success,
 .gamerule-light .list-item.list-item-selected,
 .gamerule-light .actor-list-item.actor-list-item--selected {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
     color: rgb(88, 64, 150);
 }
 .gamerule-light .fab-create:hover,
@@ -1564,15 +1556,15 @@ ToolbarButton:active {
 .gamerule-light .button-success:hover,
 .gamerule-light .list-item.list-item-selected:hover,
 .gamerule-light .actor-list-item.actor-list-item--selected:hover {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
     color: rgb(88, 64, 150);
 }
 .gamerule-light .button-secondary {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
     color: rgb(88, 64, 150);
 }
 .gamerule-light .button-secondary:hover {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
     color: rgb(88, 64, 150);
 }
 .gamerule-light .button-negation.button-negation--active {
@@ -1585,53 +1577,53 @@ ToolbarButton:active {
 }
 .gamerule-light .button-condition,
 .gamerule-light .button-condition > .unity-base-field__input {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
     color: rgb(15, 103, 120);
 }
 .gamerule-light .button-condition:hover,
 .gamerule-light .button-condition:hover > .unity-base-field__input {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
 }
 .gamerule-light .button-condition:active,
 .gamerule-light .button-condition:active > .unity-base-field__input {
-    background-color: rgb(208, 213, 224);
+    background-color: rgb(213, 213, 213);
 }
 .gamerule-light .button-action,
 .gamerule-light .button-action > .unity-base-field__input {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
     color: rgb(145, 68, 23);
 }
 .gamerule-light .button-action:hover,
 .gamerule-light .button-action:hover > .unity-base-field__input {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
 }
 .gamerule-light .button-action:active,
 .gamerule-light .button-action:active > .unity-base-field__input {
-    background-color: rgb(208, 213, 224);
+    background-color: rgb(213, 213, 213);
 }
 .gamerule-light .button-property-picker,
 .gamerule-light .button-property-picker > .unity-base-field__input {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
 }
 .gamerule-light .button-property-picker:hover,
 .gamerule-light .button-property-picker:hover > .unity-base-field__input {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
 }
 .gamerule-light .button-property-picker:active,
 .gamerule-light .button-property-picker:active > .unity-base-field__input {
-    background-color: rgb(208, 213, 224);
+    background-color: rgb(213, 213, 213);
 }
 .gamerule-light .button-number-picker,
 .gamerule-light .button-number-picker > .unity-base-field__input {
-    background-color: rgb(236, 238, 243);
+    background-color: rgb(238, 238, 238);
 }
 .gamerule-light .button-number-picker:hover,
 .gamerule-light .button-number-picker:hover > .unity-base-field__input {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
 }
 .gamerule-light .button-number-picker:active,
 .gamerule-light .button-number-picker:active > .unity-base-field__input {
-    background-color: rgb(208, 213, 224);
+    background-color: rgb(213, 213, 213);
 }
 .gamerule-light .button-condition .unity-base-popup-field__text,
 .gamerule-light .button-action .unity-base-popup-field__text {
@@ -1669,7 +1661,7 @@ ToolbarButton:active {
 .gamerule-light .button-secondary:active,
 .gamerule-light .fab-create:active,
 .gamerule-light .button-primary:active {
-    background-color: rgb(208, 213, 224);
+    background-color: rgb(213, 213, 213);
     color: rgb(88, 64, 150);
 }
 
@@ -1702,7 +1694,7 @@ ToolbarButton:active {
 }
 
 .rule-overview-column {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(41, 41, 41);
     padding-top: 7px;
     padding-bottom: 7px;
     padding-left: 8px;
@@ -1710,22 +1702,14 @@ ToolbarButton:active {
 }
 
 .rule-block-heading {
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     font-size: 11px;
     -unity-font-style: bold;
     margin-bottom: 6px;
 }
 
 .rule-editor-card {
-    background-color: rgb(48, 54, 64);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(51, 51, 51);
 }
 
 .rule-summary-row.rule-editor-card {
@@ -1737,6 +1721,7 @@ ToolbarButton:active {
 .rule-summary-row.rule-editor-card.condition-negated {
     border-left-width: 3px;
     border-left-color: rgb(204, 0, 31);
+    padding-left: 1px;
 }
 
 .rule-summary-card.button-condition,
@@ -1776,8 +1761,8 @@ ToolbarButton:active {
 }
 
 .rule-summary-name {
-    flex-shrink: 1;
-    min-width: 0;
+    width: 88px;
+    flex-shrink: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1814,29 +1799,19 @@ ToolbarButton:active {
 
 .rule-summary-detail {
     flex-grow: 1;
-    flex-basis: 64px;
+    flex-basis: 0;
     flex-shrink: 1;
     min-width: 0;
-    max-width: 100%;
     white-space: normal;
     -unity-text-align: middle-left;
-    color: rgb(231, 235, 240);
-    background-color: rgb(59, 66, 78);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    padding-left: 6px;
-    padding-right: 6px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    color: rgb(230, 230, 230);
 }
 
 .rule-summary-card:hover,
 .rule-detail-type:hover,
 .rule-join-selector:hover,
 .rule-add-element:hover {
-    background-color: rgb(59, 66, 78);
+    background-color: rgb(56, 56, 56);
 }
 
 .rule-summary-card.rule-summary-selected,
@@ -1885,7 +1860,6 @@ ToolbarButton:active {
     color: rgb(145, 68, 23);
 }
 .gamerule-light .rule-summary-detail {
-    background-color: rgb(226, 226, 226);
     color: rgb(35, 35, 35);
 }
 
@@ -1903,12 +1877,12 @@ ToolbarButton:active {
 .unity-object-field > .unity-base-field__input,
 PopupField > .unity-base-field__input,
 .unity-dropdown-field > .unity-base-field__input {
-    background-color: rgb(59, 66, 78);
-    color: rgb(231, 235, 240);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
 }
 
 .gamerule-light .unity-integer-field > .unity-base-field__input,
@@ -1939,11 +1913,11 @@ PopupField > .unity-base-field__input,
     padding-right: 7px;
     padding-top: 2px;
     padding-bottom: 2px;
-    background-color: rgb(59, 66, 78);
-    border-left-color: rgb(74, 82, 96);
-    border-right-color: rgb(74, 82, 96);
-    border-top-color: rgb(74, 82, 96);
-    border-bottom-color: rgb(74, 82, 96);
+    background-color: rgb(56, 56, 56);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -1955,7 +1929,7 @@ PopupField > .unity-base-field__input,
 }
 
 .numeric-stepper-field > .unity-base-field__input {
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
 }
 
 .action-picker-value-display,
@@ -1963,7 +1937,7 @@ PopupField > .unity-base-field__input,
 .action-legacy-value,
 .compare-property-term,
 .compare-legacy-term {
-    color: rgb(231, 235, 240);
+    color: rgb(230, 230, 230);
     -unity-text-align: middle-left;
     white-space: nowrap;
     overflow: hidden;
@@ -1974,7 +1948,7 @@ PopupField > .unity-base-field__input,
 .action-legacy-value,
 .compare-legacy-term,
 .action-picker-value-display.action-empty-value {
-    color: rgb(171, 179, 191);
+    color: rgb(181, 181, 181);
     -unity-font-style: italic;
 }
 
@@ -1985,12 +1959,12 @@ PopupField > .unity-base-field__input,
 .numeric-stepper-field > .unity-base-field__input:hover,
 .parameter-selector:hover,
 .parameter-selector:hover > .unity-base-field__input {
-    background-color: rgb(48, 54, 64);
+    background-color: rgb(51, 51, 51);
 }
 
 .parameter-selector:active,
 .parameter-selector:active > .unity-base-field__input {
-    background-color: rgb(37, 42, 50);
+    background-color: rgb(37, 37, 37);
 }
 
 .numeric-stepper-field:focus > .unity-base-field__input,
@@ -2019,12 +1993,12 @@ PopupField > .unity-base-field__input,
 .parameter-selector:disabled,
 .parameter-selector:disabled > .unity-base-field__input,
 .parameter-selector:disabled .unity-base-popup-field__text {
-    background-color: rgb(48, 54, 64);
-    color: rgb(171, 179, 191);
+    background-color: rgb(51, 51, 51);
+    color: rgb(181, 181, 181);
 }
 
 .parameter-selector:disabled .unity-base-popup-field__arrow {
-    -unity-background-image-tint-color: rgb(171, 179, 191);
+    -unity-background-image-tint-color: rgb(181, 181, 181);
 }
 
 /* Native arithmetic dropdowns draw the frame on the inner input only. */
@@ -2122,7 +2096,7 @@ PopupField.parameter-selector {
 
 .gamerule-light .parameter-selector:active,
 .gamerule-light .parameter-selector:active > .unity-base-field__input {
-    background-color: rgb(223, 226, 233);
+    background-color: rgb(226, 226, 226);
 }
 
 .gamerule-light .action-picker-value-display:disabled,
@@ -2158,3 +2132,27 @@ PopupField.parameter-selector {
     border-top-color: rgb(88, 64, 150);
     border-bottom-color: rgb(88, 64, 150);
 }
+
+/* The actor name draws its frame only on the editable input. */
+TextField.actor-properties-name,
+.gamerule-light TextField.actor-properties-name {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.actor-properties-name > .unity-base-field__input:focus,
+.gamerule-light .actor-properties-name > .unity-base-field__input:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+

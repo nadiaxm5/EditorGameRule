@@ -819,7 +819,7 @@ namespace GameRuleEditor.Panels
             elementDragSpacer.style.height = Mathf.Max(30f, item.layout.height);
             elementDragSpacer.style.marginTop = item.resolvedStyle.marginTop;
             elementDragSpacer.style.marginBottom = item.resolvedStyle.marginBottom;
-            elementDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.AccentText, 0.14f);
+            elementDragSpacer.style.backgroundColor = GameRuleTheme.Field;
             elementDragSpacer.style.borderTopWidth = 2;
             elementDragSpacer.style.borderBottomWidth = 2;
             elementDragSpacer.style.borderTopColor = GameRuleTheme.AccentText;
@@ -978,7 +978,7 @@ namespace GameRuleEditor.Panels
             ruleDragSpacer.style.height = Mathf.Max(30f, ruleContainer.layout.height);
             ruleDragSpacer.style.marginBottom = ruleContainer.resolvedStyle.marginBottom;
             ruleDragSpacer.style.marginTop = ruleContainer.resolvedStyle.marginTop;
-            ruleDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.AccentText, 0.14f);
+            ruleDragSpacer.style.backgroundColor = GameRuleTheme.Field;
             ruleDragSpacer.style.borderTopWidth = 2;
             ruleDragSpacer.style.borderBottomWidth = 2;
             ruleDragSpacer.style.borderLeftWidth = 2;

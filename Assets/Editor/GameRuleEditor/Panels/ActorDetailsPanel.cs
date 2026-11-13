@@ -148,6 +148,7 @@ namespace GameRuleEditor.Panels
             topRow.Add(activeToggle);
 
             actorNameField = new TextField();
+            actorNameField.AddToClassList("actor-properties-name");
             actorNameField.style.flexGrow = 1;
             actorNameField.style.marginRight = 10;
             actorNameField.RegisterValueChangedCallback(OnActorNameFieldValueChanged);
@@ -658,7 +659,7 @@ namespace GameRuleEditor.Panels
             compDragSpacer.style.height = Mathf.Max(30f, card.layout.height);
             compDragSpacer.style.marginBottom = card.resolvedStyle.marginBottom;
             compDragSpacer.style.marginTop = card.resolvedStyle.marginTop;
-            compDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.AccentText, 0.14f);
+            compDragSpacer.style.backgroundColor = GameRuleTheme.Field;
             compDragSpacer.style.borderTopWidth = 2;
             compDragSpacer.style.borderBottomWidth = 2;
             compDragSpacer.style.borderLeftWidth = 2;

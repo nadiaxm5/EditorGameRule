@@ -172,7 +172,7 @@ namespace GameRuleEditor.Panels
             propDragSpacer.style.height = Mathf.Max(24f, row.layout.height);
             propDragSpacer.style.marginBottom = row.resolvedStyle.marginBottom;
             propDragSpacer.style.marginTop = row.resolvedStyle.marginTop;
-            propDragSpacer.style.backgroundColor = GameRuleTheme.WithAlpha(GameRuleTheme.PropertyAccent, 0.14f);
+            propDragSpacer.style.backgroundColor = GameRuleTheme.Field;
             propDragSpacer.style.borderTopWidth = 2;
             propDragSpacer.style.borderBottomWidth = 2;
             propDragSpacer.style.borderLeftWidth = 2;
