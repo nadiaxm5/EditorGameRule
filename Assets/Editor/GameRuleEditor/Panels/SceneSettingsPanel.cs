@@ -91,12 +91,12 @@ namespace GameRuleEditor.Panels
             });
 
             screenResolutionField = CreateVector2Field(basicSection, "Screen Resolution:");
-            screenResolutionField.RegisterValueChangedCallback(evt =>
+            screenResolutionField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector2Field (Vector2) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Screen Resolution");
-                context.currentProject.sceneData.ScreenResolution = new float[] { evt.newValue.x, evt.newValue.y };
+                context.currentProject.sceneData.ScreenResolution = new float[] { valueFromField.x, valueFromField.y };
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -117,24 +117,24 @@ namespace GameRuleEditor.Panels
             scrollView.Add(cameraSection);
 
             cameraPosField = CreateVector3Field(cameraSection, "Position:");
-            cameraPosField.RegisterValueChangedCallback(evt =>
+            cameraPosField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Camera Position");
-                context.currentProject.sceneData.CameraPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                context.currentProject.sceneData.CameraPosition = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 controller.SyncCameraToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
 
             cameraRotField = CreateVector3Field(cameraSection, "Rotation:");
-            cameraRotField.RegisterValueChangedCallback(evt =>
+            cameraRotField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Camera Rotation");
-                context.currentProject.sceneData.CameraRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                context.currentProject.sceneData.CameraRotation = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 controller.SyncCameraToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
@@ -145,23 +145,23 @@ namespace GameRuleEditor.Panels
             scrollView.Add(lightingSection);
 
             sunPosField = CreateVector3Field(lightingSection, "Position:");
-            sunPosField.RegisterValueChangedCallback(evt =>
+            sunPosField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Sun Position");
-                context.currentProject.sceneData.SunPosition = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                context.currentProject.sceneData.SunPosition = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
 
             sunRotField = CreateVector3Field(lightingSection, "Rotation:");
-            sunRotField.RegisterValueChangedCallback(evt =>
+            sunRotField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Sun Rotation");
-                context.currentProject.sceneData.SunRotation = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                context.currentProject.sceneData.SunRotation = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -193,12 +193,12 @@ namespace GameRuleEditor.Panels
             scrollView.Add(physicsSection);
 
             gravityField = CreateVector3Field(physicsSection, "Gravity:");
-            gravityField.RegisterValueChangedCallback(evt =>
+            gravityField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Gravity");
-                context.currentProject.sceneData.Gravity = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                context.currentProject.sceneData.Gravity = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 controller.SyncGravityToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();

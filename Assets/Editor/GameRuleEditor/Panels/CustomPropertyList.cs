@@ -62,8 +62,12 @@ namespace GameRuleEditor.Panels
                     int idx = i;
                     var property = properties[i];
 
-                    var row = new VisualElement { style = { marginBottom = 2 } };
-                    var header = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+                    var row = new VisualElement();
+                    row.AddToClassList("custom-property-row");
+                    var header = new VisualElement();
+                    header.AddToClassList("custom-property-header");
+                    var nameGroup = new VisualElement();
+                    nameGroup.AddToClassList("custom-property-name-group");
 
                     // Drag handle
                     var handle = new Label("\u2261");
@@ -71,13 +75,14 @@ namespace GameRuleEditor.Panels
                     handle.pickingMode = PickingMode.Position;
                     handle.style.fontSize = 16;
                     handle.style.width = 16;
+                    handle.style.flexShrink = 0;
+                    handle.style.marginLeft = 0;
                     handle.style.unityTextAlign = TextAnchor.MiddleCenter;
                     handle.style.color = GameRuleTheme.SubtleText;
                     handle.style.marginRight = 4;
-                    header.Add(handle);
+                    nameGroup.Add(handle);
                     var nameField = new TextField { value = property.name, isDelayed = true };
-                    nameField.style.flexGrow = 1;
-                    nameField.style.minWidth = 0;
+                    nameField.AddToClassList("custom-property-name");
                     HideTextFieldLabel(nameField);
                     nameField.RegisterValueChangedCallback(evt =>
                     {
@@ -90,21 +95,28 @@ namespace GameRuleEditor.Panels
                         }
                         UpdateProperty(() => property.name = name);
                     });
-                    header.Add(nameField);
+                    nameGroup.Add(nameField);
+                    header.Add(nameGroup);
 
                     int typeIndex = Types.FindIndex(type => string.Equals(type, property.type, System.StringComparison.OrdinalIgnoreCase));
                     var typeField = new PopupField<string>(Types, typeIndex >= 0 ? typeIndex : 1);
-                    typeField.style.minWidth = 68;
-                    var valueContainer = new VisualElement { style = { marginLeft = 20, marginRight = 28 } };
-                    void AlignValueWithName(float nameWidth)
+                    typeField.AddToClassList("parameter-selector");
+                    typeField.AddToClassList("custom-property-type");
+                    var controls = new VisualElement();
+                    controls.AddToClassList("custom-property-controls");
+                    var valueContainer = new VisualElement();
+                    void RefreshValueLayout()
                     {
-                        bool isNumeric = property.type == "int" || property.type == "float";
-                        valueContainer.style.maxWidth = isNumeric && nameWidth > 0
-                            ? new StyleLength(nameWidth)
-                            : new StyleLength(StyleKeyword.None);
+                        bool vector = property.type == "vector2" || property.type == "vector3";
+                        header.EnableInClassList("custom-property-vector-header", vector);
+                        valueContainer.RemoveFromHierarchy();
+                        valueContainer.EnableInClassList("custom-property-vector", vector);
+                        valueContainer.EnableInClassList("custom-property-scalar", !vector);
+                        valueContainer.EnableInClassList("custom-property-bool", property.type == "bool");
+                        if (vector) row.Add(valueContainer);
+                        else controls.Insert(0, valueContainer);
+                        AddValueField(valueContainer, property);
                     }
-                    nameField.RegisterCallback<GeometryChangedEvent>(evt => AlignValueWithName(evt.newRect.width));
-                    AddValueField(valueContainer, property);
                     typeField.RegisterValueChangedCallback(evt =>
                     {
                         UpdateProperty(() =>
@@ -115,10 +127,9 @@ namespace GameRuleEditor.Panels
                             if (property.type == "vector3" && (property.arrayValue == null || property.arrayValue.Length != 3))
                                 property.arrayValue = new float[3];
                         });
-                        AddValueField(valueContainer, property);
-                        AlignValueWithName(nameField.layout.width);
+                        RefreshValueLayout();
                     });
-                    header.Add(typeField);
+                    controls.Add(typeField);
 
                     // Delete button
                     var delBtn = new Button(() =>
@@ -128,9 +139,10 @@ namespace GameRuleEditor.Panels
                     }) { text = "×", tooltip = "Remove Property" };
                     delBtn.AddToClassList("button-danger");
                     delBtn.AddToClassList("button-danger-icon");
-                    header.Add(delBtn);
+                    controls.Add(delBtn);
+                    header.Add(controls);
                     row.Add(header);
-                    row.Add(valueContainer);
+                    RefreshValueLayout();
 
                     // Spacer-based drag registration
                     handle.RegisterCallback<PointerDownEvent>(evt => OnPropDragStart(evt, row, idx, content));
@@ -346,22 +358,40 @@ namespace GameRuleEditor.Panels
                     container.Add(toggle);
                     break;
                 case "vector2":
-                    var vector2 = new Vector2Field { value = (Vector2)property.GetValue() };
-                    vector2.RegisterValueChangedCallback(evt => UpdateProperty(() =>
-                        property.arrayValue = new[] { evt.newValue.x, evt.newValue.y }));
-                    container.Add(vector2);
-                    break;
                 case "vector3":
-                    var vector3 = new Vector3Field { value = (Vector3)property.GetValue() };
-                    vector3.RegisterValueChangedCallback(evt => UpdateProperty(() =>
-                        property.arrayValue = new[] { evt.newValue.x, evt.newValue.y, evt.newValue.z }));
-                    container.Add(vector3);
+                    AddVectorComponents(container, property, property.type == "vector2" ? 2 : 3);
                     break;
                 default:
-                    var number = new FloatField { value = property.floatValue, style = { marginLeft = 0, marginRight = 0 } };
-                    number.RegisterValueChangedCallback(evt => UpdateProperty(() => property.floatValue = evt.newValue));
+                    var number = new FloatField { style = { marginLeft = 0, marginRight = 0 } };
+                    number.RegisterRoundedChange(valueFromField => UpdateProperty(() => property.floatValue = valueFromField));
+                    number.SetValueWithoutNotify(property.floatValue);
                     container.Add(number);
                     break;
+            }
+        }
+
+        private void AddVectorComponents(VisualElement container, CustomVariable property, int count)
+        {
+            var axes = new[] { "X", "Y", "Z" };
+            for (int i = 0; i < count; i++)
+            {
+                int axis = i;
+                var component = new VisualElement();
+                component.AddToClassList("custom-property-axis");
+                component.Add(new Label(axes[axis]));
+                var field = new FloatField();
+                field.RegisterRoundedChange(value => UpdateProperty(() =>
+                {
+                    var values = new float[count];
+                    if (property.arrayValue != null)
+                        Array.Copy(property.arrayValue, values, Math.Min(count, property.arrayValue.Length));
+                    values[axis] = value;
+                    property.arrayValue = values;
+                }));
+                if (property.arrayValue != null && axis < property.arrayValue.Length)
+                    field.SetValueWithoutNotify(property.arrayValue[axis]);
+                component.Add(field);
+                container.Add(component);
             }
         }
 

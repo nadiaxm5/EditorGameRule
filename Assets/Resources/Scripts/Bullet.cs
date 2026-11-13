@@ -1,22 +1,26 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class NewActor_1 : MonoBehaviour, IGameRuleActor {
-    public bool Active = true;
-    public float NewProp = 0.5f;
+public class Bullet : MonoBehaviour, IGameRuleActor {
+    public bool Active = false;
+    public float speed = 50f;
+    public float damage = 5f;
     public Dictionary<string, object> propertyList = new Dictionary<string, object> {
-        { nameof(NewProp), 0.5f },
+        { nameof(speed), 50f },
+        { nameof(damage), 5f },
     };
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){
-        if(Condition.Collision("Untagged",gameObject) || Condition.Compare("this.z < ",scopeList)){
-            Action.Spawn("", gameObject, "0", "0", "0", "0", "0", "0", scopeList);
-            Action.Edit("","",scopeList);
+        {
+            Action.Move("this.speed","0","this.ry","0",gameObject,scopeList);
+        }
+        if(Condition.Collision("Hellephant",gameObject) || Condition.Collision("ZomBear",gameObject) || Condition.Collision("ZomBunny",gameObject) || Condition.Collision("Obstacle",gameObject)){
+            Action.Delete(gameObject);
         }
     }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
-        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Collision(Untagged);Compare(this.z < );Spawn(,this,0,0,0,0,0,0);Edit(,)");
+        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Move(this.speed,0,this.ry,0);Collision(Hellephant);Collision(ZomBear);Collision(ZomBunny);Collision(Obstacle);Delete(this)");
         if (Active) gameObject.SetActive(true);
         else gameObject.SetActive(false);
     }
@@ -36,6 +40,9 @@ public class NewActor_1 : MonoBehaviour, IGameRuleActor {
         TagCollisions["Player"] = new HashSet<GameObject>();
         TagCollisions["Enemy"] = new HashSet<GameObject>();
         TagCollisions["Obstacle"] = new HashSet<GameObject>();
-        TagCollisions["Custom"] = new HashSet<GameObject>();
+        TagCollisions["Bullet"] = new HashSet<GameObject>();
+        TagCollisions["ZomBunny"] = new HashSet<GameObject>();
+        TagCollisions["ZomBear"] = new HashSet<GameObject>();
+        TagCollisions["Hellephant"] = new HashSet<GameObject>();
     }
 }

@@ -48,16 +48,60 @@
             "Rotation": [0.0, 0.0, 0.0],
             "Scale": [1.0, 1.0, 1.0],
             "AngularVelocity": [0.0, 0.0, 0.0],
-            "Properties": [
-                "speed=5",
-                "rotSpeed=360",
-                "lastHealth=100.0",
-                "health=100.0",
-                "offsetCam=7",
-                "offsetX=0.28",
-                "offsetY=0.3",
-                "offsetZ=0.7",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 5.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "rotSpeed",
+                    "type": "float",
+                    "floatValue": 360.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "lastHealth",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetCam",
+                    "type": "float",
+                    "floatValue": 7.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetX",
+                    "type": "float",
+                    "floatValue": 0.2800000011920929,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.30000001192092898,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 0.699999988079071,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -259,11 +303,30 @@
             "Scale": [1.0, 1.0, 1.0],
             "Drag": 3.4028234663852887e38,
             "OverrideDrag": true,
-            "Properties": [
-                "speed=2",
-                "health=300",
-                "damage=0.3",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 2.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 300.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.30000001192092898,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -349,11 +412,30 @@
             "PrefabName": "ZomBear",
             "Tag": "ZomBear",
             "IconColorHex": "",
-            "Properties": [
-                "speed=3",
-                "health=200",
-                "damage=0.2",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 3.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.20000000298023225,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -427,11 +509,30 @@
             "PrefabName": "ZomBunny",
             "Tag": "ZomBunny",
             "IconColorHex": "",
-            "Properties": [
-                "speed=4",
-                "health=100",
-                "damage=0.15",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 4.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.15000000596046449,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -662,9 +763,19 @@
             "Tag": "Bullet",
             "IconColorHex": "",
             "Scale": [0.05000000074505806, 0.05000000074505806, 0.05000000074505806],
-            "Properties": [
-                "speed=50",
-                "damage=5"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 50.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 5.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {

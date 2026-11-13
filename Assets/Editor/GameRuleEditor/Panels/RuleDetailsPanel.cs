@@ -131,10 +131,7 @@ namespace GameRuleEditor.Panels
         {
             content.Clear();
             var heading = new Label(breadcrumb);
-            heading.style.whiteSpace = WhiteSpace.Normal;
-            heading.style.color = GameRuleTheme.MutedText;
-            heading.style.fontSize = 12;
-            heading.style.marginBottom = 12;
+            heading.AddToClassList("studio-panel-title");
             content.Add(heading);
 
             var section = new VisualElement();

@@ -111,11 +111,10 @@ namespace GameRuleEditor.Panels
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.FlexStart;
             header.style.alignItems = Align.Center;
-            header.style.marginBottom = 8;
 
             actorNameLabel = new Label();
-            actorNameLabel.style.fontSize = 18;
-            actorNameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            actorNameLabel.AddToClassList("studio-panel-title");
+            actorNameLabel.style.flexShrink = 1;
             header.Add(actorNameLabel);
 
             scrollView.Add(header);
@@ -172,8 +171,8 @@ namespace GameRuleEditor.Panels
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
             actorNameLabel.text = groupName != null
-                ? $"Rules [{groupName}] for: {actor.ActorName}"
-                : $"Script Rules for: {actor.ActorName}";
+                ? $"{actor.ActorName} Rules [{groupName}]"
+                : $"{actor.ActorName} Rules";
 
             UpdateRulesList();
         }

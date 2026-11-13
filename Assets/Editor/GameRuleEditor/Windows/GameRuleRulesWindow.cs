@@ -13,7 +13,6 @@ namespace GameRuleEditor.Windows
     {
         private EditorContext context;
         private ProjectController controller;
-        private Label titleLabel;
 
         // [SerializeField] so an open group filter survives entering Play. Unity writes null strings
         // back as "", so both are normalized to null in OnEnable — see NormalizeGroupFilter.
@@ -116,44 +115,6 @@ namespace GameRuleEditor.Windows
 
             root.style.flexGrow = 1;
             root.style.backgroundColor = GameRuleTheme.Background; // panelBackground
-
-            // Header
-            var headerContainer = new VisualElement();
-            headerContainer.style.flexDirection = FlexDirection.Row;
-            headerContainer.style.justifyContent = Justify.SpaceBetween;
-            headerContainer.style.alignItems = Align.Center;
-            headerContainer.style.height = 32;
-            headerContainer.style.paddingLeft = 10;
-            headerContainer.style.paddingRight = 6;
-            headerContainer.style.backgroundColor = GameRuleTheme.Header; // headerBackground
-            headerContainer.style.borderBottomWidth = 1;
-            headerContainer.style.borderBottomColor = GameRuleTheme.Border;
-            headerContainer.style.flexShrink = 0;
-
-            string actorName = context?.SelectedActor?.ActorName ?? "Actor";
-            string titleText = currentGroupName != null
-                ? $"Rules [{currentGroupName}] — {actorName}"
-                : $"Rules — {actorName}";
-            titleLabel = new Label(titleText);
-            titleLabel.style.fontSize = 12;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.color = GameRuleTheme.Text; // textPrimary
-            headerContainer.Add(titleLabel);
-
-            var closeBtn = new Button(() => this.Close());
-            closeBtn.text = "\u2715"; // ✕
-            closeBtn.tooltip = "Close Window";
-            closeBtn.style.width = 24;
-            closeBtn.style.height = 24;
-            closeBtn.style.fontSize = 12;
-            closeBtn.style.backgroundColor = Color.clear;
-            closeBtn.style.borderLeftWidth = 0;
-            closeBtn.style.borderRightWidth = 0;
-            closeBtn.style.borderTopWidth = 0;
-            closeBtn.style.borderBottomWidth = 0;
-            headerContainer.Add(closeBtn);
-
-            root.Add(headerContainer);
 
             // Content
             var contentContainer = new VisualElement();

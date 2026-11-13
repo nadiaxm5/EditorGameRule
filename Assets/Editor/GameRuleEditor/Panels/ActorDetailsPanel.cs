@@ -21,6 +21,7 @@ namespace GameRuleEditor.Panels
         private VisualElement noSelectionContainer;
 
         private TextField actorNameField;
+        private Label actorPropertiesTitle;
         private bool suppressActorNameCallback;
 
         private ObjectField prefabPicker;
@@ -110,12 +111,9 @@ namespace GameRuleEditor.Panels
             var scrollView = new ScrollView();
             mainContainer.Add(scrollView);
 
-            var header = new Label("Actor Properties");
-            header.AddToClassList("panel-header");
-            header.style.fontSize = 18;
-            header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.style.marginBottom = 15;
-            scrollView.Add(header);
+            actorPropertiesTitle = new Label();
+            actorPropertiesTitle.AddToClassList("studio-panel-title");
+            scrollView.Add(actorPropertiesTitle);
 
             // ─── Top Row ───
             var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10, paddingLeft = 4 } };
@@ -270,10 +268,9 @@ namespace GameRuleEditor.Panels
 
             var ruleSetsSection = new Foldout { text = "Rule Sets", value = true };
             GameRuleTheme.StylePropertySection(ruleSetsSection);
-            var ruleSetsContent = new VisualElement
-            {
-                style = { paddingLeft = 15, paddingRight = 8, marginTop = 5, marginBottom = 8 }
-            };
+            var ruleSetsContent = new VisualElement();
+            ruleSetsContent.AddToClassList("rule-overview-column");
+            ruleSetsContent.AddToClassList("rule-sets-body");
             ruleSetsContainer = new VisualElement();
             ruleSetsContent.Add(ruleSetsContainer);
 
@@ -301,6 +298,7 @@ namespace GameRuleEditor.Panels
 
             noSelectionContainer.style.display = DisplayStyle.None;
             mainContainer.style.display = DisplayStyle.Flex;
+            actorPropertiesTitle.text = $"{actor.ActorName} Properties";
 
             if (actor.Components == null)
                 actor.Components = new List<ActorComponentMeta>();
@@ -492,7 +490,7 @@ namespace GameRuleEditor.Panels
                 else
                     collapsedComponents.Add(comp);
             });
-            GameRuleTheme.StylePropertySection(foldout);
+            GameRuleTheme.StylePropertySection(foldout, useSectionSpacing: comp.type != "Rules");
 
             var toggle = foldout.Q<Toggle>();
             if (toggle == null) return foldout;
@@ -612,7 +610,7 @@ namespace GameRuleEditor.Panels
             }
 
             var foldout = BuildComponentShell(comp, compIndex, () => RemoveComponent(compIndex, comp.id), renameable: true);
-            foldout.style.backgroundColor = GameRuleTheme.InsetSurface;
+            foldout.AddToClassList("rule-set-card");
             var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
             foldout.Add(content);
 
@@ -983,11 +981,11 @@ namespace GameRuleEditor.Panels
             row.Add(label);
 
             var field = new Vector3Field { style = { flexGrow = 1 } };
-            field.RegisterValueChangedCallback(evt =>
+            field.RegisterRoundedChange(valueFromField =>
             {
                 if (context.selectedActorIndex < 0) return;
                 Undo.RecordObject(context.currentProject, "Change " + propertyKey);
-                float[] arr = new float[] { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                float[] arr = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
                 var actor = context.SelectedActor;
                 switch (propertyKey)
                 {
@@ -1030,13 +1028,13 @@ namespace GameRuleEditor.Panels
             row.Add(label);
 
             var field = new Vector3Field { style = { flexGrow = 1 } };
-            field.RegisterValueChangedCallback(evt =>
+            field.RegisterRoundedChange(valueFromField =>
             {
                 ActorJson actor = context.SelectedActor;
                 if (actor == null) return;
 
                 Undo.RecordObject(context.currentProject, "Change " + labelText);
-                float[] value = { evt.newValue.x, evt.newValue.y, evt.newValue.z };
+                float[] value = { valueFromField.x, valueFromField.y, valueFromField.z };
                 if (propertyKey == "Velocity") actor.Velocity = value;
                 else actor.AngularVelocity = value;
 
@@ -1059,13 +1057,13 @@ namespace GameRuleEditor.Panels
             row.Add(label);
 
             var field = new FloatField { style = { flexGrow = 1 } };
-            field.RegisterValueChangedCallback(evt =>
+            field.RegisterRoundedChange(valueFromField =>
             {
                 ActorJson actor = context.SelectedActor;
                 if (actor == null) return;
 
-                float value = evt.newValue;
-                if (propertyKey == "Density") value = Mathf.Max(ActorPhysicsUtility.MinimumDensity, value);
+                float value = valueFromField;
+                if (propertyKey == "Density") value = Mathf.Max(0.01f, value);
                 else if (propertyKey == "Drag") value = Mathf.Max(0f, value);
                 else value = Mathf.Clamp01(value);
 
@@ -1078,7 +1076,7 @@ namespace GameRuleEditor.Panels
                     case "Bounciness": actor.Bounciness = value; actor.OverrideBounciness = true; break;
                 }
 
-                if (!Mathf.Approximately(value, evt.newValue))
+                if (value != valueFromField)
                     field.SetValueWithoutNotify(value);
 
                 label.style.unityFontStyleAndWeight = FontStyle.Bold;

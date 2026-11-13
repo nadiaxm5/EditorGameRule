@@ -65,6 +65,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: Environment
@@ -95,6 +96,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components:
       - type: Properties
@@ -140,6 +142,7 @@ MonoBehaviour:
       - offsetY=0.3
       - offsetZ=0.7
       - moving=0
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When: []
@@ -293,6 +296,7 @@ MonoBehaviour:
       - health=300
       - damage=0.3
       - moving=0
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When: []
@@ -365,6 +369,7 @@ MonoBehaviour:
       - health=200
       - damage=0.2
       - moving=0
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -431,6 +436,7 @@ MonoBehaviour:
       - health=100
       - damage=0.15
       - moving=0
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -499,6 +505,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -535,6 +542,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When:
@@ -571,6 +579,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: Rule 1
         When:
@@ -601,6 +610,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -635,6 +645,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -669,6 +680,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -708,6 +720,7 @@ MonoBehaviour:
       Properties:
       - speed=50
       - damage=5
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -740,6 +753,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -769,6 +783,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -795,6 +810,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: HUDCanvas
@@ -816,6 +832,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -843,6 +860,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -885,6 +903,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: Environment
@@ -915,6 +934,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components:
     - type: Properties
@@ -960,6 +980,7 @@ MonoBehaviour:
     - offsetY=0.3
     - offsetZ=0.7
     - moving=0
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When: []
@@ -1113,6 +1134,7 @@ MonoBehaviour:
     - health=300
     - damage=0.3
     - moving=0
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When: []
@@ -1185,6 +1207,7 @@ MonoBehaviour:
     - health=200
     - damage=0.2
     - moving=0
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1251,6 +1274,7 @@ MonoBehaviour:
     - health=100
     - damage=0.15
     - moving=0
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1319,6 +1343,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When:
@@ -1355,6 +1380,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When:
@@ -1391,6 +1417,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When:
@@ -1421,6 +1448,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1455,6 +1483,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1489,6 +1518,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1528,6 +1558,7 @@ MonoBehaviour:
     Properties:
     - speed=50
     - damage=5
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1560,6 +1591,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1589,6 +1621,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1615,6 +1648,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: HUDCanvas
@@ -1636,6 +1670,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -1663,6 +1698,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When:

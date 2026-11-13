@@ -36,10 +36,10 @@ namespace GameRuleEditor.Core
 
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
 
-        public static void StylePropertySection(Foldout section)
+        public static void StylePropertySection(Foldout section, bool useSectionSpacing = true)
         {
             section.style.unityFontStyleAndWeight = FontStyle.Bold;
-            section.style.marginBottom = 10;
+            if (useSectionSpacing) section.style.marginBottom = 10;
             section.style.backgroundColor = Surface;
             section.style.borderTopLeftRadius = 4;
             section.style.borderTopRightRadius = 4;

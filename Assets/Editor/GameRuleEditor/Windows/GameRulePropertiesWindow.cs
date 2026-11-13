@@ -11,7 +11,6 @@ namespace GameRuleEditor.Windows
     {
         private EditorContext context;
         private ProjectController controller;
-        private Label titleLabel;
 
         public static GameRulePropertiesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl)
         {
@@ -25,9 +24,7 @@ namespace GameRuleEditor.Windows
 
         public void Init(EditorContext ctx, ProjectController ctrl)
         {
-            if (context != null) context.OnActorSelected -= OnActorSelected;
             context = ctx; controller = ctrl;
-            context.OnActorSelected += OnActorSelected;
             BuildUI();
         }
 
@@ -37,23 +34,8 @@ namespace GameRuleEditor.Windows
             if (context != null && controller == null) controller = GameRuleLayoutManager.GetOrCreateController(context);
             if (context != null)
             {
-                context.OnActorSelected -= OnActorSelected;
-                context.OnActorSelected += OnActorSelected;
                 BuildUI();
             }
-        }
-
-        private void OnDisable()
-        {
-            if (context != null) context.OnActorSelected -= OnActorSelected;
-        }
-
-        private void OnActorSelected(int index)
-        {
-            if (titleLabel == null) return;
-
-            string actorName = context?.SelectedActor?.ActorName ?? "Actor";
-            titleLabel.text = $"Properties — {actorName}";
         }
 
         private void BuildUI()
@@ -67,41 +49,6 @@ namespace GameRuleEditor.Windows
 
             root.style.flexGrow = 1;
             root.style.backgroundColor = GameRuleTheme.Background; // panelBackground
-
-            // Header
-            var headerContainer = new VisualElement();
-            headerContainer.style.flexDirection = FlexDirection.Row;
-            headerContainer.style.justifyContent = Justify.SpaceBetween;
-            headerContainer.style.alignItems = Align.Center;
-            headerContainer.style.height = 32;
-            headerContainer.style.paddingLeft = 10;
-            headerContainer.style.paddingRight = 6;
-            headerContainer.style.backgroundColor = GameRuleTheme.Header; // headerBackground
-            headerContainer.style.borderBottomWidth = 1;
-            headerContainer.style.borderBottomColor = GameRuleTheme.Border;
-            headerContainer.style.flexShrink = 0;
-
-            string actorName = context?.SelectedActor?.ActorName ?? "Actor";
-            titleLabel = new Label($"Properties — {actorName}");
-            titleLabel.style.fontSize = 12;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.color = GameRuleTheme.Text; // textPrimary
-            headerContainer.Add(titleLabel);
-
-            var closeBtn = new Button(() => this.Close());
-            closeBtn.text = "\u2715"; // ✕
-            closeBtn.tooltip = "Close Window";
-            closeBtn.style.width = 24;
-            closeBtn.style.height = 24;
-            closeBtn.style.fontSize = 12;
-            closeBtn.style.backgroundColor = Color.clear;
-            closeBtn.style.borderLeftWidth = 0;
-            closeBtn.style.borderRightWidth = 0;
-            closeBtn.style.borderTopWidth = 0;
-            closeBtn.style.borderBottomWidth = 0;
-            headerContainer.Add(closeBtn);
-
-            root.Add(headerContainer);
 
             // Content
             var contentContainer = new VisualElement();

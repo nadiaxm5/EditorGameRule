@@ -206,25 +206,25 @@ Button:disabled {
 }
 
 .button-negation.button-negation--active {
-    background-color: rgb(204, 0, 31);
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(143, 0, 22);
-    border-right-color: rgb(143, 0, 22);
-    border-top-color: rgb(143, 0, 22);
-    border-bottom-color: rgb(143, 0, 22);
+    background-color: rgb(222, 112, 120);
+    color: rgb(30, 30, 30);
+    border-left-color: rgb(194, 87, 97);
+    border-right-color: rgb(194, 87, 97);
+    border-top-color: rgb(194, 87, 97);
+    border-bottom-color: rgb(194, 87, 97);
 }
 
 .button-negation.button-negation--active:hover {
-    background-color: rgb(226, 26, 54);
+    background-color: rgb(232, 132, 139);
 }
 
 .button-negation.button-negation--active:active {
-    background-color: rgb(168, 0, 25);
+    background-color: rgb(194, 87, 97);
 }
 
 .condition-negated {
     border-left-width: 3px;
-    border-left-color: rgb(204, 0, 31);
+    border-left-color: rgb(222, 112, 120);
 }
 
 /* ── Destructive controls ── */
@@ -1105,6 +1105,13 @@ PopupField {
     margin-bottom: 10px;
 }
 
+.studio-panel-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 12px;
+}
+
 /* ═══════════════════════════════════════════
    LIST ITEMS (legacy — used by old panels)
    ═══════════════════════════════════════════ */
@@ -1568,12 +1575,12 @@ ToolbarButton:active {
     color: rgb(88, 64, 150);
 }
 .gamerule-light .button-negation.button-negation--active {
-    background-color: rgb(204, 0, 31);
-    color: rgb(255, 255, 255);
+    background-color: rgb(222, 112, 120);
+    color: rgb(30, 30, 30);
 }
 .gamerule-light .button-negation.button-negation--active:hover {
-    background-color: rgb(226, 26, 54);
-    color: rgb(255, 255, 255);
+    background-color: rgb(232, 132, 139);
+    color: rgb(30, 30, 30);
 }
 .gamerule-light .button-condition,
 .gamerule-light .button-condition > .unity-base-field__input {
@@ -1654,8 +1661,8 @@ ToolbarButton:active {
 .gamerule-light .list-item-selected .actor-rule-count { color: rgb(88, 64, 150); }
 
 .gamerule-light .button-negation.button-negation--active:active {
-    background-color: rgb(168, 0, 25);
-    color: rgb(255, 255, 255);
+    background-color: rgb(194, 87, 97);
+    color: rgb(30, 30, 30);
 }
 
 .gamerule-light .button-secondary:active,
@@ -1669,7 +1676,7 @@ ToolbarButton:active {
 .rule-overview {
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: stretch;
     min-width: 0;
     margin-left: -4px;
     margin-right: -4px;
@@ -1708,19 +1715,40 @@ ToolbarButton:active {
     margin-bottom: 6px;
 }
 
+.rule-overview-column.rule-sets-body {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.rule-set-card > Toggle {
+    background-color: transparent;
+}
+
+.rule-set-card > Toggle:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.gamerule-light .rule-set-card > Toggle:hover {
+    background-color: rgb(226, 226, 226);
+}
+
 .rule-editor-card {
     background-color: rgb(51, 51, 51);
 }
 
-.rule-summary-row.rule-editor-card {
+.rule-summary-row.rule-editor-card,
+.rule-set-card {
     margin-bottom: 5px;
+}
+
+.rule-summary-row.rule-editor-card {
     padding-left: 4px;
     padding-right: 4px;
 }
 
 .rule-summary-row.rule-editor-card.condition-negated {
     border-left-width: 3px;
-    border-left-color: rgb(204, 0, 31);
+    border-left-color: rgb(222, 112, 120);
     padding-left: 1px;
 }
 
@@ -2135,7 +2163,9 @@ PopupField.parameter-selector {
 
 /* The actor name draws its frame only on the editable input. */
 TextField.actor-properties-name,
-.gamerule-light TextField.actor-properties-name {
+.gamerule-light TextField.actor-properties-name,
+TextField.custom-property-name,
+.gamerule-light TextField.custom-property-name {
     background-color: transparent;
     border-left-width: 0;
     border-right-width: 0;
@@ -2148,11 +2178,119 @@ TextField.actor-properties-name,
 }
 
 .actor-properties-name > .unity-base-field__input:focus,
-.gamerule-light .actor-properties-name > .unity-base-field__input:focus {
+.gamerule-light .actor-properties-name > .unity-base-field__input:focus,
+.custom-property-name > .unity-base-field__input:focus,
+.gamerule-light .custom-property-name > .unity-base-field__input:focus {
     border-left-color: rgb(161, 138, 224);
     border-right-color: rgb(161, 138, 224);
     border-top-color: rgb(161, 138, 224);
     border-bottom-color: rgb(161, 138, 224);
+}
+
+/* Shared by Custom Properties and Custom Global Variables. */
+.custom-property-row {
+    margin-bottom: 5px;
+}
+
+.custom-property-header,
+.custom-property-name-group,
+.custom-property-controls {
+    flex-direction: row;
+    align-items: center;
+}
+
+.custom-property-header {
+    flex-wrap: wrap;
+}
+
+.custom-property-name-group {
+    flex-grow: 1;
+    flex-basis: 85px;
+    min-width: 0;
+}
+
+.custom-property-name {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 4px;
+}
+
+.custom-property-controls {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.custom-property-scalar {
+    width: 55px;
+    margin-right: 4px;
+}
+
+.custom-property-bool {
+    width: 24px;
+    align-items: center;
+}
+
+.custom-property-type {
+    width: 82px;
+    margin-left: 0;
+    margin-right: 2px;
+}
+
+.custom-property-type .unity-base-popup-field__text {
+    color: rgb(217, 182, 92);
+}
+
+.gamerule-light .custom-property-type .unity-base-popup-field__text {
+    color: rgb(121, 88, 18);
+}
+
+.custom-property-vector {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 20px;
+    /* Reserve the delete button's 28px, its margins, and the type field's right margin. */
+    margin-right: 34px;
+    margin-top: 2px;
+}
+
+.custom-property-vector-header {
+    flex-wrap: nowrap;
+}
+
+.custom-property-vector-header .custom-property-controls {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+.custom-property-axis {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    flex-basis: 52px;
+    min-width: 52px;
+    margin-right: 3px;
+}
+
+.custom-property-axis > .unity-float-field {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 2px;
+    margin-right: 0;
+}
+
+.custom-property-axis:last-child {
+    margin-right: 0;
+}
+
+.custom-property-row .unity-base-text-field__input {
+    min-height: 24px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 

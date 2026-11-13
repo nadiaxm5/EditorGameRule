@@ -48,22 +48,6 @@ namespace GameRuleEditor.Windows
             root.style.flexGrow = 1;
             root.style.backgroundColor = GameRuleTheme.Background;
 
-            var header = new VisualElement();
-            header.style.flexDirection = FlexDirection.Row;
-            header.style.alignItems = Align.Center;
-            header.style.justifyContent = Justify.SpaceBetween;
-            header.style.height = 32;
-            header.style.paddingLeft = 10;
-            header.style.paddingRight = 6;
-            header.style.flexShrink = 0;
-            header.style.backgroundColor = GameRuleTheme.Header;
-            header.style.borderBottomWidth = 1;
-            header.style.borderBottomColor = GameRuleTheme.Border;
-            var title = new Label("Rule Details");
-            title.style.color = GameRuleTheme.Text;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.Add(title);
-            root.Add(header);
 
             if (context != null && controller != null)
                 root.Add(new RuleDetailsPanel(context, controller));
