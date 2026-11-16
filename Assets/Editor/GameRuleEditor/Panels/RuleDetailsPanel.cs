@@ -190,7 +190,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            ShowElement($"{rule.Name}  /  Condition {index + 1}", "WHEN", element.TypeSelector, element);
+            ShowElement($"{rule.Name} - Condition {index + 1}", "WHEN", element.TypeSelector, element);
         }
 
         private void BuildActionDetails(SentenceJson rule, int index)
@@ -223,7 +223,7 @@ namespace GameRuleEditor.Panels
                 source = replacement;
             };
 
-            ShowElement($"{rule.Name}  /  Action {index + 1}", "DO", element.TypeSelector, element);
+            ShowElement($"{rule.Name} - Action {index + 1}", "DO", element.TypeSelector, element);
         }
 
         private bool ConfirmReplacement(string source, string oldType, bool condition)

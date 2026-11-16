@@ -2279,7 +2279,7 @@ TextField.custom-property-name,
     margin-right: 0;
 }
 
-.custom-property-axis:last-child {
+.custom-property-axis-last {
     margin-right: 0;
 }
 

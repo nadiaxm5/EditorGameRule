@@ -378,6 +378,7 @@ namespace GameRuleEditor.Panels
                 int axis = i;
                 var component = new VisualElement();
                 component.AddToClassList("custom-property-axis");
+                if (axis == count - 1) component.AddToClassList("custom-property-axis-last");
                 component.Add(new Label(axes[axis]));
                 var field = new FloatField();
                 field.RegisterRoundedChange(value => UpdateProperty(() =>

@@ -232,10 +232,18 @@ MonoBehaviour:
       floatValue: 0.5
       boolValue: 0
       arrayValue: []
+    - name: NewProp2
+      type: vector2
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue:
+      - 0
+      - 0
     Script:
     - Name: Rule 1
       When:
-      - Collision(Untagged) OR Compare(this.z < )
+      - Collision(Untagged) AND Compare(this.z < )
       Do:
       - Spawn(,this,0,0,0,0,0,0)
       - Edit(,)
