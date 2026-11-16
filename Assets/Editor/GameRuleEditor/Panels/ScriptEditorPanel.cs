@@ -122,6 +122,7 @@ namespace GameRuleEditor.Panels
             var addRuleButton = new Button(AddEmptyRule);
             addRuleButton.text = "+ Add Rule";
             addRuleButton.AddToClassList("button-primary");
+            addRuleButton.AddToClassList("rules-command");
 
             var addRuleRow = new VisualElement();
             addRuleRow.style.flexDirection = FlexDirection.Row;
@@ -357,7 +358,7 @@ namespace GameRuleEditor.Panels
                 }) { text = "Duplicate" };
                 duplicateBtn.tooltip = "Duplicate Rule";
                 duplicateBtn.AddToClassList("button-primary");
-                duplicateBtn.style.height = 26;
+                duplicateBtn.AddToClassList("rules-command");
                 duplicateBtn.style.marginLeft = 4;
                 duplicateBtn.style.paddingLeft = 10;
                 duplicateBtn.style.paddingRight = 10;
@@ -381,6 +382,7 @@ namespace GameRuleEditor.Panels
                 removeIconBtn.tooltip = "Remove Rule";
                 removeIconBtn.AddToClassList("button-danger");
                 removeIconBtn.AddToClassList("button-danger-icon");
+                removeIconBtn.AddToClassList("rules-square-command");
                 removeIconBtn.style.marginLeft = 4;
                 removeIconBtn.style.paddingLeft = 0;
                 removeIconBtn.style.paddingRight = 0;
@@ -446,6 +448,7 @@ namespace GameRuleEditor.Panels
                 row.Add(CreateElementDragHandle(item, ruleIndex,
                     RuleElementKind.Condition, index));
                 row.Add(CreateSummaryButton(source, ruleIndex, RuleElementKind.Condition, index));
+                MarkSelected(row, ruleIndex, RuleElementKind.Condition, index);
 
                 var notButton = new Button(() =>
                 {
@@ -458,6 +461,7 @@ namespace GameRuleEditor.Panels
                         new List<string> { RuleConditionSequence.Build(latest) });
                 }) { text = "NOT", tooltip = "Invert this condition" };
                 notButton.AddToClassList("button-negation");
+                notButton.AddToClassList("rules-square-command");
                 notButton.EnableInClassList("button-negation--active",
                     RuleConditionSequence.IsNegated(source));
                 notButton.style.marginLeft = 5;
@@ -500,6 +504,7 @@ namespace GameRuleEditor.Panels
                     RuleElementKind.Action, index));
 
                 row.Add(CreateSummaryButton(source, ruleIndex, RuleElementKind.Action, index));
+                MarkSelected(row, ruleIndex, RuleElementKind.Action, index);
 
                 row.Add(CreateSmallButton("×", "Remove Action", () =>
                     RemoveAction(rule, ruleIndex, index)));
@@ -534,7 +539,11 @@ namespace GameRuleEditor.Panels
         {
             var button = new Button(clicked) { text = text, tooltip = tooltip };
             button.AddToClassList(destructive ? "button-danger" : "button-primary");
-            if (destructive) button.AddToClassList("button-danger-icon");
+            if (destructive)
+            {
+                button.AddToClassList("button-danger-icon");
+                button.AddToClassList("rules-square-command");
+            }
             else
             {
                 button.style.width = 27;
@@ -572,7 +581,6 @@ namespace GameRuleEditor.Panels
                 button.Add(details);
             }
 
-            MarkSelected(button, ruleIndex, kind, index);
             return button;
         }
 

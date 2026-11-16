@@ -1913,6 +1913,8 @@ ToolbarButton:active {
 }
 
 .rule-summary-row.rule-editor-card {
+    border-width: 1px;
+    border-color: transparent;
     padding-left: 4px;
     padding-right: 4px;
 }
@@ -1920,7 +1922,7 @@ ToolbarButton:active {
 .rule-summary-row.rule-editor-card.condition-negated {
     border-left-width: 3px;
     border-left-color: rgb(222, 112, 120);
-    padding-left: 1px;
+    padding-left: 2px;
 }
 
 .rule-summary-card.button-condition,
@@ -2006,15 +2008,18 @@ ToolbarButton:active {
     color: rgb(230, 230, 230);
 }
 
-.rule-summary-card:hover,
+.rule-summary-row.rule-editor-card:hover,
 .rule-detail-type:hover,
 .rule-join-selector:hover,
 .rule-add-element:hover {
     background-color: rgb(56, 56, 56);
 }
 
-.rule-summary-card.rule-summary-selected,
-.rule-summary-card:focus,
+.rule-summary-row.rule-editor-card.rule-summary-selected.condition-negated {
+    border-left-color: rgb(222, 112, 120);
+}
+
+.rule-summary-row.rule-editor-card.rule-summary-selected,
 .rule-detail-type:focus,
 .rule-join-selector:focus,
 .rule-add-element:focus {
@@ -2030,14 +2035,14 @@ ToolbarButton:active {
 }
 
 .rule-join-selector {
-    min-height: 22px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
     padding-left: 7px;
     padding-right: 7px;
     margin-top: 3px;
     margin-bottom: 3px;
-    font-size: 10px;
 }
 
 .rule-add-element {
@@ -2047,6 +2052,7 @@ ToolbarButton:active {
 
 .gamerule-light .rule-overview-column { background-color: rgb(226, 226, 226); }
 .gamerule-light .rule-editor-card { background-color: rgb(250, 250, 250); }
+.gamerule-light .rule-summary-row.rule-editor-card:hover { background-color: rgb(226, 226, 226); }
 .gamerule-light .rule-block-heading { color: rgb(35, 35, 35); }
 .gamerule-light .button-condition .rule-summary-name,
 .gamerule-light .rule-detail-type.button-condition {
@@ -2061,6 +2067,52 @@ ToolbarButton:active {
 .gamerule-light .rule-summary-detail {
     color: rgb(35, 35, 35);
 }
+
+.rule-summary-detail,
+.rule-add-element,
+.rule-join-selector,
+.rules-command {
+    -unity-font-style: bold;
+}
+
+.rule-add-element,
+.rule-join-selector,
+.rules-command,
+.rules-square-command {
+    height: 22px;
+    min-height: 22px;
+    font-size: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.rules-square-command {
+    width: 38px;
+    min-width: 38px;
+    padding-left: 0;
+    padding-right: 0;
+    -unity-text-align: middle-center;
+}
+
+.rules-square-command.button-danger-icon {
+    width: 22px;
+    min-width: 22px;
+    font-size: 16px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.rule-add-element,
+.rules-command,
+.rule-summary-name,
+.rule-summary-detail {
+    font-size: 12px;
+}
+
+.rule-summary-card.button-condition .rule-summary-detail { color: rgb(56, 185, 207); }
+.rule-summary-card.button-action .rule-summary-detail { color: rgb(240, 153, 89); }
+.gamerule-light .rule-summary-card.button-condition .rule-summary-detail { color: rgb(15, 103, 120); }
+.gamerule-light .rule-summary-card.button-action .rule-summary-detail { color: rgb(145, 68, 23); }
 
 .button-condition .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(56, 185, 207); }
 .button-action .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(240, 153, 89); }
