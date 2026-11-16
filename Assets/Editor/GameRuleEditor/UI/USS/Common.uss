@@ -456,19 +456,6 @@ Button:disabled {
     margin-right: 1px;
 }
 
-.numeric-stepper-button {
-    width: 18px;
-    min-width: 18px;
-    height: 18px;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-left: 0;
-    margin-right: 0;
-    font-size: 7px;
-}
-
 /* ── Action parameter builders ── */
 .action-parameter-row {
     min-height: 28px;
@@ -699,10 +686,6 @@ Button:disabled {
 .rule-detail-action .action-value-selection {
     margin-right: 0;
     margin-bottom: 5px;
-}
-
-.rule-detail-action .action-expression-parameter-row {
-    flex-wrap: wrap;
 }
 
 .rule-detail-action .action-expression-control {
@@ -1110,6 +1093,194 @@ PopupField {
     -unity-font-style: bold;
     white-space: normal;
     margin-bottom: 12px;
+}
+
+/* Compact parameter editors are scoped to Rule Details. */
+.rule-detail-card .rule-detail-type {
+    margin-bottom: 4px;
+}
+
+.rule-detail-card .rule-detail-action .action-parameter-row {
+    margin-bottom: 4px;
+}
+
+.rule-detail-card .rule-detail-action .action-value-selection,
+.rule-detail-card .rule-detail-action .action-picker-value-display {
+    margin-bottom: 0;
+}
+
+.rule-detail-card .rule-detail-action .action-expression-control {
+    flex-basis: 158px;
+}
+
+.compact-expression-line,
+.compact-expression-term,
+.compact-numeric-operand {
+    flex-direction: row;
+    align-items: center;
+}
+
+.compact-expression-line {
+    flex-wrap: wrap;
+}
+
+.compact-expression-term {
+    min-width: 0;
+    max-width: 100%;
+    margin-bottom: 2px;
+    margin-right: 2px;
+}
+
+.compact-expression-term > .compact-value-menu {
+    max-width: none;
+}
+
+.compact-expression-term > .compact-numeric-operand,
+.compact-numeric-operand > .numeric-stepper {
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.compact-numeric-operand .numeric-stepper-field {
+    min-width: 40px;
+    flex-shrink: 1;
+}
+
+.rule-detail-action .action-single-picker.compact-expression-term {
+    flex-direction: row;
+    align-items: center;
+}
+
+.compact-expression-operator,
+.compact-number-menu {
+    flex-shrink: 0;
+}
+
+.rule-detail-card .compact-picker-field,
+.compact-value-menu {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 1;
+    -unity-text-align: middle-center;
+}
+
+.compact-value-menu {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-number-menu {
+    min-width: 24px;
+    -unity-text-align: middle-center;
+}
+
+.compact-compare-operand {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.compact-compare-operand .compact-expression-term {
+    margin-bottom: 0;
+}
+
+.compact-compare-operand > .compare-operand-label {
+    height: 20px;
+    min-height: 20px;
+    margin-bottom: 2px;
+}
+
+.rule-detail-card .detail-parameter-row {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.detail-parameter-label {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    flex-shrink: 0;
+    margin-left: 0;
+    margin-right: 8px;
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.detail-parameter-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    align-items: flex-start;
+}
+
+.detail-parameter-value > .action-expression-control,
+.detail-parameter-value > .action-scalar-control,
+.detail-parameter-value > .action-single-picker,
+.detail-parameter-value > .vector-parameter-group,
+.detail-parameter-value > .compact-compare-values {
+    align-self: stretch;
+}
+
+.vector-parameter-group {
+    min-width: 0;
+}
+
+.vector-parameter-axis {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    margin-right: 4px;
+}
+
+.vector-parameter-axis > Label {
+    flex-shrink: 0;
+    margin-right: 3px;
+}
+
+.vector-parameter-axis > .action-scalar-control,
+.vector-parameter-axis .numeric-stepper {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.vector-parameter-axis .numeric-stepper-field {
+    width: 46px;
+    min-width: 40px;
+    flex-shrink: 1;
+}
+
+.rule-detail-card .rule-detail-action .detail-parameter-value > .action-expression-control {
+    flex-basis: auto;
+}
+
+.detail-parameter-value > .parameter-selector,
+.detail-parameter-value > .check-property-field,
+.detail-parameter-value > .detail-parameter-toggle,
+.detail-parameter-value .compact-picker-field,
+.detail-parameter-value .compact-value-menu {
+    margin-left: 0;
+}
+
+.detail-parameter-value .compact-expression-operator {
+    margin-left: 3px;
+}
+
+.detail-parameter-value > .parameter-selector,
+.detail-parameter-value > .check-property-field {
+    min-width: 0;
+    max-width: 100%;
+    align-self: flex-start;
+}
+
+.detail-parameter-value > .detail-parameter-toggle > .unity-base-field__input {
+    margin-left: 0;
+}
+
+.detail-comparison-operator {
+    margin-left: 88px;
+    align-items: flex-start;
 }
 
 /* ═══════════════════════════════════════════
@@ -1789,7 +1960,7 @@ ToolbarButton:active {
 }
 
 .rule-summary-name {
-    width: 88px;
+    width: 94px;
     flex-shrink: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -2291,6 +2462,42 @@ TextField.custom-property-name,
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
+}
+
+.compact-picker-field.button-property-picker {
+    color: rgb(217, 182, 92);
+}
+
+.detail-parameter-value .parameter-selector,
+.detail-parameter-value .parameter-selector .unity-base-popup-field__text,
+.detail-parameter-value .compare-property-term {
+    -unity-text-align: middle-center;
+}
+
+.gamerule-light .compact-picker-field.button-property-picker {
+    color: rgb(121, 88, 18);
+}
+
+/* Values share the same emphasis regardless of the parameter's condition or action. */
+.detail-parameter-value .parameter-selector,
+.detail-parameter-value .compare-property-term,
+.detail-parameter-value .action-number-degree-suffix,
+.detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    -unity-font-style: bold;
+}
+
+.detail-parameter-value .button-condition.parameter-selector,
+.detail-parameter-value .compare-property-term,
+.detail-parameter-value .action-number-degree-suffix,
+.detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    color: rgb(217, 182, 92);
+}
+
+.gamerule-light .detail-parameter-value .button-condition.parameter-selector,
+.gamerule-light .detail-parameter-value .compare-property-term,
+.gamerule-light .detail-parameter-value .action-number-degree-suffix,
+.gamerule-light .detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    color: rgb(121, 88, 18);
 }
 
 

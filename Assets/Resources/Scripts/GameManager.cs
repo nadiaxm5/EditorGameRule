@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
 
     private static readonly string[] ActorOrder = new string[] { "LightingReflection", "Environment", "Player", "Hellephant", "ZomBear", "ZomBunny", "HellephantSpawner", "ZomBearSpawner", "ZomBunnySpawner", "HellephantDead", "ZomBearDead", "ZomBunnyDead", "Bullet", "ShotLight", "Laser", "DamageCanvas", "HUDCanvas", "GameOver" };
 
-    public string GameName = "SURVIVAL_SHOOTER";
+    public string GameName = "SURVIVAL_SHOOTER (2)";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
     public Vector3 CameraPosition = new Vector3(0f, 5.49f, -7f);
     public Vector3 CameraRotation = new Vector3(30f, 0f, 0f);

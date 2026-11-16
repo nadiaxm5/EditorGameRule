@@ -199,31 +199,38 @@ namespace GameRuleEditor.CustomControls
                         projectTags.Select(tag => new TooltipDropdownOption(tag, tag,
                             "Match actors with the " + tag + " tag.")),
                         projectTags[0], RuleTooltips.Parameter("Collision", "Tag"),
-                        RuleDropdownPalette.Condition);
+                        detailsMode ? RuleDropdownPalette.Property : RuleDropdownPalette.Condition);
                     tagDropdown.AddToClassList("collision-tag-dropdown");
                     tagDropdown.AddToClassList("parameter-selector");
                     tagDropdown.AddToClassList("button-condition");
                     tagDropdown.AddToClassList("rule-selector-dropdown");
                     tagDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
-                    tagContainer.Add(tagDropdown);
+                    AddParameterControl(tagContainer, tagDropdown);
                     parametersContainer.Add(tagContainer);
                     inputElements.Add(tagDropdown);
                     break;
                 case "Timer":
-                    AddNumericField("Seconds", 0f, 0.1f, true);
+                    AddNumericField("Seconds", 0f, true);
                     break;
                 case "Touch":
                     var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
                     var touchEventContainer = CreateInlineParameter("Event");
                     var touchMode = CreateEventDropdown("Touch", touchModes, 92);
                     touchMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
-                    touchEventContainer.Add(touchMode);
+                    AddParameterControl(touchEventContainer, touchMode);
                     parametersContainer.Add(touchEventContainer);
                     inputElements.Add(touchMode);
-                    var onActorToggle = new Toggle("On This Actor");
+                    var onActorToggle = detailsMode ? new Toggle() : new Toggle("On This Actor");
                     onActorToggle.tooltip = RuleTooltips.Parameter("Touch", "On This Actor");
                     onActorToggle.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(onActorToggle);
+                    if (detailsMode)
+                    {
+                        onActorToggle.AddToClassList("detail-parameter-toggle");
+                        var actorRow = CreateInlineParameter("On This Actor");
+                        AddParameterControl(actorRow, onActorToggle);
+                        parametersContainer.Add(actorRow);
+                    }
+                    else parametersContainer.Add(onActorToggle);
                     inputElements.Add(onActorToggle);
                     break;
                 case "Keyboard":
@@ -254,11 +261,12 @@ namespace GameRuleEditor.CustomControls
             operatorContainer.AddToClassList("compare-operator-container");
             if (detailsMode)
             {
-                operatorContainer.style.alignSelf = Align.Center;
+                operatorContainer.AddToClassList("detail-comparison-operator");
+                operatorContainer.style.alignSelf = Align.FlexStart;
                 operatorContainer.style.justifyContent = Justify.Center;
                 operatorContainer.style.paddingBottom = 0;
-                operatorContainer.style.marginTop = 8;
-                operatorContainer.style.marginBottom = 8;
+                operatorContainer.style.marginTop = 6;
+                operatorContainer.style.marginBottom = 6;
             }
             operatorContainer.Add(compareOperatorDropdown);
             parametersContainer.Add(operatorContainer);
@@ -278,13 +286,13 @@ namespace GameRuleEditor.CustomControls
             keyboardKeyButton.AddToClassList("button-condition");
             keyboardKeyButton.AddToClassList("rule-selector-dropdown");
             UpdateKeyboardButton();
-            keyContainer.Add(keyboardKeyButton);
+            AddParameterControl(keyContainer, keyboardKeyButton);
             parametersContainer.Add(keyContainer);
 
             var eventContainer = CreateInlineParameter("Event");
             var keyMode = CreateEventDropdown("Keyboard", new List<string> { "press", "down", "up" }, 130);
             keyMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
-            eventContainer.Add(keyMode);
+            AddParameterControl(eventContainer, keyMode);
             parametersContainer.Add(eventContainer);
             inputElements.Add(keyMode);
         }
@@ -383,10 +391,10 @@ namespace GameRuleEditor.CustomControls
             keyboardMenu.style.height = menuHeight;
         }
 
-        private static void AddKeyboardMenuItem(VisualElement parent, string label, System.Action onClick)
+        private void AddKeyboardMenuItem(VisualElement parent, string label, System.Action onClick)
         {
             var button = new Button(onClick) { text = label };
-            button.AddToClassList("button-condition");
+            button.AddToClassList(detailsMode ? "button-property-picker" : "button-condition");
             button.AddToClassList("tooltip-dropdown-option");
             parent.Add(button);
         }
@@ -462,13 +470,13 @@ namespace GameRuleEditor.CustomControls
             return spaced;
         }
 
-        private static TooltipPopupField CreateEventDropdown(string conditionType, List<string> choices, float width)
+        private TooltipPopupField CreateEventDropdown(string conditionType, List<string> choices, float width)
         {
             var dropdown = new TooltipPopupField(
                 RuleTooltips.EventOptions(conditionType, choices),
                 choices[0],
                 RuleTooltips.Parameter(conditionType, "Event"),
-                RuleDropdownPalette.Condition)
+                detailsMode ? RuleDropdownPalette.Property : RuleDropdownPalette.Condition)
             {
                 style = { width = width }
             };
@@ -489,10 +497,15 @@ namespace GameRuleEditor.CustomControls
             if (detailsMode)
             {
                 container.style.alignSelf = Align.Stretch;
-                container.style.flexWrap = Wrap.Wrap;
+                container.AddToClassList("detail-parameter-row");
             }
             container.Add(CreateFieldTag(label));
             return container;
+        }
+
+        private void AddParameterControl(VisualElement row, VisualElement control)
+        {
+            row.Add(detailsMode ? CompactRuleValue.WrapParameter(control) : control);
         }
 
         internal static string FormatEventName(string value)
@@ -509,7 +522,7 @@ namespace GameRuleEditor.CustomControls
                 style = { flexDirection = FlexDirection.Row, marginRight = 3, alignItems = Align.Center }
             };
             container.style.flexShrink = 0;
-            if (detailsMode) container.style.flexWrap = Wrap.Wrap;
+            if (detailsMode) container.AddToClassList("detail-parameter-row");
             container.Add(CreateFieldTag(label));
 
             checkPropertyButton = null;
@@ -526,7 +539,7 @@ namespace GameRuleEditor.CustomControls
             checkPropertyButton.AddToClassList("compare-property-term");
             checkPropertyButton.AddToClassList("check-property-field");
             UpdateCheckPropertyButton();
-            container.Add(checkPropertyButton);
+            AddParameterControl(container, checkPropertyButton);
             parametersContainer.Add(container);
         }
 
@@ -534,11 +547,13 @@ namespace GameRuleEditor.CustomControls
         {
             if (checkPropertyButton == null) return;
             bool hasValue = !string.IsNullOrWhiteSpace(checkPropertyValue);
-            checkPropertyButton.text = hasValue ? checkPropertyValue : "Pick Property";
+            checkPropertyButton.text = detailsMode
+                ? (hasValue ? checkPropertyValue : "Select property") + "  ▾"
+                : hasValue ? checkPropertyValue : "Pick Property";
             checkPropertyButton.tooltip = hasValue ? checkPropertyValue : "Choose a Boolean property";
         }
 
-        private void AddNumericField(string label, float initialValue, float step, bool clampToZero)
+        private void AddNumericField(string label, float initialValue, bool clampToZero)
         {
             var container = new VisualElement
             {
@@ -548,16 +563,13 @@ namespace GameRuleEditor.CustomControls
             if (detailsMode)
             {
                 container.style.minWidth = 0;
-                container.style.flexWrap = Wrap.Wrap;
+                container.AddToClassList("detail-parameter-row");
             }
             VisualElement fieldTag = CreateFieldTag(label);
-            fieldTag.tooltip = RuleTooltips.Parameter(selectedConditionType, label) +
-                               " Drag horizontally to change the value.";
             container.Add(fieldTag);
-            var stepper = new NumericStepper(initialValue, step, clampToZero ? 0f : (float?)null);
+            var stepper = new NumericStepper(initialValue, clampToZero ? 0f : (float?)null);
             stepper.Changed += () => OnChanged?.Invoke();
-            stepper.EnableDragOn(fieldTag);
-            container.Add(stepper);
+            AddParameterControl(container, stepper);
             parametersContainer.Add(container);
             inputElements.Add(stepper);
         }
@@ -581,6 +593,7 @@ namespace GameRuleEditor.CustomControls
             tag.style.marginRight = 4;
             tag.style.minWidth = 62;
             tag.style.unityTextAlign = TextAnchor.MiddleCenter;
+            if (detailsMode) CompactRuleValue.AlignLabel(tag);
             return tag;
         }
 
@@ -744,27 +757,18 @@ namespace GameRuleEditor.CustomControls
         private sealed class NumericStepper : VisualElement
         {
             private readonly FloatField field;
-            private readonly float step;
             private readonly float? minimum;
-            private bool dragging;
-            private float dragStartX;
-            private float dragStartValue;
             public System.Action Changed;
             public string SerializedValue => FormatNumber(field.value);
 
-            public NumericStepper(float initialValue, float step, float? minimum)
+            public NumericStepper(float initialValue, float? minimum)
             {
-                this.step = step;
                 this.minimum = minimum;
                 AddToClassList("numeric-stepper");
                 style.flexDirection = FlexDirection.Row;
                 style.alignItems = Align.Center;
                 style.flexShrink = 0;
 
-                var decrement = new Button(() => SetValue(field.value - step, true))
-                { text = "▼", tooltip = $"Decrease by {FormatNumber(step)}" };
-                decrement.AddToClassList("numeric-stepper-button");
-                Add(decrement);
 
                 field = new FloatField { value = Sanitize(initialValue) };
                 field.AddToClassList("numeric-stepper-field");
@@ -776,51 +780,11 @@ namespace GameRuleEditor.CustomControls
                 });
                 Add(field);
 
-                var increment = new Button(() => SetValue(field.value + step, true))
-                { text = "▲", tooltip = $"Increase by {FormatNumber(step)}" };
-                increment.AddToClassList("numeric-stepper-button");
-                Add(increment);
             }
 
             public void SetSerializedValue(string serializedValue)
             {
-                SetValue(TryParseNumber(serializedValue, out float value) ? value : 0f, false);
-            }
-
-            public void EnableDragOn(VisualElement handle)
-            {
-                handle.RegisterCallback<PointerDownEvent>(evt =>
-                {
-                    if (evt.button != 0) return;
-                    dragging = true;
-                    dragStartX = evt.position.x;
-                    dragStartValue = field.value;
-                    handle.CapturePointer(evt.pointerId);
-                    evt.StopPropagation();
-                });
-                handle.RegisterCallback<PointerMoveEvent>(evt =>
-                {
-                    if (!dragging || !handle.HasPointerCapture(evt.pointerId)) return;
-                    float pixelDelta = evt.position.x - dragStartX;
-                    if (Mathf.Abs(pixelDelta) < 2f) return;
-                    SetValue(dragStartValue + pixelDelta / 8f * step, true);
-                    evt.StopPropagation();
-                });
-                handle.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    if (!dragging) return;
-                    dragging = false;
-                    if (handle.HasPointerCapture(evt.pointerId)) handle.ReleasePointer(evt.pointerId);
-                    evt.StopPropagation();
-                });
-            }
-
-            private void SetValue(float value, bool notify)
-            {
-                float sanitized = Sanitize(value);
-                if (Mathf.Approximately(field.value, sanitized)) return;
-                field.SetValueWithoutNotify(sanitized);
-                if (notify) Changed?.Invoke();
+                field.SetValueWithoutNotify(Sanitize(TryParseNumber(serializedValue, out float value) ? value : 0f));
             }
 
             private float Sanitize(float value)
@@ -856,6 +820,7 @@ namespace GameRuleEditor.CustomControls
                 public TermKind Kind;
                 public string Text;
                 public float Number;
+                public string NumberLiteral;
             }
 
             private readonly EditorContext context;
@@ -866,6 +831,7 @@ namespace GameRuleEditor.CustomControls
             private readonly TooltipPopupField operationDropdown;
             private string pendingOperator;
             private bool lockedLegacyExpression;
+            private string originalExpression;
             private bool suppressChanged;
             public System.Action Changed;
 
@@ -873,10 +839,11 @@ namespace GameRuleEditor.CustomControls
             {
                 this.context = context;
                 this.compactLayout = compactLayout;
-                AddToClassList("compare-operand");
+                AddToClassList(compactLayout ? "compact-compare-operand" : "compare-operand");
                 style.flexGrow = compactLayout ? 0 : 1;
                 style.minWidth = compactLayout ? 0 : 300;
-                style.flexDirection = FlexDirection.Column;
+                style.flexDirection = compactLayout ? FlexDirection.Row : FlexDirection.Column;
+                if (compactLayout) AddToClassList("detail-parameter-row");
 
                 var toolbar = new VisualElement();
                 toolbar.AddToClassList("compare-operand-toolbar");
@@ -889,7 +856,7 @@ namespace GameRuleEditor.CustomControls
                 var fieldTag = new Label(label);
                 fieldTag.AddToClassList("compare-operand-label");
                 fieldTag.tooltip = RuleTooltips.Parameter("Compare", label);
-                if (compactLayout) fieldTag.style.marginBottom = 5;
+                if (compactLayout) CompactRuleValue.AlignLabel(fieldTag);
                 toolbar.Add(fieldTag);
 
                 var pickerRow = compactLayout ? new VisualElement() : toolbar;
@@ -942,11 +909,12 @@ namespace GameRuleEditor.CustomControls
                     else operationDropdown.SetValueWithoutNotify(PickOperationLabel);
                 });
                 pickerRow.Add(operationDropdown);
-                Add(toolbar);
+                if (compactLayout) Add(fieldTag);
+                else Add(toolbar);
 
                 termsContainer = new VisualElement();
-                termsContainer.AddToClassList("compare-terms");
-                Add(termsContainer);
+                termsContainer.AddToClassList(compactLayout ? "compact-compare-values" : "compare-terms");
+                Add(compactLayout ? CompactRuleValue.WrapParameter(termsContainer) : termsContainer);
                 RebuildTerms();
             }
 
@@ -956,6 +924,7 @@ namespace GameRuleEditor.CustomControls
                 terms.Clear();
                 pendingOperator = null;
                 lockedLegacyExpression = false;
+                originalExpression = expression;
                 ParseExpression(expression);
                 RebuildTerms();
                 suppressChanged = false;
@@ -963,13 +932,14 @@ namespace GameRuleEditor.CustomControls
 
             public string GetStoredExpression()
             {
+                if (compactLayout && originalExpression != null) return originalExpression;
                 var result = new StringBuilder();
                 for (int i = 0; i < terms.Count; i++)
                 {
                     ExpressionTerm term = terms[i];
                     if (i > 0) result.Append(' ').Append(term.OperatorBefore).Append(' ');
                     if (term.Kind == TermKind.Number)
-                        result.Append(term.Number.ToString("0.####", CultureInfo.InvariantCulture));
+                        result.Append((compactLayout ? term.NumberLiteral : null) ?? term.Number.ToString("0.####", CultureInfo.InvariantCulture));
                     else
                         result.Append(GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, term.Text));
                 }
@@ -1031,6 +1001,11 @@ namespace GameRuleEditor.CustomControls
 
             private void RebuildTerms()
             {
+                if (compactLayout)
+                {
+                    RebuildCompactExpression();
+                    return;
+                }
                 termsContainer.Clear();
                 var expressionContainer = new VisualElement();
                 expressionContainer.AddToClassList("compare-terms-content");
@@ -1087,11 +1062,12 @@ namespace GameRuleEditor.CustomControls
 
                     if (term.Kind == TermKind.Number)
                     {
-                        var number = new NumericStepper(term.Number, 0.1f, null);
+                        var number = new NumericStepper(term.Number, null);
                         number.Changed += () =>
                         {
                             if (float.TryParse(number.SerializedValue, NumberStyles.Float,
                                     CultureInfo.InvariantCulture, out float parsed)) term.Number = parsed;
+                            term.NumberLiteral = null;
                             NotifyChanged();
                         };
                         row.Add(number);
@@ -1143,6 +1119,63 @@ namespace GameRuleEditor.CustomControls
                 RebuildTermsAndNotify();
             }
 
+            private void RebuildCompactExpression(int focusIndex = -1)
+            {
+                CompactRuleValue.RebuildExpression(termsContainer, terms.Count,
+                    terms.Count == 1 && !lockedLegacyExpression, index =>
+                    {
+                        var term = index < terms.Count ? terms[index] : null;
+                        bool isNumber = term?.Kind == TermKind.Number;
+                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : term?.Text, (choice, anchor) =>
+                        {
+                            if (choice == "Pick Property")
+                            {
+                                Rect screenRect = GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(anchor);
+                                if (term == null) PickProperty(screenRect);
+                                else ReplaceProperty(index, screenRect);
+                            }
+                            else if (!isNumber)
+                            {
+                                ReplaceCompactTerm(index, new ExpressionTerm { Kind = TermKind.Number });
+                            }
+                        }, isNumber);
+                        if (!isNumber) return menu;
+
+                        var value = CompactRuleValue.CreateRow("compact-numeric-operand");
+                        var number = new NumericStepper(term.Number, null);
+                        number.Changed += () =>
+                        {
+                            if (float.TryParse(number.SerializedValue, NumberStyles.Float,
+                                    CultureInfo.InvariantCulture, out float parsed)) term.Number = parsed;
+                            NotifyChanged();
+                        };
+                        value.Add(number);
+                        value.Add(menu);
+                        if (index == focusIndex) CompactRuleValue.FocusNumber(number);
+                        return value;
+                    }, index => terms[index].OperatorBefore,
+                    (index, operation) =>
+                    {
+                        terms[index].OperatorBefore = operation;
+                        NotifyChanged();
+                    }, operation => ReplaceCompactTerm(terms.Count,
+                        new ExpressionTerm { Kind = TermKind.Number, OperatorBefore = operation }),
+                    ClearExpression);
+            }
+
+            private void ReplaceCompactTerm(int index, ExpressionTerm term)
+            {
+                if (index < terms.Count)
+                {
+                    term.OperatorBefore = terms[index].OperatorBefore;
+                    terms[index] = term;
+                }
+                else terms.Add(term);
+                lockedLegacyExpression = false;
+                RebuildCompactExpression(index);
+                NotifyChanged();
+            }
+
             private void ParseExpression(string expression)
             {
                 string normalized = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, expression?.Trim());
@@ -1166,7 +1199,8 @@ namespace GameRuleEditor.CustomControls
                         {
                             OperatorBefore = terms.Count == 0 ? null : part.Operator,
                             Kind = TermKind.Number,
-                            Number = number
+                            Number = number,
+                            NumberLiteral = terms.Count == 0 && part.Operator == "-" ? "-" + value : value
                         });
                     }
                     else
@@ -1197,9 +1231,12 @@ namespace GameRuleEditor.CustomControls
                     if (character == '(') depth++;
                     else if (character == ')') depth = Math.Max(0, depth - 1);
                     if (depth != 0 || (character != '+' && character != '-')) continue;
-                    if (i > 0 && (expression[i - 1] == 'e' || expression[i - 1] == 'E')) continue;
+                    if (i > start && (expression[i - 1] == 'e' || expression[i - 1] == 'E') &&
+                        Regex.IsMatch(expression.Substring(start, i - start).Trim(), @"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE]$"))
+                        continue;
                     if (i == start)
                     {
+                        if (pendingOperator != null) continue;
                         pendingOperator = character.ToString();
                         start = i + 1;
                         continue;
@@ -1231,7 +1268,9 @@ namespace GameRuleEditor.CustomControls
 
             private void NotifyChanged()
             {
-                if (!suppressChanged) Changed?.Invoke();
+                if (suppressChanged) return;
+                originalExpression = null;
+                Changed?.Invoke();
             }
 
             private readonly struct ExpressionPart

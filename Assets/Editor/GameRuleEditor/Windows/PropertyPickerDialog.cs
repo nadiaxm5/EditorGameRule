@@ -416,7 +416,7 @@ namespace GameRuleEditor.Windows
             GUILayout.Space(outerPadding);
 
             if (includeActorPrefabs &&
-                DrawYellowTabButton("Actor Prefabs", selectedPrefabSource == PrefabSource.ActorPrefabs, 112f))
+                DrawYellowTabButton("Project Prefabs", selectedPrefabSource == PrefabSource.ActorPrefabs, 112f))
             {
                 selectedPrefabSource = PrefabSource.ActorPrefabs;
                 scrollCategory = Vector2.zero;

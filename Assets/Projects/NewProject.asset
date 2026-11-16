@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: NewProject
   m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
   projectName: NewProject
+  jsonFileName: NewProject.json
   sceneData:
     GameName: NewProject
     ScreenResolution:
