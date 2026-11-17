@@ -110,5 +110,32 @@ namespace GameRuleEditor.CustomControls
                     else field.Focus();
                 });
         }
+
+        internal static void ConfigureNumberField(FloatField field, bool showDegrees = false)
+        {
+            field.formatString = "0.##";
+            field.isDelayed = true;
+
+            void Resize(string text)
+            {
+                var input = field.Q(className: "unity-text-field__input");
+                var textElement = input as TextElement ?? input?.Q<TextElement>();
+                float textWidth = textElement != null
+                    ? textElement.MeasureTextSize(text, 0, VisualElement.MeasureMode.Undefined,
+                        0, VisualElement.MeasureMode.Undefined).x
+                    : 0f;
+                if (float.IsNaN(textWidth) || textWidth <= 0f) textWidth = text.Length * 8f;
+                float width = Mathf.Max(46f, Mathf.Ceil(textWidth) + (showDegrees ? 31f : 22f));
+                field.style.width = width;
+                field.style.minWidth = width;
+            }
+
+            void ResizeValue() => Resize(field.value.ToString(field.formatString));
+
+            field.RegisterCallback<AttachToPanelEvent>(_ => field.schedule.Execute(ResizeValue));
+            field.RegisterCallback<InputEvent>(evt => Resize(evt.newData ?? string.Empty));
+            field.RegisterCallback<FocusOutEvent>(_ => field.schedule.Execute(ResizeValue));
+            field.RegisterValueChangedCallback(_ => field.schedule.Execute(ResizeValue));
+        }
     }
 }

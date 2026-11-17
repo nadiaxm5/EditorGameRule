@@ -119,10 +119,10 @@ namespace GameRuleEditor.Windows
             win.prefabMode = false;
             win.prefabSearch = string.Empty;
             win.minSize = new Vector2(500, 300);
-            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
             win.wantsMouseMove = true;
             win.InitData();
             win.ShowUtility();
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
         }
 
         public static void ShowPrefab(EditorContext ctx, System.Action<string> callback, bool includeActorPrefabs,
@@ -141,10 +141,10 @@ namespace GameRuleEditor.Windows
             win.prefabSearch = string.Empty;
             win.scrollCategory = Vector2.zero;
             win.minSize = new Vector2(360, 220);
-            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
             win.wantsMouseMove = true;
             win.InitData();
             win.ShowUtility();
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
         }
 
         public static void ShowResource(EditorContext ctx, System.Action<string> callback,
@@ -161,23 +161,30 @@ namespace GameRuleEditor.Windows
             win.resourceSearch = string.Empty;
             win.scrollCategory = Vector2.zero;
             win.minSize = new Vector2(360, 220);
-            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
             win.wantsMouseMove = true;
             win.InitData();
             win.ShowUtility();
+            PositionNearAnchor(win, anchorScreenRect, new Vector2(500, 300));
         }
 
         /// <summary>Converts a UI Toolkit element's panel-space bounds to desktop screen coordinates.</summary>
         public static Rect GetScreenRect(VisualElement element)
         {
-            if (element == null) return default;
+            if (element?.panel == null) return default;
 
-            Rect screenRect = element.worldBound;
-            EditorWindow hostWindow = EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow;
-            if (hostWindow != null)
-                screenRect.position += hostWindow.position.position;
+            // Focus and mouse-over can already point at another window when a picker opens.
+            // Resolve the window that actually contains the originating control.
+            foreach (var window in Resources.FindObjectsOfTypeAll<EditorWindow>())
+            {
+                var root = window.rootVisualElement;
+                if (root.panel != element.panel || (root != element && !root.Contains(element)))
+                    continue;
 
-            return screenRect;
+                Rect screenRect = element.worldBound;
+                screenRect.position += window.position.position - root.worldBound.position;
+                return screenRect;
+            }
+            return default;
         }
 
         private static void PositionNearAnchor(EditorWindow window, Rect? anchorScreenRect, Vector2 windowSize)
@@ -195,15 +202,11 @@ namespace GameRuleEditor.Windows
             float x = anchor.xMin;
             float y = anchor.yMax + gap;
 
-            if (x + windowSize.x > desktop.xMax)
-                x = desktop.xMax - windowSize.x;
-            if (x < desktop.xMin)
-                x = desktop.xMin;
-
             if (y + windowSize.y > desktop.yMax)
                 y = anchor.yMin - windowSize.y - gap;
-            if (y < desktop.yMin)
-                y = desktop.yMin;
+
+            x = Mathf.Clamp(x, desktop.xMin, Mathf.Max(desktop.xMin, desktop.xMax - windowSize.x));
+            y = Mathf.Clamp(y, desktop.yMin, Mathf.Max(desktop.yMin, desktop.yMax - windowSize.y));
 
             window.position = new Rect(new Vector2(x, y), windowSize);
         }

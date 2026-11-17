@@ -770,12 +770,14 @@ namespace GameRuleEditor.CustomControls
                 style.flexShrink = 0;
 
 
-                field = new FloatField { value = Sanitize(initialValue) };
+                field = new FloatField();
                 field.AddToClassList("numeric-stepper-field");
+                CompactRuleValue.ConfigureNumberField(field);
+                field.SetValueWithoutNotify(Sanitize(initialValue));
                 field.RegisterValueChangedCallback(evt =>
                 {
                     float sanitized = Sanitize(evt.newValue);
-                    if (!Mathf.Approximately(sanitized, evt.newValue)) field.SetValueWithoutNotify(sanitized);
+                    if (sanitized != evt.newValue) field.SetValueWithoutNotify(sanitized);
                     Changed?.Invoke();
                 });
                 Add(field);
@@ -791,7 +793,7 @@ namespace GameRuleEditor.CustomControls
             {
                 if (float.IsNaN(value) || float.IsInfinity(value)) value = 0f;
                 if (minimum.HasValue) value = Mathf.Max(minimum.Value, value);
-                return (float)Math.Round(value, 4, MidpointRounding.AwayFromZero);
+                return (float)Math.Round(value, 2, MidpointRounding.AwayFromZero);
             }
 
             private static bool TryParseNumber(string text, out float value)
@@ -802,7 +804,7 @@ namespace GameRuleEditor.CustomControls
 
             private static string FormatNumber(float value)
             {
-                return value.ToString("0.####", CultureInfo.InvariantCulture);
+                return value.ToString("0.##", CultureInfo.InvariantCulture);
             }
         }
 
@@ -939,7 +941,7 @@ namespace GameRuleEditor.CustomControls
                     ExpressionTerm term = terms[i];
                     if (i > 0) result.Append(' ').Append(term.OperatorBefore).Append(' ');
                     if (term.Kind == TermKind.Number)
-                        result.Append((compactLayout ? term.NumberLiteral : null) ?? term.Number.ToString("0.####", CultureInfo.InvariantCulture));
+                        result.Append((compactLayout ? term.NumberLiteral : null) ?? term.Number.ToString("0.##", CultureInfo.InvariantCulture));
                     else
                         result.Append(GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, term.Text));
                 }
@@ -1147,6 +1149,7 @@ namespace GameRuleEditor.CustomControls
                         {
                             if (float.TryParse(number.SerializedValue, NumberStyles.Float,
                                     CultureInfo.InvariantCulture, out float parsed)) term.Number = parsed;
+                            term.NumberLiteral = null;
                             NotifyChanged();
                         };
                         value.Add(number);

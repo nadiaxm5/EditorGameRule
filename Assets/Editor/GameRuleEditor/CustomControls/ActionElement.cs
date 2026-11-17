@@ -156,7 +156,7 @@ namespace GameRuleEditor.CustomControls
                 case "MoveTo": AddScalarParameter("Speed", 0); AddVectorParameter("Target", "Target", 1); break;
                 case "NavigateTo": AddScalarParameter("Speed", 0); AddVectorParameter("Target", "Target", 1); break;
 
-                case "Rotate": AddScalarParameter("Turn Speed", 0, true); AddVectorParameter("Rotation axis", "Rotation", 1); break;
+                case "Rotate": AddScalarParameter("Turn Speed", 0, true); AddRotationAxisParameter(); break;
                 case "RotateTo": AddScalarParameter("Turn Speed", 0, true); AddVectorParameter("Target", "Target", 1); AddVectorParameter("Pivot", "Pivot", 4); break;
                 case "Torque": AddVectorParameter("Torque", "Torque", 0); break;
 
@@ -184,6 +184,37 @@ namespace GameRuleEditor.CustomControls
             AddParameterRow(label,
                 new ScalarValueControl(context, ActionDefaults.Get(selectedActionType, sourceIndex),
                     showDegrees, () => OnChanged?.Invoke(), detailsMode), sourceIndex);
+        }
+
+        private void AddRotationAxisParameter()
+        {
+            if (!detailsMode)
+            {
+                AddVectorParameter("Rotation axis", "Rotation", 1);
+                return;
+            }
+
+            var row = CompactRuleValue.CreateRow("compact-expression-line");
+            var axes = new List<RotationAxisToggle>();
+            foreach (char axis in "XYZ")
+            {
+                var item = CompactRuleValue.CreateRow("vector-parameter-axis");
+                item.Add(new Label(axis.ToString()));
+                var toggle = new RotationAxisToggle(axis, () => OnChanged?.Invoke());
+                item.Add(toggle);
+                int sourceIndex = axes.Count + 1;
+                parameterBindings.Add(new ParameterBinding(toggle, sourceIndex,
+                    ActionDefaults.Get(selectedActionType, sourceIndex)));
+                axes.Add(toggle);
+                if (axis == 'Z')
+                    item.Add(CompactRuleValue.CreateRemove("Reset rotation axis", () =>
+                    {
+                        foreach (var component in axes) component.SetStoredValue("0");
+                        OnChanged?.Invoke();
+                    }));
+                row.Add(item);
+            }
+            parametersContainer.Add(CreateParameterRow("Rotation axis", row));
         }
 
         private void AddVectorParameter(string label, string axisLabelPrefix, int sourceIndex,
@@ -317,6 +348,33 @@ namespace GameRuleEditor.CustomControls
         {
             string StoredValue { get; }
             void SetStoredValue(string value);
+        }
+
+        private sealed class RotationAxisToggle : Toggle, IActionParameterControl
+        {
+            private readonly char axis;
+            public string StoredValue { get; private set; } = "0";
+
+            public RotationAxisToggle(char axis, System.Action changed)
+            {
+                this.axis = axis;
+                this.RegisterValueChangedCallback(evt =>
+                {
+                    SetStoredValue(evt.newValue ? "1" : "0");
+                    changed?.Invoke();
+                });
+                SetStoredValue("0");
+            }
+
+            public void SetStoredValue(string value)
+            {
+                StoredValue = string.IsNullOrWhiteSpace(value) ? "0" : value.Trim();
+                bool isNumber = TryParseNumber(StoredValue, out float component);
+                SetValueWithoutNotify(!isNumber || component != 0f);
+                tooltip = isNumber && (component == 0f || component == 1f)
+                    ? $"Include the local {axis} axis."
+                    : $"Current {axis} component: {StoredValue}. Changing this checkbox sets it to 1 or 0.";
+            }
         }
 
         private sealed class ParameterBinding
@@ -509,7 +567,8 @@ namespace GameRuleEditor.CustomControls
             {
                 get
                 {
-                    if (grouped && storedExpression != null) return storedExpression;
+                    if (storedExpression != null && (grouped || (compact && kind == ScalarKind.Number)))
+                        return storedExpression;
                     if (kind == ScalarKind.Number) return FormatNumber(numberValue);
                     if (kind == ScalarKind.Property || kind == ScalarKind.Legacy)
                         return GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(
@@ -955,6 +1014,7 @@ namespace GameRuleEditor.CustomControls
                         number.Changed += () =>
                         {
                             term.Number = number.Value;
+                            term.NumberLiteral = null;
                             NotifyExpressionChanged();
                         };
                         value.Add(number);
@@ -1110,12 +1170,14 @@ namespace GameRuleEditor.CustomControls
                 style.alignItems = Align.Center;
 
 
-                field = new FloatField { value = initialValue };
+                field = new FloatField();
                 field.AddToClassList("numeric-stepper-field");
+                CompactRuleValue.ConfigureNumberField(field, showDegrees);
+                field.SetValueWithoutNotify(initialValue);
                 field.RegisterValueChangedCallback(evt =>
                 {
                     float sanitized = Sanitize(evt.newValue);
-                    if (!Mathf.Approximately(sanitized, evt.newValue)) field.SetValueWithoutNotify(sanitized);
+                    if (sanitized != evt.newValue) field.SetValueWithoutNotify(sanitized);
                     Changed?.Invoke();
                 });
                 Add(field);
@@ -1132,7 +1194,7 @@ namespace GameRuleEditor.CustomControls
             private static float Sanitize(float value)
             {
                 if (float.IsNaN(value) || float.IsInfinity(value)) value = 0f;
-                return (float)Math.Round(value, 4, MidpointRounding.AwayFromZero);
+                return (float)Math.Round(value, 2, MidpointRounding.AwayFromZero);
             }
         }
 
@@ -1144,7 +1206,7 @@ namespace GameRuleEditor.CustomControls
 
         private static string FormatNumber(float value)
         {
-            return value.ToString("0.####", CultureInfo.InvariantCulture);
+            return value.ToString("0.##", CultureInfo.InvariantCulture);
         }
     }
 }

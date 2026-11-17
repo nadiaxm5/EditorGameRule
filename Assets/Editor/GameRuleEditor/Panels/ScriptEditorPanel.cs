@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using GameRuleEditor.Core;
@@ -476,7 +477,7 @@ namespace GameRuleEditor.Panels
 
             var types = ConditionTypes();
             var add = new TooltipPopupField(RuleTooltips.ConditionOptions(types),
-                "+ Add Condition", "Choose a condition to add to this rule.",
+                "+ Add Condition", "Add a condition with a logical operator. Conditions joined by AND are treated as a group.",
                 RuleDropdownPalette.Condition);
             add.AddToClassList("button-condition");
             add.AddToClassList("rule-add-element");
@@ -607,9 +608,9 @@ namespace GameRuleEditor.Panels
             string details;
             if (parsed.Name == "Spawn")
             {
-                string prefab = parsed.Params != null && parsed.Params.Count > 0
+                string value = parsed.Params != null && parsed.Params.Count > 0
                     ? parsed.Params[0] : string.Empty;
-                details = string.IsNullOrWhiteSpace(prefab) ? "No prefab selected" : prefab;
+                details = value.Trim();
             }
             else if (parsed.Name == "Touch")
             {
@@ -637,10 +638,19 @@ namespace GameRuleEditor.Panels
                 details = parsed.Params != null && parsed.Params.Count > 0
                     ? parsed.Params[0] : string.Empty;
             }
-            else if (parsed.Name == "Move" || parsed.Name == "Rotate" ||
-                     parsed.Name == "Push" || parsed.Name == "Torque")
+            else if (parsed.Name == "Move" || parsed.Name == "Push")
             {
-                details = string.Empty;
+                details = SummarizeAxisValues(parsed.Name, parsed.Params, 1, "R", "No rotation");
+            }
+            else if (parsed.Name == "Rotate")
+            {
+                details = string.Join(", ", Enumerable.Range(1, 3)
+                    .Where(index => GetRotationComponent("Rotate", parsed.Params, index) != null)
+                    .Select(index => "XYZ"[index - 1]));
+            }
+            else if (parsed.Name == "Torque")
+            {
+                details = SummarizeAxisValues(parsed.Name, parsed.Params, 0, "", "");
             }
             else if (parsed.Name == "MoveTo" || parsed.Name == "NavigateTo" ||
                      parsed.Name == "RotateTo" || parsed.Name == "PushTo")
@@ -657,22 +667,42 @@ namespace GameRuleEditor.Panels
             return ((negated ? "NOT " : string.Empty) + parsed.Name, details);
         }
 
+        private static string SummarizeAxisValues(string actionName, List<string> parameters,
+            int firstIndex, string prefix, string emptySummary)
+        {
+            const string axes = "XYZ";
+            var components = new List<string>(axes.Length);
+            for (int i = 0; i < axes.Length; i++)
+            {
+                string value = GetRotationComponent(actionName, parameters, firstIndex + i);
+                if (value != null) components.Add($"{prefix}{axes[i]} {value}");
+            }
+            return components.Count == 0 ? emptySummary : string.Join(" - ", components);
+        }
+
+        private static string GetRotationComponent(string actionName, List<string> parameters, int index)
+        {
+            string value = ActionDefaults.Fill(actionName, index,
+                parameters != null && index < parameters.Count ? parameters[index] : null)?.Trim();
+            if (string.IsNullOrEmpty(value)) return null;
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double component)
+                && component == 0 ? null : value;
+        }
+
         private string SummarizeTarget(string actionName, List<string> parameters)
         {
             var coordinates = Enumerable.Range(1, 3)
                 .Select(index => ActionDefaults.Fill(actionName, index,
                     parameters != null && index < parameters.Count ? parameters[index] : string.Empty))
                 .ToList();
-            var targetNames = coordinates.Select(TargetReferenceName)
-                .Where(name => !string.IsNullOrEmpty(name))
-                .Distinct(System.StringComparer.OrdinalIgnoreCase).ToList();
-
-            // Any of the three target fields can refer to an actor's x, y or z.
-            // If different actors are mixed, show the actual fields rather than naming
-            // just one of them as the destination.
-            return targetNames.Count == 1
-                ? targetNames[0]
-                : string.Join(",", coordinates);
+            string actorName = coordinates
+                .Where(value => !string.IsNullOrWhiteSpace(value) &&
+                    !value.TrimStart().StartsWith("#", System.StringComparison.Ordinal))
+                .Select(TargetReferenceName)
+                .FirstOrDefault(name => !string.IsNullOrEmpty(name));
+            return actorName
+                ?? coordinates.Select(TargetReferenceName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+                ?? string.Join(",", coordinates);
         }
 
         private string TargetReferenceName(string coordinate)

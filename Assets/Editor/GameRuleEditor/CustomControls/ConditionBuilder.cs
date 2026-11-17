@@ -599,8 +599,8 @@ namespace GameRuleEditor.CustomControls
         public static string Logical(string value)
         {
             return value == "OR"
-                ? "At least one connected condition must be true."
-                : "All connected conditions must be true.";
+                ? "At least one of the two connected conditions must be true."
+                : "Both connected conditions must be true.";
         }
 
         public static string Parameter(string owner, string label)
