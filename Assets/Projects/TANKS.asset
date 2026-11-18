@@ -42,7 +42,7 @@ MonoBehaviour:
     - 0
     - -9.81
     - 0
-    SoundTrack: 
+    SoundTrack: Assets/Audio/BackgroundMusic.wav
     Mouse: []
     MouseWorld: []
     Cast:
@@ -709,7 +709,10 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -717,80 +720,121 @@ MonoBehaviour:
     Bounciness: 0
     Drag: 0.2
     OverrideDensity: 0
-    OverrideFriction: 0
+    OverrideFriction: 1
     OverrideBounciness: 0
-    OverrideDrag: 0
-    Properties:
-    - speed=10
-    - angularSpeed=90
-    - health=100
-    - offsetY=1.7
-    - offsetZ=1.35
-    - maxAim=200
-    - currentAim=0
-    CustomProperties: []
+    OverrideDrag: 1
+    Properties: []
+    CustomProperties:
+    - name: speed
+      type: float
+      intValue: 0
+      floatValue: 10
+      boolValue: 0
+      arrayValue: []
+    - name: angularSpeed
+      type: float
+      intValue: 0
+      floatValue: 90
+      boolValue: 0
+      arrayValue: []
+    - name: health
+      type: float
+      intValue: 0
+      floatValue: 100
+      boolValue: 0
+      arrayValue: []
+    - name: offsetY
+      type: float
+      intValue: 0
+      floatValue: 1.7
+      boolValue: 0
+      arrayValue: []
+    - name: offsetZ
+      type: float
+      intValue: 0
+      floatValue: 1.35
+      boolValue: 0
+      arrayValue: []
+    - name: maxAim
+      type: float
+      intValue: 0
+      floatValue: 200
+      boolValue: 0
+      arrayValue: []
+    - name: currentAim
+      type: float
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When:
       - Keyboard(RightArrow,press)
       Do:
       - Rotate(this.angularSpeed,this.rx,this.ry,this.rz)
       - PlayParticles(DustTrail)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 2
       When:
       - Keyboard(LeftArrow,press)
       Do:
       - Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)
       - PlayParticles(DustTrail)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 3
       When:
       - Keyboard(UpArrow,press)
       Do:
       - Move(this.speed,0,this.ry,0)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 4
       When:
       - Keyboard(DownArrow,press)
       Do:
       - Move(this.speed,0,this.ry+180,0)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 5
       When:
       - Collision(Shell)
       Do:
       - Edit(this.health,this.health-Shell.damage)
       - PushTo(-300,BlueTank.x,BlueTank.y,BlueTank.z)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 6
       When:
       - Compare(this.health<=0)
       Do:
       - Edit(BlueWin.Active,1)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 7
       When:
       - Keyboard(Enter,press)
       Do:
       - Edit(this.currentAim,this.currentAim+1)
       - PlaySound(ShotCharging)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 8
       When:
       - Compare(this.currentAim>=this.maxAim)
       Do:
       - Edit(this.currentAim,this.maxAim)
-      groupId: 
-    - Name: 
+      groupId: g17218b5c
+    - Name: Rule 9
       When:
       - Keyboard(Enter,up)
       Do:
       - Spawn(Shell,this,0,this.offsetY,this.offsetZ)
       - Edit(this.currentAim,0)
       - PlaySound(ShotFiring)
-      groupId: 
-    Components: []
+      groupId: g17218b5c
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g17218b5c
   - ActorName: Shell
     Active: 0
     PrefabName: Shell

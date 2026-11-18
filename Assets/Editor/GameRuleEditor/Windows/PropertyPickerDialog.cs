@@ -96,6 +96,7 @@ namespace GameRuleEditor.Windows
             public string Result;
             public string SecondaryName;
             public Object PreviewObject;
+            public bool HidePreview;
         }
 
         private string selectedCategory = "Me";
@@ -412,13 +413,11 @@ namespace GameRuleEditor.Windows
                 })
                 .ToList();
 
-            if (assets.Count == 0)
+            assets.Insert(0, new PreviewGridItem { Label = "None", Result = string.Empty, HidePreview = true });
+            DrawPreviewGrid(assets);
+            if (assets.Count == 1)
             {
                 EditorGUILayout.HelpBox($"No items in {resourceTabLabel} match the search.", MessageType.Info);
-            }
-            else
-            {
-                DrawPreviewGrid(assets);
             }
 
             EditorGUILayout.EndScrollView();
@@ -476,6 +475,15 @@ namespace GameRuleEditor.Windows
 
             List<GameObject> selectablePrefabs = LoadSelectablePrefabs();
             var gridItems = new List<PreviewGridItem>();
+            GameObject emptyPrefab = selectablePrefabs.Find(prefab => prefab.name == "Empty");
+            if (emptyPrefab != null)
+                gridItems.Add(new PreviewGridItem
+                {
+                    Label = emptyPrefab.name,
+                    Result = emptyPrefab.name,
+                    PreviewObject = emptyPrefab
+                });
+            int pinnedCount = gridItems.Count;
 
             if (selectedPrefabSource == PrefabSource.ActorPrefabs)
             {
@@ -501,6 +509,7 @@ namespace GameRuleEditor.Windows
             {
                 foreach (GameObject prefab in selectablePrefabs)
                 {
+                    if (prefab == emptyPrefab) continue;
                     if (!MatchesPrefabSearch(prefab.name)) continue;
 
                     gridItems.Add(new PreviewGridItem
@@ -513,16 +522,13 @@ namespace GameRuleEditor.Windows
                 }
             }
 
-            if (gridItems.Count == 0)
+            DrawPreviewGrid(gridItems);
+            if (gridItems.Count == pinnedCount)
             {
                 string message = selectedPrefabSource == PrefabSource.ActorPrefabs
                     ? "No actor prefabs match the search."
                     : "No prefabs in Resources/Prefabs match the search.";
                 EditorGUILayout.HelpBox(message, MessageType.Info);
-            }
-            else
-            {
-                DrawPreviewGrid(gridItems);
             }
 
             EditorGUILayout.EndScrollView();
@@ -587,7 +593,7 @@ namespace GameRuleEditor.Windows
                 previewSize,
                 previewSize);
 
-            Texture preview = GetAssetPreview(item.PreviewObject);
+            Texture preview = item.HidePreview ? null : GetAssetPreview(item.PreviewObject);
             if (preview != null)
                 GUI.DrawTexture(previewRect, preview, ScaleMode.ScaleToFit, true);
 

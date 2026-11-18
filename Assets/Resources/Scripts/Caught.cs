@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class BlueWin : MonoBehaviour, IGameRuleActor {
+public class Caught : MonoBehaviour, IGameRuleActor {
     public bool Active = false;
     private Dictionary<string, float> timers = new Dictionary<string, float>();
     public void EvalFixedUpdate(){
