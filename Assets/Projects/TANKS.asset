@@ -42,7 +42,7 @@ MonoBehaviour:
     - 0
     - -9.81
     - 0
-    SoundTrack: Assets/Audio/BackgroundMusic.wav
+    SoundTrack: Assets/Resources/Audio/Originals/BackgroundMusic.wav
     Mouse: []
     MouseWorld: []
     Cast:

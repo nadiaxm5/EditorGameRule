@@ -9,7 +9,7 @@
     "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
-    "SoundTrack": "Assets/Audio/Music/BackgroundMusic.mp3",
+    "SoundTrack": "Assets/Resources/Audio/Originals/Music/BackgroundMusic.mp3",
     "CustomVariables": [
         {"name": "Score", "type": "float", "floatValue": 0}
     ],

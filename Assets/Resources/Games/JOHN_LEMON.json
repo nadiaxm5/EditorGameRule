@@ -9,7 +9,7 @@
     "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
-    "SoundTrack": "",
+    "SoundTrack": "Assets/Resources/Audio/Originals/SFXGhostMove.wav",
     "CustomVariables": [],
     "Cast": [
         {
@@ -85,9 +85,11 @@
             "ActorName": "John",
             "Active": true,
             "PrefabName": "JohnLemon",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [-9.800000190734864, 0.0, -3.200000047683716],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "CustomProperties": [
                 {
                     "name": "speed",
@@ -109,15 +111,15 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "Edit(#CameraPosition.x,this.x)",
                         "Edit(#CameraPosition.z,this.z-this.offset)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(RightArrow,press)"
                     ],
@@ -126,10 +128,10 @@
                         "Edit(this.ry,90)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(LeftArrow,press)"
                     ],
@@ -138,10 +140,10 @@
                         "Edit(this.ry,-90)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(UpArrow,press)"
                     ],
@@ -150,10 +152,10 @@
                         "Edit(this.ry,0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Keyboard(DownArrow,press)"
                     ],
@@ -162,50 +164,50 @@
                         "Edit(this.ry,180)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
                     ],
                     "Do": [
                         "Edit(this.moving,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Collision(Enemy)"
                     ],
                     "Do": [
                         "Edit(Caught.Active,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Collision(End)"
                     ],
                     "Do": [
                         "Edit(Won.Active,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(John_Idle)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 10",
                     "When": [
                         "Check(this.moving)"
                     ],
@@ -213,7 +215,19 @@
                         "Animate(John_Walk)",
                         "PlaySound(Footsteps)"
                     ],
-                    "groupId": ""
+                    "groupId": "g563dece7"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g563dece7"
                 }
             ]
         },
@@ -242,6 +256,8 @@
             "Tag": "Enemy",
             "IconColorHex": "",
             "Position": [-5.5, 0.0, -4.5],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "CustomProperties": [
                 {
                     "name": "speed",
@@ -270,31 +286,43 @@
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "NavigateTo(this.speed,this.x,this.y,this.zTarget)"
                     ],
-                    "groupId": ""
+                    "groupId": "g5075af8b"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Compare(this.z>=this.z1)"
                     ],
                     "Do": [
                         "Edit(this.zTarget,this.z0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g5075af8b"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Compare(this.z<=this.z0)"
                     ],
                     "Do": [
                         "Edit(this.zTarget,this.z1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g5075af8b"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g5075af8b"
                 }
             ]
         },

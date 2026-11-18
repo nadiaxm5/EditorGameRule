@@ -9,7 +9,7 @@
     "SunAmbientColor": [180, 180, 180],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
-    "SoundTrack": "Assets/Audio/BackgroundMusic.wav",
+    "SoundTrack": "Assets/Resources/Audio/Originals/BackgroundMusic.wav",
     "CustomVariables": [],
     "Cast": [
         {

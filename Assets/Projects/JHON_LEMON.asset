@@ -42,7 +42,7 @@ MonoBehaviour:
     - 0
     - -9.81
     - 0
-    SoundTrack: 
+    SoundTrack: Assets/Resources/Audio/Originals/SFXGhostMove.wav
     Mouse: []
     MouseWorld: []
     Cast:
@@ -635,14 +635,20 @@ MonoBehaviour:
   - ActorName: John
     Active: 1
     PrefabName: JohnLemon
-    Tag: 
+    Tag: Untagged
     IconColorHex: 
     Position:
     - -9.8
     - 0
     - -3.2
-    Rotation: []
-    Scale: []
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -653,83 +659,104 @@ MonoBehaviour:
     OverrideFriction: 0
     OverrideBounciness: 0
     OverrideDrag: 0
-    Properties:
-    - speed=1
-    - offset=5.6
-    - moving=0
-    CustomProperties: []
+    Properties: []
+    CustomProperties:
+    - name: speed
+      type: float
+      intValue: 0
+      floatValue: 1
+      boolValue: 0
+      arrayValue: []
+    - name: offset
+      type: float
+      intValue: 0
+      floatValue: 5.6
+      boolValue: 0
+      arrayValue: []
+    - name: moving
+      type: float
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - Edit(#CameraPosition.x,this.x)
       - Edit(#CameraPosition.z,this.z-this.offset)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 2
       When:
       - Keyboard(RightArrow,press)
       Do:
       - Move(this.speed,0,90,0)
       - Edit(this.ry,90)
       - Edit(this.moving,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 3
       When:
       - Keyboard(LeftArrow,press)
       Do:
       - Move(this.speed,0,-90,0)
       - Edit(this.ry,-90)
       - Edit(this.moving,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 4
       When:
       - Keyboard(UpArrow,press)
       Do:
       - Move(this.speed,0,0,0)
       - Edit(this.ry,0)
       - Edit(this.moving,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 5
       When:
       - Keyboard(DownArrow,press)
       Do:
       - Move(this.speed,0,180,0)
       - Edit(this.ry,180)
       - Edit(this.moving,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 6
       When:
       - Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up)
         OR Keyboard(DownArrow,up)
       Do:
       - Edit(this.moving,0)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 7
       When:
       - Collision(Enemy)
       Do:
       - Edit(Caught.Active,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 8
       When:
       - Collision(End)
       Do:
       - Edit(Won.Active,1)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 9
       When:
       - NOT Check(this.moving)
       Do:
       - Animate(John_Idle)
-      groupId: 
-    - Name: 
+      groupId: g563dece7
+    - Name: Rule 10
       When:
       - Check(this.moving)
       Do:
       - Animate(John_Walk)
       - PlaySound(Footsteps)
-      groupId: 
-    Components: []
+      groupId: g563dece7
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g563dece7
   - ActorName: Gargoyle1
     Active: 1
     PrefabName: Gargoyle
@@ -795,8 +822,14 @@ MonoBehaviour:
     - -5.5
     - 0
     - -4.5
-    Rotation: []
-    Scale: []
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -807,31 +840,57 @@ MonoBehaviour:
     OverrideFriction: 0
     OverrideBounciness: 0
     OverrideDrag: 0
-    Properties:
-    - speed=1.0
-    - zTarget=6.4
-    - z0=-4.5
-    - z1=6.4
-    CustomProperties: []
+    Properties: []
+    CustomProperties:
+    - name: speed
+      type: float
+      intValue: 0
+      floatValue: 1
+      boolValue: 0
+      arrayValue: []
+    - name: zTarget
+      type: float
+      intValue: 0
+      floatValue: 6.4
+      boolValue: 0
+      arrayValue: []
+    - name: z0
+      type: float
+      intValue: 0
+      floatValue: -4.5
+      boolValue: 0
+      arrayValue: []
+    - name: z1
+      type: float
+      intValue: 0
+      floatValue: 6.4
+      boolValue: 0
+      arrayValue: []
     Script:
-    - Name: 
+    - Name: Rule 1
       When: []
       Do:
       - NavigateTo(this.speed,this.x,this.y,this.zTarget)
-      groupId: 
-    - Name: 
+      groupId: g5075af8b
+    - Name: Rule 2
       When:
       - Compare(this.z>=this.z1)
       Do:
       - Edit(this.zTarget,this.z0)
-      groupId: 
-    - Name: 
+      groupId: g5075af8b
+    - Name: Rule 3
       When:
       - Compare(this.z<=this.z0)
       Do:
       - Edit(this.zTarget,this.z1)
-      groupId: 
-    Components: []
+      groupId: g5075af8b
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g5075af8b
   - ActorName: Ghost2
     Active: 1
     PrefabName: Ghost
