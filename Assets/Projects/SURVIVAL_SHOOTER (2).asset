@@ -1946,3 +1946,53 @@ MonoBehaviour:
       - LoadScene()
       groupId: 
     Components: []
+  - ActorName: NewActor
+    Active: 1
+    PrefabName: Empty
+    Tag: Untagged
+    IconColorHex: 
+    Position: []
+    Rotation: []
+    Scale: []
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
+    Properties: []
+    CustomProperties: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Compare(this.y == 0) OR Check(Hellephant.Active) AND Collision(ZomBunny)
+        AND Keyboard(Space,press) AND Touch(press,true) AND Timer(3.56)
+      Do:
+      - Edit(ZomBunny.damage,50000 + #Score)
+      - Spawn(Player,this,Hellephant.x,HellephantSpawner.y,HellephantSpawner.z,0,0,0)
+      - Animate(Move)
+      - Move(12,1,15,0)
+      - MoveTo(0,0,Player.y,0)
+      - NavigateTo(0,Environment.x,ZomBear.y,0)
+      - LoadScene()
+      - QuitGame()
+      - PlaySound(PlayerGunShot)
+      - PlayParticles(ShellExplosion)
+      - Delete()
+      - Rotate(50,1,0,1)
+      - RotateTo(0,0,#MouseWorld.y,0,this.x,this.y,this.z)
+      - Push(2,87564.2,54789.46,0)
+      - PushTo(5,0,65223.89,0)
+      - Torque(85,0,0)
+      groupId: g59147f92
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g59147f92

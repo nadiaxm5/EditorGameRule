@@ -74,6 +74,7 @@ namespace GameRuleEditor.Windows
         private bool boolOnly = false;
 
         private System.Type resourceType = null; // [New] Filter for resources
+        private bool includeAllResourceAssets;
         private bool prefabMode = false;
         private bool includeActorPrefabs = false;
         private PrefabSource selectedPrefabSource = PrefabSource.ActorPrefabs;
@@ -116,6 +117,7 @@ namespace GameRuleEditor.Windows
             win.onPick = callback;
             win.boolOnly = onlyBooleans;
             win.resourceType = resourceFilter;
+            win.includeAllResourceAssets = false;
             win.prefabMode = false;
             win.prefabSearch = string.Empty;
             win.minSize = new Vector2(500, 300);
@@ -133,6 +135,7 @@ namespace GameRuleEditor.Windows
             win.onPick = callback;
             win.boolOnly = false;
             win.resourceType = null;
+            win.includeAllResourceAssets = false;
             win.prefabMode = true;
             win.includeActorPrefabs = includeActorPrefabs;
             win.selectedPrefabSource = includeActorPrefabs
@@ -149,13 +152,15 @@ namespace GameRuleEditor.Windows
 
         public static void ShowResource(EditorContext ctx, System.Action<string> callback,
                                         System.Type resourceFilter, string windowTitle,
-                                        string allResourcesLabel, Rect? anchorScreenRect = null)
+                                        string allResourcesLabel, Rect? anchorScreenRect = null,
+                                        bool includeAllAssets = false)
         {
             var win = GetWindow<PropertyPickerDialog>(true, windowTitle, true);
             win.context = ctx;
             win.onPick = callback;
             win.boolOnly = false;
             win.resourceType = resourceFilter;
+            win.includeAllResourceAssets = includeAllAssets;
             win.prefabMode = false;
             win.resourceTabLabel = allResourcesLabel;
             win.resourceSearch = string.Empty;
@@ -390,13 +395,18 @@ namespace GameRuleEditor.Windows
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
             scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
 
-            var assets = Resources.LoadAll("", resourceType)
+            var source = includeAllResourceAssets
+                ? AssetDatabase.FindAssets("t:" + resourceType.Name)
+                    .Select(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), resourceType))
+                    .Where(asset => asset != null)
+                : Resources.LoadAll("", resourceType);
+            var assets = source
                 .OrderBy(asset => asset.name, System.StringComparer.OrdinalIgnoreCase)
                 .Where(asset => MatchesSearch(resourceSearch, asset.name))
                 .Select(asset => new PreviewGridItem
                 {
                     Label = asset.name,
-                    Result = asset.name,
+                    Result = includeAllResourceAssets ? AssetDatabase.GetAssetPath(asset) : asset.name,
                     SecondaryName = resourceType.Name,
                     PreviewObject = asset
                 })

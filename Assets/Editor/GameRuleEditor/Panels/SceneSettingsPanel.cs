@@ -5,6 +5,7 @@ using UnityEditor.UIElements;
 using System.Collections.Generic;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
+using GameRuleEditor.Windows;
 
 namespace GameRuleEditor.Panels
 {
@@ -216,6 +217,22 @@ namespace GameRuleEditor.Panels
                 allowSceneObjects = false
             };
             soundTrackField.style.marginBottom = 5;
+            var soundTrackSelector = soundTrackField.Q(className: ObjectField.selectorUssClassName);
+            if (soundTrackSelector != null) soundTrackSelector.style.display = DisplayStyle.None;
+            soundTrackField.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 0) return;
+                evt.StopImmediatePropagation();
+                PropertyPickerDialog.ShowResource(context, reference =>
+                {
+                    soundTrackField.value = SoundTrackUtility.Resolve(reference);
+                }, typeof(AudioClip), "Pick Sound", "All Sounds",
+                    PropertyPickerDialog.GetScreenRect(soundTrackField), includeAllAssets: true);
+            }, TrickleDown.TrickleDown);
+            soundTrackField.RegisterCallback<MouseDownEvent>(evt =>
+            {
+                if (evt.button == 0) evt.StopImmediatePropagation();
+            }, TrickleDown.TrickleDown);
             soundTrackField.RegisterValueChangedCallback(evt =>
             {
                 if (context.currentProject == null) return;

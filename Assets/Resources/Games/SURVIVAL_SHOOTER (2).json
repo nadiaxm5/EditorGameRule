@@ -106,17 +106,21 @@
             "Script": [
                 {
                     "Name": "Rule 1",
+                    "When": [
+                        "Compare( < )"
+                    ],
                     "Do": [
                         "RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)",
-                        "Edit(#CameraPosition.x,this.x)",
-                        "Edit(#CameraPosition.z,this.z-this.offsetCam)"
+                        "Edit(this.y,0)",
+                        "Edit(#CameraPosition.z,this.z-this.offsetCam)",
+                        "RotateTo(0,0,0,0,this.x,this.y,this.z)"
                     ],
                     "groupId": "g754e79de"
                 },
                 {
                     "Name": "Rule 2",
                     "When": [
-                        "Keyboard(RightArrow,press)"
+                        "NOT Keyboard(RightArrow,press)"
                     ],
                     "Do": [
                         "Move(this.speed, 0, 90, 0)",
@@ -149,7 +153,7 @@
                 {
                     "Name": "Rule 5",
                     "When": [
-                        "Keyboard(DownArrow,press)"
+                        "Keyboard(DownArrow,press) OR Check()"
                     ],
                     "Do": [
                         "Move(this.speed, 0, 180, 0)",
@@ -163,14 +167,14 @@
                         "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
                     ],
                     "Do": [
-                        "Edit(this.moving,0)"
+                        "Edit(this.moving,)"
                     ],
                     "groupId": "g754e79de"
                 },
                 {
                     "Name": "Rule 7",
                     "When": [
-                        "Collision(Hellephant)"
+                        "NOT Collision(Hellephant)"
                     ],
                     "Do": [
                         "Edit(this.health,this.health-Hellephant.damage)",
@@ -203,7 +207,7 @@
                 {
                     "Name": "Rule 10",
                     "When": [
-                        "Compare(this.health<=0)"
+                        "Compare(this.health <= 0 + this.y)"
                     ],
                     "Do": [
                         "Edit(GameOver.Active,1)",
@@ -216,7 +220,7 @@
                 {
                     "Name": "Rule 11",
                     "When": [
-                        "Compare(this.health==this.lastHealth)"
+                        "Compare(this.health == this.lastHealth + 0)"
                     ],
                     "Do": [
                         "Edit(DamageCanvas.Active,0)"
@@ -287,7 +291,7 @@
                 },
                 {
                     "type": "Rules",
-                    "name": "Rules Set",
+                    "name": "Rule Set",
                     "id": "g754e79de"
                 }
             ]
@@ -401,7 +405,7 @@
                 },
                 {
                     "type": "Rules",
-                    "name": "Rules Set",
+                    "name": "Rule Set",
                     "id": "g3a9190cf"
                 }
             ]
@@ -883,6 +887,52 @@
                         "LoadScene()"
                     ],
                     "groupId": ""
+                }
+            ]
+        },
+        {
+            "ActorName": "NewActor",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Compare(this.y == 0) OR Check(Hellephant.Active) AND Collision(ZomBunny) AND Keyboard(Space,press) AND Touch(press,true) AND Timer(3.56)"
+                    ],
+                    "Do": [
+                        "Edit(ZomBunny.damage,50000 + #Score)",
+                        "Spawn(Player,this,Hellephant.x,HellephantSpawner.y,HellephantSpawner.z,0,0,0)",
+                        "Animate(Move)",
+                        "Move(12,1,15,0)",
+                        "MoveTo(0,0,Player.y,0)",
+                        "NavigateTo(0,Environment.x,ZomBear.y,0)",
+                        "LoadScene()",
+                        "QuitGame()",
+                        "PlaySound(PlayerGunShot)",
+                        "PlayParticles(ShellExplosion)",
+                        "Delete()",
+                        "Rotate(50,1,0,1)",
+                        "RotateTo(0,0,#MouseWorld.y,0,this.x,this.y,this.z)",
+                        "Push(2,87564.2,54789.46,0)",
+                        "PushTo(5,0,65223.89,0)",
+                        "Torque(85,0,0)"
+                    ],
+                    "groupId": "g59147f92"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g59147f92"
                 }
             ]
         }

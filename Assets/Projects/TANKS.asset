@@ -65,6 +65,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script: []
       Components: []
     - ActorName: BlueTank
@@ -105,6 +106,7 @@ MonoBehaviour:
       - offsetZ=1.35
       - maxAim=200
       - currentAim=0
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -199,6 +201,7 @@ MonoBehaviour:
       - offsetZ=1.35
       - maxAim=200
       - currentAim=0
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -282,6 +285,7 @@ MonoBehaviour:
       Properties:
       - speed=15
       - damage=50
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -329,6 +333,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -362,6 +367,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -392,6 +398,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -423,6 +430,7 @@ MonoBehaviour:
       OverrideDrag: 0
       Properties:
       - offsetY=0.05
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -454,6 +462,7 @@ MonoBehaviour:
       OverrideDrag: 0
       Properties:
       - offsetY=0.05
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -484,6 +493,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -511,6 +521,7 @@ MonoBehaviour:
       OverrideBounciness: 0
       OverrideDrag: 0
       Properties: []
+      CustomProperties: []
       Script:
       - Name: 
         When:
@@ -541,6 +552,7 @@ MonoBehaviour:
       - despX=15
       - offsetY=15
       - offsetZ=10
+      CustomProperties: []
       Script:
       - Name: 
         When: []
@@ -571,6 +583,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script: []
     Components: []
   - ActorName: BlueTank
@@ -614,6 +627,7 @@ MonoBehaviour:
     - offsetZ=1.35
     - maxAim=200
     - currentAim=0
+    CustomProperties: []
     Script:
     - Name: Rule 1
       When:
@@ -714,6 +728,7 @@ MonoBehaviour:
     - offsetZ=1.35
     - maxAim=200
     - currentAim=0
+    CustomProperties: []
     Script:
     - Name: 
       When:
@@ -797,6 +812,7 @@ MonoBehaviour:
     Properties:
     - speed=15
     - damage=50
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -844,6 +860,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -877,6 +894,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -907,6 +925,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -938,6 +957,7 @@ MonoBehaviour:
     OverrideDrag: 0
     Properties:
     - offsetY=0.05
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -969,6 +989,7 @@ MonoBehaviour:
     OverrideDrag: 0
     Properties:
     - offsetY=0.05
+    CustomProperties: []
     Script:
     - Name: 
       When: []
@@ -999,6 +1020,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When:
@@ -1026,6 +1048,7 @@ MonoBehaviour:
     OverrideBounciness: 0
     OverrideDrag: 0
     Properties: []
+    CustomProperties: []
     Script:
     - Name: 
       When:
@@ -1056,6 +1079,7 @@ MonoBehaviour:
     - despX=15
     - offsetY=15
     - offsetZ=10
+    CustomProperties: []
     Script:
     - Name: 
       When: []

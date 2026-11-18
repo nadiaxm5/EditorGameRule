@@ -34,14 +34,48 @@
             "Drag": 0.20000000298023225,
             "OverrideFriction": true,
             "OverrideDrag": true,
-            "Properties": [
-                "speed=10",
-                "angularSpeed=90",
-                "health=100",
-                "offsetY=1.7",
-                "offsetZ=1.35",
-                "maxAim=200",
-                "currentAim=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "angularSpeed",
+                    "type": "float",
+                    "floatValue": 90.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 1.7000000476837159,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 1.350000023841858,
+                    "boolValue": false
+                },
+                {
+                    "name": "maxAim",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "currentAim",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -164,14 +198,48 @@
             "Rotation": [0.0, 0.0, 0.0],
             "Friction": 0.6000000238418579,
             "Drag": 0.20000000298023225,
-            "Properties": [
-                "speed=10",
-                "angularSpeed=90",
-                "health=100",
-                "offsetY=1.7",
-                "offsetZ=1.35",
-                "maxAim=200",
-                "currentAim=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "angularSpeed",
+                    "type": "float",
+                    "floatValue": 90.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 1.7000000476837159,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 1.350000023841858,
+                    "boolValue": false
+                },
+                {
+                    "name": "maxAim",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "currentAim",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -278,9 +346,19 @@
             "PrefabName": "Shell",
             "Tag": "Shell",
             "IconColorHex": "",
-            "Properties": [
-                "speed=15",
-                "damage=50"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 50.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -398,8 +476,13 @@
             "PrefabName": "RedHealth",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "offsetY=0.05"
+            "CustomProperties": [
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.05000000074505806,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -421,8 +504,13 @@
             "PrefabName": "BlueHealth",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "offsetY=0.05"
+            "CustomProperties": [
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.05000000074505806,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -482,10 +570,25 @@
             "PrefabName": "CameraManager",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "despX=15",
-                "offsetY=15",
-                "offsetZ=10"
+            "CustomProperties": [
+                {
+                    "name": "despX",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
