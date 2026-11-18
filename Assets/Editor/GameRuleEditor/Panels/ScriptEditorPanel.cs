@@ -603,7 +603,6 @@ namespace GameRuleEditor.Panels
 
         private (string Name, string Details) Summarize(string source)
         {
-            bool negated = RuleConditionSequence.IsNegated(source);
             var parsed = GameRuleParser.ParseFunction(RuleConditionSequence.WithoutNot(source));
             string details;
             if (parsed.Name == "Spawn")
@@ -664,7 +663,7 @@ namespace GameRuleEditor.Panels
             }
             details = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, details);
             if (details.Length > 54) details = details.Substring(0, 51) + "…";
-            return ((negated ? "NOT " : string.Empty) + parsed.Name, details);
+            return (parsed.Name, details);
         }
 
         private static string SummarizeAxisValues(string actionName, List<string> parameters,

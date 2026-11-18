@@ -191,16 +191,10 @@ namespace GameRuleEditor.Windows
                 context.CloseInspector();
                 RefreshContent();
             });
-            closeBtn.text = "\u2715"; // ✕
+            closeBtn.text = "×";
             closeBtn.tooltip = "Close Inspector";
-            closeBtn.style.width = 24;
-            closeBtn.style.height = 24;
-            closeBtn.style.fontSize = 12;
-            closeBtn.style.backgroundColor = Color.clear;
-            closeBtn.style.borderLeftWidth = 0;
-            closeBtn.style.borderRightWidth = 0;
-            closeBtn.style.borderTopWidth = 0;
-            closeBtn.style.borderBottomWidth = 0;
+            closeBtn.AddToClassList("button-danger");
+            closeBtn.AddToClassList("button-danger-icon");
             headerContainer.Add(closeBtn);
 
             root.Add(headerContainer);

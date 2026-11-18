@@ -268,16 +268,20 @@ Button:disabled {
     color: rgb(107, 114, 128);
 }
 
-.button-danger-icon {
-    width: 28px;
-    min-width: 28px;
-    height: 26px;
+.button-danger-icon,
+.action-clear-value,
+.compare-remove-term,
+.rules-square-command.button-danger-icon {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    min-height: 22px;
     flex-shrink: 0;
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
-    padding-bottom: 1px;
-    font-size: 18px;
+    padding-bottom: 0;
+    font-size: 16px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
@@ -588,20 +592,10 @@ Button:disabled {
 }
 
 .action-clear-value {
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
     margin-left: 4px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 1px;
-    font-size: 14px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
 }
 
 .action-operation-picker {
@@ -968,20 +962,10 @@ Button:disabled {
 }
 
 .compare-remove-term {
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
     margin-left: 6px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    flex-shrink: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 1px;
-    font-size: 14px;
-    -unity-text-align: middle-center;
 }
 
 /* ═══════════════════════════════════════════
@@ -2094,14 +2078,6 @@ ToolbarButton:active {
     -unity-text-align: middle-center;
 }
 
-.rules-square-command.button-danger-icon {
-    width: 22px;
-    min-width: 22px;
-    font-size: 16px;
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
 .rule-add-element,
 .rules-command,
 .rule-summary-name,
@@ -2472,8 +2448,8 @@ TextField.custom-property-name,
     flex-direction: row;
     flex-wrap: wrap;
     margin-left: 20px;
-    /* Reserve the delete button's 28px, its margins, and the type field's right margin. */
-    margin-right: 34px;
+    /* Reserve the delete button's 22px, its margins, and the type field's right margin. */
+    margin-right: 28px;
     margin-top: 2px;
 }
 
@@ -2550,6 +2526,40 @@ TextField.custom-property-name,
 .gamerule-light .detail-parameter-value .action-number-degree-suffix,
 .gamerule-light .detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
     color: rgb(121, 88, 18);
+}
+
+
+
+
+/* Common spacing for actor and scene settings. */
+.settings-panel-content {
+    padding-right: 8px;
+}
+
+.settings-section-content {
+    padding-right: 10px;
+}
+
+.settings-parameter-label {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    flex-shrink: 0;
+    margin-left: 0;
+    margin-right: 4px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.settings-parameter-value {
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.settings-parameter-value > .unity-base-field__input,
+.settings-parameter-value .unity-composite-field__field-group {
+    margin-right: 0;
 }
 
 

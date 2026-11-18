@@ -109,6 +109,7 @@ namespace GameRuleEditor.Panels
             Add(mainContainer);
 
             var scrollView = new ScrollView();
+            scrollView.contentContainer.AddToClassList("settings-panel-content");
             mainContainer.Add(scrollView);
 
             actorPropertiesTitle = new Label();
@@ -164,7 +165,11 @@ namespace GameRuleEditor.Panels
 
             // ─── Prefab ───
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
-            prefabRow.Add(new Label("Prefab") { style = { width = 40, unityTextAlign = TextAnchor.MiddleCenter } });
+            var prefabLabel = new Label("Prefab")
+            {
+                style = { width = 40, flexShrink = 0, marginLeft = 0, marginRight = 0, unityTextAlign = TextAnchor.MiddleCenter }
+            };
+            prefabRow.Add(prefabLabel);
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1, minWidth = 0 } };
             prefabPicker.tooltip = "Only prefabs inside " + PrefabsFolder;
 
@@ -200,9 +205,29 @@ namespace GameRuleEditor.Panels
             prefabPicker.RegisterCallback<DragPerformEvent>(OnPrefabPickerDragPerform, TrickleDown.TrickleDown);
             prefabRow.Add(prefabPicker);
 
-            // Tag controls occupy 140 px and the actor-name field has a 10 px right margin.
-            // Reserving both makes the two editable fields end at exactly the same position.
-            prefabRow.Add(new VisualElement { style = { width = 150, flexShrink = 0 } });
+            prefabPicker.style.flexGrow = 0;
+            prefabPicker.style.flexShrink = 0;
+            prefabPicker.style.marginLeft = 0;
+            prefabPicker.style.marginRight = 0;
+            var prefabInput = prefabPicker.Q(className: BaseField<UnityEngine.Object>.inputUssClassName);
+            if (prefabInput != null)
+            {
+                prefabInput.style.marginLeft = 0;
+                prefabInput.style.marginRight = 0;
+            }
+
+            void AlignPrefabField()
+            {
+                var nameInput = actorNameField.Q(className: BaseField<string>.inputUssClassName);
+                if (nameInput == null || nameInput.worldBound.width <= 0) return;
+                float left = prefabRow.WorldToLocal(nameInput.worldBound.position).x;
+                prefabLabel.style.width = Mathf.Max(0, left - prefabRow.resolvedStyle.paddingLeft);
+                prefabPicker.style.width = nameInput.worldBound.width;
+            }
+
+            actorNameField.RegisterCallback<GeometryChangedEvent>(_ => AlignPrefabField());
+            prefabRow.RegisterCallback<GeometryChangedEvent>(_ => AlignPrefabField());
+            prefabRow.Add(new VisualElement { style = { flexGrow = 1 } });
             scrollView.Add(prefabRow);
 
             // ─── Transform (always-on) ───
@@ -217,6 +242,7 @@ namespace GameRuleEditor.Panels
             scrollView.Add(transformSection);
 
             var transformContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            transformContainer.AddToClassList("settings-section-content");
             transformSection.Add(transformContainer);
 
             CreateOverrideableVector3(transformContainer, "Position", "Position");
@@ -235,6 +261,7 @@ namespace GameRuleEditor.Panels
             scrollView.Add(physicsSection);
 
             var physicsContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            physicsContainer.AddToClassList("settings-section-content");
             physicsSection.Add(physicsContainer);
 
             velocityField = CreatePhysicsVector3(physicsContainer, "Velocity", "Velocity");
@@ -977,10 +1004,12 @@ namespace GameRuleEditor.Panels
         private void CreateOverrideableVector3(VisualElement parent, string labelText, string propertyKey)
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
-            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } };
+            var label = new Label(labelText);
+            label.AddToClassList("settings-parameter-label");
             row.Add(label);
 
             var field = new Vector3Field { style = { flexGrow = 1 } };
+            field.AddToClassList("settings-parameter-value");
             field.RegisterRoundedChange(valueFromField =>
             {
                 if (context.selectedActorIndex < 0) return;
@@ -1024,10 +1053,12 @@ namespace GameRuleEditor.Panels
         private Vector3Field CreatePhysicsVector3(VisualElement parent, string labelText, string propertyKey)
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
-            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } };
+            var label = new Label(labelText);
+            label.AddToClassList("settings-parameter-label");
             row.Add(label);
 
             var field = new Vector3Field { style = { flexGrow = 1 } };
+            field.AddToClassList("settings-parameter-value");
             field.RegisterRoundedChange(valueFromField =>
             {
                 ActorJson actor = context.SelectedActor;
@@ -1053,10 +1084,12 @@ namespace GameRuleEditor.Panels
         private FloatField CreatePhysicsFloat(VisualElement parent, string labelText, string propertyKey)
         {
             var row = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 2 } };
-            var label = new Label(labelText) { style = { minWidth = 140, unityFontStyleAndWeight = FontStyle.Normal } };
+            var label = new Label(labelText);
+            label.AddToClassList("settings-parameter-label");
             row.Add(label);
 
             var field = new FloatField { style = { flexGrow = 1 } };
+            field.AddToClassList("settings-parameter-value");
             field.RegisterRoundedChange(valueFromField =>
             {
                 ActorJson actor = context.SelectedActor;

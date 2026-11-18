@@ -67,6 +67,7 @@ namespace GameRuleEditor.Panels
         private void CreateUI()
         {
             var scrollView = new ScrollView();
+            scrollView.contentContainer.AddToClassList("settings-panel-content");
             scrollView.style.flexGrow = 1;
 
             // Header
@@ -208,7 +209,7 @@ namespace GameRuleEditor.Panels
             var audioSection = CreateSection("Audio");
             scrollView.Add(audioSection);
 
-            soundTrackField = new ObjectField("Soundtrack:")
+            soundTrackField = new ObjectField()
             {
                 objectType = typeof(AudioClip),
                 allowSceneObjects = false
@@ -225,7 +226,7 @@ namespace GameRuleEditor.Panels
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
-            audioSection.Add(soundTrackField);
+            AddFieldRow(audioSection, "Soundtrack:", soundTrackField);
 
             var customVarSection = CreateSection("Custom Global Variables", insetContent: false);
             customVariables = new CustomPropertyList(
@@ -246,6 +247,7 @@ namespace GameRuleEditor.Panels
             GameRuleTheme.StylePropertySection(section);
             if (insetContent)
             {
+                section.contentContainer.AddToClassList("settings-section-content");
                 section.contentContainer.style.paddingLeft = 15;
                 section.contentContainer.style.marginTop = 5;
                 section.contentContainer.style.marginBottom = 8;
@@ -253,20 +255,23 @@ namespace GameRuleEditor.Panels
             return section;
         }
 
-        private static void AddFieldRow(VisualElement parent, string label, VisualElement field, int labelWidth = 150)
+        private static void AddFieldRow(VisualElement parent, string label, VisualElement field)
         {
             var row = new VisualElement();
             row.style.flexDirection = FlexDirection.Row;
             row.style.alignItems = Align.Center;
             row.style.marginBottom = 5;
-            row.Add(new Label(label) { style = { minWidth = labelWidth } });
+            var labelElement = new Label(label);
+            labelElement.AddToClassList("settings-parameter-label");
+            row.Add(labelElement);
+            field.AddToClassList("settings-parameter-value");
             field.style.flexGrow = 1;
             field.style.minWidth = 0;
             row.Add(field);
             parent.Add(row);
         }
 
-        private TextField CreateTextField(VisualElement parent, string label, int labelWidth = 150)
+        private TextField CreateTextField(VisualElement parent, string label)
         {
             var field = new TextField();
             field.style.backgroundColor = Color.clear;
@@ -278,7 +283,7 @@ namespace GameRuleEditor.Panels
             field.style.paddingBottom = 0;
             field.style.paddingLeft = 0;
             field.style.paddingRight = 0;
-            AddFieldRow(parent, label, field, labelWidth);
+            AddFieldRow(parent, label, field);
             return field;
         }
 

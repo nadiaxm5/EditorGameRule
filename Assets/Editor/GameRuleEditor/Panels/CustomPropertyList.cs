@@ -31,6 +31,7 @@ namespace GameRuleEditor.Panels
             this.getProperties = getProperties;
             this.onChanged = onChanged;
             this.addButtonText = addButtonText;
+            AddToClassList("settings-section-content");
             style.paddingLeft = 15;
             style.marginTop = 5;
             style.marginBottom = 8;
