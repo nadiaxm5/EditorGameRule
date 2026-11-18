@@ -113,6 +113,7 @@ namespace GameRuleEditor.Windows
             var leftGroup = new VisualElement();
             leftGroup.style.flexDirection = FlexDirection.Row;
             leftGroup.style.alignItems = Align.Center;
+            leftGroup.style.flexShrink = 0;
 
             var projectMenu = new ToolbarMenu();
             projectMenu.text = "Project Actions";
@@ -128,6 +129,7 @@ namespace GameRuleEditor.Windows
             middleGroup.style.alignItems = Align.Center;
             middleGroup.style.justifyContent = Justify.Center;
             middleGroup.style.flexGrow = 1;
+            middleGroup.style.flexShrink = 0;
 
             var rightSpacer = new VisualElement();
             rightSpacer.style.flexShrink = 0;
@@ -185,12 +187,28 @@ namespace GameRuleEditor.Windows
             toolbar.Add(middleGroup);
             toolbar.Add(rightSpacer);
 
-            leftGroup.RegisterCallback<GeometryChangedEvent>(_ =>
+            void UpdateToolbarSpacing()
             {
-                rightSpacer.style.width = leftGroup.resolvedStyle.width;
-            });
+                float groupWidth = leftGroup.resolvedStyle.width;
+                float actionsWidth = 0;
+                foreach (var child in middleGroup.Children())
+                    actionsWidth += child.layout.width + child.resolvedStyle.marginLeft + child.resolvedStyle.marginRight;
+                float availableWidth = root.resolvedStyle.width;
+                rightSpacer.style.width = availableWidth > groupWidth * 2 + actionsWidth + 8
+                    ? groupWidth : 0;
+                toolbar.style.minWidth = groupWidth + actionsWidth + 8;
+            }
 
-            root.Add(toolbar);
+            var scroll = new ScrollView(ScrollViewMode.Horizontal);
+            scroll.style.flexGrow = 1;
+            scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            scroll.contentContainer.style.flexGrow = 1;
+            scroll.Add(toolbar);
+            leftGroup.RegisterCallback<GeometryChangedEvent>(_ => UpdateToolbarSpacing());
+            scroll.RegisterCallback<GeometryChangedEvent>(_ => UpdateToolbarSpacing());
+            middleGroup.RegisterCallback<GeometryChangedEvent>(_ => UpdateToolbarSpacing());
+            root.Add(scroll);
         }
 
         private void Rebuild()

@@ -67,6 +67,7 @@ namespace GameRuleEditor.Panels
         private void CreateUI()
         {
             var scrollView = new ScrollView();
+            GameRuleTheme.ConfigureAdaptiveScroll(scrollView);
             scrollView.contentContainer.AddToClassList("settings-panel-content");
             scrollView.style.flexGrow = 1;
 

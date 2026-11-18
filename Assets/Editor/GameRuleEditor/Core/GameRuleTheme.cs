@@ -55,6 +55,11 @@ namespace GameRuleEditor.Core
             {
                 state = new ThemeState();
                 root.userData = state;
+                root.RegisterCallback<GeometryChangedEvent>(evt =>
+                {
+                    root.EnableInClassList("gamerule-compact", evt.newRect.width < 420f);
+                    root.EnableInClassList("gamerule-narrow", evt.newRect.width < 300f);
+                });
                 // The root survives Clear(), so this check is installed only once per window.
                 root.schedule.Execute(() =>
                 {
@@ -66,6 +71,72 @@ namespace GameRuleEditor.Core
 
             state.ProSkin = EditorGUIUtility.isProSkin;
             state.Rebuild = rebuild;
+            root.EnableInClassList("gamerule-compact", root.resolvedStyle.width < 420f);
+            root.EnableInClassList("gamerule-narrow", root.resolvedStyle.width < 300f);
+        }
+
+        /// <summary>Wrap first; scroll horizontally only below the content's readable minimum.</summary>
+        public static void ConfigureAdaptiveScroll(ScrollView scroll)
+        {
+            scroll.mode = ScrollViewMode.VerticalAndHorizontal;
+            scroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            scroll.verticalScrollerVisibility = ScrollerVisibility.Auto;
+            var content = scroll.contentContainer;
+            content.style.flexShrink = 0;
+
+            void UpdateWidth()
+            {
+                if (scroll.panel == null || scroll.contentViewport.layout.width <= 0) return;
+                float viewportWidth = scroll.contentViewport.layout.width;
+                float minimum = ReadableMinimumWidth(content);
+                float scale = EditorGUIUtility.pixelsPerPoint;
+                float width = minimum <= viewportWidth + 0.5f ? viewportWidth
+                    : Mathf.Ceil(minimum * scale) / scale;
+                if (Mathf.Abs(content.layout.width - width) > 0.1f)
+                    content.style.width = width;
+            }
+
+            scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => UpdateWidth());
+            // Also cover changing a value/type without changing the containing row's geometry.
+            content.schedule.Execute(UpdateWidth).Every(250);
+        }
+
+        private static float ReadableMinimumWidth(VisualElement element)
+        {
+            var style = element.resolvedStyle;
+            if (style.display == DisplayStyle.None || style.position == Position.Absolute) return 0;
+
+            float inner = 0;
+            if (element.childCount == 0 && !(element is TextElement)
+                && (element is Image || style.flexShrink == 0))
+                inner = Mathf.Max(0, element.layout.width - style.paddingLeft - style.paddingRight
+                    - style.borderLeftWidth - style.borderRightWidth);
+            if (element is TextElement text && !string.IsNullOrEmpty(text.text))
+            {
+                if (style.whiteSpace == WhiteSpace.Normal)
+                {
+                    foreach (string word in text.text.Split(new[] { ' ', '\t', '\r', '\n' },
+                                 System.StringSplitOptions.RemoveEmptyEntries))
+                        inner = Mathf.Max(inner, text.MeasureTextSize(word, 0,
+                            VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x);
+                }
+                else
+                    inner = text.MeasureTextSize(text.text, 0, VisualElement.MeasureMode.Undefined,
+                        0, VisualElement.MeasureMode.Undefined).x;
+            }
+
+            float children = 0;
+            bool unbrokenRow = style.flexDirection == FlexDirection.Row && style.flexWrap == Wrap.NoWrap;
+            foreach (var child in element.Children())
+            {
+                float childWidth = ReadableMinimumWidth(child);
+                children = unbrokenRow ? children + childWidth : Mathf.Max(children, childWidth);
+            }
+            inner = Mathf.Max(inner, children) + style.paddingLeft + style.paddingRight
+                + style.borderLeftWidth + style.borderRightWidth;
+            if (style.minWidth.keyword == StyleKeyword.Undefined)
+                inner = Mathf.Max(inner, style.minWidth.value);
+            return inner + style.marginLeft + style.marginRight;
         }
     }
 }

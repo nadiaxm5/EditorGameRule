@@ -296,7 +296,7 @@ namespace GameRuleEditor.Windows
             // 2. Standard Property Mode
             const float outerPadding = 8f;
             const float columnGap = 6f;
-            float availableWidth = Mathf.Max(450f, position.width - (outerPadding * 2f) - (columnGap * 2f));
+            float availableWidth = Mathf.Max(0f, position.width - (outerPadding * 2f) - (columnGap * 2f));
             float columnWidth = availableWidth / 3f;
 
             GUILayout.Space(outerPadding);
@@ -367,6 +367,14 @@ namespace GameRuleEditor.Windows
                 new GUIContent(resourceTabLabel)).x + 18f, 96f, 140f);
             DrawYellowTabButton(resourceTabLabel, true, tabWidth);
 
+            if (position.width < 420f)
+            {
+                GUILayout.Space(outerPadding);
+                EditorGUILayout.EndHorizontal();
+                GUILayout.Space(4f);
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(outerPadding);
+            }
             GUILayout.FlexibleSpace();
             float searchWidth = Mathf.Clamp(position.width * 0.32f, 115f, 210f);
             GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.textField;
@@ -433,6 +441,14 @@ namespace GameRuleEditor.Windows
                 scrollCategory = Vector2.zero;
             }
 
+            if (position.width < 420f)
+            {
+                GUILayout.Space(outerPadding);
+                EditorGUILayout.EndHorizontal();
+                GUILayout.Space(4f);
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(outerPadding);
+            }
             GUILayout.FlexibleSpace();
             float searchWidth = Mathf.Clamp(position.width * 0.32f, 115f, 210f);
             GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSearchTextField") ?? EditorStyles.textField;

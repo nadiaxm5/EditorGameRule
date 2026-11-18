@@ -109,6 +109,7 @@ namespace GameRuleEditor.Panels
             Add(mainContainer);
 
             var scrollView = new ScrollView();
+            GameRuleTheme.ConfigureAdaptiveScroll(scrollView);
             scrollView.contentContainer.AddToClassList("settings-panel-content");
             mainContainer.Add(scrollView);
 
@@ -118,8 +119,10 @@ namespace GameRuleEditor.Panels
 
             // ─── Top Row ───
             var topRow = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginBottom = 10, paddingLeft = 4 } };
+            topRow.style.flexWrap = Wrap.Wrap;
 
             var iconContainer = new VisualElement { style = { width = 24, height = 24, marginRight = 5 } };
+            iconContainer.style.flexShrink = 0;
             var iconImage = new Image { image = EditorGUIUtility.IconContent("Prefab Icon").image, style = { width = 20, height = 20, alignSelf = Align.Center, marginTop = 2 } };
             iconImage.name = "PrefabColorImage";
             iconContainer.Add(iconImage);
@@ -143,18 +146,22 @@ namespace GameRuleEditor.Panels
             activeToggle = new Toggle();
             activeToggle.tooltip = "Active";
             activeToggle.style.marginRight = 5;
+            activeToggle.style.flexShrink = 0;
             activeToggle.RegisterValueChangedCallback(OnActiveToggleValueChanged);
             topRow.Add(activeToggle);
 
             actorNameField = new TextField();
             actorNameField.AddToClassList("actor-properties-name");
             actorNameField.style.flexGrow = 1;
+            actorNameField.style.flexBasis = 100;
+            actorNameField.style.minWidth = 70;
             actorNameField.style.marginRight = 10;
             actorNameField.RegisterValueChangedCallback(OnActorNameFieldValueChanged);
             actorNameField.RegisterCallback<FocusOutEvent>(OnActorNameFieldFocusOut);
             topRow.Add(actorNameField);
 
             var tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
+            tagContainer.style.flexShrink = 0;
             tagContainer.Add(new Label("Tag") { style = { width = 20, unityTextAlign = TextAnchor.MiddleCenter } });
             tagField = new DropdownField();
             tagField.style.width = 120;
@@ -226,6 +233,7 @@ namespace GameRuleEditor.Panels
             }
 
             actorNameField.RegisterCallback<GeometryChangedEvent>(_ => AlignPrefabField());
+            topRow.RegisterCallback<GeometryChangedEvent>(_ => AlignPrefabField());
             prefabRow.RegisterCallback<GeometryChangedEvent>(_ => AlignPrefabField());
             prefabRow.Add(new VisualElement { style = { flexGrow = 1 } });
             scrollView.Add(prefabRow);
@@ -525,6 +533,8 @@ namespace GameRuleEditor.Panels
             toggle.text = "";
             var toggleInput = toggle.Q(className: Toggle.inputUssClassName);
             if (toggleInput == null) return foldout;
+            toggleInput.style.minWidth = 0;
+            toggleInput.style.flexGrow = 1;
 
             // Hide default text element
             var toggleText = toggleInput.Q(className: Toggle.textUssClassName);
@@ -556,6 +566,7 @@ namespace GameRuleEditor.Panels
             {
                 var nameField = new TextField { value = comp.name };
                 nameField.style.flexGrow = 1;
+                nameField.style.minWidth = 0;
                 nameField.style.marginLeft = 0;
                 nameField.style.marginRight = 4;
                 nameField.style.unityFontStyleAndWeight = FontStyle.Bold;

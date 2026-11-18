@@ -20,6 +20,7 @@ namespace GameRuleEditor.Windows
         private ProjectController controller;
 
         private VisualElement actorListContainer;
+        private ScrollView actorScrollView;
         private List<VisualElement> actorItems = new List<VisualElement>();
         private Label actorCountLabel;
 
@@ -184,13 +185,15 @@ namespace GameRuleEditor.Windows
         private void BuildHeader(VisualElement root)
         {
             var header = new VisualElement();
-            header.style.height = 30;
+            header.style.minHeight = 30;
+            header.style.flexShrink = 0;
             header.style.backgroundColor = GameRuleTheme.InsetSurface;
             header.style.borderBottomWidth = 1;
             header.style.borderBottomColor = GameRuleTheme.Border;
             header.style.justifyContent = Justify.Center;
             header.style.paddingLeft = 8;
             header.style.flexDirection = FlexDirection.Row;
+            header.style.flexWrap = Wrap.Wrap;
             header.style.alignItems = Align.Center;
 
             var projectMenu = new ToolbarMenu();
@@ -242,11 +245,15 @@ namespace GameRuleEditor.Windows
         // ── Content (actor list) ────────
         private void BuildContent(VisualElement root)
         {
-            var scrollView = new ScrollView();
+            var scrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+            actorScrollView = scrollView;
             scrollView.style.flexGrow = 1;
             scrollView.style.backgroundColor = GameRuleTheme.Background;
+            scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            scrollView.contentContainer.style.flexGrow = 1;
 
             actorListContainer = new VisualElement();
+            actorListContainer.style.flexShrink = 0;
             actorListContainer.style.paddingTop = 4;
             actorListContainer.style.paddingBottom = 4;
             actorListContainer.style.paddingLeft = 4;
@@ -254,6 +261,7 @@ namespace GameRuleEditor.Windows
             scrollView.Add(actorListContainer);
 
             root.Add(scrollView);
+            scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => UpdateActorListWidth());
 
             RefreshList();
         }
@@ -319,6 +327,34 @@ namespace GameRuleEditor.Windows
             if (context.selectedActorIndex >= 0 && context.selectedActorIndex < actorItems.Count)
                 HighlightItem(context.selectedActorIndex);
 
+            actorListContainer.schedule.Execute(UpdateActorListWidth);
+
+        }
+
+        private void UpdateActorListWidth()
+        {
+            if (actorListContainer?.panel == null || actorScrollView == null) return;
+
+            float width = actorScrollView.contentViewport.layout.width;
+            foreach (var row in actorListContainer.Children())
+            {
+                var label = row.Q<Label>(className: "cast-item-name");
+                if (label == null) continue;
+                float textWidth = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined,
+                    0, VisualElement.MeasureMode.Undefined).x;
+                var rowStyle = row.resolvedStyle;
+                var labelStyle = label.resolvedStyle;
+                float rowWidth = textWidth + labelStyle.paddingLeft + labelStyle.paddingRight
+                    + labelStyle.marginLeft + labelStyle.marginRight
+                    + rowStyle.paddingLeft + rowStyle.paddingRight
+                    + rowStyle.marginLeft + rowStyle.marginRight;
+                foreach (var child in row.Children())
+                    if (child != label)
+                        rowWidth += child.layout.width + child.resolvedStyle.marginLeft + child.resolvedStyle.marginRight;
+                width = Mathf.Max(width, Mathf.Ceil(rowWidth
+                    + actorListContainer.resolvedStyle.paddingLeft + actorListContainer.resolvedStyle.paddingRight));
+            }
+            actorListContainer.style.minWidth = width;
         }
 
         private VisualElement CreateProjectRootItem()
@@ -351,12 +387,15 @@ namespace GameRuleEditor.Windows
             icon.image = EditorGUIUtility.IconContent("SceneAsset Icon").image;
             icon.style.width = 16;
             icon.style.height = 16;
+            icon.style.flexShrink = 0;
             icon.style.marginRight = 4;
             icon.tintColor = GameRuleTheme.IconTint;
             item.Add(icon);
 
             var nameLabel = new Label(context?.currentProject?.projectName ?? "No Project");
+            nameLabel.AddToClassList("cast-item-name");
             nameLabel.style.flexGrow = 1;
+            nameLabel.style.flexShrink = 0;
             nameLabel.style.fontSize = 11;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.overflow = Overflow.Hidden;
@@ -398,6 +437,7 @@ namespace GameRuleEditor.Windows
             icon.image = EditorGUIUtility.IconContent("Prefab Icon").image;
             icon.style.width = 16;
             icon.style.height = 16;
+            icon.style.flexShrink = 0;
             icon.style.marginRight = 4;
               
             Color iconColor = GameRuleTheme.PrefabIconTint;
@@ -409,7 +449,9 @@ namespace GameRuleEditor.Windows
             item.Add(icon);
             
             var nameLabel = new Label(actor.ActorName ?? "Unnamed");
+            nameLabel.AddToClassList("cast-item-name");
             nameLabel.style.flexGrow = 1;
+            nameLabel.style.flexShrink = 0;
             nameLabel.style.fontSize = 11;
             nameLabel.style.overflow = Overflow.Hidden;
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;

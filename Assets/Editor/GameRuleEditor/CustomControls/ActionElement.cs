@@ -199,7 +199,9 @@ namespace GameRuleEditor.CustomControls
             foreach (char axis in "XYZ")
             {
                 var item = CompactRuleValue.CreateRow("vector-parameter-axis");
-                item.Add(new Label(axis.ToString()));
+                var axisCaption = new Label(axis.ToString());
+                axisCaption.AddToClassList("detail-parameter-caption");
+                item.Add(axisCaption);
                 var toggle = new RotationAxisToggle(axis, () => OnChanged?.Invoke());
                 item.Add(toggle);
                 int sourceIndex = axes.Count + 1;
@@ -245,7 +247,9 @@ namespace GameRuleEditor.CustomControls
                 parameterBindings.Add(new ParameterBinding(control, index, initial));
 
                 var item = CompactRuleValue.CreateRow("vector-parameter-axis");
-                item.Add(new Label(axis) { tooltip = RuleTooltips.Parameter(selectedActionType, axisLabel) });
+                var axisCaption = new Label(axis) { tooltip = RuleTooltips.Parameter(selectedActionType, axisLabel) };
+                axisCaption.AddToClassList("detail-parameter-caption");
+                item.Add(axisCaption);
                 item.Add(control);
                 if (i == axisCount - 1)
                 {
@@ -291,7 +295,7 @@ namespace GameRuleEditor.CustomControls
             if (detailsMode)
             {
                 container.style.flexDirection = FlexDirection.Row;
-                container.style.alignItems = Align.FlexStart;
+                container.style.alignItems = Align.Center;
                 container.style.minWidth = 0;
                 container.AddToClassList("detail-parameter-row");
             }

@@ -26,6 +26,7 @@ namespace GameRuleEditor.Panels
             style.flexGrow = 1;
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
+            GameRuleTheme.ConfigureAdaptiveScroll(scroll);
             scroll.style.flexGrow = 1;
             scroll.contentViewport.style.height = Length.Percent(100);
             scroll.verticalScrollerVisibility = ScrollerVisibility.Auto;

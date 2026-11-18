@@ -39,6 +39,8 @@ namespace GameRuleEditor.CustomControls
         internal static void AlignLabel(Label label)
         {
             label.AddToClassList("detail-parameter-label");
+            label.AddToClassList("detail-parameter-caption");
+            label.style.fontSize = StyleKeyword.Null;
             label.style.marginRight = StyleKeyword.Null;
             label.style.minWidth = StyleKeyword.Null;
             label.style.unityTextAlign = TextAnchor.MiddleLeft;

@@ -1177,7 +1177,24 @@ PopupField {
 
 .rule-detail-card .detail-parameter-row {
     flex-wrap: nowrap;
-    align-items: flex-start;
+    align-items: center;
+}
+
+.rule-detail-card .detail-parameter-row > .detail-parameter-label {
+    align-self: center;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.detail-parameter-caption {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgb(230, 230, 230);
+    -unity-text-align: middle-left;
+}
+
+.gamerule-light .detail-parameter-caption {
+    color: rgb(35, 35, 35);
 }
 
 .detail-parameter-label {
@@ -2553,6 +2570,7 @@ TextField.custom-property-name,
 
 .settings-parameter-value {
     min-width: 0;
+    flex-shrink: 1;
     margin-left: 0;
     margin-right: 0;
 }
@@ -2560,6 +2578,99 @@ TextField.custom-property-name,
 .settings-parameter-value > .unity-base-field__input,
 .settings-parameter-value .unity-composite-field__field-group {
     margin-right: 0;
+}
+
+/* Adapt settings and detail editors to the space available in their own window. */
+.gamerule-compact .settings-parameter-label {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    white-space: normal;
+}
+
+.settings-parameter-value .unity-composite-field__field-group,
+.settings-parameter-value .unity-composite-field__input {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.settings-parameter-value .unity-composite-field__field {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-basis: 52px;
+    min-width: 52px;
+}
+
+.gamerule-narrow .settings-parameter-label {
+    width: 78px;
+    min-width: 78px;
+    max-width: 78px;
+}
+
+.gamerule-narrow .detail-parameter-label {
+    width: 62px;
+    min-width: 62px;
+    max-width: 62px;
+}
+
+.gamerule-narrow .detail-comparison-operator {
+    margin-left: 70px;
+}
+
+.gamerule-narrow .custom-property-vector-header {
+    flex-wrap: wrap;
+}
+
+.gamerule-narrow .custom-property-name-group {
+    flex-basis: 100%;
+}
+
+.gamerule-narrow .custom-property-controls {
+    margin-left: 20px;
+}
+
+.gamerule-narrow .custom-property-type {
+    width: 76px;
+}
+
+.detail-parameter-value > .compact-expression-line,
+.detail-parameter-value .compact-numeric-operand,
+.detail-parameter-value .compact-expression-term,
+.detail-parameter-value .vector-parameter-axis {
+    flex-wrap: wrap;
+}
+
+.detail-parameter-value .compact-expression-term,
+.detail-parameter-value .vector-parameter-axis {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.gamerule-narrow .rule-summary-name {
+    width: 82px;
+}
+
+.gamerule-narrow .rule-summary-detail {
+    flex-basis: 100%;
+    margin-top: 2px;
+}
+
+.settings-section-content,
+.settings-panel-content,
+.custom-property-row {
+    min-width: 0;
+}
+
+.panel-container,
+.panel-container .unity-scroll-view__content-viewport {
+    min-width: 0;
+}
+
+.gamerule-narrow .panel-section {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 

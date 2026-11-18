@@ -92,6 +92,8 @@ namespace GameRuleEditor.Windows
                         entry.AddToClassList("button-primary");
                         entry.style.unityTextAlign = TextAnchor.MiddleLeft;
                         entry.style.minHeight = 30;
+                        entry.style.whiteSpace = WhiteSpace.Normal;
+                        entry.style.flexShrink = 0;
                         list.Add(entry);
                     }
                     if (list.childCount == 0) list.Add(new Label("No projects found."));

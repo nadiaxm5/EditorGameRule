@@ -101,6 +101,7 @@ namespace GameRuleEditor.Panels
 
             // Script editor container
             var scrollView = new ScrollView();
+            GameRuleTheme.ConfigureAdaptiveScroll(scrollView);
             scrollView.style.flexGrow = 1;
             scrollView.style.display = DisplayStyle.None;
             scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
@@ -116,6 +117,7 @@ namespace GameRuleEditor.Panels
             actorNameLabel = new Label();
             actorNameLabel.AddToClassList("studio-panel-title");
             actorNameLabel.style.flexShrink = 1;
+            KeepWordsWhole(actorNameLabel);
             header.Add(actorNameLabel);
 
             scrollView.Add(header);
@@ -264,8 +266,8 @@ namespace GameRuleEditor.Panels
             titleField.style.flexGrow = 1;
             titleField.style.marginRight = 6;
             titleField.style.marginLeft = 0;
-            titleField.style.minWidth = 120;
-            titleField.style.flexShrink = 0;
+            titleField.style.minWidth = 50;
+            titleField.style.flexShrink = 1;
             titleField.style.unityTextAlign = TextAnchor.MiddleLeft;
 
             if (titleField.labelElement != null)
@@ -578,11 +580,33 @@ namespace GameRuleEditor.Panels
             {
                 var details = new Label(summary.Details);
                 details.AddToClassList("rule-summary-detail");
+                KeepWordsWhole(details);
                 details.pickingMode = PickingMode.Ignore;
                 button.Add(details);
             }
 
             return button;
+        }
+
+        private static void KeepWordsWhole(Label label)
+        {
+            void UpdateMinimumWidth()
+            {
+                float width = 0;
+                foreach (string word in label.text.Split(new[] { ' ', '\t', '\r', '\n' },
+                             System.StringSplitOptions.RemoveEmptyEntries))
+                    width = Mathf.Max(width, label.MeasureTextSize(word, 0,
+                        VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x);
+                float scale = EditorGUIUtility.pixelsPerPoint;
+                var style = label.resolvedStyle;
+                width += style.paddingLeft + style.paddingRight
+                    + style.borderLeftWidth + style.borderRightWidth;
+                // Leave a pixel of room for TextCore's glyph rounding at fractional editor scaling.
+                label.style.minWidth = (Mathf.Ceil(width * scale) + 1f) / scale;
+            }
+
+            label.RegisterCallback<AttachToPanelEvent>(_ => label.schedule.Execute(UpdateMinimumWidth));
+            label.RegisterCallback<GeometryChangedEvent>(_ => UpdateMinimumWidth());
         }
 
         private void MarkSelected(VisualElement element, int ruleIndex, RuleElementKind kind, int index)

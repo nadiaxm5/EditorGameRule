@@ -17,6 +17,7 @@ namespace GameRuleEditor.Windows
     {
         private const string CONTEXT_FOLDER = "Assets/Editor/GameRuleEditor/Projects";
         private const string CONTEXT_PATH = CONTEXT_FOLDER + "/EditorContext.asset";
+        private const string STUDIO_LAYOUT_PATH = "Assets/Editor/GameRuleEditor/UI/Layouts/GameRuleStudio.wlt";
 
         /// <summary>
         /// The single shared ProjectController. Both windows must use this same instance.
@@ -54,6 +55,7 @@ namespace GameRuleEditor.Windows
         {
             var context = EnsureEditorContext();
             var controller = GetOrCreateController(context);
+            bool restoredLayout = TryLoadStudioLayout();
 
            /* // 0. Open Toolbar window (docked top preferably)
             var toolbarWindow = EditorWindow.GetWindow<GameRuleToolbarWindow>("Tools", false);
@@ -64,7 +66,7 @@ namespace GameRuleEditor.Windows
             // 1. Open Hierarchy window (docked next to Unity's Hierarchy)
             var hierarchyWindow = EditorWindow.GetWindow<GameRuleHierarchyWindow>(
                 "Cast", false, typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow"));
-            hierarchyWindow.minSize = new Vector2(256, 300);
+            hierarchyWindow.minSize = new Vector2(176, 300);
             hierarchyWindow.Init(context, controller);
 
             // 2. Open Inspector window (docked next to Unity's Inspector), 
@@ -86,22 +88,43 @@ namespace GameRuleEditor.Windows
             detailsWin.minSize = new Vector2(320, 300);
             detailsWin.Init(context, controller);
 
-            // Unity's public GetWindow API only creates tabs. Split the existing horizontal
-            // dock group so Rule Details remains visible between Rules and Properties.
-            TryArrangeStudioDocks(hierarchyWindow, rulesWin, detailsWin, propsWin);
-            // Unity may still be attaching a freshly created DockArea on the first
-            // delayCall. A second idempotent pass handles that first-open case.
-            EditorApplication.delayCall += () =>
+            // Compatibility fallback if Unity cannot load the bundled layout template.
+            if (!restoredLayout)
             {
                 TryArrangeStudioDocks(hierarchyWindow, rulesWin, detailsWin, propsWin);
-                EditorApplication.delayCall += () => TryArrangeStudioDocks(
-                    hierarchyWindow, rulesWin, detailsWin, propsWin);
-            };
+                // Newly created DockAreas may only be attached on a later editor frame.
+                EditorApplication.delayCall += () =>
+                {
+                    TryArrangeStudioDocks(hierarchyWindow, rulesWin, detailsWin, propsWin);
+                    EditorApplication.delayCall += () => TryArrangeStudioDocks(
+                        hierarchyWindow, rulesWin, detailsWin, propsWin);
+                };
+            }
             
             // If no project loaded, show modal dialog
             if (promptForProject && context.currentProject == null)
             {
                 ShowStartDialog(controller);
+            }
+        }
+
+        private static bool TryLoadStudioLayout()
+        {
+            try
+            {
+                string path = Path.GetFullPath(STUDIO_LAYOUT_PATH);
+                if (!File.Exists(path)) return false;
+                Type layoutType = typeof(EditorWindow).Assembly.GetType("UnityEditor.WindowLayout");
+                MethodInfo load = layoutType?.GetMethod("LoadWindowLayout",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null,
+                    new[] { typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(bool) }, null);
+                // Keep Unity on the current monitor; restore the saved docks, tabs and proportions.
+                return load != null && (bool)load.Invoke(null, new object[] { path, false, false, true, true });
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("GameRule: could not restore the studio layout: " + error.Message);
+                return false;
             }
         }
 
@@ -183,7 +206,7 @@ namespace GameRuleEditor.Windows
                 }
 
                 Rect bounds = (Rect)viewPosition.GetValue(split);
-                float[] fractions = { 0.14f, 0.43f, 0.21f, 0.22f };
+                float[] fractions = { 0.1015625f, 0.38203125f, 0.30390625f, 0.2125f };
                 float x = 0;
                 for (int i = 0; i < desired.Length; i++)
                 {

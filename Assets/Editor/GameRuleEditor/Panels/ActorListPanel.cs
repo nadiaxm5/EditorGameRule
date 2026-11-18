@@ -20,7 +20,7 @@ namespace GameRuleEditor.Panels
             context = editorContext;
             controller = projectController;
 
-            style.minWidth = 250;
+            style.minWidth = 0;
             style.maxWidth = 350;
             style.backgroundColor = GameRuleTheme.RaisedSurface;
             style.borderRightWidth = 1;
@@ -152,12 +152,15 @@ namespace GameRuleEditor.Panels
             content.style.flexGrow = 1;
 
             var nameLabel = new Label(actor.ActorName);
+            nameLabel.style.whiteSpace = WhiteSpace.Normal;
+            nameLabel.style.minWidth = 0;
             nameLabel.style.fontSize = 12;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.marginBottom = 2;
             content.Add(nameLabel);
 
             var prefabLabel = new Label($"Prefab: {actor.PrefabName}");
+            prefabLabel.style.whiteSpace = WhiteSpace.Normal;
             prefabLabel.style.fontSize = 10;
             prefabLabel.AddToClassList("actor-prefab-label");
             content.Add(prefabLabel);
