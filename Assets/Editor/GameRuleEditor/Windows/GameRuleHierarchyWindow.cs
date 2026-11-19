@@ -307,20 +307,9 @@ namespace GameRuleEditor.Windows
             
             var addActorBtn = new Button(OnAddActor);
             addActorBtn.text = "+ Add Actor";
+            addActorBtn.AddToClassList("button-primary");
             addActorBtn.style.marginTop = 10;
             addActorBtn.style.marginBottom = 10;
-            addActorBtn.style.paddingTop = 6;
-            addActorBtn.style.paddingBottom = 6;
-            addActorBtn.style.backgroundColor = GameRuleTheme.Surface;
-            addActorBtn.style.color = GameRuleTheme.AccentText;
-            addActorBtn.style.borderTopWidth = 1;
-            addActorBtn.style.borderBottomWidth = 1;
-            addActorBtn.style.borderLeftWidth = 1;
-            addActorBtn.style.borderRightWidth = 1;
-            addActorBtn.style.borderTopColor = GameRuleTheme.Border;
-            addActorBtn.style.borderBottomColor = GameRuleTheme.Border;
-            addActorBtn.style.borderLeftColor = GameRuleTheme.Border;
-            addActorBtn.style.borderRightColor = GameRuleTheme.Border;
             addActorBtn.style.marginLeft = 20;
             actorListContainer.Add(addActorBtn);
 
@@ -412,7 +401,7 @@ namespace GameRuleEditor.Windows
             item.AddToClassList("actor-list-item");
             item.style.flexDirection = FlexDirection.Row;
             item.style.alignItems = Align.Center;
-            item.style.height = 15;
+            item.style.height = 18;
             item.style.paddingLeft = 24;
             item.style.paddingRight = 4;
             item.style.marginLeft = 2;

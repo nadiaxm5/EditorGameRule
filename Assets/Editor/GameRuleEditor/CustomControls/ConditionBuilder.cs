@@ -342,6 +342,19 @@ namespace GameRuleEditor.CustomControls
             ValueChanged += callback;
         }
 
+        public void UnregisterValueChangedCallback(System.Action<string> callback)
+        {
+            ValueChanged -= callback;
+        }
+
+        public void SetChoices(IEnumerable<TooltipDropdownOption> choices)
+        {
+            CloseMenu();
+            options.Clear();
+            if (choices != null) options.AddRange(choices);
+            UpdatePresentation();
+        }
+
         public void SetValueWithoutNotify(string newValue)
         {
             currentValue = newValue ?? string.Empty;

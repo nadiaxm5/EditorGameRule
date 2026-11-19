@@ -327,6 +327,7 @@ namespace GameRuleEditor.Panels
             ruleFoldout.Add(contentContainer);
 
             var titleField = new TextField();
+            titleField.AddToClassList("studio-rule-name");
             titleField.value = currentName;
             titleField.label = string.Empty;
             titleField.style.fontSize = 13;

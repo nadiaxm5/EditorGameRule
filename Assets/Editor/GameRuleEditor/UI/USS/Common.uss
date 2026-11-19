@@ -1336,6 +1336,8 @@ PopupField {
 
 .actor-list-item {
     background-color: transparent;
+    border-width: 1px;
+    border-color: transparent;
     transition-duration: 0.08s;
 }
 
@@ -2152,6 +2154,7 @@ ToolbarButton:active {
 
 /* Native field inputs, in windows that load this stylesheet. */
 TextField.actor-properties-name > .unity-base-field__input,
+TextField.studio-rule-name > .unity-base-field__input,
 TextField.custom-property-name > .unity-base-field__input,
 TextField.rule-set-name > .unity-base-field__input,
 TextField.settings-parameter-value > .unity-base-field__input,
@@ -2169,6 +2172,7 @@ PopupField > .unity-base-field__input,
 }
 
 .gamerule-light TextField.actor-properties-name > .unity-base-field__input,
+.gamerule-light TextField.studio-rule-name > .unity-base-field__input,
 .gamerule-light TextField.custom-property-name > .unity-base-field__input,
 .gamerule-light TextField.rule-set-name > .unity-base-field__input,
 .gamerule-light TextField.settings-parameter-value > .unity-base-field__input,
@@ -2257,6 +2261,7 @@ PopupField > .unity-base-field__input,
 .numeric-stepper-field:focus > .unity-base-field__input,
 .numeric-stepper-field > .unity-base-field__input:focus,
 TextField.actor-properties-name > .unity-base-field__input:focus,
+TextField.studio-rule-name > .unity-base-field__input:focus,
 TextField.custom-property-name > .unity-base-field__input:focus,
 TextField.rule-set-name > .unity-base-field__input:focus,
 TextField.settings-parameter-value > .unity-base-field__input:focus,
@@ -2409,6 +2414,7 @@ PopupField.parameter-selector {
 .gamerule-light .numeric-stepper-field:focus > .unity-base-field__input,
 .gamerule-light .numeric-stepper-field > .unity-base-field__input:focus,
 .gamerule-light TextField.actor-properties-name > .unity-base-field__input:focus,
+.gamerule-light TextField.studio-rule-name > .unity-base-field__input:focus,
 .gamerule-light TextField.custom-property-name > .unity-base-field__input:focus,
 .gamerule-light TextField.rule-set-name > .unity-base-field__input:focus,
 .gamerule-light TextField.settings-parameter-value > .unity-base-field__input:focus,
@@ -2723,5 +2729,78 @@ TextField.custom-property-name,
     padding-left: 5px;
     padding-right: 5px;
 }
+
+/* Shared command density; dropdowns and NOT retain their own treatment. */
+Button.button-primary {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+/* Compact inspector inputs. Rule Details keeps the shared 28px input variant. */
+.settings-parameter-value .unity-base-text-field__input,
+.settings-parameter-value > .unity-base-text-field__input,
+.actor-properties-name > .unity-base-field__input,
+.rule-set-name > .unity-base-field__input,
+.custom-property-row .unity-base-text-field__input {
+    min-height: 22px;
+    height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.studio-compact-selector.parameter-selector {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 12px;
+}
+
+/* Visible checkbox frames, without affecting foldout arrows or NOT buttons. */
+.rule-detail-action .unity-toggle__checkmark,
+.rule-detail-condition .unity-toggle__checkmark,
+.custom-property-bool .unity-toggle__checkmark {
+    background-color: rgb(56, 56, 56);
+    border-width: 1px;
+    border-color: rgb(110, 110, 110);
+    border-radius: 3px;
+}
+.rule-detail-action Toggle:hover .unity-toggle__checkmark,
+.rule-detail-action Toggle:focus .unity-toggle__checkmark,
+.rule-detail-condition Toggle:hover .unity-toggle__checkmark,
+.rule-detail-condition Toggle:focus .unity-toggle__checkmark,
+.custom-property-bool Toggle:focus .unity-toggle__checkmark,
+.custom-property-bool Toggle:hover .unity-toggle__checkmark {
+    border-color: rgb(161, 138, 224);
+}
+.gamerule-light .rule-detail-action .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool .unity-toggle__checkmark {
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(145, 145, 145);
+}
+.gamerule-light .rule-detail-action Toggle:hover .unity-toggle__checkmark,
+.gamerule-light .rule-detail-action Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition Toggle:hover .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool Toggle:hover .unity-toggle__checkmark {
+    border-color: rgb(88, 64, 150);
+}
+.gamerule-light .actor-list-item.actor-list-item--selected {
+    border-color: rgb(88, 64, 150);
+}
+.button-primary:focus { border-color: rgb(161, 138, 224); }
+.gamerule-light .button-primary:focus { border-color: rgb(88, 64, 150); }
 
 

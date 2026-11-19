@@ -66,6 +66,7 @@ namespace GameRuleEditor.Windows
         private GUIStyle propertyButtonStyle;
         private GUIStyle navigationColoredLabelStyle;
         private GUIStyle propertyColoredLabelStyle;
+        private GUIStyle pickerSurfaceStyle;
         private bool stylesAreProSkin;
         private Vector2 mouseScreenPosition;
         private Rect currentColumnScreenRect;
@@ -284,6 +285,7 @@ namespace GameRuleEditor.Windows
             // can offset it by that column's origin and make a neighbouring button hover.
             mouseScreenPosition = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
             EnsureStyles();
+            EditorGUI.DrawRect(new Rect(0, 0, position.width, position.height), GameRuleTheme.Panel);
             if (Event.current.type == EventType.MouseMove) Repaint();
 
             if (prefabMode)
@@ -393,7 +395,7 @@ namespace GameRuleEditor.Windows
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(outerPadding);
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            EditorGUILayout.BeginVertical(pickerSurfaceStyle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
             scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
 
             var source = includeAllResourceAssets
@@ -470,7 +472,7 @@ namespace GameRuleEditor.Windows
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(outerPadding);
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            EditorGUILayout.BeginVertical(pickerSurfaceStyle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
             scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
 
             List<GameObject> selectablePrefabs = LoadSelectablePrefabs();
@@ -541,9 +543,9 @@ namespace GameRuleEditor.Windows
         private void DrawPreviewGrid(List<PreviewGridItem> items)
         {
             const float gap = 8f;
-            const float minimumCardWidth = 96f;
-            const float maximumCardWidth = 114f;
-            const float cardHeight = 116f;
+            const float minimumCardWidth = 112f;
+            const float maximumCardWidth = 136f;
+            const float cardHeight = 138f;
 
             // Account for outer padding, help-box padding and the vertical scrollbar.
             float availableWidth = Mathf.Max(minimumCardWidth, position.width - 42f);
@@ -579,6 +581,8 @@ namespace GameRuleEditor.Windows
             string tooltip = string.IsNullOrEmpty(item.SecondaryName) || item.SecondaryName == item.Label
                 ? item.Label
                 : $"{item.Label} — {item.SecondaryName}";
+            string assetPath = AssetDatabase.GetAssetPath(item.PreviewObject);
+            if (!string.IsNullOrEmpty(assetPath)) tooltip += "\n" + assetPath;
             bool clicked = GUI.Button(cardRect, new GUIContent(string.Empty, tooltip), GUIStyle.none);
 
             Color cardColor = pressed
@@ -602,9 +606,12 @@ namespace GameRuleEditor.Windows
             GUIStyle labelStyle = new GUIStyle(EditorStyles.miniLabel)
             {
                 alignment = TextAnchor.UpperCenter,
+                fontSize = 11,
                 wordWrap = true,
                 clipping = TextClipping.Clip
             };
+            // Wrap compound asset names visually; the stored reference and tooltip stay intact.
+            string displayName = Regex.Replace(item.Label, @"(?<=[a-z0-9])(?=[A-Z])|(?<=[_\-])", "\u200B");
             if (hovered || pressed)
             {
                 Color hoveredTextColor = GameRuleTheme.PropertyAccent;
@@ -614,7 +621,7 @@ namespace GameRuleEditor.Windows
                 labelStyle.focused.textColor = hoveredTextColor;
             }
 
-            GUI.Label(labelRect, new GUIContent(item.Label, tooltip), labelStyle);
+            GUI.Label(labelRect, new GUIContent(displayName, tooltip), labelStyle);
 
             if (clicked)
             {
@@ -686,13 +693,13 @@ namespace GameRuleEditor.Windows
                 GUILayout.Width(width), GUILayout.Height(22f));
             bool hovered = rect.Contains(Event.current.mousePosition);
             bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
-            bool clicked = GUI.Button(rect, GUIContent.none, style);
+            bool clicked = GUI.Button(rect, GUIContent.none, GUIStyle.none);
 
             Color fillColor = pressed || selected
                 ? GameRuleTheme.Panel
                 : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
-            EditorGUI.DrawRect(new Rect(rect.x + 2f, rect.y + 2f,
-                Mathf.Max(0f, rect.width - 4f), Mathf.Max(0f, rect.height - 4f)), fillColor);
+            GameRuleTheme.DrawPickerField(rect, fillColor,
+                selected || hovered ? GameRuleTheme.PropertyAccent : GameRuleTheme.Border);
 
             GUIStyle labelStyle = CreateColoredLabelStyle(TextAnchor.MiddleCenter, new RectOffset(2, 2, 2, 2));
             labelStyle.fontStyle = FontStyle.Bold;
@@ -704,7 +711,7 @@ namespace GameRuleEditor.Windows
                                 bool hideHorizontalScrollbar = false)
         {
             Rect columnRect = EditorGUILayout.BeginVertical(
-                EditorStyles.helpBox, GUILayout.Width(width), GUILayout.ExpandHeight(true));
+                pickerSurfaceStyle, GUILayout.Width(width), GUILayout.ExpandHeight(true));
             Rect previousColumnScreenRect = currentColumnScreenRect;
             Vector2 columnScreenPosition = GUIUtility.GUIToScreenPoint(columnRect.position);
             currentColumnScreenRect = new Rect(columnScreenPosition, columnRect.size);
@@ -820,6 +827,7 @@ namespace GameRuleEditor.Windows
         private void EnsureStyles()
         {
             if (navigationButtonStyle != null &&
+                pickerSurfaceStyle != null &&
                 propertyButtonStyle != null &&
                 navigationColoredLabelStyle != null &&
                 propertyColoredLabelStyle != null &&
@@ -836,15 +844,20 @@ namespace GameRuleEditor.Windows
             navigationColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
             propertyColoredLabelStyle = CreateColoredLabelStyle(TextAnchor.MiddleLeft, new RectOffset(8, 8, 2, 2));
             stylesAreProSkin = EditorGUIUtility.isProSkin;
+            pickerSurfaceStyle = new GUIStyle(EditorStyles.helpBox);
+            pickerSurfaceStyle.normal.background = null;
         }
 
         private static GUIStyle CreateButtonStyle(TextAnchor alignment)
         {
-            return new GUIStyle(EditorStyles.miniButton)
+            var style = new GUIStyle(EditorStyles.label)
             {
                 alignment = alignment,
                 stretchWidth = true
             };
+            style.normal.textColor = style.hover.textColor = style.active.textColor =
+                style.focused.textColor = GameRuleTheme.Text;
+            return style;
         }
 
         private static GUIStyle CreateColoredLabelStyle(TextAnchor alignment, RectOffset padding)
@@ -883,23 +896,14 @@ namespace GameRuleEditor.Windows
             // Register the tooltip only over the visible part of this column's button.
             // The colored button draws its label separately, but still needs GUIContent for hover help.
             var content = new GUIContent(label, hovered ? tooltip : null);
-            bool clicked = GUI.Button(buttonRect,
-                colored ? new GUIContent(string.Empty, hovered ? tooltip : null) : content,
-                buttonStyle);
-
-            if (colored)
-            {
-                Color fillColor = pressed
-                    ? GameRuleTheme.Panel
-                    : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
-                var fillRect = new Rect(
-                    buttonRect.x + 2f,
-                    buttonRect.y + 2f,
-                    Mathf.Max(0f, buttonRect.width - 4f),
-                    Mathf.Max(0f, buttonRect.height - 4f));
-                EditorGUI.DrawRect(fillRect, fillColor);
-                GUI.Label(buttonRect, content, coloredLabelStyle);
-            }
+            bool clicked = GUI.Button(buttonRect, new GUIContent(string.Empty, hovered ? tooltip : null), GUIStyle.none);
+            Color fillColor = pressed ? GameRuleTheme.Panel
+                : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
+            Color borderColor = colored ? GameRuleTheme.PropertyAccent : GameRuleTheme.Border;
+            GameRuleTheme.DrawPickerField(buttonRect, fillColor, borderColor);
+            var labelStyle = colored ? coloredLabelStyle : buttonStyle;
+            labelStyle.normal.textColor = colored ? GameRuleTheme.PropertyAccent : GameRuleTheme.Text;
+            GUI.Label(buttonRect, content, labelStyle);
 
             return clicked;
         }

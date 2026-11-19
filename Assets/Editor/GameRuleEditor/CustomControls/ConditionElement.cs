@@ -51,6 +51,7 @@ namespace GameRuleEditor.CustomControls
             context = ctx;
             availableTypes = conditionTypes;
             this.detailsMode = detailsMode;
+            if (detailsMode) AddToClassList("rule-detail-condition");
             style.flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row;
             style.marginBottom = 5;
             style.flexShrink = 0;

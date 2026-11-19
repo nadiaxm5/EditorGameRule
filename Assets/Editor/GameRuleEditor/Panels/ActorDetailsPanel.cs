@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.Windows;
+using GameRuleEditor.CustomControls;
 
 namespace GameRuleEditor.Panels
 {
@@ -25,7 +26,7 @@ namespace GameRuleEditor.Panels
         private bool suppressActorNameCallback;
 
         private ObjectField prefabPicker;
-        private DropdownField tagField;
+        private TooltipPopupField tagField;
         private Toggle activeToggle;
         private bool suppressActiveToggleCallback;
 
@@ -165,7 +166,11 @@ namespace GameRuleEditor.Panels
             var tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
             tagContainer.style.flexShrink = 0;
             tagContainer.Add(new Label("Tag") { style = { width = 20, unityTextAlign = TextAnchor.MiddleCenter } });
-            tagField = new DropdownField();
+            tagField = new TooltipPopupField(new List<TooltipDropdownOption>(), "Untagged",
+                "Choose the actor's tag.", RuleDropdownPalette.Property);
+            tagField.AddToClassList("parameter-selector");
+            tagField.AddToClassList("button-property-picker");
+            tagField.AddToClassList("studio-compact-selector");
             tagField.style.width = 120;
             tagContainer.Add(tagField);
             topRow.Add(tagContainer);
@@ -446,7 +451,8 @@ namespace GameRuleEditor.Panels
             tagField.UnregisterValueChangedCallback(OnTagFieldValueChanged);
             var choices = Loader.GetProjectTags(context.currentProject?.actors);
             choices.Add("Add Custom Tag...");
-            tagField.choices = choices;
+            tagField.SetChoices(choices.ConvertAll(tag => new TooltipDropdownOption(tag, tag,
+                tag == "Add Custom Tag..." ? "Create a custom tag." : "Assign this tag to the actor.")));
             tagField.SetValueWithoutNotify(actor.Tag ?? "Untagged");
             tagField.RegisterValueChangedCallback(OnTagFieldValueChanged);
 
@@ -1294,9 +1300,9 @@ namespace GameRuleEditor.Panels
             suppressActorNameCallback = false;
         }
 
-        private void OnTagFieldValueChanged(ChangeEvent<string> evt)
+        private void OnTagFieldValueChanged(string value)
         {
-            if (evt.newValue == "Add Custom Tag...")
+            if (value == "Add Custom Tag...")
             {
                 var tagContainer = tagField.parent;
                 var textField = new TextField { value = "", style = { width = 120 } };
@@ -1339,7 +1345,7 @@ namespace GameRuleEditor.Panels
             if (context.SelectedActor != null)
             {
                 Undo.RecordObject(context.currentProject, "Change Tag");
-                context.SelectedActor.Tag = evt.newValue;
+                context.SelectedActor.Tag = value;
                 EditorUtility.SetDirty(context.currentProject);
                 controller.SyncDataToScene(context.SelectedActor);
                 context.NotifyProjectChanged();

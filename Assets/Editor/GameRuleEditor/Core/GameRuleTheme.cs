@@ -36,6 +36,14 @@ namespace GameRuleEditor.Core
 
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
 
+        // IMGUI pickers use the same neutral field and subtle one-pixel frame as UI Toolkit.
+        public static void DrawPickerField(Rect rect, Color fill, Color border)
+        {
+            EditorGUI.DrawRect(rect, border);
+            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1,
+                Mathf.Max(0, rect.width - 2), Mathf.Max(0, rect.height - 2)), fill);
+        }
+
         public static void StylePropertySection(Foldout section, bool useSectionSpacing = true)
         {
             section.style.unityFontStyleAndWeight = FontStyle.Bold;
