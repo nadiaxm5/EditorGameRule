@@ -77,12 +77,14 @@ public static class Utils
 
     public static void PlaySound(string audioClip, GameObject obj)
     {
+        if (obj == null || string.IsNullOrWhiteSpace(audioClip)) return;
+
         AudioSource[] audios = obj.GetComponents<AudioSource>();
         foreach (AudioSource audio in audios)
         {
-            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
+            if (audio.clip != null && audio.clip.name == audioClip)
             {
-                audio.Play();
+                if (!audio.isPlaying) audio.Play();
                 return;
             }
         }
@@ -91,12 +93,29 @@ public static class Utils
         foreach (AudioSource audio in childAudios)
         {
             if (audio.gameObject == obj) continue;
-            if (audio.clip != null && audio.clip.name == audioClip && !audio.isPlaying)
+            if (audio.clip != null && audio.clip.name == audioClip)
             {
-                audio.Play();
+                if (!audio.isPlaying) audio.Play();
                 return;
             }
         }
+
+        // Picker values are clip names; also accept a Resources-relative path.
+        AudioClip clip = Resources.Load<AudioClip>(audioClip)
+            ?? Resources.LoadAll<AudioClip>("Audio").FirstOrDefault(candidate => candidate.name == audioClip);
+        if (clip == null) return;
+
+        // Keep the actor's configured routing/volume when it already has an unused source.
+        AudioSource source = audios.FirstOrDefault(audio => audio.clip == clip)
+            ?? audios.FirstOrDefault(audio => audio.clip == null && audio.enabled && !audio.isPlaying);
+        if (source == null)
+        {
+            source = obj.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = false;
+        }
+        source.clip = clip;
+        if (!source.isPlaying) source.Play();
     }
 
     public static void PlayParticles(string particleSystemName, GameObject obj)

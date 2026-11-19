@@ -62,7 +62,7 @@ MonoBehaviour:
     AND Compare(this.x>this.x0-this.delta)"],"Do":["Edit(this.xTarget,this.x1)","Edit(this.zTarget,this.z1)"],"groupId":""},{"Name":"","When":["Compare(this.z<this.z1+this.delta)
     AND Compare(this.z>this.z1-this.delta) AND Compare(this.x<this.x1+this.delta)
     AND Compare(this.x>this.x1-this.delta)"],"Do":["Edit(this.xTarget,this.x0)","Edit(this.zTarget,this.z0)"],"groupId":""}],"Components":[]}]}'
-  selectedActorIndex: 7
+  selectedActorIndex: -1
   selectedScriptIndex: -1
   selectedRuleElementKind: 0
   selectedRuleElementIndex: -1
