@@ -13,19 +13,24 @@ namespace GameRuleEditor.Windows
         [SerializeField] private bool creating;
         [SerializeField] private string projectName = "New Project";
         [SerializeField] private string search = "";
+        [SerializeField] private GameRuleProject duplicationSource;
         private ProjectController controller;
 
         public static void ShowNew(ProjectController controller) => ShowDialog(controller, true);
         public static void ShowOpen(ProjectController controller) => ShowDialog(controller, false);
+        public static void ShowDuplicate(ProjectController controller, GameRuleProject source) => ShowDialog(controller, true, source);
 
-        private static void ShowDialog(ProjectController controller, bool creating)
+        private static void ShowDialog(ProjectController controller, bool creating, GameRuleProject source = null)
         {
+            string title = source != null ? "Duplicate Project" : creating ? "New Project" : "Open Project";
             var window = GetWindow<GameRuleProjectDialog>(true,
-                creating ? "New Project" : "Open Project", true);
+                title, true);
             window.controller = controller;
             window.creating = creating;
+            window.duplicationSource = source;
+            if (creating) window.projectName = source != null ? source.projectName + " Copy" : "New Project";
             window.minSize = new Vector2(360, 180);
-            window.titleContent = new GUIContent(creating ? "New Project" : "Open Project");
+            window.titleContent = new GUIContent(title);
             window.Build();
             window.ShowUtility();
         }
@@ -53,14 +58,20 @@ namespace GameRuleEditor.Windows
             {
                 var name = new TextField("Project name") { value = projectName };
                 root.Add(name);
-                var help = new Label("The project is saved locally and its scene opens automatically.");
+                bool duplicating = duplicationSource != null;
+                var help = new Label(duplicating
+                    ? "The copy includes current edits, is saved locally and opens automatically."
+                    : "The project is saved locally and its scene opens automatically.");
                 help.style.whiteSpace = WhiteSpace.Normal;
                 help.style.marginTop = 10;
                 root.Add(help);
                 var create = new Button(() => GameRuleTopMenuActions.Run(() =>
                 {
-                    if (controller.CreateAndGenerateProject(projectName)) Close();
-                })) { text = "Create Project" };
+                    bool completed = duplicating
+                        ? controller.DuplicateProject(duplicationSource, projectName)
+                        : controller.CreateAndGenerateProject(projectName);
+                    if (completed) Close();
+                })) { text = duplicating ? "Duplicate Project" : "Create Project" };
                 create.AddToClassList("button-primary");
                 create.style.marginTop = 12;
                 create.SetEnabled(!string.IsNullOrWhiteSpace(projectName));

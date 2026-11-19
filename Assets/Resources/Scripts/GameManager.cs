@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
 
     private static readonly string[] ActorOrder = new string[] { "House", "End", "Won", "Caught", "John", "Gargoyle1", "Gargoyle2", "Ghost1", "Ghost2", "Ghost3", "Ghost4" };
 
-    public string GameName = "JOHN_LEMON";
+    public string GameName = "JOHN_LEMON Copy";
     public Vector2 ScreenResolution = new Vector2(1920f, 1080f);
     public Vector3 CameraPosition = new Vector3(-9.8f, 5.6f, -8.8f);
     public Vector3 CameraRotation = new Vector3(45f, 0f, 0f);

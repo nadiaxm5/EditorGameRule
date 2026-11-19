@@ -130,6 +130,47 @@ namespace GameRuleEditor.Controllers
             return true;
         }
 
+        /// <summary>Copies current editable data, then opens and generates the new project.</summary>
+        public bool DuplicateProject(GameRuleProject source, string projectName)
+        {
+            if (source == null || string.IsNullOrWhiteSpace(projectName)) return false;
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new System.InvalidOperationException("Stop Play mode before duplicating projects.");
+
+            EnsureProjectsFolder();
+            projectName = UniqueProjectName(projectName);
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath(
+                $"{ProjectsAssetFolder}/{SanitizeFileName(projectName)}.asset");
+            var duplicate = Object.Instantiate(source);
+            duplicate.name = duplicate.projectName = projectName;
+            duplicate.sceneData.GameName = projectName;
+            // The copy must never adopt, rename or overwrite the source project's JSON.
+            duplicate.jsonFileName = null;
+            try
+            {
+                // Snapshot first so Discard on the original cannot remove edits from the copy.
+                if (!ConfirmLeaveProject())
+                {
+                    Object.DestroyImmediate(duplicate);
+                    return false;
+                }
+                AssetDatabase.CreateAsset(duplicate, assetPath);
+                WriteProjectJson(duplicate);
+                AssetDatabase.Refresh();
+            }
+            catch
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+                if (duplicate != null && !AssetDatabase.Contains(duplicate)) Object.DestroyImmediate(duplicate);
+                throw;
+            }
+
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            LoadProject(duplicate);
+            GenerateScene();
+            return true;
+        }
+
         /// <summary>
         /// Loads an existing project
         /// </summary>
@@ -297,10 +338,10 @@ namespace GameRuleEditor.Controllers
             return true;
         }
 
-        private string WriteProjectJson()
+        private string WriteProjectJson(GameRuleProject project = null)
         {
             const string gamesFolder = "Assets/Resources/Games";
-            var project = context.currentProject;
+            project = project ?? context.currentProject;
             string assetPath = AssetDatabase.GetAssetPath(project);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             if (string.IsNullOrEmpty(guid))

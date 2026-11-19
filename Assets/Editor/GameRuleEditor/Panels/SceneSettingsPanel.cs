@@ -39,6 +39,7 @@ namespace GameRuleEditor.Panels
 
         private Vector3Field gravityField;
         private ObjectField soundTrackField;
+        private Button saveProjectButton;
 
         private CustomPropertyList customVariables;
 
@@ -56,12 +57,14 @@ namespace GameRuleEditor.Panels
             // Subscribe to events
             context.OnProjectLoaded += UpdateUI;
             context.OnProjectChanged += UpdateUI;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
             // Cleanup when removed from visual tree
             RegisterCallback<DetachFromPanelEvent>(evt =>
             {
                 context.OnProjectLoaded -= UpdateUI;
                 context.OnProjectChanged -= UpdateUI;
+                EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             });
         }
 
@@ -79,6 +82,34 @@ namespace GameRuleEditor.Panels
             header.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.style.marginBottom = 15;
             scrollView.Add(header);
+
+            saveProjectButton = new Button(GameRuleTopMenuActions.SaveProject)
+            {
+                name = "save-project",
+                tooltip = "Save the current project."
+            };
+            saveProjectButton.AddToClassList("button-primary");
+            saveProjectButton.AddToClassList("rules-command");
+            saveProjectButton.style.flexDirection = FlexDirection.Row;
+            saveProjectButton.style.alignItems = Align.Center;
+            saveProjectButton.style.flexShrink = 0;
+            var saveIcon = new Image
+            {
+                image = EditorGUIUtility.FindTexture(EditorGUIUtility.isProSkin ? "d_SaveAs" : "SaveAs"),
+                tintColor = GameRuleTheme.AccentText,
+                pickingMode = PickingMode.Ignore
+            };
+            saveIcon.style.width = saveIcon.style.height = 14;
+            saveIcon.style.flexShrink = 0;
+            saveIcon.style.marginRight = 5;
+            saveProjectButton.Add(saveIcon);
+            saveProjectButton.Add(new TextElement { text = "Save Project", pickingMode = PickingMode.Ignore });
+            var saveRow = new VisualElement();
+            saveRow.style.flexDirection = FlexDirection.Row;
+            saveRow.style.alignItems = Align.Center;
+            saveRow.style.marginBottom = 10;
+            saveRow.Add(saveProjectButton);
+            scrollView.Add(saveRow);
 
             // Basic settings section
             var basicSection = CreateSection("Basic Settings");
@@ -354,6 +385,7 @@ namespace GameRuleEditor.Panels
                 return;
             }
             SetEnabled(true);
+            saveProjectButton.SetEnabled(GameRuleTopMenuActions.HasEditableProject());
             var scene = context.currentProject.sceneData;
 
             // --- Native Data Binding for direct 1:1 type field ---
@@ -389,6 +421,11 @@ namespace GameRuleEditor.Panels
 
             scene.CustomVariables ??= new List<CustomVariable>();
             customVariables.Refresh();
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            saveProjectButton.SetEnabled(GameRuleTopMenuActions.HasEditableProject());
         }
 
         private void UpdateVector3Field(Vector3Field field, float[] data)

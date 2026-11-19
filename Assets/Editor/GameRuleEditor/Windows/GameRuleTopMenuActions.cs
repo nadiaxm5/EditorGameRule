@@ -30,7 +30,14 @@ namespace GameRuleEditor.Windows
             if (TryGetContextAndController(out _, out var controller)) controller.SaveProject();
         });
 
-        [MenuItem("GameRule/Project Actions/Close Project", priority = 13)]
+        [MenuItem("GameRule/Project Actions/Duplicate Project", priority = 13)]
+        public static void DuplicateProject() => Run(() =>
+        {
+            if (TryGetContextAndController(out var context, out var controller) && context.currentProject != null)
+                GameRuleProjectDialog.ShowDuplicate(controller, context.currentProject);
+        });
+
+        [MenuItem("GameRule/Project Actions/Close Project", priority = 14)]
         public static void CloseProject() => Run(() =>
         {
             if (TryGetContextAndController(out _, out var controller)) controller.CloseProject();
@@ -67,6 +74,7 @@ namespace GameRuleEditor.Windows
             !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling;
 
         [MenuItem("GameRule/Project Actions/Save Project", true)]
+        [MenuItem("GameRule/Project Actions/Duplicate Project", true)]
         [MenuItem("GameRule/Project Actions/Close Project", true)]
         [MenuItem("GameRule/JSON Actions/Export JSON", true)]
         public static bool HasEditableProject() => CanManageProjects() &&
@@ -77,6 +85,7 @@ namespace GameRuleEditor.Windows
             menu.AppendAction("New Project", _ => NewProject(), _ => Status(CanManageProjects()));
             menu.AppendAction("Open Project", _ => OpenProject(), _ => Status(CanManageProjects()));
             menu.AppendAction("Save Project", _ => SaveProject(), _ => Status(HasEditableProject()));
+            menu.AppendAction("Duplicate Project", _ => DuplicateProject(), _ => Status(HasEditableProject()));
             menu.AppendAction("Close Project", _ => CloseProject(), _ => Status(HasEditableProject()));
         }
 
