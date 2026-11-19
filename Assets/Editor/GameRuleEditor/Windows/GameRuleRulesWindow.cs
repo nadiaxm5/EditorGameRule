@@ -18,6 +18,16 @@ namespace GameRuleEditor.Windows
         // back as "", so both are normalized to null in OnEnable — see NormalizeGroupFilter.
         [SerializeField] private string currentGroupId;
         [SerializeField] private string currentGroupName;
+        private bool filterAvailable;
+
+        internal static event System.Action RuleSetFilterChanged;
+
+        internal static bool IsRuleSetSelected(EditorContext ctx, string id)
+        {
+            foreach (var window in Resources.FindObjectsOfTypeAll<GameRuleRulesWindow>())
+                if (window.filterAvailable && window.context == ctx && window.currentGroupId == id) return true;
+            return false;
+        }
 
         internal static bool IsRulesTabActive()
         {
@@ -49,6 +59,8 @@ namespace GameRuleEditor.Windows
 
         public void Init(EditorContext ctx, ProjectController ctrl)
         {
+            filterAvailable = true;
+            if (context != null) context.OnActorSelected -= OnActorSelected;
             context = ctx; controller = ctrl;
             BuildUI();
 
@@ -71,6 +83,7 @@ namespace GameRuleEditor.Windows
 
         private void OnEnable()
         {
+            filterAvailable = true;
             NormalizeGroupFilter();
 
             if (context == null) context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
@@ -84,6 +97,8 @@ namespace GameRuleEditor.Windows
         private void OnDisable()
         {
             if (context != null) context.OnActorSelected -= OnActorSelected;
+            filterAvailable = false;
+            RuleSetFilterChanged?.Invoke();
         }
 
         private void OnBecameVisible()
@@ -122,7 +137,17 @@ namespace GameRuleEditor.Windows
             root.Add(contentContainer);
 
             if (context != null)
-                contentContainer.Add(new ScriptEditorPanel(context, controller, currentGroupId, currentGroupName));
+            {
+                var panel = new ScriptEditorPanel(context, controller, currentGroupId, currentGroupName);
+                panel.OnGroupFilterChanged += (id, name) =>
+                {
+                    currentGroupId = id;
+                    currentGroupName = name;
+                    RuleSetFilterChanged?.Invoke();
+                };
+                contentContainer.Add(panel);
+            }
+            RuleSetFilterChanged?.Invoke();
         }
     }
 }

@@ -142,6 +142,44 @@ namespace GameRuleEditor.Core
             OnProjectChanged?.Invoke();
         }
 
+        internal const string UngroupedRuleSetId = "__ungrouped_rules__";
+
+        internal static string GetRuleSetId(ActorJson actor, SentenceJson rule)
+        {
+            if (!string.IsNullOrEmpty(rule?.groupId)) return rule.groupId;
+            var first = actor?.Components?.Find(component => component.type == "Rules");
+            return string.IsNullOrEmpty(first?.id) ? UngroupedRuleSetId : first.id;
+        }
+
+        // A view of the existing groups, including legacy rules awaiting Properties migration.
+        // Building the overview must not regroup or reorder the serialized script.
+        internal List<ActorComponentMeta> GetRuleSets()
+        {
+            var result = new List<ActorComponentMeta>();
+            var actor = SelectedActor;
+            if (actor?.Components != null)
+                foreach (var component in actor.Components)
+                {
+                    if (component.type != "Rules") continue;
+                    string id = string.IsNullOrEmpty(component.id) ? UngroupedRuleSetId : component.id;
+                    if (result.Exists(group => group.id == id)) continue;
+                    result.Add(new ActorComponentMeta { type = "Rules", id = id,
+                        name = string.IsNullOrWhiteSpace(component.name) ? "Rule Set" : component.name });
+                }
+            if (actor?.Script != null)
+                foreach (var rule in actor.Script)
+                {
+                    string id = GetRuleSetId(actor, rule);
+                    if (result.Exists(group => group.id == id)) continue;
+                    result.Add(new ActorComponentMeta { type = "Rules", id = id,
+                        name = result.Count == 0 ? "Rule Set" : $"Rule Set {result.Count + 1}" });
+                }
+            return result;
+        }
+
+        internal string GetRuleSetName(SentenceJson rule) =>
+            GetRuleSets().Find(group => group.id == GetRuleSetId(SelectedActor, rule))?.name ?? "Rule Set";
+
         /// <summary>
         /// Selects an actor by index
         /// </summary>

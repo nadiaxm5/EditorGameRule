@@ -1898,17 +1898,46 @@ ToolbarButton:active {
     margin-bottom: 4px;
 }
 
-.rule-set-card > Toggle {
+.rule-set-entry {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    padding: 4px;
+    background-color: rgb(51, 51, 51);
+    border-width: 1px;
+    border-color: transparent;
+    border-radius: 4px;
+}
+
+.rule-set-entry:hover { background-color: rgb(56, 56, 56); }
+.rule-set-entry.rule-set-selected { border-color: rgb(161, 138, 224); }
+.rule-set-handle {
+    width: 16px;
+    flex-shrink: 0;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+    color: rgb(181, 181, 181);
+}
+.rule-set-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 45px;
+    margin: 0 4px 0 0;
+    padding: 0;
     background-color: transparent;
+    border-width: 0;
 }
-
-.rule-set-card > Toggle:hover {
-    background-color: rgb(56, 56, 56);
+.rule-set-count {
+    flex-shrink: 0;
+    margin-right: 6px;
+    font-size: 11px;
+    color: rgb(181, 181, 181);
 }
-
-.gamerule-light .rule-set-card > Toggle:hover {
-    background-color: rgb(226, 226, 226);
-}
+.gamerule-light .rule-set-entry { background-color: rgb(250, 250, 250); }
+.gamerule-light .rule-set-entry:hover { background-color: rgb(226, 226, 226); }
+.gamerule-light .rule-set-entry.rule-set-selected { border-color: rgb(88, 64, 150); }
+.gamerule-light .rule-set-handle,
+.gamerule-light .rule-set-count { color: rgb(92, 92, 92); }
 
 .rule-editor-card {
     background-color: rgb(51, 51, 51);
@@ -2122,6 +2151,10 @@ ToolbarButton:active {
 .gamerule-light .button-number-picker .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(29, 109, 81); }
 
 /* Native field inputs, in windows that load this stylesheet. */
+TextField.actor-properties-name > .unity-base-field__input,
+TextField.custom-property-name > .unity-base-field__input,
+TextField.rule-set-name > .unity-base-field__input,
+TextField.settings-parameter-value > .unity-base-field__input,
 .unity-integer-field > .unity-base-field__input,
 .unity-float-field > .unity-base-field__input,
 .unity-object-field > .unity-base-field__input,
@@ -2135,6 +2168,10 @@ PopupField > .unity-base-field__input,
     border-bottom-color: rgb(66, 66, 66);
 }
 
+.gamerule-light TextField.actor-properties-name > .unity-base-field__input,
+.gamerule-light TextField.custom-property-name > .unity-base-field__input,
+.gamerule-light TextField.rule-set-name > .unity-base-field__input,
+.gamerule-light TextField.settings-parameter-value > .unity-base-field__input,
 .gamerule-light .unity-integer-field > .unity-base-field__input,
 .gamerule-light .unity-float-field > .unity-base-field__input,
 .gamerule-light .unity-object-field > .unity-base-field__input,
@@ -2219,6 +2256,10 @@ PopupField > .unity-base-field__input,
 
 .numeric-stepper-field:focus > .unity-base-field__input,
 .numeric-stepper-field > .unity-base-field__input:focus,
+TextField.actor-properties-name > .unity-base-field__input:focus,
+TextField.custom-property-name > .unity-base-field__input:focus,
+TextField.rule-set-name > .unity-base-field__input:focus,
+TextField.settings-parameter-value > .unity-base-field__input:focus,
 .unity-integer-field > .unity-base-field__input:focus,
 .unity-float-field > .unity-base-field__input:focus,
 .unity-object-field:focus > .unity-base-field__input,
@@ -2367,6 +2408,10 @@ PopupField.parameter-selector {
 
 .gamerule-light .numeric-stepper-field:focus > .unity-base-field__input,
 .gamerule-light .numeric-stepper-field > .unity-base-field__input:focus,
+.gamerule-light TextField.actor-properties-name > .unity-base-field__input:focus,
+.gamerule-light TextField.custom-property-name > .unity-base-field__input:focus,
+.gamerule-light TextField.rule-set-name > .unity-base-field__input:focus,
+.gamerule-light TextField.settings-parameter-value > .unity-base-field__input:focus,
 .gamerule-light .unity-integer-field > .unity-base-field__input:focus,
 .gamerule-light .unity-float-field > .unity-base-field__input:focus,
 .gamerule-light .unity-object-field:focus > .unity-base-field__input,

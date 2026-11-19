@@ -1126,7 +1126,7 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Moves a rule to a target index
         /// </summary>
-        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex)
+        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex, bool withinGroup = false)
         {
             if (context.currentProject == null ||
                 actorIndex < 0 ||
@@ -1146,14 +1146,31 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Move Rule");
-
             SentenceJson moved = actor.Script[fromIndex];
-            actor.Script.RemoveAt(fromIndex);
-            toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
-            actor.Script.Insert(toIndex, moved);
+            if (withinGroup)
+            {
+                string group = EditorContext.GetRuleSetId(actor, moved);
+                if (group != EditorContext.GetRuleSetId(actor, actor.Script[toIndex])) return;
+                var slots = Enumerable.Range(0, actor.Script.Count)
+                    .Where(i => EditorContext.GetRuleSetId(actor, actor.Script[i]) == group).ToList();
+                var rules = slots.Select(i => actor.Script[i]).ToList();
+                int from = slots.IndexOf(fromIndex), to = slots.IndexOf(toIndex);
+                Undo.RecordObject(context.currentProject, "Move Rule Within Set");
+                rules.RemoveAt(from);
+                rules.Insert(to, moved);
+                for (int i = 0; i < slots.Count; i++) actor.Script[slots[i]] = rules[i];
+            }
+            else
+            {
+                Undo.RecordObject(context.currentProject, "Move Rule");
+                actor.Script.RemoveAt(fromIndex);
+                toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
+                actor.Script.Insert(toIndex, moved);
+            }
 
             EditorUtility.SetDirty(context.currentProject);
+            context.ClearRuleElementSelection(false);
+            context.selectedScriptIndex = toIndex;
             context.NotifyProjectChanged();
             context.SelectScript(toIndex);
         }

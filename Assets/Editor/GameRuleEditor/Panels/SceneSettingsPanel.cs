@@ -116,7 +116,7 @@ namespace GameRuleEditor.Panels
             scrollView.Add(basicSection);
 
             // Vinculación nativa (El binding)
-            gameNameField = CreateTextField(basicSection, "Game Name:");
+            gameNameField = CreateTextField(basicSection, "Game Name");
             // Secondary callback to keep projectName in sync (native binding handles GameName + undo)
             gameNameField.RegisterValueChangedCallback(evt =>
             {
@@ -124,7 +124,7 @@ namespace GameRuleEditor.Panels
                     context.currentProject.projectName = evt.newValue;
             });
 
-            screenResolutionField = CreateVector2Field(basicSection, "Screen Resolution:");
+            screenResolutionField = CreateVector2Field(basicSection, "Screen Resolution");
             screenResolutionField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -135,7 +135,7 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
 
-            backgroundColorField = CreateColorField(basicSection, "Background Color:");
+            backgroundColorField = CreateColorField(basicSection, "Background Color");
             backgroundColorField.RegisterValueChangedCallback(evt =>
             {
                 if (context.currentProject == null) return;
@@ -150,7 +150,7 @@ namespace GameRuleEditor.Panels
             var cameraSection = CreateSection("Camera");
             scrollView.Add(cameraSection);
 
-            cameraPosField = CreateVector3Field(cameraSection, "Position:");
+            cameraPosField = CreateVector3Field(cameraSection, "Position");
             cameraPosField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -162,7 +162,7 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
 
-            cameraRotField = CreateVector3Field(cameraSection, "Rotation:");
+            cameraRotField = CreateVector3Field(cameraSection, "Rotation");
             cameraRotField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -178,7 +178,7 @@ namespace GameRuleEditor.Panels
             var lightingSection = CreateSection("Lighting (Sun)");
             scrollView.Add(lightingSection);
 
-            sunPosField = CreateVector3Field(lightingSection, "Position:");
+            sunPosField = CreateVector3Field(lightingSection, "Position");
             sunPosField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -189,7 +189,7 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
 
-            sunRotField = CreateVector3Field(lightingSection, "Rotation:");
+            sunRotField = CreateVector3Field(lightingSection, "Rotation");
             sunRotField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -200,7 +200,7 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
 
-            sunColorField = CreateColorField(lightingSection, "Sun Color:");
+            sunColorField = CreateColorField(lightingSection, "Sun Color");
             sunColorField.RegisterValueChangedCallback(evt =>
             {
                 if (context.currentProject == null) return;
@@ -211,7 +211,7 @@ namespace GameRuleEditor.Panels
                 context.NotifyProjectChanged();
             });
 
-            sunAmbientField = CreateColorField(lightingSection, "Ambient Color:");
+            sunAmbientField = CreateColorField(lightingSection, "Ambient Color");
             sunAmbientField.RegisterValueChangedCallback(evt =>
             {
                 if (context.currentProject == null) return;
@@ -226,7 +226,7 @@ namespace GameRuleEditor.Panels
             var physicsSection = CreateSection("Physics");
             scrollView.Add(physicsSection);
 
-            gravityField = CreateVector3Field(physicsSection, "Gravity:");
+            gravityField = CreateVector3Field(physicsSection, "Gravity");
             gravityField.RegisterRoundedChange(valueFromField =>
             {
                 if (context.currentProject == null) return;
@@ -275,7 +275,7 @@ namespace GameRuleEditor.Panels
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
-            AddFieldRow(audioSection, "Soundtrack:", soundTrackField);
+            AddFieldRow(audioSection, "Soundtrack", soundTrackField);
 
             var customVarSection = CreateSection("Custom Global Variables", insetContent: false);
             customVariables = new CustomPropertyList(

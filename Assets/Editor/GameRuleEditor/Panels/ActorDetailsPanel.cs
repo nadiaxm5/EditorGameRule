@@ -79,6 +79,7 @@ namespace GameRuleEditor.Panels
             {
                 context.OnActorSelected += OnActorSelected;
                 context.OnProjectChanged += UpdateUI;
+                GameRuleRulesWindow.RuleSetFilterChanged += UpdateRuleSetSelection;
                 UpdateUI();
             });
 
@@ -86,6 +87,7 @@ namespace GameRuleEditor.Panels
             {
                 context.OnActorSelected -= OnActorSelected;
                 context.OnProjectChanged -= UpdateUI;
+                GameRuleRulesWindow.RuleSetFilterChanged -= UpdateRuleSetSelection;
             });
         }
 
@@ -647,33 +649,59 @@ namespace GameRuleEditor.Panels
                 EditorUtility.SetDirty(context.currentProject);
             }
 
-            var foldout = BuildComponentShell(comp, compIndex, () => RemoveComponent(compIndex, comp.id), renameable: true);
-            foldout.AddToClassList("rule-set-card");
-            var content = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
-            foldout.Add(content);
+            var card = new VisualElement { userData = comp.id, tooltip = "Open this rule set in Rules" };
+            card.AddToClassList("rule-set-card");
+            card.AddToClassList("rule-set-entry");
+            card.EnableInClassList("rule-set-selected", GameRuleRulesWindow.IsRuleSetSelected(context, comp.id));
+
+            var handle = new Label("\u2261") { tooltip = "Drag to reorder" };
+            handle.AddToClassList("rule-set-handle");
+            handle.RegisterCallback<PointerDownEvent>(evt => OnCompDragStart(evt, card, compIndex));
+            handle.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+            card.Add(handle);
+
+            var name = new TextField { value = comp.name, tooltip = "Rename rule set" };
+            name.AddToClassList("rule-set-name");
+            HideTextFieldLabel(name);
+            name.RegisterValueChangedCallback(evt =>
+            {
+                Undo.RecordObject(context.currentProject, "Rename Component");
+                comp.name = evt.newValue;
+                EditorUtility.SetDirty(context.currentProject);
+            });
+            // Notify after editing so the Rules headings and filter follow the new name.
+            name.RegisterCallback<FocusOutEvent>(_ => schedule.Execute(() => context.NotifyProjectChanged()));
+            name.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+            card.Add(name);
 
             int ruleCount = 0;
             var actor = context.SelectedActor;
             if (actor?.Script != null)
                 foreach (var r in actor.Script)
-                    if (r.groupId == comp.id) ruleCount++;
+                    if (EditorContext.GetRuleSetId(actor, r) == comp.id) ruleCount++;
 
-            var infoLabel = new Label(ruleCount == 0
-                ? "No rules defined yet."
-                : $"{ruleCount} rule{(ruleCount == 1 ? "" : "s")} defined.");
-            infoLabel.style.color = GameRuleTheme.MutedText;
-            infoLabel.style.fontSize = 11;
-            infoLabel.style.marginBottom = 8;
-            content.Add(infoLabel);
+            var infoLabel = new Label($"{ruleCount} rule{(ruleCount == 1 ? "" : "s")}");
+            infoLabel.AddToClassList("rule-set-count");
+            card.Add(infoLabel);
+            var remove = new Button(() => RemoveComponent(compIndex, comp.id)) { text = "×", tooltip = "Remove Component" };
+            remove.AddToClassList("button-danger");
+            remove.AddToClassList("button-danger-icon");
+            remove.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+            card.Add(remove);
+            card.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.button != 0) return;
+                GameRuleRulesWindow.EnsureVisible(context, controller, comp.id, comp.name);
+                evt.StopPropagation();
+            });
+            return card;
+        }
 
-            string capturedId = comp.id;
-            var openBtn = new Button(() => GameRuleRulesWindow.EnsureVisible(context, controller, capturedId, comp.name));
-            openBtn.text = "Open Rules Window";
-            openBtn.AddToClassList("button-primary");
-            openBtn.style.alignSelf = Align.Center;
-            content.Add(openBtn);
-
-            return foldout;
+        private void UpdateRuleSetSelection()
+        {
+            foreach (var card in ruleSetsContainer.Children())
+                if (card.userData is string id)
+                    card.EnableInClassList("rule-set-selected", GameRuleRulesWindow.IsRuleSetSelected(context, id));
         }
 
         // ──────────────────────────────────
