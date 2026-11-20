@@ -14,6 +14,8 @@ namespace GameRuleEditor.Panels
         private readonly Func<List<CustomVariable>> getProperties;
         private readonly System.Action onChanged;
         private readonly string addButtonText;
+        private readonly Func<ActorJson> getOwner;
+        private readonly System.Action onRenamed;
         private List<CustomVariable> displayedProperties;
         private int displayedCount;
 
@@ -25,12 +27,15 @@ namespace GameRuleEditor.Panels
         private VisualElement propDragSpacer;
 
         public CustomPropertyList(Func<GameRuleProject> getProject, Func<List<CustomVariable>> getProperties,
-            System.Action onChanged = null, string addButtonText = "+ Add Property")
+            System.Action onChanged = null, string addButtonText = "+ Add Property",
+            Func<ActorJson> getOwner = null, System.Action onRenamed = null)
         {
             this.getProject = getProject;
             this.getProperties = getProperties;
             this.onChanged = onChanged;
             this.addButtonText = addButtonText;
+            this.getOwner = getOwner;
+            this.onRenamed = onRenamed;
             AddToClassList("settings-section-content");
             style.paddingLeft = 15;
             style.marginTop = 5;
@@ -94,7 +99,16 @@ namespace GameRuleEditor.Panels
                             nameField.SetValueWithoutNotify(property.name);
                             return;
                         }
-                        UpdateProperty(() => property.name = name);
+                        if (name == property.name) return;
+                        Undo.IncrementCurrentGroup();
+                        int group = Undo.GetCurrentGroup();
+                        Undo.SetCurrentGroupName("Rename Custom Property");
+                        try
+                        {
+                            UpdateProperty(() => getProject().RenameCustomProperty(getOwner?.Invoke(), property, name));
+                            onRenamed?.Invoke();
+                        }
+                        finally { Undo.CollapseUndoOperations(group); }
                     });
                     nameGroup.Add(nameField);
                     header.Add(nameGroup);

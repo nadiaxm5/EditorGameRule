@@ -574,9 +574,7 @@ namespace GameRuleEditor.Windows
                     string uniqueName = GetUniqueActorName(requestedName, actorIndex);
                     if (uniqueName != oldName)
                     {
-                        controller.UpdateActorProperty(actorIndex,
-                            () => context.currentProject.actors[actorIndex].ActorName = uniqueName,
-                            "Rename Actor");
+                        controller.RenameActor(actorIndex, uniqueName);
                     }
                 }
 

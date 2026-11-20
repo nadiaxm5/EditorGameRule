@@ -311,6 +311,129 @@ namespace GameRuleEditor.Core
         }
 
         // Helpers
+        internal void RenameActor(ActorJson actor, string newName)
+        {
+            if (!string.IsNullOrEmpty(actor.ActorName))
+            {
+                string pattern = @"(?<![A-Za-z0-9_.#])" + Regex.Escape(actor.ActorName) + @"(?=\.)";
+                RewriteReferences((owner, expression) => ReplaceReference(expression, pattern, _ => newName));
+            }
+            actor.ActorName = newName;
+        }
+
+        internal void RenameCustomProperty(ActorJson owner, CustomVariable property, string newName)
+        {
+            string oldName = property.name;
+            if (!string.IsNullOrEmpty(oldName))
+                RewriteReferences((ruleOwner, expression) =>
+                {
+                    string scope = owner == null ? "#" :
+                        "(?:" + Regex.Escape(owner.ActorName) + (ruleOwner == owner ? "|this" : "") + @")\.";
+                    string pattern = @"(?<![A-Za-z0-9_.#])" + scope + Regex.Escape(oldName) + @"(?![A-Za-z0-9_])";
+                    return ReplaceReference(expression, pattern,
+                        match => match.Value.Substring(0, match.Value.Length - oldName.Length) + newName);
+                });
+            property.name = newName;
+        }
+
+        private void RewriteReferences(System.Func<ActorJson, string, string> rewrite)
+        {
+            foreach (var actor in actors)
+                if (actor.Script != null)
+                    foreach (var rule in actor.Script)
+                        foreach (var list in new[] { rule.When, rule.Do })
+                            if (list != null)
+                                for (int i = 0; i < list.Count; i++)
+                                    list[i] = RewriteReferenceParameters(list[i], expression => rewrite(actor, expression));
+        }
+
+        // Edit parameter spans in place: keep logical operators, whitespace, quotes and
+        // nested expressions intact. Asset names, tags, keys and event names are literals.
+        private static string RewriteReferenceParameters(string source, System.Func<string, string> rewrite)
+        {
+            if (string.IsNullOrEmpty(source)) return source;
+            var result = new StringBuilder();
+            int copied = 0;
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (source[i] == '\'' || source[i] == '"') { i = QuotedEnd(source, i); continue; }
+                if (!char.IsLetter(source[i]) && source[i] != '_') continue;
+                int start = i;
+                while (i < source.Length && (char.IsLetterOrDigit(source[i]) || source[i] == '_')) i++;
+                string function = source.Substring(start, i - start);
+                int open = i;
+                while (open < source.Length && char.IsWhiteSpace(source[open])) open++;
+                if (open >= source.Length || source[open] != '(') { i--; continue; }
+                int depth = 0, parameterStart = open + 1, parameterIndex = 0;
+                string destination = null;
+                for (int j = open + 1; j < source.Length; j++)
+                {
+                    char c = source[j];
+                    if (c == '\'' || c == '"') { j = QuotedEnd(source, j); continue; }
+                    if (c == '(') { depth++; continue; }
+                    if (c == ')' && depth > 0) { depth--; continue; }
+                    if ((c != ',' && c != ')') || depth != 0) continue;
+                    string parameter = source.Substring(parameterStart, j - parameterStart);
+                    if (parameterIndex == 0) destination = parameter.Trim().Trim('"', '\'');
+                    if (IsReferenceParameter(function, parameterIndex))
+                    {
+                        result.Append(source, copied, parameterStart - copied);
+                        // Quoted text values stay literal; quoted numeric/property parameters
+                        // are also accepted by imported GameRule descriptors.
+                        bool textValue = function == "Edit" && parameterIndex == 1 &&
+                            (destination.EndsWith(".text", System.StringComparison.Ordinal) ||
+                             destination == "#GameName" || destination == "#SoundTrack");
+                        int left = 0, right = parameter.Length - 1;
+                        while (left <= right && char.IsWhiteSpace(parameter[left])) left++;
+                        while (right >= left && char.IsWhiteSpace(parameter[right])) right--;
+                        if (!textValue && right > left && (parameter[left] == '"' || parameter[left] == '\'') &&
+                            QuotedEnd(parameter, left) == right)
+                            result.Append(parameter.Substring(0, left + 1))
+                                .Append(rewrite(parameter.Substring(left + 1, right - left - 1)))
+                                .Append(parameter.Substring(right));
+                        else result.Append(rewrite(parameter));
+                        copied = j;
+                    }
+                    parameterStart = j + 1;
+                    parameterIndex++;
+                    if (c == ')') { i = j; break; }
+                }
+            }
+            result.Append(source, copied, source.Length - copied);
+            return result.ToString();
+        }
+
+        private static bool IsReferenceParameter(string function, int index)
+        {
+            switch (function)
+            {
+                case "Check": case "Compare": case "Timer":
+                case "Move": case "MoveTo": case "NavigateTo": case "Rotate":
+                case "RotateTo": case "Push": case "PushTo": case "Torque": return true;
+                case "Edit": return index < 2;
+                case "Spawn": return index >= 2;
+                default: return false;
+            }
+        }
+
+        private static int QuotedEnd(string text, int start)
+        {
+            for (int i = start + 1; i < text.Length; i++)
+            {
+                if (text[i] == '\\') { i++; continue; }
+                if (text[i] == text[start]) return i;
+            }
+            return text.Length - 1;
+        }
+
+        private static string ReplaceReference(string expression, string pattern,
+            System.Func<Match, string> replacement)
+        {
+            // Protect quoted literals inside expressions, including escaped quotes.
+            return Regex.Replace(expression, "\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'|(?<reference>" + pattern + ")",
+                match => match.Groups["reference"].Success ? replacement(match) : match.Value);
+        }
+
         public ActorJson AddActor(string actorName, string prefabName)
         {
             ActorJson newActor = new ActorJson

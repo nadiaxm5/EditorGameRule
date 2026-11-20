@@ -819,8 +819,40 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
-        /// Updates an actor's property with undo support
+        /// Renames the actor, scene object and all rule references in one undo operation.
         /// </summary>
+        public bool RenameActor(int actorIndex, string newName)
+        {
+            var project = context.currentProject;
+            if (project == null || actorIndex < 0 || actorIndex >= project.actors.Count ||
+                string.IsNullOrWhiteSpace(newName)) return false;
+            newName = newName.Trim();
+            var actor = project.actors[actorIndex];
+            if (actor.ActorName == newName || project.actors.Exists(other => other != actor && other.ActorName == newName))
+                return false;
+            Undo.IncrementCurrentGroup();
+            int group = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Rename Actor");
+            try
+            {
+                Undo.RegisterCompleteObjectUndo(project, "Rename Actor");
+                var obj = FindSceneObjectByName(actor.ActorName);
+                if (obj != null) Undo.RecordObject(obj, "Rename Actor");
+                project.RenameActor(actor, newName);
+                if (obj != null)
+                {
+                    obj.name = newName;
+                    EditorSceneManager.MarkSceneDirty(obj.scene);
+                }
+                EditorUtility.SetDirty(project);
+                context.NotifyActorListChanged();
+                context.NotifyProjectChanged();
+                return true;
+            }
+            finally { Undo.CollapseUndoOperations(group); }
+        }
+
+        /// <summary>Updates an actor's property with undo support.</summary>
         public void UpdateActorProperty(int actorIndex, System.Action modifyAction, string undoName = "Modify Actor")
         {
             if (context.currentProject == null ||

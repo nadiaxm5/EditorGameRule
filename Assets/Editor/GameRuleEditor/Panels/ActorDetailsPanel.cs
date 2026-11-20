@@ -154,6 +154,7 @@ namespace GameRuleEditor.Panels
             topRow.Add(activeToggle);
 
             actorNameField = new TextField();
+            actorNameField.isDelayed = true;
             actorNameField.AddToClassList("actor-properties-name");
             actorNameField.style.flexGrow = 1;
             actorNameField.style.flexBasis = 100;
@@ -642,7 +643,8 @@ namespace GameRuleEditor.Panels
         {
             var foldout = BuildComponentShell(comp, compIndex, null, draggable: false);
             var actor = context.SelectedActor;
-            foldout.Add(new CustomPropertyList(() => context.currentProject, () => actor.GetCustomProperties()));
+            foldout.Add(new CustomPropertyList(() => context.currentProject, () => actor.GetCustomProperties(),
+                getOwner: () => actor, onRenamed: context.NotifyProjectChanged));
             return foldout;
         }
 
@@ -1242,17 +1244,6 @@ namespace GameRuleEditor.Panels
             return candidate;
         }
 
-        private void RenameSceneObject(string oldName, string newName)
-        {
-            if (string.IsNullOrEmpty(oldName) || string.IsNullOrEmpty(newName) || oldName == newName) return;
-            foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
-            {
-                if (go == null || go.name != oldName || !go.scene.IsValid() || EditorUtility.IsPersistent(go)) continue;
-                go.name = newName;
-                return;
-            }
-        }
-
         // ──────────────────────────────────
         //  ACTOR HEADER CALLBACKS
         // ──────────────────────────────────
@@ -1274,13 +1265,7 @@ namespace GameRuleEditor.Panels
             string uniqueName = GetUniqueActorName(requested, context.selectedActorIndex);
             if (uniqueName == oldName) return;
 
-            controller.UpdateActorProperty(context.selectedActorIndex, () =>
-            {
-                context.SelectedActor.ActorName = uniqueName;
-                RenameSceneObject(oldName, uniqueName);
-            }, "Rename Actor");
-
-            context.NotifyActorListChanged();
+            controller.RenameActor(context.selectedActorIndex, uniqueName);
 
             if (uniqueName != requested)
             {
