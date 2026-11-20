@@ -432,9 +432,68 @@ namespace GameRuleEditor.Controllers
 
         #region Scene Generation
 
+        private const string GeneratedProjectKey = "GameRule.GeneratedProject";
+        private const string GeneratedStateKey = "GameRule.GeneratedState";
+        private const string GeneratedSceneKey = "GameRule.GeneratedScene";
+
+        // SessionState survives compilation and Play/Stop without changing the project JSON.
+        public bool MatchesGeneratedScene()
+        {
+            var project = context.currentProject;
+            if (project == null || EditorPrefs.GetBool("GameRule_PendingScriptAttach", false)) return false;
+            string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(project));
+            return !string.IsNullOrEmpty(guid)
+                && SessionState.GetString(GeneratedProjectKey, "") == guid
+                && SessionState.GetInt(GeneratedSceneKey, int.MinValue) == EditorSceneManager.GetActiveScene().handle
+                && SessionState.GetString(GeneratedStateKey, "") == GenerationSignature(project);
+        }
+
+        private static string GenerationSignature(GameRuleProject project)
+        {
+            // Use one canonical Cast, rather than the stale import copy in sceneData.Cast.
+            var scene = JsonUtility.FromJson<SceneJson>(JsonUtility.ToJson(project.sceneData));
+            scene.Cast = new List<ActorJson>();
+            foreach (var original in project.actors)
+            {
+                var actor = JsonUtility.FromJson<ActorJson>(JsonUtility.ToJson(original));
+                var prefab = ActorPhysicsUtility.LoadPrefab(actor);
+                actor.Position = GenerationVector(actor.Position, prefab != null ? prefab.transform.position : Vector3.zero);
+                actor.Rotation = GenerationVector(actor.Rotation, prefab != null ? prefab.transform.eulerAngles : Vector3.zero, rotation: true);
+                actor.Scale = GenerationVector(actor.Scale, prefab != null ? prefab.transform.localScale : Vector3.one);
+                actor.Tag = string.IsNullOrEmpty(actor.Tag) ? prefab != null ? prefab.tag : "Untagged" : actor.Tag;
+                actor.GetCustomProperties();
+                ActorPhysicsUtility.NormalizeLegacyOverrides(actor);
+                if (!actor.OverrideDensity) actor.Density = 0;
+                if (!actor.OverrideDrag) actor.Drag = 0;
+                if (!actor.OverrideFriction) actor.Friction = 0;
+                if (!actor.OverrideBounciness) actor.Bounciness = 0;
+                // Set names, grouping and icon tint do not change the flattened runtime script.
+                actor.Components = null;
+                actor.IconColorHex = null;
+                if (actor.Script != null)
+                    foreach (var rule in actor.Script)
+                    {
+                        rule.Name = null;
+                        rule.groupId = null;
+                    }
+                scene.Cast.Add(actor);
+            }
+            return Hash128.Compute(project.projectName + "\n" + JsonUtility.ToJson(scene)).ToString();
+        }
+
+        private static float[] GenerationVector(float[] value, Vector3 fallback, bool rotation = false)
+        {
+            var result = value != null && value.Length >= 3
+                ? new[] { value[0], value[1], value[2] }
+                : new[] { fallback.x, fallback.y, fallback.z };
+            if (rotation)
+                for (int i = 0; i < result.Length; i++) result[i] = Mathf.Repeat(result[i], 360f);
+            return result;
+        }
+
         /// <summary>
         /// Generates the Unity scene from the current project data.
-        /// Exports a temporary JSON to Resources/Games and calls Loader.LoadJson.
+        /// Saves the named JSON to Resources/Games and calls Loader.LoadJson.
         /// </summary>
         public void GenerateScene()
         {
@@ -447,7 +506,15 @@ namespace GameRuleEditor.Controllers
             string fileName = WriteProjectJson();
             AssetDatabase.Refresh();
 
+            string signature = GenerationSignature(context.currentProject);
+            SessionState.EraseString(GeneratedStateKey);
             Loader.LoadJson(fileName);
+            if (GameObject.Find("GameManager") == null)
+                throw new System.InvalidOperationException("Scene generation did not create GameManager.");
+            SessionState.SetString(GeneratedProjectKey,
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(context.currentProject)));
+            SessionState.SetString(GeneratedStateKey, signature);
+            SessionState.SetInt(GeneratedSceneKey, EditorSceneManager.GetActiveScene().handle);
             Debug.Log($"Scene generated from project '{context.currentProject.projectName}'");
         }
 

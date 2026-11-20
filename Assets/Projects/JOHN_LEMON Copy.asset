@@ -762,13 +762,22 @@ MonoBehaviour:
       - Animate(John_Walk)
       - PlaySound(Footsteps)
       groupId: g563dece7
+    - Name: Rule 11
+      When:
+      - Collision(Enemy)
+      Do:
+      - Delete()
+      groupId: g03f1b34a
     Components:
     - type: Properties
       name: Custom Properties
       id: 
     - type: Rules
-      name: Rule Set
+      name: Everything
       id: g563dece7
+    - type: Rules
+      name: Die
+      id: g03f1b34a
   - ActorName: Gargoyle1
     Active: 1
     PrefabName: Gargoyle
@@ -782,7 +791,10 @@ MonoBehaviour:
     - 0
     - 30
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -810,7 +822,10 @@ MonoBehaviour:
     - 0
     - 218
     - 0
-    Scale: []
+    Scale:
+    - 1
+    - 1
+    - 1
     Velocity: []
     AngularVelocity: []
     Density: 0
@@ -824,7 +839,10 @@ MonoBehaviour:
     Properties: []
     CustomProperties: []
     Script: []
-    Components: []
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
   - ActorName: Ghost1
     Active: 1
     PrefabName: Ghost

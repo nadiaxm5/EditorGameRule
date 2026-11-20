@@ -10,6 +10,33 @@ using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessa
 
 public static class Loader
 {
+    [InitializeOnLoadMethod]
+    private static void InitializeAutomaticPlay()
+    {
+        EditorApplication.update -= ContinueAutomaticPlay;
+        EditorApplication.update += ContinueAutomaticPlay;
+    }
+
+    private static void ContinueAutomaticPlay()
+    {
+        if (!EditorPrefs.GetBool("GameRule_AutoPlayAfterGenerate", false)) return;
+        if (EditorApplication.isPlaying)
+        {
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            return;
+        }
+        if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling ||
+            EditorApplication.isUpdating || EditorPrefs.GetBool("GameRule_PendingScriptAttach", false) ||
+            !string.IsNullOrEmpty(SessionState.GetString("GameRule.PendingPlayGenerationProject", ""))) return;
+        if (EditorUtility.scriptCompilationFailed)
+        {
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            return;
+        }
+        // Keep the request until Play really starts; a delayCall can be lost on reload.
+        EditorApplication.isPlaying = true;
+    }
+
     private static readonly string[] DefaultGameRuleTags =
     {
         "Untagged",
@@ -208,6 +235,9 @@ public static class Loader
         EditorPrefs.SetBool("GameRule_PendingScriptAttach", true);
         EditorPrefs.SetInt("GameRule_ScriptAttachRetries", 0);
 
+        // A prefab/scene-only edit may leave identical C# source. Still run the reload
+        // callback that attaches scripts to the freshly instantiated scene and resumes Play.
+        UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
         // Force synchronous import so scripts compile before Play mode domain reload
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
     }
@@ -249,15 +279,7 @@ public static class Loader
             EditorPrefs.DeleteKey("GameRule_PendingScriptAttach");
             EditorPrefs.DeleteKey("GameRule_ScriptAttachRetries");
 
-            // If there's a pending auto-play request, enter Play mode now
-            if (EditorPrefs.GetBool("GameRule_AutoPlayAfterGenerate", false))
-            {
-                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
-                EditorApplication.delayCall += () =>
-                {
-                    EditorApplication.isPlaying = true;
-                };
-            }
+            // ContinueAutomaticPlay resumes the persisted request once import/reload is idle.
         }
         else
         {

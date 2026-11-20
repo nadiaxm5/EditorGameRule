@@ -23,6 +23,36 @@ namespace GameRuleEditor.Windows
         private ScrollView actorScrollView;
         private List<VisualElement> actorItems = new List<VisualElement>();
         private Label actorCountLabel;
+        private const string PendingPlayProjectKey = "GameRule.PendingPlayGenerationProject";
+
+        [InitializeOnLoadMethod]
+        private static void InitializePendingPlayGeneration()
+        {
+            EditorApplication.update -= ContinuePendingPlayGeneration;
+            EditorApplication.update += ContinuePendingPlayGeneration;
+        }
+
+        private static void ContinuePendingPlayGeneration()
+        {
+            string projectGuid = SessionState.GetString(PendingPlayProjectKey, "");
+            if (string.IsNullOrEmpty(projectGuid) || EditorApplication.isPlayingOrWillChangePlaymode ||
+                EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            SessionState.EraseString(PendingPlayProjectKey);
+            var ctx = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
+            if (ctx?.currentProject == null ||
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(ctx.currentProject)) != projectGuid) return;
+            try
+            {
+                // Persist the request across any domain reload caused by cancelling Play.
+                EditorPrefs.SetBool("GameRule_AutoPlayAfterGenerate", true);
+                GameRuleLayoutManager.GetOrCreateController(ctx).GenerateScene();
+            }
+            catch (System.Exception ex)
+            {
+                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+                Debug.LogError($"Failed to generate scene before Play: {ex.Message}");
+            }
+        }
 
         [MenuItem("GameRule/GameRule Studio Setup", priority = 50)]
         public static void OpenEditor()
@@ -82,10 +112,8 @@ namespace GameRuleEditor.Windows
                     // reused and no regeneration is necessary.
                     controller.SyncSoundTrackToScene(false);
 
-                    // Check if the scene is already generated (same name + GameManager exists).
-                    // Also require every actor to have a GameObject in the scene: adding an actor only
-                    // touches project data, so without this an actor added after generation would be
-                    // missing on Play (the scene is not regenerated).
+                    // Object presence alone cannot detect edited rules or initial values.
+                    // Reuse only the scene generated from this exact runtime descriptor.
                     var currentScene = EditorSceneManager.GetActiveScene();
                     // Unity can clear the name of an unsaved scene when scripts reload.
                     var managerObject = GameObject.Find("GameManager");
@@ -94,7 +122,8 @@ namespace GameRuleEditor.Windows
                     bool sceneAlreadyGenerated = generatedManager != null
                         && (currentScene.name == projectName ||
                             (string.IsNullOrEmpty(currentScene.name) && generatedManager.GameName == projectName))
-                        && AllActorsPresentInScene();
+                        && AllActorsPresentInScene()
+                        && controller.MatchesGeneratedScene();
 
                     if (sceneAlreadyGenerated)
                     {
@@ -103,22 +132,9 @@ namespace GameRuleEditor.Windows
                     }
 
                     // Cancel Play mode — we need to generate + compile first
+                    SessionState.SetString(PendingPlayProjectKey,
+                        AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(context.currentProject)));
                     EditorApplication.isPlaying = false;
-
-                    // Delay generation to next editor frame so Play mode cancellation takes effect
-                    EditorApplication.delayCall += () =>
-                    {
-                        try
-                        {
-                            controller.GenerateScene();
-                            // Flag: after scripts compile and attach, auto-enter Play mode
-                            EditorPrefs.SetBool("GameRule_AutoPlayAfterGenerate", true);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogError($"Failed to generate scene before Play: {ex.Message}");
-                        }
-                    };
                 }
             }
             // Rebuild UI when returning to edit mode
@@ -651,7 +667,9 @@ namespace GameRuleEditor.Windows
 
             for (int i = 0; i < actors.Count; i++)
             {
-                if (FindActorGameObject(i) == null)
+                var obj = FindActorGameObject(i);
+                if (obj == null || !obj.GetComponents<MonoBehaviour>().Any(component =>
+                    component != null && component is IGameRuleActor && component.GetType().Name == actors[i].ActorName))
                     return false;
             }
             return true;
