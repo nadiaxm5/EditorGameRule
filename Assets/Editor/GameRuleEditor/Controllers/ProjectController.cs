@@ -83,6 +83,7 @@ namespace GameRuleEditor.Controllers
         // Check for scene changes every frame (efficiently)
         private void OnEditorUpdate()
         {
+            if (EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode) return;
             if (context.currentProject == null || context.selectedActorIndex < 0) return;
             var actor = context.SelectedActor;
             if (actor == null) return;
@@ -921,7 +922,10 @@ namespace GameRuleEditor.Controllers
         // Pull data from GameObject to JSON if changed
         public bool SyncSceneToData(ActorJson actor)
         {
-            if (actor == null) return false;
+            // Scene inspection during Play must never become authored initial state.
+            // Guard the shared entry point as well as the update loop, including transitions.
+            if (actor == null || EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
+                return false;
             GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return false;
 
@@ -941,14 +945,10 @@ namespace GameRuleEditor.Controllers
                 changed = true;
             }
 
-            // Do not persist velocities produced by a running simulation. In Edit mode,
-            // Inspector changes to root Rigidbody/Collider components are bidirectional.
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
-                if (ActorPhysicsUtility.CaptureFrom(obj, actor, prefab))
-                    changed = true;
-            }
+            // In Edit mode, root Rigidbody/Collider Inspector changes remain bidirectional.
+            GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
+            if (ActorPhysicsUtility.CaptureFrom(obj, actor, prefab))
+                changed = true;
 
             if (obj.transform.hasChanged)
             {
