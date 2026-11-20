@@ -71,6 +71,9 @@ public static class Loader
             scene.Cast = new List<ActorJson>();
         }
 
+        // Reject invalid imported names before replacing the scene or generated scripts.
+        GameRuleProject.ValidateSceneNames(scene);
+
         if (scene.Gravity != null && scene.Gravity.Length >= 3)
             Physics.gravity = new Vector3(scene.Gravity[0], scene.Gravity[1], scene.Gravity[2]);
 

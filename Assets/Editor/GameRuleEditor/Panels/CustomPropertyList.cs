@@ -90,11 +90,15 @@ namespace GameRuleEditor.Panels
                     var nameField = new TextField { value = property.name, isDelayed = true };
                     nameField.AddToClassList("custom-property-name");
                     HideTextFieldLabel(nameField);
+                    var nameError = GameRuleTheme.CreateNameError();
+                    GameRuleTheme.ShowNameError(nameError,
+                        GameRuleProject.PropertyNameError(property.name, getOwner?.Invoke(), properties, property));
                     nameField.RegisterValueChangedCallback(evt =>
                     {
                         string name = evt.newValue.Trim();
-                        if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[A-Za-z_][A-Za-z0-9_]*$") ||
-                            properties.Exists(other => other != property && other.name == name))
+                        string error = GameRuleProject.PropertyNameError(name, getOwner?.Invoke(), properties, property);
+                        GameRuleTheme.ShowNameError(nameError, error);
+                        if (error != null)
                         {
                             nameField.SetValueWithoutNotify(property.name);
                             return;
@@ -157,6 +161,7 @@ namespace GameRuleEditor.Panels
                     controls.Add(delBtn);
                     header.Add(controls);
                     row.Add(header);
+                    row.Add(nameError);
                     RefreshValueLayout();
 
                     // Spacer-based drag registration
@@ -173,7 +178,7 @@ namespace GameRuleEditor.Panels
             {
                 string name = "NewProp";
                 int suffix = 2;
-                while (properties.Exists(property => property.name == name))
+                while (GameRuleProject.PropertyNameError(name, getOwner?.Invoke(), properties) != null)
                     name = "NewProp" + suffix++;
                 UpdateProperty(() => properties.Add(new CustomVariable { name = name, type = "float" }));
                 Refresh();

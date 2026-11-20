@@ -673,6 +673,8 @@ namespace GameRuleEditor.Controllers
         public void AddActor(string actorName)
         {
             if (context.currentProject == null) return;
+            string error = GameRuleProject.ActorNameError(actorName, context.currentProject.actors);
+            if (error != null) throw new System.ArgumentException(error, nameof(actorName));
 
             Undo.RecordObject(context.currentProject, "Add Actor");
 
@@ -828,7 +830,7 @@ namespace GameRuleEditor.Controllers
                 string.IsNullOrWhiteSpace(newName)) return false;
             newName = newName.Trim();
             var actor = project.actors[actorIndex];
-            if (actor.ActorName == newName || project.actors.Exists(other => other != actor && other.ActorName == newName))
+            if (actor.ActorName == newName || GameRuleProject.ActorNameError(newName, project.actors, actor) != null)
                 return false;
             Undo.IncrementCurrentGroup();
             int group = Undo.GetCurrentGroup();

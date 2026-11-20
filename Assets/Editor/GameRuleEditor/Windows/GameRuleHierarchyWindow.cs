@@ -520,8 +520,16 @@ namespace GameRuleEditor.Windows
             int labelIndex = item.IndexOf(nameLabel);
             if (labelIndex < 0) return;
 
+            var renameGroup = new VisualElement();
+            renameGroup.style.flexGrow = 1;
+            renameGroup.style.flexShrink = 1;
+            var nameError = GameRuleTheme.CreateNameError();
+            renameGroup.Add(renameField);
+            renameGroup.Add(nameError);
+            item.style.height = StyleKeyword.Auto;
+            item.style.minHeight = 18;
             item.Remove(nameLabel);
-            item.Insert(labelIndex, renameField);
+            item.Insert(labelIndex, renameGroup);
 
             var textInput = renameField.Q(TextField.textInputUssName);
             if (textInput != null)
@@ -561,23 +569,26 @@ namespace GameRuleEditor.Windows
             void FinishRename(bool commit)
             {
                 if (isCommitted) return;
-                isCommitted = true;
 
                 if (commit)
                 {
                     string requestedName = renameField.value?.Trim();
-                    if (string.IsNullOrEmpty(requestedName))
+                    string error = GameRuleProject.ActorNameError(requestedName, context.currentProject.actors, actor);
+                    GameRuleTheme.ShowNameError(nameError, error);
+                    if (error != null)
                     {
-                        requestedName = oldName;
+                        return;
                     }
 
-                    string uniqueName = GetUniqueActorName(requestedName, actorIndex);
-                    if (uniqueName != oldName)
+                    if (requestedName != oldName)
                     {
-                        controller.RenameActor(actorIndex, uniqueName);
+                        // Refresh callbacks can dispatch FocusOut while this finishes.
+                        isCommitted = true;
+                        controller.RenameActor(actorIndex, requestedName);
                     }
                 }
 
+                isCommitted = true;
                 RefreshList();
                 context.SelectActor(actorIndex);
             }
@@ -626,22 +637,6 @@ namespace GameRuleEditor.Windows
                 sequentialLeftClickCount = 0;
                 lastLeftClickTime = 0;
             }
-        }
-
-        private string GetUniqueActorName(string baseName, int currentActorIndex)
-        {
-            string candidate = baseName;
-            int suffix = 1;
-
-            while (context.currentProject.actors
-                .Where((_, i) => i != currentActorIndex)
-                .Any(a => a.ActorName == candidate))
-            {
-                candidate = $"{baseName}_{suffix}";
-                suffix++;
-            }
-
-            return candidate;
         }
 
         private void FrameActorInScene(int actorIndex)

@@ -34,6 +34,23 @@ namespace GameRuleEditor.Core
         public static Color IconTint => AccentText;
         public static Color PrefabIconTint => Color.white;
 
+        public static Label CreateNameError()
+        {
+            var label = new Label();
+            label.AddToClassList("name-validation-error");
+            label.style.color = (Color)new Color32(222, 112, 120, 255);
+            label.style.fontSize = 10;
+            label.style.whiteSpace = WhiteSpace.Normal;
+            label.style.display = DisplayStyle.None;
+            return label;
+        }
+
+        public static void ShowNameError(Label label, string error)
+        {
+            label.text = error ?? string.Empty;
+            label.style.display = string.IsNullOrEmpty(error) ? DisplayStyle.None : DisplayStyle.Flex;
+        }
+
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
 
         // IMGUI pickers use the same neutral field and subtle one-pixel frame as UI Toolkit.

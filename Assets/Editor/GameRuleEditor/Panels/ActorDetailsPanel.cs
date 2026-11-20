@@ -22,6 +22,7 @@ namespace GameRuleEditor.Panels
         private VisualElement noSelectionContainer;
 
         private TextField actorNameField;
+        private Label actorNameError;
         private Label actorPropertiesTitle;
         private bool suppressActorNameCallback;
 
@@ -177,6 +178,8 @@ namespace GameRuleEditor.Panels
             topRow.Add(tagContainer);
 
             scrollView.Add(topRow);
+            actorNameError = GameRuleTheme.CreateNameError();
+            scrollView.Add(actorNameError);
 
             // ─── Prefab ───
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
@@ -443,6 +446,8 @@ namespace GameRuleEditor.Panels
 
             suppressActorNameCallback = true;
             actorNameField.SetValueWithoutNotify(actor.ActorName ?? "Unnamed");
+            GameRuleTheme.ShowNameError(actorNameError,
+                GameRuleProject.ActorNameError(actor.ActorName, context.currentProject.actors, actor));
             suppressActorNameCallback = false;
 
             suppressActiveToggleCallback = true;
@@ -1231,19 +1236,6 @@ namespace GameRuleEditor.Panels
             s.paddingLeft = 0; s.paddingRight = 0; s.paddingTop = 0; s.paddingBottom = 0;
         }
 
-        private string GetUniqueActorName(string baseName, int currentActorIndex)
-        {
-            string candidate = baseName;
-            int suffix = 1;
-            while (context.currentProject.actors.Exists(
-                a => a != context.currentProject.actors[currentActorIndex] && a.ActorName == candidate))
-            {
-                candidate = $"{baseName}_{suffix}";
-                suffix++;
-            }
-            return candidate;
-        }
-
         // ──────────────────────────────────
         //  ACTOR HEADER CALLBACKS
         // ──────────────────────────────────
@@ -1259,20 +1251,15 @@ namespace GameRuleEditor.Panels
             if (suppressActorNameCallback || context.selectedActorIndex < 0 || context.SelectedActor == null) return;
 
             string requested = (evt.newValue ?? string.Empty).Trim();
-            if (string.IsNullOrEmpty(requested)) return;
-
-            string oldName = context.SelectedActor.ActorName ?? "Unnamed";
-            string uniqueName = GetUniqueActorName(requested, context.selectedActorIndex);
-            if (uniqueName == oldName) return;
-
-            controller.RenameActor(context.selectedActorIndex, uniqueName);
-
-            if (uniqueName != requested)
+            string error = GameRuleProject.ActorNameError(requested, context.currentProject.actors, context.SelectedActor);
+            GameRuleTheme.ShowNameError(actorNameError, error);
+            if (error != null)
             {
-                suppressActorNameCallback = true;
-                actorNameField.SetValueWithoutNotify(uniqueName);
-                suppressActorNameCallback = false;
+                actorNameField.SetValueWithoutNotify(context.SelectedActor.ActorName);
+                return;
             }
+            controller.RenameActor(context.selectedActorIndex, requested);
+            actorNameField.SetValueWithoutNotify(context.SelectedActor.ActorName);
         }
 
         private void OnActorNameFieldFocusOut(FocusOutEvent evt)
