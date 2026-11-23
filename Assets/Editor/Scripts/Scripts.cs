@@ -496,6 +496,7 @@ public static class Scripts
             outfile.WriteLine("            mainCamera.transform.position = CameraPosition;");
             outfile.WriteLine("            mainCamera.transform.eulerAngles = CameraRotation;");
             outfile.WriteLine("            mainCamera.backgroundColor = BackgroundColor;");
+            outfile.WriteLine("            mainCamera.clearFlags = CameraClearFlags.SolidColor;");
             outfile.WriteLine("        }");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
@@ -512,6 +513,7 @@ public static class Scripts
             outfile.WriteLine("        mainCamera.transform.position = Vector3.Lerp(previousCameraPosition, currentCameraPosition, alpha);");
             outfile.WriteLine("        mainCamera.transform.rotation = Quaternion.Slerp(previousCameraRotation, currentCameraRotation, alpha);");
             outfile.WriteLine("        mainCamera.backgroundColor = BackgroundColor;");
+            outfile.WriteLine("        mainCamera.clearFlags = CameraClearFlags.SolidColor;");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 

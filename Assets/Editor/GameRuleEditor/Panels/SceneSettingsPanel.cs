@@ -142,6 +142,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Background Color");
                 context.currentProject.sceneData.BackgroundColor = ColorToBytes(evt.newValue);
+                controller.SyncCameraToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -185,6 +186,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Sun Position");
                 context.currentProject.sceneData.SunPosition = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
+                controller.SyncSunToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -196,6 +198,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: Vector3Field (Vector3) -> float[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Sun Rotation");
                 context.currentProject.sceneData.SunRotation = new float[] { valueFromField.x, valueFromField.y, valueFromField.z };
+                controller.SyncSunToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -207,6 +210,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Sun Color");
                 context.currentProject.sceneData.SunColor = ColorToBytes(evt.newValue);
+                controller.SyncSunToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });
@@ -218,6 +222,7 @@ namespace GameRuleEditor.Panels
                 // Manual Undo: ColorField (Color) -> byte[] (type mismatch)
                 Undo.RecordObject(context.currentProject, "Change Ambient Color");
                 context.currentProject.sceneData.SunAmbientColor = ColorToBytes(evt.newValue);
+                controller.SyncSunToScene();
                 EditorUtility.SetDirty(context.currentProject);
                 context.NotifyProjectChanged();
             });

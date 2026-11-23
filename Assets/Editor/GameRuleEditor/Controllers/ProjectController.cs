@@ -95,6 +95,8 @@ namespace GameRuleEditor.Controllers
             if (!validElement) context.ClearRuleElementSelection(false);
 
             SyncGravityToScene();
+            SyncCameraToScene(false);
+            SyncSunToScene(false);
             if (context.SelectedActor != null)
                 SyncDataToScene(context.SelectedActor);
 
@@ -537,6 +539,8 @@ namespace GameRuleEditor.Controllers
             string signature = GenerationSignature(context.currentProject);
             SessionState.EraseString(GeneratedStateKey);
             Loader.LoadJson(fileName);
+            SyncCameraToScene(false);
+            SyncSunToScene(false);
             if (GameObject.Find("GameManager") == null)
                 throw new System.InvalidOperationException("Scene generation did not create GameManager.");
             SessionState.SetString(GeneratedProjectKey,
@@ -621,7 +625,7 @@ namespace GameRuleEditor.Controllers
         /// Without this the GameManager script only applies them on Play, so edits made in
         /// Scene Settings are invisible while working in the editor.
         /// </summary>
-        public void SyncCameraToScene()
+        public void SyncCameraToScene(bool recordUndo = true)
         {
             if (context.currentProject == null) return;
 
@@ -629,7 +633,8 @@ namespace GameRuleEditor.Controllers
             if (camera == null) return;
 
             var scene = context.currentProject.sceneData;
-            Undo.RecordObject(camera.transform, "Change Camera Transform");
+            if (recordUndo)
+                Undo.RecordObjects(new Object[] { camera.transform, camera }, "Change Camera Settings");
 
             if (scene.CameraPosition != null && scene.CameraPosition.Length >= 3)
                 camera.transform.position = new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]);
@@ -637,7 +642,54 @@ namespace GameRuleEditor.Controllers
             if (scene.CameraRotation != null && scene.CameraRotation.Length >= 3)
                 camera.transform.eulerAngles = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
 
+            if (TrySceneColor(scene.BackgroundColor, out Color background))
+            {
+                camera.backgroundColor = background;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+            }
+
             EditorSceneManager.MarkSceneDirty(camera.gameObject.scene);
+            SceneView.RepaintAll();
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        /// <summary>Applies Sun and ambient settings using the same objects as generated GameManager.</summary>
+        public void SyncSunToScene(bool recordUndo = true)
+        {
+            var scene = context.currentProject?.sceneData;
+            if (scene == null) return;
+
+            var manager = FindSceneObjectByName("GameManager");
+            Light sun = manager != null ? manager.GetComponentInChildren<Light>(true) : null;
+            if (sun != null)
+            {
+                if (recordUndo) Undo.RecordObjects(new Object[] { sun.transform, sun }, "Change Sun Settings");
+                if (scene.SunPosition != null && scene.SunPosition.Length >= 3)
+                    sun.transform.position = new Vector3(scene.SunPosition[0], scene.SunPosition[1], scene.SunPosition[2]);
+                if (scene.SunRotation != null && scene.SunRotation.Length >= 3)
+                    sun.transform.eulerAngles = new Vector3(scene.SunRotation[0], scene.SunRotation[1], scene.SunRotation[2]);
+                if (TrySceneColor(scene.SunColor, out Color color)) sun.color = color;
+                EditorSceneManager.MarkSceneDirty(sun.gameObject.scene);
+            }
+
+            if (TrySceneColor(scene.SunAmbientColor, out Color ambient))
+            {
+                if (recordUndo) Undo.RecordObject(Unsupported.GetRenderSettings(), "Change Ambient Lighting");
+                RenderSettings.ambientLight = ambient;
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                var activeScene = EditorSceneManager.GetActiveScene();
+                if (activeScene.IsValid()) EditorSceneManager.MarkSceneDirty(activeScene);
+            }
+            SceneView.RepaintAll();
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        private static bool TrySceneColor(byte[] bytes, out Color color)
+        {
+            color = Color.white;
+            if (bytes == null || bytes.Length < 3) return false;
+            color = new Color32(bytes[0], bytes[1], bytes[2], 255);
+            return true;
         }
 
         /// <summary>
