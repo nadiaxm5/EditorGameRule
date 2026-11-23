@@ -45,16 +45,18 @@ namespace GameRuleEditor.Controllers
         private void OnUndoRedoPerformed()
         {
             if (context == null) return;
+            int previousActorIndex = context.selectedActorIndex;
 
             // After undo/redo, the project data may have changed (e.g. actor removed),
             // but selectedActorIndex/selectedScriptIndex on EditorContext are NOT part of
-            // the undo record. Clamp them to valid ranges to avoid null references.
+            // the undo record. Clear invalid selections instead of selecting a different
+            // actor/rule just because it now occupies the last available index.
             if (context.currentProject != null)
             {
                 int actorCount = context.currentProject.actors.Count;
                 if (context.selectedActorIndex >= actorCount)
                 {
-                    context.selectedActorIndex = actorCount - 1;
+                    context.selectedActorIndex = -1;
                     context.selectedScriptIndex = -1;
                 }
 
@@ -63,21 +65,46 @@ namespace GameRuleEditor.Controllers
                     var actor = context.currentProject.actors[context.selectedActorIndex];
                     int scriptCount = actor.Script?.Count ?? 0;
                     if (context.selectedScriptIndex >= scriptCount)
-                        context.selectedScriptIndex = scriptCount - 1;
+                        context.selectedScriptIndex = -1;
                 }
                 else
                 {
                     context.selectedScriptIndex = -1;
                 }
             }
+            else
+            {
+                context.selectedActorIndex = -1;
+                context.selectedScriptIndex = -1;
+            }
+
+            var selectedRule = context.SelectedScript;
+            int selectedElement = context.SelectedRuleElementIndex;
+            bool validElement = selectedRule != null && selectedElement >= 0 && !context.PendingRuleElement;
+            if (validElement && context.SelectedRuleElementKind == RuleElementKind.Action)
+                validElement = selectedRule.Do != null && selectedElement < selectedRule.Do.Count &&
+                    !string.IsNullOrWhiteSpace(selectedRule.Do[selectedElement]);
+            else if (validElement && context.SelectedRuleElementKind == RuleElementKind.Condition)
+            {
+                var terms = selectedRule.When != null && selectedRule.When.Count > 0
+                    ? RuleConditionSequence.Parse(selectedRule.When[0]) : null;
+                validElement = terms != null && selectedElement < terms.Count &&
+                    !string.IsNullOrWhiteSpace(terms[selectedElement].Source);
+            }
+            else validElement = false;
+            if (!validElement) context.ClearRuleElementSelection(false);
 
             SyncGravityToScene();
             if (context.SelectedActor != null)
                 SyncDataToScene(context.SelectedActor);
 
+            bool wasRefreshing = context.isUndoRedoRefresh;
             context.isUndoRedoRefresh = true;
-            context.NotifyAll();
-            context.isUndoRedoRefresh = false;
+            try
+            {
+                context.NotifyAll(actorSelectionChanged: previousActorIndex != context.selectedActorIndex);
+            }
+            finally { context.isUndoRedoRefresh = wasRefreshing; }
         }
 
         // Check for scene changes every frame (efficiently)

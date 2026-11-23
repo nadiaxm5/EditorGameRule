@@ -277,11 +277,13 @@ namespace GameRuleEditor.Core
         /// <summary>
         /// Lo llama todo para forzar que toda la UI se actualice después de un undo/redo, asegurándonos de que todos los paneles vuelvan a leer el estado actual del proyecto y la selección. Sin esto, algunos paneles podrían quedar desincronizados con el estado real después de un undo/redo.
         /// </summary>
-        public void NotifyAll()
+        public void NotifyAll(bool actorSelectionChanged = true)
         {
             OnActorListChanged?.Invoke();
             OnProjectChanged?.Invoke();
-            OnActorSelected?.Invoke(selectedActorIndex);
+            // Data refreshes must not look like a Cast click: Rules resets its filter
+            // and expansion state on a real actor selection.
+            if (actorSelectionChanged) OnActorSelected?.Invoke(selectedActorIndex);
             OnScriptSelected?.Invoke(selectedScriptIndex);
             OnRuleElementSelected?.Invoke();
             OnInspectorModeChanged?.Invoke(_activeInspectorMode);
