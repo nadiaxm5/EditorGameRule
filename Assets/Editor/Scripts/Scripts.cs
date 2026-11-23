@@ -115,7 +115,7 @@ public static class Scripts
 
             outfile.WriteLine("    void Start() {");
             if (joinScope.Length != 0)
-                outfile.WriteLine("        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),\"" + joinScope + "\");");
+                outfile.WriteLine("        scopeList = Utils.CreateScope(gameObject.GetInstanceID()," + GameRuleParser.QuoteString(joinScope) + ");");
             outfile.WriteLine("        if (Active) gameObject.SetActive(true);");
             outfile.WriteLine("        else gameObject.SetActive(false);");
             outfile.WriteLine("    }");
@@ -169,10 +169,10 @@ public static class Scripts
             return bare + "()";
         }
 
-        string name = element.Substring(0, init);
+        var parsed = GameRuleParser.ParseFunction(element);
+        string name = parsed.Name;
         string command = name;
-        string rest = element.Substring(init + 1, end - init - 1);
-        List<string> parameters = rest.Split(new string[] { "," }, StringSplitOptions.None).ToList();
+        List<string> parameters = parsed.Params;
 
         // A parameter left empty in the editor — or missing in a hand-written JSON — would reach
         // the runtime as "" and blow up the expression parser. Fill it with the same default the
@@ -186,7 +186,7 @@ public static class Scripts
         foreach (string s in parameters)
         {
             counter++;
-            command += "\"" + s + "\"";
+            command += GameRuleParser.QuoteString(s);
             if (parameters.Count != counter) command += ",";
         }
         if (name == "Compare" || name == "Edit" || name == "Check") command += ",scopeList)";
@@ -200,11 +200,11 @@ public static class Scripts
             string prefab = parameters[0];
             // The serialized second parameter is always "this". At runtime that means the
             // GameObject executing this generated rule, never a user-selectable actor.
-            command = $"Spawn(\"{prefab}\", gameObject";
+            command = $"Spawn({GameRuleParser.QuoteString(prefab)}, gameObject";
 
             List<string> extraParams = new List<string>();
             for (int i = 2; i < parameters.Count; i++)
-                extraParams.Add($"\"{parameters[i].Trim()}\"");
+                extraParams.Add(GameRuleParser.QuoteString(parameters[i].Trim()));
 
             while (extraParams.Count < 6)
                 extraParams.Add("\"0\"");
@@ -227,36 +227,24 @@ public static class Scripts
 
     private static string ProcessCondition(string condition)
     {
-        string result = condition
-            .Replace(" AND ", " && ")
-            .Replace(" OR ", " || ")
-            .Replace("NOT ", "!");
-
-        var individualConditions = ExtractIndividualConditions(condition);
-        foreach (string individualCondition in individualConditions)
+        var parts = new List<string>();
+        foreach (string token in GameRuleParser.TokenizeCondition(condition))
         {
-            string replacement = $"Condition.{StringToCommand(individualCondition)}";
-            result = result.Replace(individualCondition, replacement);
+            switch (token)
+            {
+                case "AND": parts.Add("&&"); break;
+                case "OR": parts.Add("||"); break;
+                case "NOT": parts.Add("!"); break;
+                default: parts.Add($"Condition.{StringToCommand(token)}"); break;
+            }
         }
-
-        return result;
+        return string.Join(" ", parts);
     }
 
     private static List<string> ExtractIndividualConditions(string conditionExpression)
     {
-        List<string> conditions = new List<string>();
-
-        var matches = Regex.Matches(
-            conditionExpression,
-            @"[a-zA-Z_][a-zA-Z0-9_]*\([^)]+\)"
-        );
-
-        foreach (Match match in matches)
-        {
-            conditions.Add(match.Value);
-        }
-
-        return conditions;
+        return GameRuleParser.TokenizeCondition(conditionExpression)
+            .Where(token => token != "AND" && token != "OR" && token != "NOT").ToList();
     }
 
     public static void CreateGameManager(SceneJson scene, List<string> declarationOrder)
@@ -287,7 +275,7 @@ public static class Scripts
             outfile.WriteLine("    private static readonly string[] ActorOrder = new string[] { " + bakedOrder + " };");
             outfile.WriteLine("");
 
-            outfile.WriteLine($"    public string GameName = \"{scene.GameName ?? "Unknown"}\";");
+            outfile.WriteLine($"    public string GameName = {GameRuleParser.QuoteString(scene.GameName ?? "Unknown")};");
 
             // ScreenResolution 1920x1080 default
             if (scene.ScreenResolution != null && scene.ScreenResolution.Length >= 2)
@@ -343,10 +331,7 @@ public static class Scripts
             else
                 outfile.WriteLine("    public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);");
 
-            string soundTrack = (scene.SoundTrack ?? "")
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"");
-            outfile.WriteLine($"    public string SoundTrack = \"{soundTrack}\";");
+            outfile.WriteLine($"    public string SoundTrack = {GameRuleParser.QuoteString(scene.SoundTrack)};");
 
             outfile.WriteLine("    public float FPS { get; private set; }");
 

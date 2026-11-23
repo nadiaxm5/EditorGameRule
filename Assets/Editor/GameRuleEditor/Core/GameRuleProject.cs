@@ -81,20 +81,20 @@ namespace GameRuleEditor.Core
 
             // Remove empty arrays
             string emptyArrayPattern = @"\s*""[a-zA-Z0-9_]+"": \[\],?";
-            rawJson = Regex.Replace(rawJson, emptyArrayPattern, "");
+            rawJson = ReplaceJsonSyntax(rawJson, emptyArrayPattern, "");
 
             // Remove default floats
             string zeroFloatPattern = @"\s*""[a-zA-Z0-9_]+"": 0(?:\.0+)?(?=\s*[,}]),?";
-            rawJson = Regex.Replace(rawJson, zeroFloatPattern, "");
+            rawJson = ReplaceJsonSyntax(rawJson, zeroFloatPattern, "");
 
             // False physics override flags mean "inherit from prefab" and need not clutter JSON.
             string inheritedPhysicsPattern = @"\s*""Override(?:Density|Friction|Bounciness|Drag)"": false,?";
-            rawJson = Regex.Replace(rawJson, inheritedPhysicsPattern, "");
+            rawJson = ReplaceJsonSyntax(rawJson, inheritedPhysicsPattern, "");
 
             // Manual construction
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
-            sb.AppendLine($"    \"GameName\": \"{sceneData.GameName}\",");
+            sb.AppendLine($"    \"GameName\": {GameRuleParser.QuoteString(sceneData.GameName)},");
             sb.AppendLine($"    \"ScreenResolution\": [{F(sceneData.ScreenResolution[0])}, {F(sceneData.ScreenResolution[1])}],");
 
             sb.AppendLine($"    \"CameraPosition\": {Vec3ToJson(sceneData.CameraPosition)},");
@@ -107,7 +107,7 @@ namespace GameRuleEditor.Core
 
             sb.AppendLine($"    \"BackgroundColor\": {ColorToJson(sceneData.BackgroundColor)},");
             sb.AppendLine($"    \"Gravity\": {Vec3ToJson(sceneData.Gravity)},");
-            sb.AppendLine($"    \"SoundTrack\": \"{EscapeJsonString(sceneData.SoundTrack)}\",");
+            sb.AppendLine($"    \"SoundTrack\": {GameRuleParser.QuoteString(sceneData.SoundTrack)},");
 
             // Custom Variables
             if (realVariables != null && realVariables.Count > 0)
@@ -120,9 +120,6 @@ namespace GameRuleEditor.Core
                 sb.AppendLine("    \"CustomVariables\": [],");
             }
 
-            // Clean Raw JSON and temp variable list and extract
-            rawJson = rawJson.Replace("\"CustomVariables\": [],", "").Replace("\"CustomVariables\": []", "");
-
             int castIndex = rawJson.IndexOf("\"Cast\":");
             if (castIndex != -1)
             {
@@ -132,10 +129,10 @@ namespace GameRuleEditor.Core
 
                 // Compact multi-line number arrays
                 string compactPattern = @":\s*\[\s*([0-9.-]+),\s*([0-9.-]+),\s*([0-9.-]+)\s*\]";
-                castContent = Regex.Replace(castContent, compactPattern, ": [$1, $2, $3]");
+                castContent = ReplaceJsonSyntax(castContent, compactPattern, ": [$1, $2, $3]");
 
                 // Removes commas left behind
-                castContent = Regex.Replace(castContent, @",(\s*})", "$1");
+                castContent = ReplaceJsonSyntax(castContent, @",(\s*[}\]])", "$1");
 
                 sb.Append("    " + castContent);
             }
@@ -164,15 +161,12 @@ namespace GameRuleEditor.Core
             return $"[{c[0]}, {c[1]}, {c[2]}]";
         }
 
-        private string EscapeJsonString(string value)
+        private static string ReplaceJsonSyntax(string json, string pattern, string replacement)
         {
-            if (string.IsNullOrEmpty(value)) return "";
-            return value
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n")
-                .Replace("\t", "\\t");
+            // Consume complete JSON strings before searching their contents for cleanup
+            // patterns. Names and rule text must never be modified by export formatting.
+            return Regex.Replace(json, "(?<syntax>" + pattern + @")|""(?:\\.|[^""\\])*""",
+                match => match.Groups["syntax"].Success ? match.Result(replacement) : match.Value);
         }
 
         private string BuildCleanCustomVariablesJson(List<CustomVariable> variables)
@@ -184,9 +178,9 @@ namespace GameRuleEditor.Core
             {
                 var v = variables[i];
                 sb.Append("        {");
-                sb.Append($"\"name\": \"{v.name}\", \"type\": \"{v.type}\"");
+                sb.Append($"\"name\": {GameRuleParser.QuoteString(v.name)}, \"type\": {GameRuleParser.QuoteString(v.type)}");
 
-                switch (v.type.ToLower())
+                switch ((v.type ?? string.Empty).ToLowerInvariant())
                 {
                     case "int": sb.Append($", \"intValue\": {v.intValue}"); break;
                     case "float": sb.Append($", \"floatValue\": {v.floatValue.ToString(CultureInfo.InvariantCulture)}"); break;
@@ -334,7 +328,6 @@ namespace GameRuleEditor.Core
             if (!Regex.IsMatch(name, @"^[A-Za-z_][A-Za-z0-9_]*$"))
                 return "Use letters, digits and underscores; start with a letter or underscore.";
             if (ReservedNames.Contains(name)) return $"'{name}' is a reserved C# keyword.";
-            if (name == "AND" || name == "OR" || name == "NOT") return $"'{name}' is a GameRule logic operator.";
             return null;
         }
 

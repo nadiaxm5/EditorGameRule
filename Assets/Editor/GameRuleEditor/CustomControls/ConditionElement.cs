@@ -712,8 +712,8 @@ namespace GameRuleEditor.CustomControls
             string conditionText;
             if (selectedConditionType == "Compare")
             {
-                conditionText = $"Compare({compareLeftOperand.GetStoredExpression()} " +
-                                $"{compareOperatorDropdown.value} {compareRightOperand.GetStoredExpression()})";
+                conditionText = GameRuleParser.FormatFunction("Compare", new[] {
+                    $"{compareLeftOperand.GetStoredExpression()} {compareOperatorDropdown.value} {compareRightOperand.GetStoredExpression()}" });
                 return isNegated ? $"NOT {conditionText}" : conditionText;
             }
 
@@ -721,7 +721,7 @@ namespace GameRuleEditor.CustomControls
             {
                 string storedValue = GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(
                     context, checkPropertyValue ?? string.Empty);
-                conditionText = $"Check({storedValue})";
+                conditionText = GameRuleParser.FormatFunction("Check", new[] { storedValue });
                 return isNegated ? $"NOT {conditionText}" : conditionText;
             }
 
@@ -730,7 +730,7 @@ namespace GameRuleEditor.CustomControls
                 string eventName = inputElements.Count > 0 && inputElements[0] is TooltipPopupField eventDropdown
                     ? eventDropdown.value
                     : string.Empty;
-                conditionText = $"Keyboard({selectedKeyboardKey ?? string.Empty},{eventName})";
+                conditionText = GameRuleParser.FormatFunction("Keyboard", new[] { selectedKeyboardKey ?? string.Empty, eventName });
                 return isNegated ? $"NOT {conditionText}" : conditionText;
             }
 
@@ -751,7 +751,7 @@ namespace GameRuleEditor.CustomControls
                     parts.Add(toggle.value.ToString().ToLowerInvariant());
             }
 
-            conditionText = $"{selectedConditionType}({string.Join(",", parts)})";
+            conditionText = GameRuleParser.FormatFunction(selectedConditionType, parts);
             return isNegated ? $"NOT {conditionText}" : conditionText;
         }
 

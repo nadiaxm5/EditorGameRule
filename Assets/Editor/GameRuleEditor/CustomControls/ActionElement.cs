@@ -345,7 +345,7 @@ namespace GameRuleEditor.CustomControls
             if (type == "Spawn") parameters.Insert(1, "this");
 
             if (parameters.Count == 0) return $"{type}()";
-            return $"{type}({string.Join(",", parameters)})";
+            return GameRuleParser.FormatFunction(type, parameters);
         }
 
         private interface IActionParameterControl
