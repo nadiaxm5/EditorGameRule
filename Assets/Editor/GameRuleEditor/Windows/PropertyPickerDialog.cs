@@ -67,6 +67,7 @@ namespace GameRuleEditor.Windows
         private GUIStyle navigationColoredLabelStyle;
         private GUIStyle propertyColoredLabelStyle;
         private GUIStyle pickerSurfaceStyle;
+        private GUIStyle pickerColumnStyle;
         private bool stylesAreProSkin;
         private Vector2 mouseScreenPosition;
         private Rect currentColumnScreenRect;
@@ -100,6 +101,8 @@ namespace GameRuleEditor.Windows
             public bool HidePreview;
         }
 
+        private enum PropertyScope { Self, Global, Actor }
+        private PropertyScope selectedScope = PropertyScope.Self;
         private string selectedCategory = "Me";
         private string selectedGroup = "Transform";
 
@@ -243,32 +246,21 @@ namespace GameRuleEditor.Windows
                     ? match.Groups["name"].Value : match.Value);
             if (string.IsNullOrEmpty(actorName)) return value;
 
-            return Regex.Replace(value, @"(?<![A-Za-z0-9_])this\.", actorName + ".",
-                RegexOptions.IgnoreCase);
+            return Regex.Replace(value, @"(?<![A-Za-z0-9_])this\.", actorName + ".");
         }
 
         public static string ToStoredReference(EditorContext ctx, string value)
         {
-            string actorName = ctx?.SelectedActor?.ActorName;
-            if (string.IsNullOrEmpty(value)) return value;
-
-            if (!string.IsNullOrEmpty(actorName))
-            {
-                string actorReference = @"(?<![A-Za-z0-9_])" + Regex.Escape(actorName) + @"\.";
-                value = Regex.Replace(value, actorReference, "this.", RegexOptions.IgnoreCase);
-            }
-
-            return Regex.Replace(value,
-                @"(?<![A-Za-z0-9_.#])(?<name>[A-Za-z_][A-Za-z0-9_]*)",
-                match => IsGlobalName(ctx, match.Groups["name"].Value)
-                    ? "#" + match.Value : match.Value);
+            // Picker results and loaded operands already carry their scope (this., Actor., #).
+            // Display text is deliberately ambiguous and must never be used to infer it.
+            return value;
         }
 
         public static bool IsGlobalReference(EditorContext ctx, string value)
         {
             if (string.IsNullOrWhiteSpace(value)) return false;
             Match match = Regex.Match(value.Trim(),
-                @"^#?(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\.[xyz])?$");
+                @"^#(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\.[xyz])?$");
             return match.Success && IsGlobalName(ctx, match.Groups["name"].Value);
         }
 
@@ -303,7 +295,7 @@ namespace GameRuleEditor.Windows
 
             // 2. Standard Property Mode
             const float outerPadding = 8f;
-            const float columnGap = 6f;
+            const float columnGap = outerPadding;
             float availableWidth = Mathf.Max(0f, position.width - (outerPadding * 2f) - (columnGap * 2f));
             float columnWidth = availableWidth / 3f;
 
@@ -315,11 +307,11 @@ namespace GameRuleEditor.Windows
             DrawColumn(ref scrollCategory, columnWidth, () =>
             {
                 string meLabel = currentActor == null ? "Me" : $"Me ({currentActor.ActorName})";
-                DrawSelectable(meLabel, "Me");
-                DrawSelectable("Game (global)", "Game");
+                DrawSelectable(meLabel, "Me", PropertyScope.Self);
+                DrawSelectable("Game (global)", "Game", PropertyScope.Global);
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Actors", EditorStyles.boldLabel);
-                foreach (var actorName in actorNames) DrawSelectable(actorName, actorName);
+                foreach (var actorName in actorNames) DrawSelectable(actorName, actorName, PropertyScope.Actor);
             }, hideHorizontalScrollbar: true);
 
             GUILayout.Space(columnGap);
@@ -327,7 +319,7 @@ namespace GameRuleEditor.Windows
             // Col 2: Group
             DrawColumn(ref scrollGroup, columnWidth, () =>
             {
-                if (selectedCategory == "Game")
+                if (selectedScope == PropertyScope.Global)
                 {
                     DrawGroupSelectable("Global Variables", "Global");
                     if (!boolOnly)
@@ -354,7 +346,7 @@ namespace GameRuleEditor.Windows
             // Col 3: Properties
             DrawColumn(ref scrollProps, columnWidth, () =>
             {
-                if (selectedCategory == "Game") DrawGameProperties();
+                if (selectedScope == PropertyScope.Global) DrawGameProperties();
                 else DrawActorProperties();
             });
 
@@ -585,10 +577,7 @@ namespace GameRuleEditor.Windows
             if (!string.IsNullOrEmpty(assetPath)) tooltip += "\n" + assetPath;
             bool clicked = GUI.Button(cardRect, new GUIContent(string.Empty, tooltip), GUIStyle.none);
 
-            Color cardColor = pressed
-                ? GameRuleTheme.Panel
-                : hovered ? GameRuleTheme.Field : GameRuleTheme.Header;
-            EditorGUI.DrawRect(cardRect, cardColor);
+            GameRuleTheme.DrawPickerButton(cardRect, hovered, pressed);
 
             float previewSize = Mathf.Min(width - 12f, 76f);
             var previewRect = new Rect(
@@ -607,19 +596,14 @@ namespace GameRuleEditor.Windows
             {
                 alignment = TextAnchor.UpperCenter,
                 fontSize = 11,
+                fontStyle = FontStyle.Bold,
                 wordWrap = true,
                 clipping = TextClipping.Clip
             };
             // Wrap compound asset names visually; the stored reference and tooltip stay intact.
             string displayName = Regex.Replace(item.Label, @"(?<=[a-z0-9])(?=[A-Z])|(?<=[_\-])", "\u200B");
-            if (hovered || pressed)
-            {
-                Color hoveredTextColor = GameRuleTheme.PropertyAccent;
-                labelStyle.normal.textColor = hoveredTextColor;
-                labelStyle.hover.textColor = hoveredTextColor;
-                labelStyle.active.textColor = hoveredTextColor;
-                labelStyle.focused.textColor = hoveredTextColor;
-            }
+            labelStyle.normal.textColor = labelStyle.hover.textColor =
+                labelStyle.active.textColor = labelStyle.focused.textColor = GameRuleTheme.PropertyAccent;
 
             GUI.Label(labelRect, new GUIContent(displayName, tooltip), labelStyle);
 
@@ -695,11 +679,7 @@ namespace GameRuleEditor.Windows
             bool pressed = hovered && Event.current.type == EventType.MouseDown && Event.current.button == 0;
             bool clicked = GUI.Button(rect, GUIContent.none, GUIStyle.none);
 
-            Color fillColor = pressed || selected
-                ? GameRuleTheme.Panel
-                : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
-            GameRuleTheme.DrawPickerField(rect, fillColor,
-                selected || hovered ? GameRuleTheme.PropertyAccent : GameRuleTheme.Border);
+            GameRuleTheme.DrawPickerButton(rect, hovered, pressed, selected);
 
             GUIStyle labelStyle = CreateColoredLabelStyle(TextAnchor.MiddleCenter, new RectOffset(2, 2, 2, 2));
             labelStyle.fontStyle = FontStyle.Bold;
@@ -710,27 +690,43 @@ namespace GameRuleEditor.Windows
         private void DrawColumn(ref Vector2 scroll, float width, System.Action drawContent,
                                 bool hideHorizontalScrollbar = false)
         {
+            // IMGUI can lay out the contents at the full column width before deciding
+            // that a vertical scrollbar is needed. Reserve its gutter explicitly so
+            // buttons keep their right edge visible, including on the first frame.
+            GUIStyle verticalScrollbar = GUI.skin.verticalScrollbar;
+            float scrollbarGutter = Mathf.Max(14f, verticalScrollbar.fixedWidth) +
+                verticalScrollbar.margin.left + verticalScrollbar.margin.right + 4f;
+            float contentWidth = Mathf.Max(0f, width - pickerSurfaceStyle.padding.horizontal - scrollbarGutter);
             Rect columnRect = EditorGUILayout.BeginVertical(
-                pickerSurfaceStyle, GUILayout.Width(width), GUILayout.ExpandHeight(true));
+                pickerColumnStyle, GUILayout.Width(width), GUILayout.ExpandHeight(true));
+            // Keep each column visibly separate from the darker, evenly sized gutters.
+            Color columnFill = Color.Lerp(GameRuleTheme.Panel, GameRuleTheme.Surface, 0.5f);
+            GUI.DrawTexture(columnRect, Texture2D.whiteTexture, ScaleMode.StretchToFill,
+                true, 0f, columnFill, 0f, 4f);
             Rect previousColumnScreenRect = currentColumnScreenRect;
             Vector2 columnScreenPosition = GUIUtility.GUIToScreenPoint(columnRect.position);
             currentColumnScreenRect = new Rect(columnScreenPosition, columnRect.size);
+            currentColumnScreenRect.width = Mathf.Max(0f, currentColumnScreenRect.width - scrollbarGutter);
 
             scroll = hideHorizontalScrollbar
-                ? EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, GUI.skin.verticalScrollbar)
+                ? EditorGUILayout.BeginScrollView(scroll, GUIStyle.none, verticalScrollbar)
                 : EditorGUILayout.BeginScrollView(scroll);
+            EditorGUILayout.BeginVertical(GUILayout.Width(contentWidth), GUILayout.MaxWidth(contentWidth));
             drawContent();
+            EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
             currentColumnScreenRect = previousColumnScreenRect;
         }
 
-        private void DrawSelectable(string label, string id)
+        private void DrawSelectable(string label, string id, PropertyScope scope)
         {
-            string defaultGroup = (id == "Game") ? "Global" : "Transform";
-            if (DrawTintedButton(label, navigationButtonStyle, navigationColoredLabelStyle, selectedCategory == id))
+            string defaultGroup = scope == PropertyScope.Global ? "Global" : "Transform";
+            if (DrawTintedButton(label, navigationButtonStyle, navigationColoredLabelStyle,
+                selectedCategory == id && selectedScope == scope))
             {
                 selectedCategory = id;
+                selectedScope = scope;
                 selectedGroup = defaultGroup;
             }
         }
@@ -776,8 +772,8 @@ namespace GameRuleEditor.Windows
 
         private void DrawActorProperties()
         {
-            string prefix = (selectedCategory == "Me") ? "this." : selectedCategory + ".";
-            ActorJson targetData = (selectedCategory == "Me") ? currentActor : context.currentProject.actors.Find(a => a.ActorName == selectedCategory);
+            string prefix = selectedScope == PropertyScope.Self ? "this." : selectedCategory + ".";
+            ActorJson targetData = selectedScope == PropertyScope.Self ? currentActor : context.currentProject.actors.Find(a => a.ActorName == selectedCategory);
 
             if (propertyDefinitions.ContainsKey(selectedGroup))
             {
@@ -828,6 +824,7 @@ namespace GameRuleEditor.Windows
         {
             if (navigationButtonStyle != null &&
                 pickerSurfaceStyle != null &&
+                pickerColumnStyle != null &&
                 propertyButtonStyle != null &&
                 navigationColoredLabelStyle != null &&
                 propertyColoredLabelStyle != null &&
@@ -846,6 +843,9 @@ namespace GameRuleEditor.Windows
             stylesAreProSkin = EditorGUIUtility.isProSkin;
             pickerSurfaceStyle = new GUIStyle(EditorStyles.helpBox);
             pickerSurfaceStyle.normal.background = null;
+            // Explicit outer padding and column gaps already reserve the margins.
+            // Native helpBox margins would add width and clip the rightmost column.
+            pickerColumnStyle = new GUIStyle(pickerSurfaceStyle) { margin = new RectOffset() };
         }
 
         private static GUIStyle CreateButtonStyle(TextAnchor alignment)
@@ -853,10 +853,11 @@ namespace GameRuleEditor.Windows
             var style = new GUIStyle(EditorStyles.label)
             {
                 alignment = alignment,
+                fontStyle = FontStyle.Bold,
                 stretchWidth = true
             };
             style.normal.textColor = style.hover.textColor = style.active.textColor =
-                style.focused.textColor = GameRuleTheme.Text;
+                style.focused.textColor = GameRuleTheme.PropertyAccent;
             return style;
         }
 
@@ -865,6 +866,7 @@ namespace GameRuleEditor.Windows
             var style = new GUIStyle(EditorStyles.label)
             {
                 alignment = alignment,
+                fontStyle = FontStyle.Bold,
                 padding = padding
             };
             Color textColor = GameRuleTheme.PropertyAccent;
@@ -888,6 +890,12 @@ namespace GameRuleEditor.Windows
                 GUILayout.ExpandWidth(true));
 
             Vector2 buttonScreenPosition = GUIUtility.GUIToScreenPoint(buttonRect.position);
+            // ScrollView's layout may stretch the child beyond the requested width.
+            // Bound the actual painted/clickable rectangle to this column's content
+            // area, leaving the scrollbar and a small gap completely outside it.
+            if (currentColumnScreenRect.width > 0f)
+                buttonRect.width = Mathf.Max(0f, Mathf.Min(buttonRect.width,
+                    currentColumnScreenRect.xMax - buttonScreenPosition.x - 4f));
             Rect buttonScreenRect = new Rect(buttonScreenPosition, buttonRect.size);
             Rect visibleButtonScreenRect = Intersect(buttonScreenRect, currentColumnScreenRect);
             bool hovered = visibleButtonScreenRect.Contains(mouseScreenPosition);
@@ -897,12 +905,9 @@ namespace GameRuleEditor.Windows
             // The colored button draws its label separately, but still needs GUIContent for hover help.
             var content = new GUIContent(label, hovered ? tooltip : null);
             bool clicked = GUI.Button(buttonRect, new GUIContent(string.Empty, hovered ? tooltip : null), GUIStyle.none);
-            Color fillColor = pressed ? GameRuleTheme.Panel
-                : hovered ? GameRuleTheme.Field : GameRuleTheme.Surface;
-            Color borderColor = colored ? GameRuleTheme.PropertyAccent : GameRuleTheme.Border;
-            GameRuleTheme.DrawPickerField(buttonRect, fillColor, borderColor);
+            GameRuleTheme.DrawPickerButton(buttonRect, hovered, pressed, selected);
             var labelStyle = colored ? coloredLabelStyle : buttonStyle;
-            labelStyle.normal.textColor = colored ? GameRuleTheme.PropertyAccent : GameRuleTheme.Text;
+            labelStyle.normal.textColor = GameRuleTheme.PropertyAccent;
             GUI.Label(buttonRect, content, labelStyle);
 
             return clicked;

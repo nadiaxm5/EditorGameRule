@@ -406,10 +406,10 @@ namespace GameRuleEditor.CustomControls
             private readonly Button valueButton;
             private readonly Button pickerButton;
             private readonly Button clearButton;
-            private string displayValue;
+            private string storedValue;
 
             public string StoredValue => GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(
-                context, displayValue ?? string.Empty);
+                context, storedValue ?? string.Empty);
 
             public PropertyValueControl(EditorContext context, System.Action changed, bool compact)
             {
@@ -444,7 +444,7 @@ namespace GameRuleEditor.CustomControls
 
             public void SetStoredValue(string value)
             {
-                displayValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, value?.Trim());
+                storedValue = value?.Trim();
                 UpdateButton();
             }
 
@@ -452,7 +452,7 @@ namespace GameRuleEditor.CustomControls
             {
                 GameRuleEditor.Windows.PropertyPickerDialog.Show(context, picked =>
                 {
-                    displayValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked);
+                    storedValue = picked;
                     UpdateButton();
                     changed?.Invoke();
                 }, false, anchorScreenRect: GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(anchorElement));
@@ -460,7 +460,8 @@ namespace GameRuleEditor.CustomControls
 
             private void UpdateButton()
             {
-                bool hasValue = !string.IsNullOrWhiteSpace(displayValue);
+                string displayValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, storedValue);
+                bool hasValue = !string.IsNullOrWhiteSpace(storedValue);
                 if (clearButton != null) clearButton.style.display = hasValue ? DisplayStyle.Flex : DisplayStyle.None;
                 valueButton.text = compact ? (hasValue ? displayValue : "Select property") + "  ▾" : hasValue ? displayValue : "Empty";
                 valueButton.tooltip = hasValue ? displayValue : "No property selected";
@@ -629,7 +630,7 @@ namespace GameRuleEditor.CustomControls
                 }
                 else
                 {
-                    textValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, normalized);
+                    textValue = normalized;
                     kind = Regex.IsMatch(textValue,
                         @"^(?:#[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+)$")
                         || GameRuleEditor.Windows.PropertyPickerDialog.IsGlobalReference(context, textValue)
@@ -647,7 +648,7 @@ namespace GameRuleEditor.CustomControls
                 {
                     storedExpression = null;
                     kind = ScalarKind.Property;
-                    textValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked);
+                    textValue = picked;
                     RebuildSelection();
                     changed?.Invoke();
                 }, false, anchorScreenRect:
@@ -670,7 +671,7 @@ namespace GameRuleEditor.CustomControls
                 if (compact)
                 {
                     string display = kind == ScalarKind.Number || kind == ScalarKind.Empty
-                        ? null : textValue + (showDegrees ? "°" : "");
+                        ? null : GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, textValue) + (showDegrees ? "°" : "");
                     var menu = CompactRuleValue.CreateMenu(display, (choice, anchor) =>
                     {
                         if (choice == "Pick Property") OpenPropertyPicker(anchor);
@@ -715,7 +716,7 @@ namespace GameRuleEditor.CustomControls
                     Button valueButton = null;
                     valueButton = new Button(() => OpenPropertyPicker(valueButton))
                     {
-                        text = showDegrees ? textValue + "°" : textValue,
+                        text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, textValue) + (showDegrees ? "°" : ""),
                         tooltip = kind == ScalarKind.Legacy
                             ? "Existing expression. Pick a property or number to replace it."
                             : "Click to replace this property"
@@ -847,7 +848,7 @@ namespace GameRuleEditor.CustomControls
                     ApplyPickedTerm(new ExpressionTerm
                     {
                         Kind = TermKind.Property,
-                        Text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked)
+                        Text = picked
                     });
                 }, false, anchorScreenRect:
                     GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(valuePicker));
@@ -863,7 +864,7 @@ namespace GameRuleEditor.CustomControls
                     {
                         OperatorBefore = operatorBefore,
                         Kind = TermKind.Property,
-                        Text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked)
+                        Text = picked
                     };
                     lockedLegacyExpression = false;
                     RebuildSelection();
@@ -999,7 +1000,7 @@ namespace GameRuleEditor.CustomControls
                     {
                         var term = index < terms.Count ? terms[index] : null;
                         bool isNumber = term?.Kind == TermKind.Number;
-                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : term?.Text, (choice, anchor) =>
+                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, term?.Text), (choice, anchor) =>
                         {
                             if (choice == "Pick Property")
                             {
@@ -1045,7 +1046,7 @@ namespace GameRuleEditor.CustomControls
                     ReplaceCompactTerm(0, new ExpressionTerm
                     {
                         Kind = TermKind.Property,
-                        Text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked)
+                        Text = picked
                     }, false), false, anchorScreenRect:
                     GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(anchor));
             }
@@ -1071,8 +1072,7 @@ namespace GameRuleEditor.CustomControls
 
             private void ParseExpression(string expression)
             {
-                string normalized = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(
-                    context, expression?.Trim());
+                string normalized = expression?.Trim();
                 if (string.IsNullOrEmpty(normalized)) return;
                 List<ExpressionPart> parts = SplitAddSubtract(normalized);
                 if (parts.Count > 2)

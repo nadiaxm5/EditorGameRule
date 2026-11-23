@@ -53,12 +53,21 @@ namespace GameRuleEditor.Core
 
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
 
-        // IMGUI pickers use the same neutral field and subtle one-pixel frame as UI Toolkit.
+        // Match UI Toolkit's four-pixel corners and one-pixel frame in IMGUI pickers.
         public static void DrawPickerField(Rect rect, Color fill, Color border)
         {
-            EditorGUI.DrawRect(rect, border);
-            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1,
-                Mathf.Max(0, rect.width - 2), Mathf.Max(0, rect.height - 2)), fill);
+            GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0f, border, 0f, 4f);
+            var inside = new Rect(rect.x + 1, rect.y + 1,
+                Mathf.Max(0, rect.width - 2), Mathf.Max(0, rect.height - 2));
+            GUI.DrawTexture(inside, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0f, fill, 0f, 3f);
+        }
+
+        public static void DrawPickerButton(Rect rect, bool hovered, bool pressed, bool selected = false)
+        {
+            Color fill = pressed ? (IsLight ? Rgb(213, 213, 213) : Panel)
+                : hovered ? (IsLight ? Rgb(226, 226, 226) : Field)
+                : IsLight ? Rgb(238, 238, 238) : Surface;
+            DrawPickerField(rect, fill, selected ? PropertyAccent : Border);
         }
 
         public static void StylePropertySection(Foldout section, bool useSectionSpacing = true)

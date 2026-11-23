@@ -531,7 +531,7 @@ namespace GameRuleEditor.CustomControls
             {
                 GameRuleEditor.Windows.PropertyPickerDialog.Show(context, picked =>
                 {
-                    checkPropertyValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked);
+                    checkPropertyValue = picked;
                     UpdateCheckPropertyButton();
                     OnChanged?.Invoke();
                 }, boolOnly, anchorScreenRect:
@@ -548,10 +548,11 @@ namespace GameRuleEditor.CustomControls
         {
             if (checkPropertyButton == null) return;
             bool hasValue = !string.IsNullOrWhiteSpace(checkPropertyValue);
+            string displayValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, checkPropertyValue);
             checkPropertyButton.text = detailsMode
-                ? (hasValue ? checkPropertyValue : "Select property") + "  ▾"
-                : hasValue ? checkPropertyValue : "Pick Property";
-            checkPropertyButton.tooltip = hasValue ? checkPropertyValue : "Choose a Boolean property";
+                ? (hasValue ? displayValue : "Select property") + "  ▾"
+                : hasValue ? displayValue : "Pick Property";
+            checkPropertyButton.tooltip = hasValue ? displayValue : "Choose a Boolean property";
         }
 
         private void AddNumericField(string label, float initialValue, bool clampToZero)
@@ -651,8 +652,7 @@ namespace GameRuleEditor.CustomControls
 
             if (type == "Check")
             {
-                checkPropertyValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(
-                    context, parameters[0]);
+                checkPropertyValue = parameters[0];
                 UpdateCheckPropertyButton();
                 return;
             }
@@ -956,7 +956,7 @@ namespace GameRuleEditor.CustomControls
                     ApplyPickedTerm(new ExpressionTerm
                     {
                         Kind = TermKind.Property,
-                        Text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked)
+                        Text = picked
                     });
                 }, false, anchorScreenRect: anchor);
             }
@@ -971,7 +971,7 @@ namespace GameRuleEditor.CustomControls
                     {
                         OperatorBefore = operatorBefore,
                         Kind = TermKind.Property,
-                        Text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, picked)
+                        Text = picked
                     };
                     lockedLegacyExpression = false;
                     RebuildTermsAndNotify();
@@ -1129,7 +1129,7 @@ namespace GameRuleEditor.CustomControls
                     {
                         var term = index < terms.Count ? terms[index] : null;
                         bool isNumber = term?.Kind == TermKind.Number;
-                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : term?.Text, (choice, anchor) =>
+                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, term?.Text), (choice, anchor) =>
                         {
                             if (choice == "Pick Property")
                             {
@@ -1182,7 +1182,7 @@ namespace GameRuleEditor.CustomControls
 
             private void ParseExpression(string expression)
             {
-                string normalized = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, expression?.Trim());
+                string normalized = expression?.Trim();
                 if (string.IsNullOrEmpty(normalized)) return;
                 List<ExpressionPart> parts = SplitAddSubtract(normalized);
                 if (parts.Count > 2)
