@@ -67,6 +67,7 @@ public static class Utils
 
     public static void PlayAnimation(string animationName, GameObject obj)
     {
+        if (obj == null || string.IsNullOrWhiteSpace(animationName)) return;
         Animator animator = obj.GetComponent<Animator>();
         if (animator != null)
         {

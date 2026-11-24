@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using GameRuleEditor.Core;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor.Animations;
 
 namespace GameRuleEditor.Windows
 {
@@ -77,6 +78,7 @@ namespace GameRuleEditor.Windows
 
         private System.Type resourceType = null; // [New] Filter for resources
         private bool includeAllResourceAssets;
+        private bool showActorResources = true;
         private bool prefabMode = false;
         private bool includeActorPrefabs = false;
         private PrefabSource selectedPrefabSource = PrefabSource.ActorPrefabs;
@@ -101,6 +103,93 @@ namespace GameRuleEditor.Windows
             public bool HidePreview;
         }
 
+        internal static bool UsesActorResources(System.Type type) =>
+            type == typeof(AnimationClip) || type == typeof(ParticleSystem);
+
+        private static List<PreviewGridItem> GetActorResources(EditorContext ctx, System.Type type, out string warning)
+        {
+            var result = new List<PreviewGridItem>();
+            warning = null;
+            var actor = ctx?.SelectedActor;
+            GameObject prefab = string.IsNullOrEmpty(actor?.PrefabName) ? null :
+                AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/" + actor.PrefabName + ".prefab");
+            if (prefab == null)
+            {
+                warning = type == typeof(AnimationClip)
+                    ? "Assign a prefab to this actor before choosing an Animator state."
+                    : "Assign a prefab to this actor before choosing a particle system.";
+                return result;
+            }
+
+            if (type == typeof(AnimationClip))
+            {
+                // Match Utils.PlayAnimation: only the Animator on the actor root is used.
+                var animator = prefab.GetComponent<Animator>();
+                if (animator == null) { warning = "Animate requires an Animator on the actor prefab's root."; return result; }
+                RuntimeAnimatorController runtime = animator.runtimeAnimatorController;
+                var visited = new HashSet<RuntimeAnimatorController>();
+                while (runtime is AnimatorOverrideController overrides && visited.Add(runtime))
+                    runtime = overrides.runtimeAnimatorController;
+                if (!(runtime is AnimatorController controller))
+                { warning = "Assign an Animator Controller with playable states to the actor's Animator."; return result; }
+
+                foreach (var layer in controller.layers)
+                {
+                    AnimatorStateMachine machine = layer.stateMachine;
+                    if (layer.syncedLayerIndex >= 0 && layer.syncedLayerIndex < controller.layers.Length)
+                        machine = controller.layers[layer.syncedLayerIndex].stateMachine;
+                    AddAnimatorStates(result, machine, layer.name, new HashSet<AnimatorStateMachine>());
+                }
+                if (!animator.enabled) warning = "Enable the Animator component on the actor prefab to play its states.";
+                else if (result.Count == 0) warning = "This actor's Animator Controller has no playable states.";
+            }
+            else
+            {
+                // Runtime searches active children; the instantiated root is renamed to ActorName.
+                foreach (var system in prefab.GetComponentsInChildren<ParticleSystem>())
+                {
+                    string name = system.gameObject == prefab ? actor.ActorName : system.gameObject.name;
+                    if (result.Any(item => item.Result == name)) continue;
+                    result.Add(new PreviewGridItem { Label = name, Result = name,
+                        SecondaryName = system.gameObject == prefab ? "Actor root" : AnimationUtility.CalculateTransformPath(system.transform, prefab.transform),
+                        PreviewObject = system });
+                }
+                if (result.Count == 0)
+                    warning = "PlayParticles requires a Particle System on the actor prefab or an active child.";
+            }
+            return result.OrderBy(item => item.Label, System.StringComparer.OrdinalIgnoreCase)
+                .ThenBy(item => item.Result, System.StringComparer.Ordinal).ToList();
+        }
+
+        private static void AddAnimatorStates(List<PreviewGridItem> items, AnimatorStateMachine machine,
+                                             string path, HashSet<AnimatorStateMachine> visited)
+        {
+            if (machine == null || !visited.Add(machine)) return;
+            foreach (var child in machine.states)
+            {
+                var state = child.state;
+                if (state == null) continue;
+                items.Add(new PreviewGridItem { Label = state.name, Result = path + "." + state.name,
+                    SecondaryName = path + "." + state.name,
+                    PreviewObject = state.motion != null ? (Object)state.motion : state });
+            }
+            foreach (var child in machine.stateMachines)
+                if (child.stateMachine != null)
+                    AddAnimatorStates(items, child.stateMachine, path + "." + child.stateMachine.name, visited);
+        }
+
+        internal static string ActorResourceWarning(EditorContext ctx, System.Type type, string value)
+        {
+            if (!UsesActorResources(type)) return null;
+            var choices = GetActorResources(ctx, type, out string warning);
+            if (warning != null) return warning;
+            if (string.IsNullOrEmpty(value)) return null;
+            if (choices.Any(item => item.Result == value || type == typeof(AnimationClip) && item.Label == value)) return null;
+            return type == typeof(AnimationClip)
+                ? "The selected name is not a state in this actor's Animator Controller. Choose a state; a clip name alone is not enough."
+                : "No active Particle System with this name exists on the actor prefab or its children.";
+        }
+
         private enum PropertyScope { Self, Global, Actor }
         private PropertyScope selectedScope = PropertyScope.Self;
         private string selectedCategory = "Me";
@@ -122,6 +211,7 @@ namespace GameRuleEditor.Windows
             win.onPick = callback;
             win.boolOnly = onlyBooleans;
             win.resourceType = resourceFilter;
+            win.showActorResources = true;
             win.includeAllResourceAssets = false;
             win.prefabMode = false;
             win.prefabSearch = string.Empty;
@@ -166,6 +256,7 @@ namespace GameRuleEditor.Windows
             win.boolOnly = false;
             win.resourceType = resourceFilter;
             win.includeAllResourceAssets = includeAllAssets;
+            win.showActorResources = true;
             win.prefabMode = false;
             win.resourceTabLabel = allResourcesLabel;
             win.resourceSearch = string.Empty;
@@ -363,9 +454,25 @@ namespace GameRuleEditor.Windows
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(outerPadding);
 
+            bool hasActorTab = UsesActorResources(resourceType);
+            string actorTabLabel = resourceType == typeof(AnimationClip) ? "Actor Animations" : "Actor Particles";
+            if (hasActorTab)
+            {
+                float actorTabWidth = EditorStyles.miniButton.CalcSize(new GUIContent(actorTabLabel)).x + 18f;
+                if (DrawYellowTabButton(actorTabLabel, showActorResources, actorTabWidth))
+                {
+                    showActorResources = true;
+                    scrollCategory = Vector2.zero;
+                }
+                GUILayout.Space(4f);
+            }
             float tabWidth = Mathf.Clamp(EditorStyles.miniButton.CalcSize(
                 new GUIContent(resourceTabLabel)).x + 18f, 96f, 140f);
-            DrawYellowTabButton(resourceTabLabel, true, tabWidth);
+            if (DrawYellowTabButton(resourceTabLabel, !hasActorTab || !showActorResources, tabWidth))
+            {
+                showActorResources = false;
+                scrollCategory = Vector2.zero;
+            }
 
             if (position.width < 420f)
             {
@@ -385,33 +492,51 @@ namespace GameRuleEditor.Windows
             EditorGUILayout.EndHorizontal();
             GUILayout.Space(6f);
 
+            List<PreviewGridItem> actorResources = null;
+            if (hasActorTab && showActorResources)
+            {
+                actorResources = GetActorResources(context, resourceType, out string warning);
+                string hint = resourceType == typeof(AnimationClip)
+                    ? "States from this actor's Animator Controller. Selecting a clip asset alone does not create a state."
+                    : "Particle systems already on this actor or its active children. Selecting an asset does not add a system.";
+                EditorGUILayout.HelpBox(warning ?? hint, warning == null ? MessageType.Info : MessageType.Warning);
+            }
+            else if (hasActorTab)
+            {
+                string hint = resourceType == typeof(AnimationClip)
+                    ? "All animation clips. Animate still requires a matching state in this actor's Animator Controller."
+                    : "All particle resources. PlayParticles still requires a matching system on this actor or an active child.";
+                EditorGUILayout.HelpBox(hint, MessageType.Info);
+            }
+
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(outerPadding);
             EditorGUILayout.BeginVertical(pickerSurfaceStyle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
             scrollCategory = EditorGUILayout.BeginScrollView(scrollCategory, GUILayout.ExpandHeight(true));
 
-            var source = includeAllResourceAssets
-                ? AssetDatabase.FindAssets("t:" + resourceType.Name)
-                    .Select(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), resourceType))
-                    .Where(asset => asset != null)
-                : Resources.LoadAll("", resourceType);
-            var assets = source
-                .OrderBy(asset => asset.name, System.StringComparer.OrdinalIgnoreCase)
-                .Where(asset => MatchesSearch(resourceSearch, asset.name))
-                .Select(asset => new PreviewGridItem
+            var assets = actorResources;
+            if (assets == null)
+            {
+                var source = includeAllResourceAssets
+                    ? AssetDatabase.FindAssets("t:" + resourceType.Name)
+                        .Select(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), resourceType))
+                        .Where(asset => asset != null)
+                    : Resources.LoadAll("", resourceType);
+                assets = source.Select(asset => new PreviewGridItem
                 {
-                    Label = asset.name,
-                    Result = includeAllResourceAssets ? AssetDatabase.GetAssetPath(asset) : asset.name,
-                    SecondaryName = resourceType.Name,
-                    PreviewObject = asset
-                })
-                .ToList();
+                    Label = asset.name, Result = includeAllResourceAssets ? AssetDatabase.GetAssetPath(asset) : asset.name,
+                    SecondaryName = resourceType.Name, PreviewObject = asset
+                }).ToList();
+            }
+            assets = assets.OrderBy(item => item.Label, System.StringComparer.OrdinalIgnoreCase)
+                .Where(item => MatchesSearch(resourceSearch, item.Label, item.Result)).ToList();
 
             assets.Insert(0, new PreviewGridItem { Label = "None", Result = string.Empty, HidePreview = true });
             DrawPreviewGrid(assets);
-            if (assets.Count == 1)
+            if (assets.Count == 1 && (actorResources == null || actorResources.Count > 0))
             {
-                EditorGUILayout.HelpBox($"No items in {resourceTabLabel} match the search.", MessageType.Info);
+                string tabLabel = hasActorTab && showActorResources ? actorTabLabel : resourceTabLabel;
+                EditorGUILayout.HelpBox($"No items in {tabLabel} match the search.", MessageType.Info);
             }
 
             EditorGUILayout.EndScrollView();

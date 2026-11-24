@@ -480,6 +480,7 @@ namespace GameRuleEditor.CustomControls
             private readonly System.Action changed;
             private readonly Button valueButton;
             private readonly Button pickerButton;
+            private readonly Label compatibilityWarning;
             private string value;
 
             public string StoredValue => value ?? string.Empty;
@@ -495,9 +496,32 @@ namespace GameRuleEditor.CustomControls
                 this.prefabMode = prefabMode;
                 this.changed = changed;
                 AddToClassList("action-single-picker");
+                VisualElement buttons = this;
+                if (GameRuleEditor.Windows.PropertyPickerDialog.UsesActorResources(resourceType))
+                {
+                    style.flexDirection = FlexDirection.Column;
+                    style.alignItems = Align.Stretch;
+                    buttons = new VisualElement();
+                    buttons.style.flexDirection = FlexDirection.Row;
+                    buttons.style.flexWrap = Wrap.Wrap;
+                    buttons.style.minWidth = 0;
+                    Add(buttons);
+                    compatibilityWarning = new Label();
+                    compatibilityWarning.AddToClassList("resource-compatibility-warning");
+                    compatibilityWarning.style.whiteSpace = WhiteSpace.Normal;
+                    compatibilityWarning.style.fontSize = 10;
+                    compatibilityWarning.style.color = GameRuleTheme.PropertyAccent;
+                    compatibilityWarning.style.marginTop = 3;
+                    RegisterCallback<AttachToPanelEvent>(_ =>
+                    {
+                        EditorApplication.projectChanged += UpdateButton;
+                        UpdateButton();
+                    });
+                    RegisterCallback<DetachFromPanelEvent>(_ => EditorApplication.projectChanged -= UpdateButton);
+                }
                 valueButton = new Button(() => OpenPicker(valueButton));
                 valueButton.AddToClassList("action-picker-value-display");
-                Add(valueButton);
+                buttons.Add(valueButton);
 
                 pickerButton = new Button(() => OpenPicker(pickerButton)) { text = pickerLabel, tooltip = pickerLabel };
                 pickerButton.AddToClassList("button-property-picker");
@@ -509,7 +533,8 @@ namespace GameRuleEditor.CustomControls
                     valueButton.AddToClassList("button-property-picker");
                     valueButton.AddToClassList("parameter-selector");
                 }
-                else Add(pickerButton);
+                else buttons.Add(pickerButton);
+                if (compatibilityWarning != null) Add(compatibilityWarning);
                 UpdateButton();
             }
 
@@ -547,6 +572,13 @@ namespace GameRuleEditor.CustomControls
                 valueButton.text = compact ? (hasValue ? value : pickerLabel) + "  ▾" : hasValue ? value : "Empty";
                 valueButton.tooltip = hasValue ? value : $"No {pickerLabel.Replace("Pick ", string.Empty).ToLowerInvariant()} selected";
                 valueButton.EnableInClassList("action-empty-value", !hasValue);
+                if (compatibilityWarning != null)
+                {
+                    string warning = GameRuleEditor.Windows.PropertyPickerDialog.ActorResourceWarning(context, resourceType, value);
+                    compatibilityWarning.text = warning ?? string.Empty;
+                    compatibilityWarning.style.display = warning == null ? DisplayStyle.None : DisplayStyle.Flex;
+                    if (warning != null) valueButton.tooltip = warning;
+                }
             }
         }
 

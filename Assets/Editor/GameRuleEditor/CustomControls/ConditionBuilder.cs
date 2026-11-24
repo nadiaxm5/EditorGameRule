@@ -492,9 +492,9 @@ namespace GameRuleEditor.CustomControls
                 { "Edit", "Set a property to a value or simple expression." },
                 { "Delete", "Remove this actor from the scene." },
                 { "Spawn", "Create a prefab relative to this actor." },
-                { "Animate", "Play an animation on this actor." },
+                { "Animate", "Play a state from the Animator Controller on this actor's root." },
                 { "PlaySound", "Play a sound on this actor." },
-                { "PlayParticles", "Play a particle effect on this actor." },
+                { "PlayParticles", "Play a Particle System already on this actor or an active child." },
                 { "Move", "Move continuously in the chosen direction." },
                 { "MoveTo", "Move toward a world position." },
                 { "NavigateTo", "Navigate to a position using the NavMesh." },
@@ -624,9 +624,9 @@ namespace GameRuleEditor.CustomControls
                 case "Edit.Property": return "Property that will receive the new value.";
                 case "Edit.Value": return "New value or one-step addition or subtraction.";
                 case "Spawn.Prefab": return "Prefab that will be created.";
-                case "Animate.Animation": return "Animation clip to play.";
+                case "Animate.Animation": return "State to play from the Animator Controller on this actor's root.";
                 case "PlaySound.Sound": return "Audio clip to play.";
-                case "PlayParticles.Particle System": return "Particle effect to play.";
+                case "PlayParticles.Particle System": return "Particle System already on this actor or an active child.";
                 case "Check.Boolean Property": return "Boolean property whose value will be checked.";
                 case "Collision.Tag": return "Tag that the other colliding actor must have.";
                 case "Timer.Seconds": return "Seconds between each successful timer check.";
