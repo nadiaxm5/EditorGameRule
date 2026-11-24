@@ -813,7 +813,7 @@ namespace GameRuleEditor.Controllers
             int from = groups.FindIndex(item => item.id == id);
             if (actor == null || from < 0 || targetIndex < 0 || targetIndex >= groups.Count || from == targetIndex) return;
             var selected = context.selectedActorIndex == actorIndex ? context.SelectedScript : null;
-            Undo.RecordObject(context.currentProject, "Reorder Rule Sets");
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Reorder Rule Sets");
             MaterializeRuleSets(actor);
             var slots = Enumerable.Range(0, actor.Components.Count).Where(i => actor.Components[i].type == "Rules").ToList();
             var ordered = slots.Select(i => actor.Components[i]).ToList();
@@ -823,16 +823,21 @@ namespace GameRuleEditor.Controllers
             for (int i = 0; i < slots.Count; i++) actor.Components[slots[i]] = ordered[i];
             if (actor.Script != null)
             {
-                // Code generation traverses Script directly: keep whole sets in their visual order.
-                var rulesBySet = actor.Script.ToLookup(rule => EditorContext.GetRuleSetId(actor, rule));
-                var rules = ordered.SelectMany(group => rulesBySet[group.id]).ToList();
-                actor.Script.Clear();
-                actor.Script.AddRange(rules);
+                OrderRulesBySet(actor);
                 if (context.selectedActorIndex == actorIndex)
                     context.selectedScriptIndex = selected == null ? -1 : actor.Script.IndexOf(selected);
             }
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
+        }
+
+        private static void OrderRulesBySet(ActorJson actor)
+        {
+            // Script is also the execution order. Preserve the order within each set.
+            var rulesBySet = actor.Script.ToLookup(rule => EditorContext.GetRuleSetId(actor, rule));
+            var rules = EditorContext.GetRuleSets(actor).SelectMany(group => rulesBySet[group.id]).ToList();
+            actor.Script.Clear();
+            actor.Script.AddRange(rules);
         }
 
         public bool ConfirmRemoveRuleSet(int actorIndex, string id)
@@ -1278,7 +1283,7 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Add Rule");
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Add Rule");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
             if (actor.Script == null)
@@ -1294,11 +1299,11 @@ namespace GameRuleEditor.Controllers
             };
 
             actor.Script.Add(newRule);
+            OrderRulesBySet(actor);
 
             EditorUtility.SetDirty(context.currentProject);
+            context.SelectScript(actor.Script.IndexOf(newRule));
             context.NotifyProjectChanged();
-
-            context.SelectScript(actor.Script.Count - 1);
         }
 
         /// <summary>
@@ -1315,7 +1320,7 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Add Empty Rule");
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Add Empty Rule");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
             if (actor.Script == null)
@@ -1332,11 +1337,11 @@ namespace GameRuleEditor.Controllers
             };
 
             actor.Script.Add(newRule);
+            OrderRulesBySet(actor);
 
             EditorUtility.SetDirty(context.currentProject);
+            context.SelectScript(actor.Script.IndexOf(newRule));
             context.NotifyProjectChanged();
-
-            context.SelectScript(actor.Script.Count - 1);
         }
 
         /// <summary>

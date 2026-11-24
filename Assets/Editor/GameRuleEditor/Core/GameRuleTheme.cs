@@ -73,7 +73,7 @@ namespace GameRuleEditor.Core
         public static void StylePropertySection(Foldout section, bool useSectionSpacing = true)
         {
             section.style.unityFontStyleAndWeight = FontStyle.Bold;
-            if (useSectionSpacing) section.style.marginBottom = 10;
+            if (useSectionSpacing) section.style.marginBottom = 6;
             section.style.backgroundColor = Surface;
             section.style.borderTopLeftRadius = 4;
             section.style.borderTopRightRadius = 4;

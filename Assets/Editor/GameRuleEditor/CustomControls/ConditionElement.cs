@@ -318,7 +318,7 @@ namespace GameRuleEditor.CustomControls
             keyboardMenuOverlay.style.top = 0;
             keyboardMenuOverlay.style.right = 0;
             keyboardMenuOverlay.style.bottom = 0;
-            keyboardMenuOverlay.RegisterCallback<ClickEvent>(evt =>
+            keyboardMenuOverlay.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (evt.target == keyboardMenuOverlay) CloseKeyboardMenu();
             });
@@ -335,6 +335,7 @@ namespace GameRuleEditor.CustomControls
             keyboardMenuOverlay.BringToFront();
             ShowKeyboardGroup(null);
             keyboardMenuOverlay.Focus();
+            TooltipPopupField.DismissWhenFocusLeaves(keyboardMenuOverlay, CloseKeyboardMenu);
         }
 
         private void ShowKeyboardGroup(string groupName)

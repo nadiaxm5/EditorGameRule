@@ -421,7 +421,7 @@ namespace GameRuleEditor.CustomControls
             openMenuOverlay.style.top = 0;
             openMenuOverlay.style.right = 0;
             openMenuOverlay.style.bottom = 0;
-            openMenuOverlay.RegisterCallback<ClickEvent>(evt =>
+            openMenuOverlay.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (evt.target == openMenuOverlay) CloseMenu();
             });
@@ -463,6 +463,24 @@ namespace GameRuleEditor.CustomControls
             root.Add(openMenuOverlay);
             openMenuOverlay.BringToFront();
             openMenuOverlay.Focus();
+            DismissWhenFocusLeaves(openMenuOverlay, CloseMenu);
+        }
+
+        internal static void DismissWhenFocusLeaves(VisualElement overlay, System.Action close)
+        {
+            var owner = Resources.FindObjectsOfTypeAll<EditorWindow>()
+                .FirstOrDefault(window => window.rootVisualElement.panel == overlay.panel);
+            overlay.RegisterCallback<FocusOutEvent>(evt =>
+            {
+                if (evt.relatedTarget is VisualElement target && target != overlay && !overlay.Contains(target))
+                    close();
+            });
+            // Each EditorWindow has its own panel: its overlay cannot receive outside clicks.
+            // The scheduled check automatically stops when the overlay is detached.
+            overlay.schedule.Execute(() =>
+            {
+                if (owner != null && EditorWindow.focusedWindow != owner) close();
+            }).Every(50);
         }
 
         private void CloseMenu()

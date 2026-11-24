@@ -387,6 +387,8 @@ namespace GameRuleEditor.Panels
             var container = new VisualElement();
             container.userData = ruleIndex;
             container.AddToClassList("panel-section");
+            container.style.borderTopWidth = container.style.borderBottomWidth = 0;
+            container.style.borderLeftWidth = container.style.borderRightWidth = 0;
             container.style.paddingTop = 4;
             container.style.marginBottom = 6;
             container.style.flexShrink = 0;
@@ -956,9 +958,9 @@ namespace GameRuleEditor.Panels
             var actor = context.SelectedActor;
             if (actor?.Script != null && actor.Script.Count > 0)
             {
-                var newRule = actor.Script[actor.Script.Count - 1];
+                var newRule = context.SelectedScript;
                 // Keep the newly added rule open without changing any rule the user folded.
-                collapsedRules.Remove(newRule);
+                if (newRule != null) collapsedRules.Remove(newRule);
             }
 
             UpdateRulesList();
