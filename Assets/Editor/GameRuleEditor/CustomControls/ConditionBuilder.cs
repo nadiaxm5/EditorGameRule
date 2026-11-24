@@ -520,12 +520,14 @@ namespace GameRuleEditor.CustomControls
 
         public static List<TooltipDropdownOption> ActionOptions(IEnumerable<string> names)
         {
-            return names.Select(name => new TooltipDropdownOption(name, name, Action(name))).ToList();
+            return names.OrderBy(name => name, System.StringComparer.OrdinalIgnoreCase)
+                .Select(name => new TooltipDropdownOption(name, name, Action(name))).ToList();
         }
 
         public static List<TooltipDropdownOption> ConditionOptions(IEnumerable<string> names)
         {
-            return names.Select(name => new TooltipDropdownOption(name, name, Condition(name))).ToList();
+            return names.OrderBy(name => name, System.StringComparer.OrdinalIgnoreCase)
+                .Select(name => new TooltipDropdownOption(name, name, Condition(name))).ToList();
         }
 
         public static List<TooltipDropdownOption> LogicalOptions()

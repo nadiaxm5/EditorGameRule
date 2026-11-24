@@ -14,7 +14,7 @@
    ═══════════════════════════════════════════ */
 
 ScrollView {
-    background-color: rgb(37, 37, 37);
+    background-color: rgb(30, 30, 30);
 }
 
 /* ═══════════════════════════════════════════
@@ -1035,7 +1035,7 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .panel-container {
-    background-color: rgb(37, 37, 37);
+    background-color: rgb(30, 30, 30);
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
@@ -1920,6 +1920,43 @@ ToolbarButton:active {
     -unity-text-align: middle-center;
     color: rgb(181, 181, 181);
 }
+.rules-set-header {
+    background-color: rgb(65, 53, 86);
+}
+
+.rules-set-header:hover {
+    background-color: rgb(76, 62, 100);
+}
+
+.gamerule-light .rules-set-header {
+    background-color: rgb(222, 213, 242);
+}
+
+.gamerule-light .rules-set-header:hover {
+    background-color: rgb(210, 198, 235);
+}
+
+.panel-container TextField.studio-rule-name > .unity-base-field__input,
+.gamerule-light .panel-container TextField.studio-rule-name > .unity-base-field__input {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.rules-set-header Button.button-danger,
+.gamerule-light .rules-set-header Button.button-danger {
+    background-color: transparent;
+}
+
+.rules-set-header Button.button-danger:hover,
+.gamerule-light .rules-set-header Button.button-danger:hover {
+    background-color: rgb(222, 112, 120);
+}
+
+.rules-set-header Button.button-danger:active,
+.gamerule-light .rules-set-header Button.button-danger:active {
+    background-color: rgb(194, 87, 97);
+}
+
 .rule-set-name {
     flex-grow: 1;
     flex-shrink: 1;
@@ -1940,6 +1977,25 @@ ToolbarButton:active {
 .gamerule-light .rule-set-entry.rule-set-selected { border-color: rgb(88, 64, 150); }
 .gamerule-light .rule-set-handle,
 .gamerule-light .rule-set-count { color: rgb(92, 92, 92); }
+
+.rule-set-entry.rule-set-property-row,
+.gamerule-light .rule-set-entry.rule-set-property-row {
+    background-color: transparent;
+    padding: 0;
+}
+
+.rule-set-property-row .rule-set-handle {
+    font-size: 16px;
+}
+
+.rule-set-property-row .rule-set-count {
+    color: rgb(161, 138, 224);
+    font-size: 12px;
+}
+
+.gamerule-light .rule-set-property-row .rule-set-count {
+    color: rgb(88, 64, 150);
+}
 
 .rule-editor-card {
     background-color: rgb(51, 51, 51);
@@ -2137,6 +2193,13 @@ ToolbarButton:active {
 .rule-summary-name,
 .rule-summary-detail {
     font-size: 12px;
+}
+
+.rule-add-element,
+.rules-command {
+    padding-left: 10px;
+    padding-right: 10px;
+    -unity-text-align: middle-center;
 }
 
 .rule-summary-card.button-condition .rule-summary-detail { color: rgb(56, 185, 207); }
@@ -2506,8 +2569,29 @@ TextField.custom-property-name,
 
 .custom-property-type {
     width: 82px;
+    height: 22px;
+    min-height: 22px;
+    padding: 0;
+    border-width: 0;
     margin-left: 0;
     margin-right: 2px;
+}
+
+.custom-property-type > .unity-base-field__input {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+Button.custom-property-type {
+    border-width: 1px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .custom-property-type .unity-base-popup-field__text {
@@ -2614,6 +2698,12 @@ TextField.custom-property-name,
     padding-right: 10px;
 }
 
+.cast-item-name,
+.custom-property-name > .unity-base-field__input,
+.settings-parameter-label {
+    -unity-font-style: bold;
+}
+
 .settings-parameter-label {
     width: 120px;
     min-width: 120px;
@@ -2621,7 +2711,6 @@ TextField.custom-property-name,
     flex-shrink: 0;
     margin-left: 0;
     margin-right: 4px;
-    -unity-font-style: normal;
     -unity-text-align: middle-left;
 }
 

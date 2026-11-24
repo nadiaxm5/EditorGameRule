@@ -197,7 +197,8 @@ namespace GameRuleEditor.CustomControls
                     var projectTags = Loader.GetProjectTags(context?.currentProject?.actors);
                     var tagContainer = CreateInlineParameter("Tag");
                     var tagDropdown = new TooltipPopupField(
-                        projectTags.Select(tag => new TooltipDropdownOption(tag, tag,
+                        projectTags.OrderBy(tag => tag, System.StringComparer.OrdinalIgnoreCase)
+                            .Select(tag => new TooltipDropdownOption(tag, tag,
                             "Match actors with the " + tag + " tag.")),
                         projectTags[0], RuleTooltips.Parameter("Collision", "Tag"),
                         detailsMode ? RuleDropdownPalette.Property : RuleDropdownPalette.Condition);

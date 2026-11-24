@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using GameRuleEditor.Core;
+using GameRuleEditor.CustomControls;
 
 namespace GameRuleEditor.Panels
 {
@@ -118,9 +119,15 @@ namespace GameRuleEditor.Panels
                     header.Add(nameGroup);
 
                     int typeIndex = Types.FindIndex(type => string.Equals(type, property.type, System.StringComparison.OrdinalIgnoreCase));
-                    var typeField = new PopupField<string>(Types, typeIndex >= 0 ? typeIndex : 1);
+                    var typeOptions = new List<TooltipDropdownOption>();
+                    foreach (var type in Types)
+                        typeOptions.Add(new TooltipDropdownOption(type, type, "Use the " + type + " data type."));
+                    var typeField = new TooltipPopupField(typeOptions, Types[typeIndex >= 0 ? typeIndex : 1],
+                        "Choose the property's data type.", RuleDropdownPalette.Property);
                     typeField.AddToClassList("parameter-selector");
                     typeField.AddToClassList("custom-property-type");
+                    typeField.AddToClassList("button-property-picker");
+                    typeField.AddToClassList("studio-compact-selector");
                     var controls = new VisualElement();
                     controls.AddToClassList("custom-property-controls");
                     var valueContainer = new VisualElement();
@@ -136,11 +143,11 @@ namespace GameRuleEditor.Panels
                         else controls.Insert(0, valueContainer);
                         AddValueField(valueContainer, property);
                     }
-                    typeField.RegisterValueChangedCallback(evt =>
+                    typeField.RegisterValueChangedCallback(value =>
                     {
                         UpdateProperty(() =>
                         {
-                            property.type = evt.newValue.ToLowerInvariant();
+                            property.type = value.ToLowerInvariant();
                             if (property.type == "vector2" && (property.arrayValue == null || property.arrayValue.Length != 2))
                                 property.arrayValue = new float[2];
                             if (property.type == "vector3" && (property.arrayValue == null || property.arrayValue.Length != 3))

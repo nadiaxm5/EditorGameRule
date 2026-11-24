@@ -153,10 +153,11 @@ namespace GameRuleEditor.Core
 
         // A view of the existing groups, including legacy rules awaiting Properties migration.
         // Building the overview must not regroup or reorder the serialized script.
-        internal List<ActorComponentMeta> GetRuleSets()
+        internal List<ActorComponentMeta> GetRuleSets() => GetRuleSets(SelectedActor);
+
+        internal static List<ActorComponentMeta> GetRuleSets(ActorJson actor)
         {
             var result = new List<ActorComponentMeta>();
-            var actor = SelectedActor;
             if (actor?.Components != null)
                 foreach (var component in actor.Components)
                 {

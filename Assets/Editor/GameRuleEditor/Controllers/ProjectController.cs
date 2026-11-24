@@ -745,6 +745,139 @@ namespace GameRuleEditor.Controllers
 
         #region Actor Operations
 
+        public ActorComponentMeta AddRuleSet(int actorIndex)
+        {
+            var project = context.currentProject;
+            if (project == null || actorIndex < 0 || actorIndex >= project.actors.Count) return null;
+            var actor = project.actors[actorIndex];
+            Undo.RecordObject(project, "Add Rule Set");
+            MaterializeRuleSets(actor);
+            int number = actor.Components.Count(component => component.type == "Rules") + 1;
+            var group = new ActorComponentMeta
+            {
+                type = "Rules",
+                name = NextRuleSetName(actor, number),
+                id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
+            };
+            actor.Components.Add(group);
+            EditorUtility.SetDirty(project);
+            context.NotifyProjectChanged();
+            return group;
+        }
+
+        // Materialize the existing legacy view without changing which set owns any rule.
+        private static void MaterializeRuleSets(ActorJson actor)
+        {
+            var groups = EditorContext.GetRuleSets(actor);
+            var assignments = actor.Script?.Select(rule => new { Rule = rule, Id = EditorContext.GetRuleSetId(actor, rule) }).ToList();
+            actor.Components ??= new List<ActorComponentMeta>();
+            foreach (var group in groups)
+            {
+                var component = actor.Components.Find(item => item.type == "Rules" &&
+                    (string.IsNullOrEmpty(item.id) ? EditorContext.UngroupedRuleSetId : item.id) == group.id);
+                if (component == null)
+                    actor.Components.Add(new ActorComponentMeta { type = "Rules", id = group.id, name = group.name });
+                else
+                {
+                    component.id = group.id;
+                    if (string.IsNullOrWhiteSpace(component.name)) component.name = group.name;
+                }
+            }
+            if (assignments != null)
+                foreach (var entry in assignments)
+                    if (string.IsNullOrEmpty(entry.Rule.groupId)) entry.Rule.groupId = entry.Id;
+        }
+
+        private ActorJson RuleSetActor(int actorIndex) => context.currentProject != null &&
+            actorIndex >= 0 && actorIndex < context.currentProject.actors.Count
+                ? context.currentProject.actors[actorIndex] : null;
+
+        public bool RenameRuleSet(int actorIndex, string id, string name)
+        {
+            var actor = RuleSetActor(actorIndex);
+            name = name?.Trim();
+            var group = EditorContext.GetRuleSets(actor).Find(item => item.id == id);
+            if (actor == null || group == null || string.IsNullOrEmpty(name) || group.name == name) return false;
+            Undo.RecordObject(context.currentProject, "Rename Rule Set");
+            MaterializeRuleSets(actor);
+            actor.Components.Find(item => item.type == "Rules" && item.id == id).name = name;
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            return true;
+        }
+
+        public void ReorderRuleSets(int actorIndex, string id, int targetIndex)
+        {
+            var actor = RuleSetActor(actorIndex);
+            var groups = EditorContext.GetRuleSets(actor);
+            int from = groups.FindIndex(item => item.id == id);
+            if (actor == null || from < 0 || targetIndex < 0 || targetIndex >= groups.Count || from == targetIndex) return;
+            var selected = context.selectedActorIndex == actorIndex ? context.SelectedScript : null;
+            Undo.RecordObject(context.currentProject, "Reorder Rule Sets");
+            MaterializeRuleSets(actor);
+            var slots = Enumerable.Range(0, actor.Components.Count).Where(i => actor.Components[i].type == "Rules").ToList();
+            var ordered = slots.Select(i => actor.Components[i]).ToList();
+            var moved = ordered[from];
+            ordered.RemoveAt(from);
+            ordered.Insert(targetIndex, moved);
+            for (int i = 0; i < slots.Count; i++) actor.Components[slots[i]] = ordered[i];
+            if (actor.Script != null)
+            {
+                // Code generation traverses Script directly: keep whole sets in their visual order.
+                var rulesBySet = actor.Script.ToLookup(rule => EditorContext.GetRuleSetId(actor, rule));
+                var rules = ordered.SelectMany(group => rulesBySet[group.id]).ToList();
+                actor.Script.Clear();
+                actor.Script.AddRange(rules);
+                if (context.selectedActorIndex == actorIndex)
+                    context.selectedScriptIndex = selected == null ? -1 : actor.Script.IndexOf(selected);
+            }
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        public bool ConfirmRemoveRuleSet(int actorIndex, string id)
+        {
+            var actor = RuleSetActor(actorIndex);
+            var group = EditorContext.GetRuleSets(actor).Find(item => item.id == id);
+            if (actor == null || group == null) return false;
+            bool hasRules = actor.Script?.Any(rule => EditorContext.GetRuleSetId(actor, rule) == id) == true;
+            if (hasRules && !EditorUtility.DisplayDialog("Remove Rule Set",
+                $"Remove '{group.name}' and all its rules?", "Remove", "Cancel")) return false;
+            return RemoveRuleSet(actorIndex, id);
+        }
+
+        public bool RemoveRuleSet(int actorIndex, string id)
+        {
+            var actor = RuleSetActor(actorIndex);
+            if (actor == null || !EditorContext.GetRuleSets(actor).Exists(item => item.id == id)) return false;
+            var selected = context.selectedActorIndex == actorIndex ? context.SelectedScript : null;
+            Undo.RecordObject(context.currentProject, "Remove Rule Set");
+            MaterializeRuleSets(actor);
+            actor.Script?.RemoveAll(rule => EditorContext.GetRuleSetId(actor, rule) == id);
+            actor.Components.RemoveAll(item => item.type == "Rules" && item.id == id);
+            if (context.selectedActorIndex == actorIndex)
+            {
+                context.selectedScriptIndex = selected == null ? -1 : actor.Script.IndexOf(selected);
+                if (context.selectedScriptIndex < 0) context.ClearRuleElementSelection(false);
+            }
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            return true;
+        }
+
+        internal static string NextRuleSetName(ActorJson actor, int number)
+        {
+            string name;
+            do
+            {
+                name = number == 1 ? "Rule Set" : $"Rule Set {number}";
+                number++;
+            }
+            while (actor.Components != null && actor.Components.Exists(component => component.type == "Rules" &&
+                string.Equals(component.name, name, System.StringComparison.OrdinalIgnoreCase)));
+            return name;
+        }
+
         /// <summary>
         /// Adds a new actor to the project with a default "Empty" prefab.
         /// Automatically creates the Empty prefab if it doesn't exist.

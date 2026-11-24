@@ -112,6 +112,8 @@ namespace GameRuleEditor.Panels
             scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             scrollView.verticalScrollerVisibility = ScrollerVisibility.Auto;
             scrollView.contentContainer.style.minWidth = 0;
+            scrollView.contentContainer.style.paddingRight = 8;
+            scrollView.contentContainer.style.paddingBottom = 12;
 
             // Header
             var header = new VisualElement();
@@ -176,7 +178,7 @@ namespace GameRuleEditor.Panels
                 var focused = this.focusController?.focusedElement as VisualElement;
                 if (focused != null && rulesContainer.Contains(focused))
                 {
-                    if (!(focused is Button))
+                    if (focused is TextField || focused.GetFirstAncestorOfType<TextField>() != null)
                     {
                         return;
                     }
@@ -218,9 +220,36 @@ namespace GameRuleEditor.Panels
                 UpdateUI();
             });
             groupSelectorContainer.Add(selector);
-            addRuleRow.style.display = groupId == null ? DisplayStyle.None : DisplayStyle.Flex;
+            addRuleRow.style.display = DisplayStyle.None; // Each set owns its Add Rule button.
 
             UpdateRulesList();
+        }
+
+        private static void ConfigureRuleNameField(TextField field)
+        {
+            field.AddToClassList("studio-rule-name");
+            field.label = string.Empty;
+            field.labelElement.style.display = DisplayStyle.None;
+            field.style.fontSize = 13;
+            field.style.unityFontStyleAndWeight = FontStyle.Bold;
+            field.style.backgroundColor = Color.clear;
+            field.style.borderTopWidth = field.style.borderBottomWidth = 0;
+            field.style.borderLeftWidth = field.style.borderRightWidth = 0;
+            field.style.flexGrow = 1;
+            field.style.marginRight = 6;
+            field.style.marginLeft = 0;
+            field.style.minWidth = 50;
+            field.style.flexShrink = 1;
+            field.style.unityTextAlign = TextAnchor.MiddleLeft;
+            field.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                foreach (var text in field.Query<TextElement>().ToList())
+                {
+                    if (text.ClassListContains("unity-label")) continue;
+                    text.style.paddingLeft = 4;
+                    text.style.overflow = Overflow.Visible;
+                }
+            });
         }
 
         private void UpdateRulesList()
@@ -229,28 +258,66 @@ namespace GameRuleEditor.Panels
             var actor = context.SelectedActor;
             if (actor == null) return;
             var groups = context.GetRuleSets();
-            if (groupId != null)
-            {
-                PopulateRuleSet(rulesContainer, groupId);
-                return;
-            }
-            foreach (var group in groups)
+            var setList = new VisualElement { name = "rule-sets-overview-list" };
+            rulesContainer.Add(setList);
+            foreach (var group in groups.Where(group => groupId == null || group.id == groupId))
             {
                 string id = group.id;
-                var foldout = new Foldout { text = group.name, value = !collapsedGroups.Contains(id) };
+                var foldout = new Foldout { text = group.name, value = !collapsedGroups.Contains(id), userData = id };
                 foldout.AddToClassList("rules-set-overview");
-                foldout.style.marginBottom = 12;
+                foldout.style.marginBottom = 6;
                 foldout.contentContainer.style.marginLeft = 0;
                 foldout.contentContainer.style.paddingTop = 8;
                 var toggle = foldout.Q<Toggle>();
-                toggle.style.backgroundColor = GameRuleTheme.Header;
+                toggle.AddToClassList("rules-set-header");
                 toggle.style.paddingTop = toggle.style.paddingBottom = 4;
-                var title = toggle.Q<Label>();
-                if (title != null)
+                var title = toggle.Q<Label>(className: "unity-toggle__text") ?? toggle.Q<Label>();
+                if (title != null) title.style.display = DisplayStyle.None;
+                var header = new VisualElement();
+                header.style.flexDirection = FlexDirection.Row;
+                header.style.alignItems = Align.Center;
+                header.style.flexGrow = 1;
+                header.style.minWidth = 0;
+                var input = toggle.Q(className: "unity-base-field__input") ?? toggle;
+                input.style.flexGrow = 1;
+                input.Add(header);
+                var handle = new Label("\u2261") { tooltip = groupId == null ? "Drag to reorder rule sets" : "Show All Rule Sets to reorder" };
+                handle.AddToClassList("rule-element-drag-handle");
+                handle.name = "rule-set-drag-handle";
+                handle.style.width = 16;
+                handle.style.flexShrink = 0;
+                handle.style.color = GameRuleTheme.SubtleText;
+                handle.SetEnabled(groupId == null && groups.Count > 1);
+                handle.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                handle.RegisterCallback<PointerDownEvent>(evt =>
+                    OnElementDragStart(evt, foldout, -1, RuleElementKind.None, groups.FindIndex(item => item.id == id)));
+                header.Add(handle);
+                var name = new TextField { value = group.name, isDelayed = true, tooltip = "Rename rule set" };
+                ConfigureRuleNameField(name);
+                name.style.flexBasis = 0;
+                name.style.minWidth = 0;
+                name.RegisterValueChangedCallback(evt =>
                 {
-                    title.style.color = GameRuleTheme.AccentText;
-                    title.style.unityFontStyleAndWeight = FontStyle.Bold;
-                }
+                    if (!controller.RenameRuleSet(context.selectedActorIndex, id, evt.newValue))
+                        name.SetValueWithoutNotify(context.GetRuleSets().Find(item => item.id == id)?.name ?? group.name);
+                });
+                name.RegisterCallback<FocusOutEvent>(_ => schedule.Execute(() => context.NotifyProjectChanged()));
+                name.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<KeyDownEvent>(evt => evt.StopPropagation());
+                header.Add(name);
+                var remove = new Button(() => controller.ConfirmRemoveRuleSet(context.selectedActorIndex, id))
+                { text = "×", tooltip = "Remove Rule Set", name = "remove-rule-set" };
+                remove.AddToClassList("button-danger");
+                remove.AddToClassList("button-danger-icon");
+                remove.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                remove.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+                remove.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                header.Add(remove);
+                foldout.RegisterCallback<PointerMoveEvent>(evt => OnElementDragMove(evt, foldout));
+                foldout.RegisterCallback<PointerUpEvent>(evt => OnElementDragEnd(evt, foldout));
+                foldout.RegisterCallback<PointerCaptureOutEvent>(evt => OnElementDragEnd(evt, foldout));
                 foldout.RegisterValueChangedCallback(evt =>
                 {
                     if (evt.target != foldout) return;
@@ -265,10 +332,37 @@ namespace GameRuleEditor.Panels
                 var list = new VisualElement { name = "rules-set-list", userData = id };
                 PopulateRuleSet(list, id);
                 foldout.Add(list);
-                rulesContainer.Add(foldout);
+                setList.Add(foldout);
             }
             if (groups.Count == 0)
-                rulesContainer.Add(new Label("No rule sets defined. Add a Rule Set in Properties."));
+            {
+                var empty = new Label("No rule sets defined. Add a Rule Set to get started.");
+                empty.style.color = GameRuleTheme.SubtleText;
+                empty.style.whiteSpace = WhiteSpace.Normal;
+                empty.style.marginBottom = 8;
+                rulesContainer.Add(empty);
+            }
+            var addSet = new Button(AddRuleSet)
+            { text = "+ Add Rule Set", name = "add-rule-set", tooltip = "Create an empty rule set for this actor." };
+            addSet.AddToClassList("button-primary");
+            addSet.style.alignSelf = Align.Center;
+            addSet.style.marginTop = 4;
+            rulesContainer.Add(addSet);
+        }
+
+        private void AddRuleSet()
+        {
+            var group = controller.AddRuleSet(context.selectedActorIndex);
+            if (group == null) return;
+            collapsedGroups.Remove(group.id);
+            if (groupId != null)
+            {
+                groupId = group.id;
+                groupName = group.name;
+                OnGroupFilterChanged?.Invoke(groupId, groupName);
+                context.ClearRuleElementSelection();
+            }
+            UpdateUI();
         }
 
         private void PopulateRuleSet(VisualElement list, string id)
@@ -293,7 +387,8 @@ namespace GameRuleEditor.Panels
             var container = new VisualElement();
             container.userData = ruleIndex;
             container.AddToClassList("panel-section");
-            container.style.marginBottom = 15;
+            container.style.paddingTop = 4;
+            container.style.marginBottom = 6;
             container.style.flexShrink = 0;
 
             if (string.IsNullOrEmpty(rule.Name))
@@ -327,42 +422,8 @@ namespace GameRuleEditor.Panels
             ruleFoldout.Add(contentContainer);
 
             var titleField = new TextField();
-            titleField.AddToClassList("studio-rule-name");
             titleField.value = currentName;
-            titleField.label = string.Empty;
-            titleField.style.fontSize = 13;
-            titleField.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleField.style.backgroundColor = Color.clear;
-            titleField.style.borderTopWidth = 0;
-            titleField.style.borderBottomWidth = 0;
-            titleField.style.borderLeftWidth = 0;
-            titleField.style.borderRightWidth = 0;
-            titleField.style.flexGrow = 1;
-            titleField.style.marginRight = 6;
-            titleField.style.marginLeft = 0;
-            titleField.style.minWidth = 50;
-            titleField.style.flexShrink = 1;
-            titleField.style.unityTextAlign = TextAnchor.MiddleLeft;
-
-            if (titleField.labelElement != null)
-            {
-                titleField.labelElement.style.display = DisplayStyle.None;
-            }
-
-                titleField.RegisterCallback<GeometryChangedEvent>(evt =>
-                {
-                    // Buscamos cualquier elemento de texto interno real (TextElement)
-                    var innerTexts = titleField.Query<TextElement>().ToList();
-                    foreach (var txt in innerTexts)
-                    {
-                        // Ignoramos la etiqueta oculta (Label) y nos quedamos con el Input real
-                        if (!txt.ClassListContains("unity-label"))
-                        {
-                            txt.style.paddingLeft = 4; // Damos aire por la izquierda
-                            txt.style.overflow = Overflow.Visible; // EVITA QUE SE RECORTE LA NEGRITA
-                        }
-                    }
-                });
+            ConfigureRuleNameField(titleField);
 
             titleField.RegisterValueChangedCallback(evt =>
             {
@@ -438,8 +499,6 @@ namespace GameRuleEditor.Panels
                 duplicateBtn.AddToClassList("button-primary");
                 duplicateBtn.AddToClassList("rules-command");
                 duplicateBtn.style.marginLeft = 4;
-                duplicateBtn.style.paddingLeft = 10;
-                duplicateBtn.style.paddingRight = 10;
                 duplicateBtn.style.flexShrink = 0;
                 duplicateBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
                 foldoutToggle.Add(duplicateBtn);
@@ -940,14 +999,16 @@ namespace GameRuleEditor.Panels
         private void OnElementDragStart(PointerDownEvent evt, VisualElement item,
             int ruleIndex, RuleElementKind kind, int index)
         {
-            if (evt.button != 0 || item.parent == null ||
-                context.SelectedActor?.Script == null ||
-                ruleIndex < 0 || ruleIndex >= context.SelectedActor.Script.Count ||
+            bool movingSet = kind == RuleElementKind.None;
+            if (evt.button != 0 || item.parent == null || context.SelectedActor == null ||
+                (!movingSet && (context.SelectedActor.Script == null ||
+                    ruleIndex < 0 || ruleIndex >= context.SelectedActor.Script.Count)) ||
                 draggedElementItem != null)
                 return;
 
             var column = item.parent;
-            if (column.Children().Count(child => child.ClassListContains("rule-overview-item")) < 2)
+            string itemClass = movingSet ? "rules-set-overview" : "rule-overview-item";
+            if (column.Children().Count(child => child.ClassListContains(itemClass)) < 2)
                 return;
 
             draggedElementItem = item;
@@ -985,15 +1046,16 @@ namespace GameRuleEditor.Panels
             float diffY = evt.position.y - dragStartPosElement.y;
             item.style.translate = new Translate(0f, diffY, 0f);
             float centerY = item.layout.y + diffY + item.layout.height / 2f;
+            string itemClass = draggedElementKind == RuleElementKind.None ? "rules-set-overview" : "rule-overview-item";
             var otherItems = elementDragColumn.Children()
-                .Where(child => child != item && child.ClassListContains("rule-overview-item"))
+                .Where(child => child != item && child.ClassListContains(itemClass))
                 .ToList();
             int target = otherItems.FindIndex(child =>
                 centerY < child.layout.y + child.layout.height / 2f);
             if (target < 0) target = otherItems.Count;
 
             int current = elementDragColumn.Children().TakeWhile(child => child != elementDragSpacer)
-                .Count(child => child != item && child.ClassListContains("rule-overview-item"));
+                .Count(child => child != item && child.ClassListContains(itemClass));
             if (target == current)
             {
                 evt.StopPropagation();
@@ -1019,6 +1081,7 @@ namespace GameRuleEditor.Panels
             RuleElementKind kind = draggedElementKind;
             var column = elementDragColumn;
             var spacer = elementDragSpacer;
+            string itemClass = kind == RuleElementKind.None ? "rules-set-overview" : "rule-overview-item";
             draggedElementItem = null;
             elementDragSpacer = null;
             elementDragColumn = null;
@@ -1033,7 +1096,7 @@ namespace GameRuleEditor.Panels
             if (spacer?.parent == column)
             {
                 to = column.Children().TakeWhile(child => child != spacer)
-                    .Count(child => child != item && child.ClassListContains("rule-overview-item"));
+                    .Count(child => child != item && child.ClassListContains(itemClass));
                 column.Remove(spacer);
             }
 
@@ -1045,7 +1108,11 @@ namespace GameRuleEditor.Panels
             item.style.width = StyleKeyword.Null;
 
             if (evt is PointerUpEvent && to >= 0 && from != to)
-                MoveRuleElement(ruleIndex, kind, from, to);
+            {
+                if (kind == RuleElementKind.None)
+                    controller.ReorderRuleSets(context.selectedActorIndex, (string)item.userData, to);
+                else MoveRuleElement(ruleIndex, kind, from, to);
+            }
             else
                 UpdateRulesList();
             evt.StopPropagation();

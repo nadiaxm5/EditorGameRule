@@ -137,6 +137,9 @@ namespace GameRuleEditor.Panels
 
             var section = new VisualElement();
             section.AddToClassList("rule-overview-column");
+            section.style.backgroundColor = GameRuleTheme.Surface;
+            section.style.borderTopLeftRadius = section.style.borderTopRightRadius = 4;
+            section.style.borderBottomLeftRadius = section.style.borderBottomRightRadius = 4;
             var sectionHeading = new Label(sectionName);
             sectionHeading.AddToClassList("rule-block-heading");
             section.Add(sectionHeading);

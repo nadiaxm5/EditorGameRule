@@ -167,13 +167,16 @@ namespace GameRuleEditor.Panels
 
             var tagContainer = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
             tagContainer.style.flexShrink = 0;
-            tagContainer.Add(new Label("Tag") { style = { width = 20, unityTextAlign = TextAnchor.MiddleCenter } });
+            tagContainer.Add(new Label("Tag") { style = { width = 32, paddingRight = 6,
+                marginLeft = 0, marginRight = 0, unityTextAlign = TextAnchor.MiddleRight,
+                unityFontStyleAndWeight = FontStyle.Bold } });
             tagField = new TooltipPopupField(new List<TooltipDropdownOption>(), "Untagged",
                 "Choose the actor's tag.", RuleDropdownPalette.Property);
             tagField.AddToClassList("parameter-selector");
             tagField.AddToClassList("button-property-picker");
             tagField.AddToClassList("studio-compact-selector");
             tagField.style.width = 120;
+            tagField.style.marginLeft = 0;
             tagContainer.Add(tagField);
             topRow.Add(tagContainer);
 
@@ -185,10 +188,13 @@ namespace GameRuleEditor.Panels
             var prefabRow = new VisualElement { style = { flexDirection = FlexDirection.Row, marginBottom = 15, paddingLeft = 4 } };
             var prefabLabel = new Label("Prefab")
             {
-                style = { width = 40, flexShrink = 0, marginLeft = 0, marginRight = 0, unityTextAlign = TextAnchor.MiddleCenter }
+                style = { width = 40, flexShrink = 0, marginLeft = 0, marginRight = 0,
+                    paddingRight = 6, unityTextAlign = TextAnchor.MiddleRight,
+                    unityFontStyleAndWeight = FontStyle.Bold }
             };
             prefabRow.Add(prefabLabel);
             prefabPicker = new ObjectField { objectType = typeof(GameObject), allowSceneObjects = false, style = { flexGrow = 1, minWidth = 0 } };
+            prefabPicker.style.marginLeft = 0;
             prefabPicker.tooltip = "Only prefabs inside " + PrefabsFolder;
 
             // The whole field opens our custom prefab picker, so Unity's separate circular
@@ -260,7 +266,7 @@ namespace GameRuleEditor.Panels
 
             scrollView.Add(transformSection);
 
-            var transformContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            var transformContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
             transformContainer.AddToClassList("settings-section-content");
             transformSection.Add(transformContainer);
 
@@ -279,7 +285,7 @@ namespace GameRuleEditor.Panels
 
             scrollView.Add(physicsSection);
 
-            var physicsContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5 } };
+            var physicsContainer = new VisualElement { style = { paddingLeft = 15, marginTop = 5, marginBottom = 8 } };
             physicsContainer.AddToClassList("settings-section-content");
             physicsSection.Add(physicsContainer);
 
@@ -315,13 +321,18 @@ namespace GameRuleEditor.Panels
             var ruleSetsSection = new Foldout { text = "Rule Sets", value = true };
             GameRuleTheme.StylePropertySection(ruleSetsSection);
             var ruleSetsContent = new VisualElement();
-            ruleSetsContent.AddToClassList("rule-overview-column");
-            ruleSetsContent.AddToClassList("rule-sets-body");
+            ruleSetsContent.style.paddingLeft = 15;
+            ruleSetsContent.style.marginTop = 5;
+            ruleSetsContent.style.marginBottom = 8;
+            ruleSetsContent.AddToClassList("settings-section-content");
             ruleSetsContainer = new VisualElement();
             ruleSetsContent.Add(ruleSetsContainer);
 
             var addRulesSetButton = new Button(AddRulesComponent) { text = "+ Add Rule Set" };
             addRulesSetButton.AddToClassList("button-primary");
+            addRulesSetButton.style.marginTop = 4;
+            addRulesSetButton.style.paddingTop = 4;
+            addRulesSetButton.style.paddingBottom = 4;
             addRulesSetButton.style.alignSelf = Align.Center;
             ruleSetsContent.Add(addRulesSetButton);
 
@@ -376,7 +387,7 @@ namespace GameRuleEditor.Panels
 
                 if (IsLegacyRuleSetName(comp.name))
                 {
-                    comp.name = NextRuleSetName(actor, ruleSetNumber);
+                    comp.name = ProjectController.NextRuleSetName(actor, ruleSetNumber);
                     dirty = true;
                 }
             }
@@ -456,6 +467,7 @@ namespace GameRuleEditor.Panels
 
             tagField.UnregisterValueChangedCallback(OnTagFieldValueChanged);
             var choices = Loader.GetProjectTags(context.currentProject?.actors);
+            choices.Sort(System.StringComparer.OrdinalIgnoreCase);
             choices.Add("Add Custom Tag...");
             tagField.SetChoices(choices.ConvertAll(tag => new TooltipDropdownOption(tag, tag,
                 tag == "Add Custom Tag..." ? "Create a custom tag." : "Assign this tag to the actor.")));
@@ -665,6 +677,7 @@ namespace GameRuleEditor.Panels
             var card = new VisualElement { userData = comp.id, tooltip = "Open this rule set in Rules" };
             card.AddToClassList("rule-set-card");
             card.AddToClassList("rule-set-entry");
+            card.AddToClassList("rule-set-property-row");
             card.EnableInClassList("rule-set-selected", GameRuleRulesWindow.IsRuleSetSelected(context, comp.id));
 
             var handle = new Label("\u2261") { tooltip = "Drag to reorder" };
@@ -673,14 +686,14 @@ namespace GameRuleEditor.Panels
             handle.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
             card.Add(handle);
 
-            var name = new TextField { value = comp.name, tooltip = "Rename rule set" };
+            var name = new TextField { value = comp.name, isDelayed = true, tooltip = "Rename rule set" };
             name.AddToClassList("rule-set-name");
+            name.AddToClassList("custom-property-name");
             HideTextFieldLabel(name);
             name.RegisterValueChangedCallback(evt =>
             {
-                Undo.RecordObject(context.currentProject, "Rename Component");
-                comp.name = evt.newValue;
-                EditorUtility.SetDirty(context.currentProject);
+                if (!controller.RenameRuleSet(context.selectedActorIndex, comp.id, evt.newValue))
+                    name.SetValueWithoutNotify(comp.name);
             });
             // Notify after editing so the Rules headings and filter follow the new name.
             name.RegisterCallback<FocusOutEvent>(_ => schedule.Execute(() => context.NotifyProjectChanged()));
@@ -696,7 +709,7 @@ namespace GameRuleEditor.Panels
             var infoLabel = new Label($"{ruleCount} rule{(ruleCount == 1 ? "" : "s")}");
             infoLabel.AddToClassList("rule-set-count");
             card.Add(infoLabel);
-            var remove = new Button(() => RemoveComponent(compIndex, comp.id)) { text = "×", tooltip = "Remove Component" };
+            var remove = new Button(() => RemoveRulesComponent(comp.id)) { text = "×", tooltip = "Remove Rule Set" };
             remove.AddToClassList("button-danger");
             remove.AddToClassList("button-danger-icon");
             remove.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
@@ -725,7 +738,9 @@ namespace GameRuleEditor.Panels
         // ──────────────────────────────────
         private void OnCompDragStart(PointerDownEvent evt, VisualElement card, int index)
         {
-            if (evt.button != 0 || context.SelectedActor?.Components == null) return;
+            if (evt.button != 0 || context.SelectedActor?.Components == null ||
+                card.parent != ruleSetsContainer || index < 0 || index >= context.SelectedActor.Components.Count ||
+                context.SelectedActor.Components[index].type != "Rules") return;
 
             isDraggingComp = true;
             dragStartPosComp = evt.position;
@@ -847,28 +862,8 @@ namespace GameRuleEditor.Panels
             }
 
             var actor = context.SelectedActor;
-            int newIndex = -1;
-            if (actor?.Components != null && targetRuleSetIndex >= 0)
-            {
-                for (int i = 0; i < actor.Components.Count; i++)
-                {
-                    if (actor.Components[i].type != "Rules") continue;
-                    if (targetRuleSetIndex-- == 0)
-                    {
-                        newIndex = i;
-                        break;
-                    }
-                }
-            }
-            if (newIndex >= 0 && originalIndex >= 0 && originalIndex < actor.Components.Count &&
-                originalIndex != newIndex)
-            {
-                Undo.RecordObject(context.currentProject, "Reorder Components");
-                var compToMove = actor.Components[originalIndex];
-                actor.Components.RemoveAt(originalIndex);
-                actor.Components.Insert(newIndex, compToMove);
-                EditorUtility.SetDirty(context.currentProject);
-            }
+            if (actor?.Components != null && originalIndex >= 0 && originalIndex < actor.Components.Count)
+                controller.ReorderRuleSets(context.selectedActorIndex, actor.Components[originalIndex].id, targetRuleSetIndex);
 
             RebuildComponents();
             evt.StopPropagation();
@@ -958,60 +953,14 @@ namespace GameRuleEditor.Panels
         // ──────────────────────────────────
         private void AddRulesComponent()
         {
-            var actor = context.SelectedActor;
-            if (actor == null) return;
-            if (actor.Components == null)
-                actor.Components = new List<ActorComponentMeta>();
-            int nextNumber = actor.Components.FindAll(component => component.type == "Rules").Count + 1;
-
-            Undo.RecordObject(context.currentProject, "Add Rule Set");
-            actor.Components.Add(new ActorComponentMeta
-            {
-                type = "Rules",
-                name = NextRuleSetName(actor, nextNumber),
-                id = NewGroupId()
-            });
-            EditorUtility.SetDirty(context.currentProject);
-            context.NotifyProjectChanged();
-            RebuildComponents();
+            if (controller.AddRuleSet(context.selectedActorIndex) != null)
+                RebuildComponents();
         }
 
-        /// <param name="groupId">For Rules components: the id of the component being removed (clears only its rules).</param>
-        private void RemoveComponent(int compIndex, string groupId)
+        private void RemoveRulesComponent(string groupId)
         {
-            var actor = context.SelectedActor;
-            if (actor == null || compIndex < 0 || compIndex >= actor.Components.Count) return;
-
-            var comp = actor.Components[compIndex];
-            bool isProperties = comp.type == "Properties";
-
-            bool hasData = isProperties
-                ? (actor.GetCustomProperties().Count > 0)
-                : (actor.Script != null && actor.Script.Exists(r => r.groupId == groupId));
-
-            if (hasData)
-            {
-                string dataLabel = isProperties ? "properties" : "rules";
-                if (!EditorUtility.DisplayDialog("Remove Component",
-                    $"This will also delete all {dataLabel} in this component. Are you sure?",
-                    "Remove", "Cancel"))
-                    return;
-
-                Undo.RecordObject(context.currentProject, "Remove Component");
-                if (isProperties)
-                    actor.GetCustomProperties().Clear();
-                else
-                    actor.Script.RemoveAll(r => r.groupId == groupId);
-            }
-            else
-            {
-                Undo.RecordObject(context.currentProject, "Remove Component");
-            }
-
-            actor.Components.RemoveAt(compIndex);
-            EditorUtility.SetDirty(context.currentProject);
-            context.NotifyProjectChanged();
-            RebuildComponents();
+            if (controller.ConfirmRemoveRuleSet(context.selectedActorIndex, groupId))
+                RebuildComponents();
         }
 
         private static bool HasComponentOfType(ActorJson actor, string type)
@@ -1034,20 +983,6 @@ namespace GameRuleEditor.Panels
                     int.TryParse(name.Substring(prefix.Length), out _))
                     return true;
             return false;
-        }
-
-        private static string NextRuleSetName(ActorJson actor, int number)
-        {
-            string name;
-            do
-            {
-                name = number == 1 ? "Rule Set" : $"Rule Set {number}";
-                number++;
-            }
-            while (actor.Components.Exists(component => component.type == "Rules" &&
-                string.Equals(component.name, name, System.StringComparison.OrdinalIgnoreCase)));
-
-            return name;
         }
 
         // ──────────────────────────────────
@@ -1098,7 +1033,7 @@ namespace GameRuleEditor.Panels
             else
             {
                 vecField.SetValueWithoutNotify(prefabDefault);
-                row.label.style.unityFontStyleAndWeight = FontStyle.Normal;
+                row.label.style.unityFontStyleAndWeight = FontStyle.Bold;
             }
         }
 
@@ -1217,7 +1152,7 @@ namespace GameRuleEditor.Panels
         private void SetPhysicsLabelState(string key, bool overridden)
         {
             if (physicsLabels.TryGetValue(key, out Label label))
-                label.style.unityFontStyleAndWeight = overridden ? FontStyle.Bold : FontStyle.Normal;
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
         }
 
         // ──────────────────────────────────
