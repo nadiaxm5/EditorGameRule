@@ -4,6 +4,8 @@ using UnityEditor;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.Panels;
+using System.Collections;
+using System.Reflection;
 
 namespace GameRuleEditor.Windows
 {
@@ -11,17 +13,41 @@ namespace GameRuleEditor.Windows
     {
         private EditorContext context;
         private ProjectController controller;
-        private Label titleLabel;
 
         // [SerializeField] so an open group filter survives entering Play. Unity writes null strings
         // back as "", so both are normalized to null in OnEnable — see NormalizeGroupFilter.
         [SerializeField] private string currentGroupId;
         [SerializeField] private string currentGroupName;
+        private bool filterAvailable;
+
+        internal static event System.Action RuleSetFilterChanged;
+
+        internal static bool IsRuleSetSelected(EditorContext ctx, string id)
+        {
+            foreach (var window in Resources.FindObjectsOfTypeAll<GameRuleRulesWindow>())
+                if (window.filterAvailable && window.context == ctx && window.currentGroupId == id) return true;
+            return false;
+        }
+
+        internal static bool IsRulesTabActive()
+        {
+            var window = Resources.FindObjectsOfTypeAll<GameRuleRulesWindow>();
+            if (window.Length == 0) return false;
+
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var parent = typeof(EditorWindow).GetField("m_Parent", flags)?.GetValue(window[0]);
+            if (parent == null) return false;
+            var panes = parent.GetType().GetField("m_Panes", flags)?.GetValue(parent) as IList;
+            var selected = parent.GetType().GetProperty("selected", flags)?.GetValue(parent);
+            if (panes == null || !(selected is int index)) return true;
+            return index >= 0 && index < panes.Count && ReferenceEquals(panes[index], window[0]);
+        }
 
         public static GameRuleRulesWindow EnsureVisible(EditorContext ctx, ProjectController ctrl, string groupId = null, string groupName = null)
         {
             var window = GetWindow<GameRuleRulesWindow>("Rules", false);
             window.minSize = new Vector2(400, 300);
+            if (window.currentGroupId != groupId) ctx?.ClearRuleElementSelection();
             window.currentGroupId = groupId;
             window.currentGroupName = groupName;
             window.NormalizeGroupFilter();
@@ -33,6 +59,8 @@ namespace GameRuleEditor.Windows
 
         public void Init(EditorContext ctx, ProjectController ctrl)
         {
+            filterAvailable = true;
+            if (context != null) context.OnActorSelected -= OnActorSelected;
             context = ctx; controller = ctrl;
             BuildUI();
 
@@ -55,6 +83,7 @@ namespace GameRuleEditor.Windows
 
         private void OnEnable()
         {
+            filterAvailable = true;
             NormalizeGroupFilter();
 
             if (context == null) context = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
@@ -68,6 +97,18 @@ namespace GameRuleEditor.Windows
         private void OnDisable()
         {
             if (context != null) context.OnActorSelected -= OnActorSelected;
+            filterAvailable = false;
+            RuleSetFilterChanged?.Invoke();
+        }
+
+        private void OnBecameVisible()
+        {
+            context?.SetRulesTabVisible(true);
+        }
+
+        private void OnBecameInvisible()
+        {
+            context?.SetRulesTabVisible(false);
         }
 
         private void OnActorSelected(int index)
@@ -82,50 +123,13 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Editor/GameRuleEditor/UI/USS/Common.uss");
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
 
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // panelBackground
-
-            // Header
-            var headerContainer = new VisualElement();
-            headerContainer.style.flexDirection = FlexDirection.Row;
-            headerContainer.style.justifyContent = Justify.SpaceBetween;
-            headerContainer.style.alignItems = Align.Center;
-            headerContainer.style.height = 32;
-            headerContainer.style.paddingLeft = 10;
-            headerContainer.style.paddingRight = 6;
-            headerContainer.style.backgroundColor = new Color(0.22f, 0.22f, 0.22f); // headerBackground
-            headerContainer.style.borderBottomWidth = 1;
-            headerContainer.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
-            headerContainer.style.flexShrink = 0;
-
-            string actorName = context?.SelectedActor?.ActorName ?? "Actor";
-            string titleText = currentGroupName != null
-                ? $"Rules [{currentGroupName}] — {actorName}"
-                : $"Rules — {actorName}";
-            titleLabel = new Label(titleText);
-            titleLabel.style.fontSize = 12;
-            titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
-            headerContainer.Add(titleLabel);
-
-            var closeBtn = new Button(() => this.Close());
-            closeBtn.text = "\u2715"; // ✕
-            closeBtn.tooltip = "Close Window";
-            closeBtn.style.width = 24;
-            closeBtn.style.height = 24;
-            closeBtn.style.fontSize = 12;
-            closeBtn.style.backgroundColor = Color.clear;
-            closeBtn.style.borderLeftWidth = 0;
-            closeBtn.style.borderRightWidth = 0;
-            closeBtn.style.borderTopWidth = 0;
-            closeBtn.style.borderBottomWidth = 0;
-            headerContainer.Add(closeBtn);
-
-            root.Add(headerContainer);
+            root.style.backgroundColor = GameRuleTheme.Background; // panelBackground
 
             // Content
             var contentContainer = new VisualElement();
@@ -133,7 +137,17 @@ namespace GameRuleEditor.Windows
             root.Add(contentContainer);
 
             if (context != null)
-                contentContainer.Add(new ScriptEditorPanel(context, controller, currentGroupId, currentGroupName));
+            {
+                var panel = new ScriptEditorPanel(context, controller, currentGroupId, currentGroupName);
+                panel.OnGroupFilterChanged += (id, name) =>
+                {
+                    currentGroupId = id;
+                    currentGroupName = name;
+                    RuleSetFilterChanged?.Invoke();
+                };
+                contentContainer.Add(panel);
+            }
+            RuleSetFilterChanged?.Invoke();
         }
     }
 }

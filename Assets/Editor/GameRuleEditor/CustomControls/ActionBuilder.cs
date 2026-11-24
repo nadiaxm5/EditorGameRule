@@ -34,15 +34,15 @@ namespace GameRuleEditor.CustomControls
                 }
             }
 
-            style.backgroundColor = new Color(0.25f, 0.25f, 0.25f);
+            style.backgroundColor = GameRuleTheme.RaisedSurface;
             style.borderTopLeftRadius = 5; style.borderTopRightRadius = 5;
             style.borderBottomLeftRadius = 5; style.borderBottomRightRadius = 5;
             style.borderLeftWidth = 1; style.borderRightWidth = 1;
             style.borderTopWidth = 1; style.borderBottomWidth = 1;
-            style.borderLeftColor = new Color(0.15f, 0.15f, 0.15f);
-            style.borderRightColor = new Color(0.15f, 0.15f, 0.15f);
-            style.borderTopColor = new Color(0.15f, 0.15f, 0.15f);
-            style.borderBottomColor = new Color(0.15f, 0.15f, 0.15f);
+            style.borderLeftColor = GameRuleTheme.SoftBorder;
+            style.borderRightColor = GameRuleTheme.SoftBorder;
+            style.borderTopColor = GameRuleTheme.SoftBorder;
+            style.borderBottomColor = GameRuleTheme.SoftBorder;
             style.paddingTop = 10; style.paddingBottom = 10;
             style.paddingLeft = 10; style.paddingRight = 10;
 
@@ -61,31 +61,39 @@ namespace GameRuleEditor.CustomControls
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             header.Add(label);
 
-            var addButton = new Button(() => AddAction(null));
-            addButton.text = "+ Add Action";
-            addButton.AddToClassList("button-primary");
-            addButton.style.height = 25;
-            header.Add(addButton);
-
             Add(header);
 
             actionsContainer = new VisualElement();
             Add(actionsContainer);
+
+            var addActionRow = new VisualElement();
+            addActionRow.style.flexDirection = FlexDirection.Row;
+            addActionRow.style.justifyContent = Justify.Center;
+            addActionRow.style.alignItems = Align.Center;
+            addActionRow.style.marginTop = 6;
+
+            var addButton = new Button(() => AddAction(null));
+            addButton.text = "+ Add Action";
+            addButton.tooltip = "Add another action to this rule.";
+            addButton.AddToClassList("button-action");
+            addButton.style.height = 25;
+            addActionRow.Add(addButton);
+            Add(addActionRow);
 /*
             var previewContainer = new VisualElement();
             previewContainer.style.marginTop = 10;
-            previewContainer.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            previewContainer.style.backgroundColor = GameRuleTheme.InsetSurface;
             previewContainer.style.paddingTop = 8; previewContainer.style.paddingBottom = 8;
             previewContainer.style.paddingLeft = 8; previewContainer.style.paddingRight = 8;
 
             var previewTitle = new Label("Preview:");
             previewTitle.style.fontSize = 10;
-            previewTitle.style.color = new Color(0.7f, 0.7f, 0.7f);
+            previewTitle.style.color = GameRuleTheme.MutedText;
             previewContainer.Add(previewTitle);
 
             previewLabel = new Label("");
             previewLabel.style.fontSize = 11;
-            previewLabel.style.color = new Color(0.8f, 0.9f, 1f);
+            previewLabel.style.color = GameRuleTheme.PreviewText;
             previewLabel.style.whiteSpace = WhiteSpace.Normal;
             previewContainer.Add(previewLabel);
 
@@ -109,7 +117,9 @@ namespace GameRuleEditor.CustomControls
             actions.Add(actionElement);
             actionsContainer.Add(actionElement);
 
-            UpdatePreview();
+            // A newly added empty row is only a local selector until the user chooses
+            // an action. Persisting here would immediately rebuild the UI and remove it.
+            if (actionString != null) UpdatePreview();
         }
 
         private void RemoveAction(ActionElement element)

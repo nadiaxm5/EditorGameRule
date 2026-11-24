@@ -5,19 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEditorInternal;
 using GameRuleEditor.Core;
 
 public static class Scripts
 {
     public static void Create(List<ActorJson> actorList)
     {
+        List<string> projectTags = Loader.GetProjectTags(actorList);
+
         foreach (ActorJson actor in actorList)
         {
-            List<string> tags = new List<string>(InternalEditorUtility.tags);
+            List<string> tags = new List<string>(projectTags);
             List<string> scope = new List<string>();
             List<string> spawns = new List<string>();
-            List<string> properties = new List<string>();
+            var propertyDefaults = new List<string>();
             string scriptsPath = "Assets/Resources/Scripts/" + actor.ActorName + ".cs";
             StreamWriter outfile = new StreamWriter(scriptsPath);
             bool hasCollision = false;
@@ -30,24 +31,28 @@ public static class Scripts
 
             // Properties
             outfile.WriteLine("    public bool Active = " + actor.Active.ToString().ToLower() + ";");
-            foreach (string p in actor.Properties)
+            foreach (CustomVariable property in actor.GetCustomProperties())
             {
-                properties.Add(p);
-                outfile.WriteLine("    public float " + p + "f;");
+                string declaration = GenerateCustomVariableDeclaration(property, out string initializer);
+                if (declaration == null) continue;
+                outfile.WriteLine("    " + declaration);
+                propertyDefaults.Add($"        {{ nameof({property.name}), {initializer} }},");
             }
 
             // Structure Accumulators
-            string joinProperties = string.Join(";", properties);
             string joinSpawns = string.Join(",", spawns);
             string joinScope = "";
 
             // Dictionaries
-            if (joinProperties.Length > 0)
-                outfile.WriteLine("    public Dictionary<string, float> propertyList = new Dictionary<string, float>();");
+            if (propertyDefaults.Count > 0)
+            {
+                outfile.WriteLine("    public Dictionary<string, object> propertyList = new Dictionary<string, object> {");
+                foreach (string entry in propertyDefaults) outfile.WriteLine(entry);
+                outfile.WriteLine("    };");
+            }
             outfile.WriteLine("    private Dictionary<string, float> timers = new Dictionary<string, float>();");
 
-            // Split Update and FixedUpdate
-            List<SentenceJson> updateSentences = new List<SentenceJson>();
+            // Every rule is evaluated in declaration order during one deterministic fixed tick.
             List<SentenceJson> fixedSentences = new List<SentenceJson>();
 
             foreach (SentenceJson s in actor.Script)
@@ -59,9 +64,7 @@ public static class Scripts
                 // Skip sentences with no actions
                 if (s.Do == null || !s.Do.Any()) continue;
 
-                bool isUpdate = s.When != null && s.When.Any(w => w.Contains("Keyboard") || w.Contains("Touch"));
-                if (isUpdate) updateSentences.Add(s);
-                else fixedSentences.Add(s);
+                fixedSentences.Add(s);
             }
 
             // Physics-phase rules are invoked by the central scheduler in actor declaration order.
@@ -97,43 +100,8 @@ public static class Scripts
             }
             outfile.WriteLine("    }");
 
-            // Input-phase rules are invoked by the central scheduler in actor declaration order.
-            // Always emit the method, even when empty, to satisfy IGameRuleActor.
-            outfile.WriteLine("    public void EvalUpdate(){");
-            foreach (SentenceJson s in updateSentences)
-            {
-                if (s.When != null && s.When.Any())
-                {
-                    outfile.Write("        if(");
-                    string conditionExpression = ProcessCondition(s.When[0]);
-                    outfile.Write(conditionExpression);
-                    outfile.WriteLine("){");
-
-                    foreach (string c in ExtractIndividualConditions(s.When[0]))
-                    {
-                        if (c.Contains("Collision")) hasCollision = true;
-                        scope.Add(c);
-                    }
-                }
-                else
-                {
-                    outfile.WriteLine("        {");
-                }
-
-                foreach (string a in s.Do)
-                {
-                    if (a.Contains("Spawn")) spawns.Add(StringToElement(a));
-                    scope.Add(a);
-                    outfile.WriteLine("            Action." + StringToCommand(a) + ";");
-                }
-                outfile.WriteLine("        }");
-            }
-            outfile.WriteLine("    }");
-
             // Awake
             List<string> awakeLines = new List<string>();
-            if (joinProperties.Length != 0)
-                awakeLines.Add("        propertyList = Utils.CreateProperties(\"" + joinProperties + "\");");
             if (spawns.Count > 0)
             {
                 string joinSpawnsNow = string.Join(",", spawns);
@@ -147,7 +115,7 @@ public static class Scripts
 
             outfile.WriteLine("    void Start() {");
             if (joinScope.Length != 0)
-                outfile.WriteLine("        scopeList = Utils.CreateScope(gameObject.GetInstanceID(),\"" + joinScope + "\");");
+                outfile.WriteLine("        scopeList = Utils.CreateScope(gameObject.GetInstanceID()," + GameRuleParser.QuoteString(joinScope) + ");");
             outfile.WriteLine("        if (Active) gameObject.SetActive(true);");
             outfile.WriteLine("        else gameObject.SetActive(false);");
             outfile.WriteLine("    }");
@@ -160,13 +128,15 @@ public static class Scripts
                 foreach (string t in tags)
                     awakeLines.Add("        TagCollisions[\"" + t + "\"] = new HashSet<GameObject>();");
                 outfile.WriteLine("    void OnTriggerEnter(Collider other) {");
-                outfile.WriteLine("        if (TagCollisions.ContainsKey(other.tag))");
-                outfile.WriteLine("            TagCollisions[other.tag].Add(other.gameObject);");
+                outfile.WriteLine("        GameObject otherActor = other.transform.root.gameObject;");
+                outfile.WriteLine("        if (TagCollisions.ContainsKey(otherActor.tag))");
+                outfile.WriteLine("            TagCollisions[otherActor.tag].Add(otherActor);");
                 outfile.WriteLine("    }");
 
                 outfile.WriteLine("    void OnTriggerExit(Collider other) {");
-                outfile.WriteLine("        if (TagCollisions.ContainsKey(other.tag))");
-                outfile.WriteLine("            TagCollisions[other.tag].Remove(other.gameObject);");
+                outfile.WriteLine("        GameObject otherActor = other.transform.root.gameObject;");
+                outfile.WriteLine("        if (TagCollisions.ContainsKey(otherActor.tag))");
+                outfile.WriteLine("            TagCollisions[otherActor.tag].Remove(otherActor);");
                 outfile.WriteLine("    }");
             }
 
@@ -199,10 +169,10 @@ public static class Scripts
             return bare + "()";
         }
 
-        string name = element.Substring(0, init);
+        var parsed = GameRuleParser.ParseFunction(element);
+        string name = parsed.Name;
         string command = name;
-        string rest = element.Substring(init + 1, end - init - 1);
-        List<string> parameters = rest.Split(new string[] { "," }, StringSplitOptions.None).ToList();
+        List<string> parameters = parsed.Params;
 
         // A parameter left empty in the editor — or missing in a hand-written JSON — would reach
         // the runtime as "" and blow up the expression parser. Fill it with the same default the
@@ -216,7 +186,7 @@ public static class Scripts
         foreach (string s in parameters)
         {
             counter++;
-            command += "\"" + s + "\"";
+            command += GameRuleParser.QuoteString(s);
             if (parameters.Count != counter) command += ",";
         }
         if (name == "Compare" || name == "Edit" || name == "Check") command += ",scopeList)";
@@ -228,11 +198,13 @@ public static class Scripts
         else if (name == "Spawn")
         {
             string prefab = parameters[0];
-            command = $"Spawn(\"{prefab}\", gameObject";
+            // The serialized second parameter is always "this". At runtime that means the
+            // GameObject executing this generated rule, never a user-selectable actor.
+            command = $"Spawn({GameRuleParser.QuoteString(prefab)}, gameObject";
 
             List<string> extraParams = new List<string>();
             for (int i = 2; i < parameters.Count; i++)
-                extraParams.Add($"\"{parameters[i].Trim()}\"");
+                extraParams.Add(GameRuleParser.QuoteString(parameters[i].Trim()));
 
             while (extraParams.Count < 6)
                 extraParams.Add("\"0\"");
@@ -255,36 +227,24 @@ public static class Scripts
 
     private static string ProcessCondition(string condition)
     {
-        string result = condition
-            .Replace(" AND ", " && ")
-            .Replace(" OR ", " || ")
-            .Replace("NOT ", "!");
-
-        var individualConditions = ExtractIndividualConditions(condition);
-        foreach (string individualCondition in individualConditions)
+        var parts = new List<string>();
+        foreach (string token in GameRuleParser.TokenizeCondition(condition))
         {
-            string replacement = $"Condition.{StringToCommand(individualCondition)}";
-            result = result.Replace(individualCondition, replacement);
+            switch (token)
+            {
+                case "AND": parts.Add("&&"); break;
+                case "OR": parts.Add("||"); break;
+                case "NOT": parts.Add("!"); break;
+                default: parts.Add($"Condition.{StringToCommand(token)}"); break;
+            }
         }
-
-        return result;
+        return string.Join(" ", parts);
     }
 
     private static List<string> ExtractIndividualConditions(string conditionExpression)
     {
-        List<string> conditions = new List<string>();
-
-        var matches = Regex.Matches(
-            conditionExpression,
-            @"[a-zA-Z_][a-zA-Z0-9_]*\([^)]+\)"
-        );
-
-        foreach (Match match in matches)
-        {
-            conditions.Add(match.Value);
-        }
-
-        return conditions;
+        return GameRuleParser.TokenizeCondition(conditionExpression)
+            .Where(token => token != "AND" && token != "OR" && token != "NOT").ToList();
     }
 
     public static void CreateGameManager(SceneJson scene, List<string> declarationOrder)
@@ -303,7 +263,10 @@ public static class Scripts
             outfile.WriteLine("    public static GameManager Instance { get; private set; }");
             outfile.WriteLine("    private Camera mainCamera;");
             outfile.WriteLine("    private Light sunLight;");
-            outfile.WriteLine("    private AudioSource audioSource;");
+            outfile.WriteLine("    private Vector3 previousCameraPosition;");
+            outfile.WriteLine("    private Vector3 currentCameraPosition;");
+            outfile.WriteLine("    private Quaternion previousCameraRotation;");
+            outfile.WriteLine("    private Quaternion currentCameraRotation;");
             outfile.WriteLine("");
 
             // Canonical actor order from the project descriptor, captured before Loader reverses
@@ -312,7 +275,7 @@ public static class Scripts
             outfile.WriteLine("    private static readonly string[] ActorOrder = new string[] { " + bakedOrder + " };");
             outfile.WriteLine("");
 
-            outfile.WriteLine($"    public string GameName = \"{scene.GameName ?? "Unknown"}\";");
+            outfile.WriteLine($"    public string GameName = {GameRuleParser.QuoteString(scene.GameName ?? "Unknown")};");
 
             // ScreenResolution 1920x1080 default
             if (scene.ScreenResolution != null && scene.ScreenResolution.Length >= 2)
@@ -368,15 +331,7 @@ public static class Scripts
             else
                 outfile.WriteLine("    public Vector3 Gravity = new Vector3(0f, -9.81f, 0f);");
 
-            outfile.WriteLine("    public string SoundTrack");
-            outfile.WriteLine("    {");
-            outfile.WriteLine("        get");
-            outfile.WriteLine("        {");
-            outfile.WriteLine("            if (audioSource != null && audioSource.clip != null)");
-            outfile.WriteLine("                return audioSource.clip.name;");
-            outfile.WriteLine("            return \"\";");
-            outfile.WriteLine("        }");
-            outfile.WriteLine("    }");
+            outfile.WriteLine($"    public string SoundTrack = {GameRuleParser.QuoteString(scene.SoundTrack)};");
 
             outfile.WriteLine("    public float FPS { get; private set; }");
 
@@ -396,7 +351,7 @@ public static class Scripts
                 {
                     if (!string.IsNullOrEmpty(customVar.name) && !string.IsNullOrEmpty(customVar.type))
                     {
-                        string fieldDeclaration = GenerateCustomVariableDeclaration(customVar);
+                        string fieldDeclaration = GenerateCustomVariableDeclaration(customVar, out _);
                         if (!string.IsNullOrEmpty(fieldDeclaration))
                         {
                             outfile.WriteLine($"    {fieldDeclaration}");
@@ -420,9 +375,9 @@ public static class Scripts
             outfile.WriteLine("        ");
             outfile.WriteLine("        mainCamera = GetComponentInChildren<Camera>();");
             outfile.WriteLine("        sunLight = GetComponentInChildren<Light>();");
-            outfile.WriteLine("        audioSource = GetComponent<AudioSource>();");
             outfile.WriteLine("        ");
-            outfile.WriteLine("        ApplyCameraSettings();");
+            outfile.WriteLine("        InitializeCameraState();");
+            outfile.WriteLine("        ApplyCameraSettingsImmediate();");
             outfile.WriteLine("        ApplySunSettings();");
             outfile.WriteLine("        ApplyGlobalSettings();");
             outfile.WriteLine("        ");
@@ -446,17 +401,32 @@ public static class Scripts
 
             outfile.WriteLine("    void Update()");
             outfile.WriteLine("    {");
-            outfile.WriteLine("        UpdateRuntimeVariables();");
-            outfile.WriteLine("        ActorScheduler.RunUpdate();");
+            outfile.WriteLine("        GameRuleInput.CaptureFrame();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
             outfile.WriteLine("    void FixedUpdate()");
             outfile.WriteLine("    {");
-            outfile.WriteLine("        UpdateMousePosition();");
-            outfile.WriteLine("        ActorScheduler.RunFixedUpdate();");
-            outfile.WriteLine("        ApplyCameraSettings();");
-            outfile.WriteLine("        ApplySunSettings();");
+            outfile.WriteLine("        GameRuleInput.BeginFixedTick();");
+            outfile.WriteLine("        try");
+            outfile.WriteLine("        {");
+            outfile.WriteLine("            UpdateRuntimeVariables();");
+            outfile.WriteLine("            UpdateMousePosition();");
+            outfile.WriteLine("            BeginCameraFixedTick();");
+            outfile.WriteLine("            ActorScheduler.RunFixedUpdate();");
+            outfile.WriteLine("            EndCameraFixedTick();");
+            outfile.WriteLine("            ApplySunSettings();");
+            outfile.WriteLine("        }");
+            outfile.WriteLine("        finally");
+            outfile.WriteLine("        {");
+            outfile.WriteLine("            GameRuleInput.EndFixedTick();");
+            outfile.WriteLine("        }");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    void LateUpdate()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        ApplyCameraSettingsInterpolated();");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
@@ -472,30 +442,78 @@ public static class Scripts
             outfile.WriteLine("    {");
             outfile.WriteLine("        if (mainCamera != null)");
             outfile.WriteLine("        {");
-            outfile.WriteLine("            var mouse = UnityEngine.InputSystem.Mouse.current;");
-            outfile.WriteLine("            if (mouse != null)");
+            outfile.WriteLine("            Vector2 m = GameRuleInput.PointerPosition();");
+            outfile.WriteLine("            Mouse = new Vector3(m.x, m.y, 0);");
+            outfile.WriteLine();
+            outfile.WriteLine("            Transform cameraTransform = mainCamera.transform;");
+            outfile.WriteLine("            Vector3 renderedPosition = cameraTransform.position;");
+            outfile.WriteLine("            Quaternion renderedRotation = cameraTransform.rotation;");
+            outfile.WriteLine("            Ray ray;");
+            outfile.WriteLine("            try");
             outfile.WriteLine("            {");
-            outfile.WriteLine("                Vector2 m = mouse.position.ReadValue();");
-            outfile.WriteLine("                Mouse = new Vector3(m.x, m.y, 0);");
-            outfile.WriteLine();
-            outfile.WriteLine("                Ray ray = mainCamera.ScreenPointToRay(Mouse);");
-            outfile.WriteLine("                Plane plane = new Plane(Vector3.up, Vector3.zero);");
-            outfile.WriteLine();
-            outfile.WriteLine("                if (plane.Raycast(ray, out float enter))");
-            outfile.WriteLine("                    MouseWorld = ray.GetPoint(enter);");
+            outfile.WriteLine("                cameraTransform.SetPositionAndRotation(CameraPosition, Quaternion.Euler(CameraRotation));");
+            outfile.WriteLine("                ray = mainCamera.ScreenPointToRay(Mouse);");
             outfile.WriteLine("            }");
+            outfile.WriteLine("            finally");
+            outfile.WriteLine("            {");
+            outfile.WriteLine("                cameraTransform.SetPositionAndRotation(renderedPosition, renderedRotation);");
+            outfile.WriteLine("            }");
+            outfile.WriteLine("            Plane plane = new Plane(Vector3.up, Vector3.zero);");
+            outfile.WriteLine();
+            outfile.WriteLine("            if (plane.Raycast(ray, out float enter))");
+            outfile.WriteLine("                MouseWorld = ray.GetPoint(enter);");
             outfile.WriteLine("        }");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
-            outfile.WriteLine("    private void ApplyCameraSettings()");
+            outfile.WriteLine("    private void InitializeCameraState()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        previousCameraPosition = CameraPosition;");
+            outfile.WriteLine("        currentCameraPosition = CameraPosition;");
+            outfile.WriteLine("        previousCameraRotation = Quaternion.Euler(CameraRotation);");
+            outfile.WriteLine("        currentCameraRotation = previousCameraRotation;");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void BeginCameraFixedTick()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        previousCameraPosition = currentCameraPosition;");
+            outfile.WriteLine("        previousCameraRotation = currentCameraRotation;");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void EndCameraFixedTick()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        currentCameraPosition = CameraPosition;");
+            outfile.WriteLine("        currentCameraRotation = Quaternion.Euler(CameraRotation);");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void ApplyCameraSettingsImmediate()");
             outfile.WriteLine("    {");
             outfile.WriteLine("        if (mainCamera != null)");
             outfile.WriteLine("        {");
             outfile.WriteLine("            mainCamera.transform.position = CameraPosition;");
             outfile.WriteLine("            mainCamera.transform.eulerAngles = CameraRotation;");
             outfile.WriteLine("            mainCamera.backgroundColor = BackgroundColor;");
+            outfile.WriteLine("            mainCamera.clearFlags = CameraClearFlags.SolidColor;");
             outfile.WriteLine("        }");
+            outfile.WriteLine("    }");
+            outfile.WriteLine("");
+
+            outfile.WriteLine("    private void ApplyCameraSettingsInterpolated()");
+            outfile.WriteLine("    {");
+            outfile.WriteLine("        if (mainCamera == null) return;");
+            outfile.WriteLine();
+            outfile.WriteLine("        float step = UnityEngine.Time.fixedDeltaTime;");
+            outfile.WriteLine("        float alpha = step > 0f");
+            outfile.WriteLine("            ? Mathf.Clamp01((UnityEngine.Time.time - UnityEngine.Time.fixedTime) / step)");
+            outfile.WriteLine("            : 1f;");
+            outfile.WriteLine();
+            outfile.WriteLine("        mainCamera.transform.position = Vector3.Lerp(previousCameraPosition, currentCameraPosition, alpha);");
+            outfile.WriteLine("        mainCamera.transform.rotation = Quaternion.Slerp(previousCameraRotation, currentCameraRotation, alpha);");
+            outfile.WriteLine("        mainCamera.backgroundColor = BackgroundColor;");
+            outfile.WriteLine("        mainCamera.clearFlags = CameraClearFlags.SolidColor;");
             outfile.WriteLine("    }");
             outfile.WriteLine("");
 
@@ -524,38 +542,43 @@ public static class Scripts
         }
     }
 
-    private static string GenerateCustomVariableDeclaration(CustomVariable customVar)
+    private static string GenerateCustomVariableDeclaration(CustomVariable customVar, out string initializer)
     {
-        string name = customVar.name;
-        string type = customVar.type.ToLower();
-
+        string type = customVar.type?.ToLowerInvariant();
+        initializer = null;
         switch (type)
         {
             case "int":
-                return $"public int {name} = {customVar.intValue};";
+                initializer = customVar.intValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                break;
             case "float":
-                return $"public float {name} = {customVar.floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}f;";
+                initializer = FloatLiteral(customVar.floatValue);
+                break;
             case "bool":
-                return $"public bool {name} = {customVar.boolValue.ToString().ToLower()};";
+                initializer = customVar.boolValue ? "true" : "false";
+                break;
             case "vector2":
-                if (customVar.arrayValue != null && customVar.arrayValue.Length >= 2)
-                {
-                    string x = customVar.arrayValue[0].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string y = customVar.arrayValue[1].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    return $"public Vector2 {name} = new Vector2({x}f, {y}f);";
-                }
+                var vector2 = (UnityEngine.Vector2)customVar.GetValue();
+                initializer = $"new Vector2({FloatLiteral(vector2.x)}, {FloatLiteral(vector2.y)})";
+                type = "Vector2";
                 break;
-
             case "vector3":
-                if (customVar.arrayValue != null && customVar.arrayValue.Length >= 3)
-                {
-                    string x = customVar.arrayValue[0].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string y = customVar.arrayValue[1].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string z = customVar.arrayValue[2].ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    return $"public Vector3 {name} = new Vector3({x}f, {y}f, {z}f);";
-                }
+                var vector3 = (UnityEngine.Vector3)customVar.GetValue();
+                initializer = $"new Vector3({FloatLiteral(vector3.x)}, {FloatLiteral(vector3.y)}, {FloatLiteral(vector3.z)})";
+                type = "Vector3";
                 break;
+            default:
+                return null;
         }
-        return null;
+
+        return $"public {type} {customVar.name} = {initializer};";
+    }
+
+    private static string FloatLiteral(float value)
+    {
+        if (float.IsNaN(value)) return "float.NaN";
+        if (float.IsPositiveInfinity(value)) return "float.PositiveInfinity";
+        if (float.IsNegativeInfinity(value)) return "float.NegativeInfinity";
+        return value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "f";
     }
 }

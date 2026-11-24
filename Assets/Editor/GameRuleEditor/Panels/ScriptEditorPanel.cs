@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 using GameRuleEditor.CustomControls;
@@ -21,20 +24,31 @@ namespace GameRuleEditor.Panels
         private VisualElement rulesContainer;
         private VisualElement noSelectionContainer;
         private Label actorNameLabel;
+        private VisualElement groupSelectorContainer;
+        private VisualElement addRuleRow;
+        private const string AllRuleSets = "__all_rule_sets__";
+        private readonly HashSet<string> collapsedGroups = new HashSet<string>();
+        public event System.Action<string, string> OnGroupFilterChanged;
 
         private HashSet<SentenceJson> collapsedRules = new HashSet<SentenceJson>();
-        private HashSet<SentenceJson> initializedRules = new HashSet<SentenceJson>();
-
-        private static HashSet<string> dismissedInfoBoxGroups = new HashSet<string>();
 
         private bool isDraggingRule;
         private Vector2 dragStartPosRule;
         private VisualElement draggedRuleItem;
         private int draggedRuleIndex = -1;
         private VisualElement ruleDragSpacer;
+        private VisualElement ruleDragList;
+        private List<int> ruleDragAbsIndices;
 
-        // Abs indices of rules currently visible (respects groupId filter)
-        private List<int> visibleAbsIndices = new List<int>();
+        private VisualElement draggedElementItem;
+        private VisualElement elementDragSpacer;
+        private VisualElement elementDragColumn;
+        private Vector2 dragStartPosElement;
+        private int draggedElementIndex = -1;
+        private int draggedElementRuleIndex = -1;
+        private RuleElementKind draggedElementKind;
+
+        private bool subscribed;
 
         public ScriptEditorPanel(EditorContext editorContext, ProjectController projectController, string groupId = null, string groupName = null)
         {
@@ -53,16 +67,26 @@ namespace GameRuleEditor.Panels
             CreateUI();
             UpdateUI();
 
-            // Subscribe to events
+            RegisterCallback<AttachToPanelEvent>(_ => { Subscribe(); UpdateUI(); });
+            RegisterCallback<DetachFromPanelEvent>(_ => Unsubscribe());
+        }
+
+        private void Subscribe()
+        {
+            if (subscribed) return;
+            subscribed = true;
             context.OnActorSelected += OnActorSelected;
             context.OnProjectChanged += UpdateUI;
+            context.OnRuleElementSelected += UpdateRulesList;
+        }
 
-            // Cleanup when removed from visual tree
-            RegisterCallback<DetachFromPanelEvent>(evt =>
-            {
-                context.OnActorSelected -= OnActorSelected;
-                context.OnProjectChanged -= UpdateUI;
-            });
+        private void Unsubscribe()
+        {
+            if (!subscribed) return;
+            subscribed = false;
+            context.OnActorSelected -= OnActorSelected;
+            context.OnProjectChanged -= UpdateUI;
+            context.OnRuleElementSelected -= UpdateRulesList;
         }
 
         private void CreateUI()
@@ -75,88 +99,52 @@ namespace GameRuleEditor.Panels
 
             var noSelectionLabel = new Label("Select an actor to edit its script rules");
             noSelectionLabel.style.fontSize = 14;
-            noSelectionLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
+            noSelectionLabel.style.color = GameRuleTheme.SubtleText;
             noSelectionContainer.Add(noSelectionLabel);
 
             Add(noSelectionContainer);
 
             // Script editor container
             var scrollView = new ScrollView();
+            GameRuleTheme.ConfigureAdaptiveScroll(scrollView);
             scrollView.style.flexGrow = 1;
             scrollView.style.display = DisplayStyle.None;
             scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             scrollView.verticalScrollerVisibility = ScrollerVisibility.Auto;
-            scrollView.contentContainer.style.minWidth = 760;
+            scrollView.contentContainer.style.minWidth = 0;
+            scrollView.contentContainer.style.paddingRight = 8;
+            scrollView.contentContainer.style.paddingBottom = 12;
 
             // Header
             var header = new VisualElement();
             header.style.flexDirection = FlexDirection.Row;
             header.style.justifyContent = Justify.FlexStart;
             header.style.alignItems = Align.Center;
-            header.style.marginBottom = 8;
 
             actorNameLabel = new Label();
-            actorNameLabel.style.fontSize = 18;
-            actorNameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            actorNameLabel.AddToClassList("studio-panel-title");
+            actorNameLabel.style.flexShrink = 1;
+            KeepWordsWhole(actorNameLabel);
             header.Add(actorNameLabel);
 
             scrollView.Add(header);
 
+            groupSelectorContainer = new VisualElement();
+            groupSelectorContainer.style.marginBottom = 10;
+            scrollView.Add(groupSelectorContainer);
+
             var addRuleButton = new Button(AddEmptyRule);
             addRuleButton.text = "+ Add Rule";
             addRuleButton.AddToClassList("button-primary");
+            addRuleButton.AddToClassList("rules-command");
 
-            var addRuleRow = new VisualElement();
+            addRuleRow = new VisualElement();
             addRuleRow.style.flexDirection = FlexDirection.Row;
             addRuleRow.style.justifyContent = Justify.FlexStart;
             addRuleRow.style.alignItems = Align.Center;
             addRuleRow.style.marginBottom = 10;
             addRuleRow.Add(addRuleButton);
             scrollView.Add(addRuleRow);
-
-            // Info box
-            string infoBoxKey = groupId ?? "";
-            var infoBox = new VisualElement();
-            infoBox.AddToClassList("help-box");
-            infoBox.style.marginBottom = 15;
-            infoBox.style.flexDirection = FlexDirection.Row;
-            infoBox.style.alignItems = Align.FlexStart;
-            infoBox.style.display = dismissedInfoBoxGroups.Contains(infoBoxKey)
-                ? DisplayStyle.None
-                : DisplayStyle.Flex;
-
-            var infoText = new Label(
-                "Rules are evaluated every frame. Conditional rules (when-do) execute only when their conditions are met. " +
-                "Unconditional rules (do) execute every frame."
-            );
-            infoText.style.whiteSpace = WhiteSpace.Normal;
-            infoText.style.flexGrow = 1;
-            infoBox.Add(infoText);
-
-            var closeInfoBtn = new Button(() =>
-            {
-                dismissedInfoBoxGroups.Add(infoBoxKey);
-                infoBox.style.display = DisplayStyle.None;
-            });
-            closeInfoBtn.text = "\u00d7";
-            closeInfoBtn.style.width = 18;
-            closeInfoBtn.style.height = 18;
-            closeInfoBtn.style.paddingLeft = 0;
-            closeInfoBtn.style.paddingRight = 0;
-            closeInfoBtn.style.paddingTop = 0;
-            closeInfoBtn.style.paddingBottom = 0;
-            closeInfoBtn.style.marginLeft = 6;
-            closeInfoBtn.style.flexShrink = 0;
-            closeInfoBtn.style.unityTextAlign = TextAnchor.MiddleCenter;
-            closeInfoBtn.style.backgroundColor = Color.clear;
-            closeInfoBtn.style.borderTopWidth = 0;
-            closeInfoBtn.style.borderBottomWidth = 0;
-            closeInfoBtn.style.borderLeftWidth = 0;
-            closeInfoBtn.style.borderRightWidth = 0;
-            closeInfoBtn.style.color = new Color(0.7f, 0.7f, 0.7f);
-            infoBox.Add(closeInfoBtn);
-
-            scrollView.Add(infoBox);
 
             // Rules container
             rulesContainer = new VisualElement();
@@ -168,6 +156,9 @@ namespace GameRuleEditor.Panels
         // Helper method for actor selection
         private void OnActorSelected(int index)
         {
+            groupId = groupName = null;
+            collapsedRules.Clear();
+            collapsedGroups.Clear();
             UpdateUI();
         }
 
@@ -187,7 +178,7 @@ namespace GameRuleEditor.Panels
                 var focused = this.focusController?.focusedElement as VisualElement;
                 if (focused != null && rulesContainer.Contains(focused))
                 {
-                    if (!(focused is Button))
+                    if (focused is TextField || focused.GetFirstAncestorOfType<TextField>() != null)
                     {
                         return;
                     }
@@ -197,57 +188,210 @@ namespace GameRuleEditor.Panels
             noSelectionContainer.style.display = DisplayStyle.None;
             this.Q<ScrollView>().style.display = DisplayStyle.Flex;
 
-            actorNameLabel.text = groupName != null
-                ? $"Rules [{groupName}] for: {actor.ActorName}"
-                : $"Script Rules for: {actor.ActorName}";
+            actorNameLabel.text = $"{actor.ActorName} Rules";
+            var groups = context.GetRuleSets();
+            if (groupId != null && !groups.Exists(group => group.id == groupId))
+            {
+                groupId = groupName = null;
+                context.ClearRuleElementSelection();
+            }
+            groupName = groups.Find(group => group.id == groupId)?.name;
+            OnGroupFilterChanged?.Invoke(groupId, groupName);
+            groupSelectorContainer.Clear();
+            var options = new List<TooltipDropdownOption>
+            {
+                new TooltipDropdownOption(AllRuleSets, "All Rule Sets", "Show all rule sets for this actor.")
+            };
+            options.AddRange(groups.Select(group => new TooltipDropdownOption(group.id, group.name,
+                "Show the rules in this set.")));
+            var selector = new TooltipPopupField(options, groupId ?? AllRuleSets,
+                "Choose which rule sets to show.", RuleDropdownPalette.Primary);
+            selector.name = "rule-set-filter";
+            selector.AddToClassList("button-primary");
+            selector.AddToClassList("parameter-selector");
+            selector.style.alignSelf = Align.FlexStart;
+            selector.SetEnabled(groups.Count > 0);
+            selector.RegisterValueChangedCallback(value =>
+            {
+                groupId = value == AllRuleSets ? null : value;
+                groupName = context.GetRuleSets().Find(group => group.id == groupId)?.name;
+                OnGroupFilterChanged?.Invoke(groupId, groupName);
+                context.ClearRuleElementSelection();
+                UpdateUI();
+            });
+            groupSelectorContainer.Add(selector);
+            addRuleRow.style.display = DisplayStyle.None; // Each set owns its Add Rule button.
 
             UpdateRulesList();
+        }
+
+        private static void ConfigureRuleNameField(TextField field)
+        {
+            field.AddToClassList("studio-rule-name");
+            field.label = string.Empty;
+            field.labelElement.style.display = DisplayStyle.None;
+            field.style.fontSize = 13;
+            field.style.unityFontStyleAndWeight = FontStyle.Bold;
+            field.style.backgroundColor = Color.clear;
+            field.style.borderTopWidth = field.style.borderBottomWidth = 0;
+            field.style.borderLeftWidth = field.style.borderRightWidth = 0;
+            field.style.flexGrow = 1;
+            field.style.marginRight = 6;
+            field.style.marginLeft = 0;
+            field.style.minWidth = 50;
+            field.style.flexShrink = 1;
+            field.style.unityTextAlign = TextAnchor.MiddleLeft;
+            field.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                foreach (var text in field.Query<TextElement>().ToList())
+                {
+                    if (text.ClassListContains("unity-label")) continue;
+                    text.style.paddingLeft = 4;
+                    text.style.overflow = Overflow.Visible;
+                }
+            });
         }
 
         private void UpdateRulesList()
         {
             rulesContainer.Clear();
-            visibleAbsIndices.Clear();
+            var actor = context.SelectedActor;
+            if (actor == null) return;
+            var groups = context.GetRuleSets();
+            var setList = new VisualElement { name = "rule-sets-overview-list" };
+            rulesContainer.Add(setList);
+            foreach (var group in groups.Where(group => groupId == null || group.id == groupId))
+            {
+                string id = group.id;
+                var foldout = new Foldout { text = group.name, value = !collapsedGroups.Contains(id), userData = id };
+                foldout.AddToClassList("rules-set-overview");
+                foldout.style.marginBottom = 6;
+                foldout.contentContainer.style.marginLeft = 0;
+                foldout.contentContainer.style.paddingTop = 8;
+                var toggle = foldout.Q<Toggle>();
+                toggle.AddToClassList("rules-set-header");
+                toggle.style.paddingTop = toggle.style.paddingBottom = 4;
+                var title = toggle.Q<Label>(className: "unity-toggle__text") ?? toggle.Q<Label>();
+                if (title != null) title.style.display = DisplayStyle.None;
+                var header = new VisualElement();
+                header.style.flexDirection = FlexDirection.Row;
+                header.style.alignItems = Align.Center;
+                header.style.flexGrow = 1;
+                header.style.minWidth = 0;
+                var input = toggle.Q(className: "unity-base-field__input") ?? toggle;
+                input.style.flexGrow = 1;
+                input.Add(header);
+                var handle = new Label("\u2261") { tooltip = groupId == null ? "Drag to reorder rule sets" : "Show All Rule Sets to reorder" };
+                handle.AddToClassList("rule-element-drag-handle");
+                handle.name = "rule-set-drag-handle";
+                handle.style.width = 16;
+                handle.style.flexShrink = 0;
+                handle.style.color = GameRuleTheme.SubtleText;
+                handle.SetEnabled(groupId == null && groups.Count > 1);
+                handle.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                handle.RegisterCallback<PointerDownEvent>(evt =>
+                    OnElementDragStart(evt, foldout, -1, RuleElementKind.None, groups.FindIndex(item => item.id == id)));
+                header.Add(handle);
+                var name = new TextField { value = group.name, isDelayed = true, tooltip = "Rename rule set" };
+                ConfigureRuleNameField(name);
+                name.style.flexBasis = 0;
+                name.style.minWidth = 0;
+                name.RegisterValueChangedCallback(evt =>
+                {
+                    if (!controller.RenameRuleSet(context.selectedActorIndex, id, evt.newValue))
+                        name.SetValueWithoutNotify(context.GetRuleSets().Find(item => item.id == id)?.name ?? group.name);
+                });
+                name.RegisterCallback<FocusOutEvent>(_ => schedule.Execute(() => context.NotifyProjectChanged()));
+                name.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                name.RegisterCallback<KeyDownEvent>(evt => evt.StopPropagation());
+                header.Add(name);
+                var remove = new Button(() => controller.ConfirmRemoveRuleSet(context.selectedActorIndex, id))
+                { text = "×", tooltip = "Remove Rule Set", name = "remove-rule-set" };
+                remove.AddToClassList("button-danger");
+                remove.AddToClassList("button-danger-icon");
+                remove.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                remove.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+                remove.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+                header.Add(remove);
+                foldout.RegisterCallback<PointerMoveEvent>(evt => OnElementDragMove(evt, foldout));
+                foldout.RegisterCallback<PointerUpEvent>(evt => OnElementDragEnd(evt, foldout));
+                foldout.RegisterCallback<PointerCaptureOutEvent>(evt => OnElementDragEnd(evt, foldout));
+                foldout.RegisterValueChangedCallback(evt =>
+                {
+                    if (evt.target != foldout) return;
+                    if (evt.newValue) collapsedGroups.Remove(id); else collapsedGroups.Add(id);
+                });
+                var add = new Button(() => AddEmptyRule(id)) { text = "+ Add Rule" };
+                add.AddToClassList("button-primary");
+                add.AddToClassList("rules-command");
+                add.style.alignSelf = Align.FlexStart;
+                add.style.marginBottom = 8;
+                foldout.Add(add);
+                var list = new VisualElement { name = "rules-set-list", userData = id };
+                PopulateRuleSet(list, id);
+                foldout.Add(list);
+                setList.Add(foldout);
+            }
+            if (groups.Count == 0)
+            {
+                var empty = new Label("No rule sets defined. Add a Rule Set to get started.");
+                empty.style.color = GameRuleTheme.SubtleText;
+                empty.style.whiteSpace = WhiteSpace.Normal;
+                empty.style.marginBottom = 8;
+                rulesContainer.Add(empty);
+            }
+            var addSet = new Button(AddRuleSet)
+            { text = "+ Add Rule Set", name = "add-rule-set", tooltip = "Create an empty rule set for this actor." };
+            addSet.AddToClassList("button-primary");
+            addSet.style.alignSelf = Align.Center;
+            addSet.style.marginTop = 4;
+            rulesContainer.Add(addSet);
+        }
 
+        private void AddRuleSet()
+        {
+            var group = controller.AddRuleSet(context.selectedActorIndex);
+            if (group == null) return;
+            collapsedGroups.Remove(group.id);
+            if (groupId != null)
+            {
+                groupId = group.id;
+                groupName = group.name;
+                OnGroupFilterChanged?.Invoke(groupId, groupName);
+                context.ClearRuleElementSelection();
+            }
+            UpdateUI();
+        }
+
+        private void PopulateRuleSet(VisualElement list, string id)
+        {
             var actor = context.SelectedActor;
             if (actor?.Script != null)
-            {
                 for (int i = 0; i < actor.Script.Count; i++)
-                {
-                    var rule = actor.Script[i];
-                    if (groupId != null && rule.groupId != groupId)
-                        continue;
-                    visibleAbsIndices.Add(i);
-                }
-            }
-
-            if (visibleAbsIndices.Count == 0)
+                    if (EditorContext.GetRuleSetId(actor, actor.Script[i]) == id)
+                        list.Add(CreateRuleElement(actor.Script[i], i));
+            if (list.childCount == 0)
             {
-                var emptyLabel = new Label("No rules defined. Add a rule to get started.");
-                emptyLabel.style.color = new Color(0.5f, 0.5f, 0.5f);
-                emptyLabel.style.fontSize = 12;
-                emptyLabel.style.marginTop = 20;
-                emptyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-                rulesContainer.Add(emptyLabel);
-                return;
-            }
-
-            foreach (int absIdx in visibleAbsIndices)
-            {
-                var ruleElement = CreateRuleElement(actor.Script[absIdx], absIdx);
-                rulesContainer.Add(ruleElement);
+                var empty = new Label("No rules defined. Add a rule to get started.");
+                empty.style.color = GameRuleTheme.SubtleText;
+                empty.style.whiteSpace = WhiteSpace.Normal;
+                empty.style.marginBottom = 10;
+                list.Add(empty);
             }
         }
 
         private VisualElement CreateRuleElement(SentenceJson rule, int ruleIndex)
         {
             var container = new VisualElement();
+            container.userData = ruleIndex;
             container.AddToClassList("panel-section");
-            container.style.marginBottom = 15;
+            container.style.borderTopWidth = container.style.borderBottomWidth = 0;
+            container.style.borderLeftWidth = container.style.borderRightWidth = 0;
+            container.style.paddingTop = 4;
+            container.style.marginBottom = 6;
             container.style.flexShrink = 0;
-
-            bool hasCondition = rule.When != null && rule.When.Count > 0;
-            bool hasActions = rule.Do != null && rule.Do.Count > 0;
 
             if (string.IsNullOrEmpty(rule.Name))
             {
@@ -256,12 +400,6 @@ namespace GameRuleEditor.Panels
             }
 
             string currentName = rule.Name;
-
-            if (!initializedRules.Contains(rule))
-            {
-                initializedRules.Add(rule);
-                collapsedRules.Add(rule);
-            }
 
             bool isCollapsed = collapsedRules.Contains(rule);
             var ruleFoldout = new Foldout();
@@ -287,45 +425,13 @@ namespace GameRuleEditor.Panels
 
             var titleField = new TextField();
             titleField.value = currentName;
-            titleField.label = string.Empty;
-            titleField.style.fontSize = 13;
-            titleField.style.unityFontStyleAndWeight = FontStyle.Bold;
-            titleField.style.backgroundColor = Color.clear;
-            titleField.style.borderTopWidth = 0;
-            titleField.style.borderBottomWidth = 0;
-            titleField.style.borderLeftWidth = 0;
-            titleField.style.borderRightWidth = 0;
-            titleField.style.flexGrow = 1;
-            titleField.style.marginRight = 6;
-            titleField.style.marginLeft = 0;
-            titleField.style.minWidth = 120;
-            titleField.style.flexShrink = 0;
-            titleField.style.unityTextAlign = TextAnchor.MiddleLeft;
-
-            if (titleField.labelElement != null)
-            {
-                titleField.labelElement.style.display = DisplayStyle.None;
-            }
-
-                titleField.RegisterCallback<GeometryChangedEvent>(evt =>
-                {
-                    // Buscamos cualquier elemento de texto interno real (TextElement)
-                    var innerTexts = titleField.Query<TextElement>().ToList();
-                    foreach (var txt in innerTexts)
-                    {
-                        // Ignoramos la etiqueta oculta (Label) y nos quedamos con el Input real
-                        if (!txt.ClassListContains("unity-label"))
-                        {
-                            txt.style.paddingLeft = 4; // Damos aire por la izquierda
-                            txt.style.overflow = Overflow.Visible; // EVITA QUE SE RECORTE LA NEGRITA
-                        }
-                    }
-                });
+            ConfigureRuleNameField(titleField);
 
             titleField.RegisterValueChangedCallback(evt =>
             {
                 rule.Name = evt.newValue;
                 EditorUtility.SetDirty(context.currentProject);
+                context.NotifyProjectChanged();
             });
 
             titleField.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
@@ -357,7 +463,7 @@ namespace GameRuleEditor.Panels
                     dragHandle.pickingMode = PickingMode.Position;
                     dragHandle.style.width = 16;
                     dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
-                    dragHandle.style.color = new Color(0.65f, 0.65f, 0.65f);
+                    dragHandle.style.color = GameRuleTheme.SubtleText;
                     dragHandle.style.marginLeft = 2;
                     dragHandle.style.marginRight = 4;
 
@@ -377,6 +483,28 @@ namespace GameRuleEditor.Panels
                     foldoutToggle.Add(titleField);
                 }
 
+                var duplicateBtn = new Button(() =>
+                {
+                    controller.DuplicateRule(context.selectedActorIndex, ruleIndex);
+
+                    var actor = context.SelectedActor;
+                    int duplicateIndex = ruleIndex + 1;
+                    if (actor?.Script != null && duplicateIndex < actor.Script.Count)
+                    {
+                        SentenceJson duplicatedRule = actor.Script[duplicateIndex];
+                        collapsedRules.Remove(duplicatedRule);
+                    }
+
+                    UpdateRulesList();
+                }) { text = "Duplicate" };
+                duplicateBtn.tooltip = "Duplicate Rule";
+                duplicateBtn.AddToClassList("button-primary");
+                duplicateBtn.AddToClassList("rules-command");
+                duplicateBtn.style.marginLeft = 4;
+                duplicateBtn.style.flexShrink = 0;
+                duplicateBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                foldoutToggle.Add(duplicateBtn);
+
                 var removeIconBtn = new Button(() =>
                 {
                     if (EditorUtility.DisplayDialog(
@@ -389,23 +517,15 @@ namespace GameRuleEditor.Panels
                         UpdateRulesList();
                     }
                 });
-                removeIconBtn.text = string.Empty;
+                removeIconBtn.text = "×";
                 removeIconBtn.tooltip = "Remove Rule";
                 removeIconBtn.AddToClassList("button-danger");
-                removeIconBtn.style.width = 28;
-                removeIconBtn.style.height = 26;
+                removeIconBtn.AddToClassList("button-danger-icon");
+                removeIconBtn.AddToClassList("rules-square-command");
                 removeIconBtn.style.marginLeft = 4;
                 removeIconBtn.style.paddingLeft = 0;
                 removeIconBtn.style.paddingRight = 0;
                 removeIconBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-
-                var trashImage = new Image();
-                trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-                trashImage.style.width = 16;
-                trashImage.style.height = 16;
-                trashImage.style.alignSelf = Align.Center;
-                trashImage.style.unityBackgroundImageTintColor = Color.white;
-                removeIconBtn.Add(trashImage);
 
                 foldoutToggle.Add(removeIconBtn);
             }
@@ -415,89 +535,432 @@ namespace GameRuleEditor.Panels
             container.RegisterCallback<PointerUpEvent>(evt => OnRuleDragEnd(evt, container));
             container.RegisterCallback<PointerCaptureOutEvent>(evt => OnRuleDragEnd(evt, container));
 
-            // Condition builder
-            if (hasCondition)
-            {
-                var conditionBuilder = new ConditionBuilder(context);
-                if (rule.When.Count > 0)
-                {
-                    conditionBuilder.SetCondition(rule.When[0]);
-                }
-                conditionBuilder.OnConditionChanged += conditionStr =>
-                {
-                    List<string> conditions = string.IsNullOrEmpty(conditionStr)
-                        ? new List<string> { "" }
-                        : new List<string> { conditionStr };
-
-                    controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex, conditions);
-                };
-                conditionBuilder.OnRemoveCondition += () =>
-                {
-                    controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
-                };
-                contentContainer.Add(conditionBuilder);
-            }
-            else
-            {
-                var addConditionBtn = new Button(() =>
-                {
-                    controller.AddRuleCondition(context.selectedActorIndex, ruleIndex);
-                    // Rebuild directly instead of relying on the NotifyProjectChanged → UpdateUI path:
-                    // the focus guard there can skip the refresh (a just-clicked foldout/field may still
-                    // read as focused), which left the new condition invisible until the actor was reselected.
-                    UpdateRulesList();
-                });
-                addConditionBtn.text = "+ Add Condition";
-                addConditionBtn.AddToClassList("button-primary");
-                addConditionBtn.style.marginBottom = 10;
-                addConditionBtn.style.alignSelf = Align.FlexStart;
-                contentContainer.Add(addConditionBtn);
-            }
-
-            if (hasActions)
-            {
-                var actionBuilder = new ActionBuilder(context);
-                actionBuilder.SetActions(rule.Do);
-                actionBuilder.OnActionsChanged += actions =>
-                {
-                    controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
-                };
-                actionBuilder.style.marginTop = 10;
-                contentContainer.Add(actionBuilder);
-            }
-            else
-            {
-                var addActionBtn = new Button(() =>
-                {
-                    controller.AddRuleAction(context.selectedActorIndex, ruleIndex);
-                    // Rebuild directly (see Add Condition above): the guarded UpdateUI path can skip the
-                    // refresh right after adding a rule, leaving the new action invisible until reselection.
-                    UpdateRulesList();
-                });
-                addActionBtn.text = "+ Add Action";
-                addActionBtn.AddToClassList("button-success");
-                addActionBtn.style.marginBottom = 10;
-                addActionBtn.style.alignSelf = Align.FlexStart;
-                contentContainer.Add(addActionBtn);
-            }
+            var overview = new VisualElement();
+            overview.AddToClassList("rule-overview");
+            overview.Add(CreateConditionColumn(rule, ruleIndex));
+            overview.Add(CreateActionColumn(rule, ruleIndex));
+            contentContainer.Add(overview);
 
             return container;
         }
 
+        private VisualElement CreateConditionColumn(SentenceJson rule, int ruleIndex)
+        {
+            var column = CreateOverviewColumn("WHEN");
+            string expression = rule.When != null && rule.When.Count > 0 ? rule.When[0] : null;
+            var terms = RuleConditionSequence.Parse(expression);
+            for (int i = 0; i < terms.Count; i++)
+            {
+                string source = terms[i].Source;
+                if (string.IsNullOrWhiteSpace(source)) continue;
+                int index = i;
+                var item = CreateDraggableElementItem();
+                if (i > 0)
+                {
+                    string join = terms[i].JoinBefore;
+                    var connector = new TooltipPopupField(RuleTooltips.LogicalOptions(),
+                        join == "OR" ? "OR" : "AND", RuleTooltips.Logical(join),
+                        RuleDropdownPalette.Condition);
+                    connector.AddToClassList("button-condition");
+                    connector.AddToClassList("rule-join-selector");
+                    connector.RegisterValueChangedCallback(value =>
+                    {
+                        var latest = RuleConditionSequence.Parse(rule.When[0]);
+                        if (index >= latest.Count) return;
+                        latest[index].JoinBefore = value;
+                        controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                            new List<string> { RuleConditionSequence.Build(latest) });
+                    });
+                    item.Add(connector);
+                }
+
+                var row = new VisualElement();
+                row.AddToClassList("rule-summary-row");
+                row.AddToClassList("rule-editor-card");
+                // The connector already has 3px above and below; the generic row's
+                // bottom margin would otherwise make the gap above it larger.
+                row.style.marginBottom = 0;
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.EnableInClassList("condition-negated",
+                    RuleConditionSequence.IsNegated(source));
+                row.Add(CreateElementDragHandle(item, ruleIndex,
+                    RuleElementKind.Condition, index));
+                row.Add(CreateSummaryButton(source, ruleIndex, RuleElementKind.Condition, index));
+                MarkSelected(row, ruleIndex, RuleElementKind.Condition, index);
+
+                var notButton = new Button(() =>
+                {
+                    var latest = RuleConditionSequence.Parse(rule.When[0]);
+                    if (index >= latest.Count) return;
+                    string body = RuleConditionSequence.WithoutNot(latest[index].Source);
+                    latest[index].Source = RuleConditionSequence.IsNegated(latest[index].Source)
+                        ? body : "NOT " + body;
+                    controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                        new List<string> { RuleConditionSequence.Build(latest) });
+                }) { text = "NOT", tooltip = "Invert this condition" };
+                notButton.AddToClassList("button-negation");
+                notButton.AddToClassList("rules-square-command");
+                notButton.EnableInClassList("button-negation--active",
+                    RuleConditionSequence.IsNegated(source));
+                notButton.style.marginLeft = 5;
+                row.Add(notButton);
+
+                var remove = CreateSmallButton("×", "Remove Condition", () =>
+                    RemoveCondition(rule, ruleIndex, index));
+                row.Add(remove);
+                item.Add(row);
+                column.Add(item);
+            }
+
+            var types = ConditionTypes();
+            var add = new TooltipPopupField(RuleTooltips.ConditionOptions(types),
+                "+ Add Condition", "Add a condition with a logical operator. Conditions joined by AND are treated as a group.",
+                RuleDropdownPalette.Condition);
+            add.AddToClassList("button-condition");
+            add.AddToClassList("rule-add-element");
+            add.RegisterValueChangedCallback(type => AddConditionOfType(rule, ruleIndex, type, types));
+            column.Add(add);
+            return column;
+        }
+
+        private VisualElement CreateActionColumn(SentenceJson rule, int ruleIndex)
+        {
+            var column = CreateOverviewColumn("DO");
+            int storedCount = rule.Do?.Count ?? 0;
+            for (int i = 0; i < storedCount; i++)
+            {
+                int index = i;
+                string source = rule.Do[i];
+                if (string.IsNullOrWhiteSpace(source)) continue;
+                var item = CreateDraggableElementItem();
+                var row = new VisualElement();
+                row.AddToClassList("rule-summary-row");
+                row.AddToClassList("rule-editor-card");
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.Add(CreateElementDragHandle(item, ruleIndex,
+                    RuleElementKind.Action, index));
+
+                row.Add(CreateSummaryButton(source, ruleIndex, RuleElementKind.Action, index));
+                MarkSelected(row, ruleIndex, RuleElementKind.Action, index);
+
+                row.Add(CreateSmallButton("×", "Remove Action", () =>
+                    RemoveAction(rule, ruleIndex, index)));
+                item.Add(row);
+                column.Add(item);
+            }
+
+            var types = ActionTypes();
+            var addButton = new TooltipPopupField(RuleTooltips.ActionOptions(types),
+                "+ Add Action", "Choose an action to add to this rule.",
+                RuleDropdownPalette.Action);
+            addButton.AddToClassList("button-action");
+            addButton.AddToClassList("rule-add-element");
+            addButton.RegisterValueChangedCallback(type => AddActionOfType(rule, ruleIndex, type, types));
+            column.Add(addButton);
+            return column;
+        }
+
+        private static VisualElement CreateOverviewColumn(string heading)
+        {
+            var column = new VisualElement();
+            column.AddToClassList("rule-overview-column");
+            column.AddToClassList("rule-overview-responsive-column");
+            var label = new Label(heading);
+            label.AddToClassList("rule-block-heading");
+            column.Add(label);
+            return column;
+        }
+
+        private static Button CreateSmallButton(string text, string tooltip, System.Action clicked,
+                                                bool destructive = true)
+        {
+            var button = new Button(clicked) { text = text, tooltip = tooltip };
+            button.AddToClassList(destructive ? "button-danger" : "button-primary");
+            if (destructive)
+            {
+                button.AddToClassList("button-danger-icon");
+                button.AddToClassList("rules-square-command");
+            }
+            else
+            {
+                button.style.width = 27;
+                button.style.height = 27;
+                button.style.flexShrink = 0;
+            }
+            button.style.marginLeft = 4;
+            return button;
+        }
+
+        private Button CreateSummaryButton(string source, int ruleIndex, RuleElementKind kind, int index)
+        {
+            bool isCondition = kind == RuleElementKind.Condition;
+            var summary = Summarize(source);
+            var button = new Button(() => context.SelectRuleElement(ruleIndex, kind, index))
+            {
+                tooltip = isCondition
+                    ? RuleTooltips.Condition(GameRuleParser.ParseFunction(
+                        RuleConditionSequence.WithoutNot(source)).Name)
+                    : RuleTooltips.Action(GameRuleParser.ParseFunction(source).Name)
+            };
+            button.AddToClassList("rule-summary-card");
+            button.AddToClassList(isCondition ? "button-condition" : "button-action");
+
+            var name = new Label(summary.Name);
+            name.AddToClassList("rule-summary-name");
+            name.pickingMode = PickingMode.Ignore;
+            button.Add(name);
+
+            if (!string.IsNullOrEmpty(summary.Details))
+            {
+                var details = new Label(summary.Details);
+                details.AddToClassList("rule-summary-detail");
+                KeepWordsWhole(details);
+                details.pickingMode = PickingMode.Ignore;
+                button.Add(details);
+            }
+
+            return button;
+        }
+
+        private static void KeepWordsWhole(Label label)
+        {
+            void UpdateMinimumWidth()
+            {
+                float width = 0;
+                foreach (string word in label.text.Split(new[] { ' ', '\t', '\r', '\n' },
+                             System.StringSplitOptions.RemoveEmptyEntries))
+                    width = Mathf.Max(width, label.MeasureTextSize(word, 0,
+                        VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x);
+                float scale = EditorGUIUtility.pixelsPerPoint;
+                var style = label.resolvedStyle;
+                width += style.paddingLeft + style.paddingRight
+                    + style.borderLeftWidth + style.borderRightWidth;
+                // Leave a pixel of room for TextCore's glyph rounding at fractional editor scaling.
+                label.style.minWidth = (Mathf.Ceil(width * scale) + 1f) / scale;
+            }
+
+            label.RegisterCallback<AttachToPanelEvent>(_ => label.schedule.Execute(UpdateMinimumWidth));
+            label.RegisterCallback<GeometryChangedEvent>(_ => UpdateMinimumWidth());
+        }
+
+        private void MarkSelected(VisualElement element, int ruleIndex, RuleElementKind kind, int index)
+        {
+            element.EnableInClassList("rule-summary-selected",
+                context.selectedScriptIndex == ruleIndex &&
+                context.SelectedRuleElementKind == kind &&
+                context.SelectedRuleElementIndex == index);
+        }
+
+        private static List<string> ConditionTypes() => typeof(global::Condition)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.ReturnType == typeof(bool)).Select(method => method.Name).ToList();
+
+        private static List<string> ActionTypes() => typeof(global::Action)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.ReturnType == typeof(void)).Select(method => method.Name).ToList();
+
+        private (string Name, string Details) Summarize(string source)
+        {
+            var parsed = GameRuleParser.ParseFunction(RuleConditionSequence.WithoutNot(source));
+            string details;
+            if (parsed.Name == "Spawn")
+            {
+                string value = parsed.Params != null && parsed.Params.Count > 0
+                    ? parsed.Params[0] : string.Empty;
+                details = value.Trim();
+            }
+            else if (parsed.Name == "Touch")
+            {
+                // The second parameter controls the actor target; it is not useful in
+                // the short rule overview, but remains unchanged in the stored rule.
+                details = parsed.Params != null && parsed.Params.Count > 0
+                    ? ConditionElement.FormatEventName(parsed.Params[0]) : string.Empty;
+            }
+            else if (parsed.Name == "Keyboard")
+            {
+                details = parsed.Params != null && parsed.Params.Count > 0 &&
+                    !string.IsNullOrWhiteSpace(parsed.Params[0])
+                    ? ConditionElement.FormatKeyName(parsed.Params[0]) : string.Empty;
+            }
+            else if (parsed.Name == "Compare")
+            {
+                string expression = parsed.Params != null && parsed.Params.Count > 0
+                    ? parsed.Params[0] : string.Empty;
+                var comparison = System.Text.RegularExpressions.Regex.Match(
+                    expression, @"^(.*?)\s*(<=|>=|==|!=|<|>)\s*(.*)$");
+                details = comparison.Success ? comparison.Groups[1].Value.Trim() : expression.Trim();
+            }
+            else if (parsed.Name == "Edit")
+            {
+                details = parsed.Params != null && parsed.Params.Count > 0
+                    ? parsed.Params[0] : string.Empty;
+            }
+            else if (parsed.Name == "Move" || parsed.Name == "Push")
+            {
+                details = SummarizeAxisValues(parsed.Name, parsed.Params, 1, "R", "No rotation");
+            }
+            else if (parsed.Name == "Rotate")
+            {
+                details = string.Join(", ", Enumerable.Range(1, 3)
+                    .Where(index => GetRotationComponent("Rotate", parsed.Params, index) != null)
+                    .Select(index => "XYZ"[index - 1]));
+            }
+            else if (parsed.Name == "Torque")
+            {
+                details = SummarizeAxisValues(parsed.Name, parsed.Params, 0, "", "");
+            }
+            else if (parsed.Name == "MoveTo" || parsed.Name == "NavigateTo" ||
+                     parsed.Name == "RotateTo" || parsed.Name == "PushTo")
+            {
+                details = SummarizeTarget(parsed.Name, parsed.Params);
+            }
+            else
+            {
+                details = parsed.Params == null ? string.Empty : string.Join(" · ",
+                    parsed.Params.Where(value => !string.IsNullOrWhiteSpace(value)).Take(2));
+            }
+            details = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, details);
+            if (details.Length > 54) details = details.Substring(0, 51) + "…";
+            return (parsed.Name, details);
+        }
+
+        private static string SummarizeAxisValues(string actionName, List<string> parameters,
+            int firstIndex, string prefix, string emptySummary)
+        {
+            const string axes = "XYZ";
+            var components = new List<string>(axes.Length);
+            for (int i = 0; i < axes.Length; i++)
+            {
+                string value = GetRotationComponent(actionName, parameters, firstIndex + i);
+                if (value != null) components.Add($"{prefix}{axes[i]} {value}");
+            }
+            return components.Count == 0 ? emptySummary : string.Join(" - ", components);
+        }
+
+        private static string GetRotationComponent(string actionName, List<string> parameters, int index)
+        {
+            string value = ActionDefaults.Fill(actionName, index,
+                parameters != null && index < parameters.Count ? parameters[index] : null)?.Trim();
+            if (string.IsNullOrEmpty(value)) return null;
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double component)
+                && component == 0 ? null : value;
+        }
+
+        private string SummarizeTarget(string actionName, List<string> parameters)
+        {
+            var coordinates = Enumerable.Range(1, 3)
+                .Select(index => ActionDefaults.Fill(actionName, index,
+                    parameters != null && index < parameters.Count ? parameters[index] : string.Empty))
+                .ToList();
+            string actorName = coordinates
+                .Where(value => !string.IsNullOrWhiteSpace(value) &&
+                    !value.TrimStart().StartsWith("#", System.StringComparison.Ordinal))
+                .Select(TargetReferenceName)
+                .FirstOrDefault(name => !string.IsNullOrEmpty(name));
+            return actorName
+                ?? coordinates.Select(TargetReferenceName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+                ?? string.Join(",", coordinates);
+        }
+
+        private string TargetReferenceName(string coordinate)
+        {
+            if (string.IsNullOrWhiteSpace(coordinate)) return null;
+            string reference = coordinate.Trim();
+            int dot = reference.LastIndexOf('.');
+            if (dot <= 0 || dot == reference.Length - 1) return null;
+            string property = reference.Substring(dot + 1);
+            if (property != "x" && property != "y" && property != "z") return null;
+
+            string name = reference.Substring(0, dot);
+            if (name.StartsWith("#", System.StringComparison.Ordinal))
+                return name.Substring(1);
+            if (string.Equals(name, "this", System.StringComparison.OrdinalIgnoreCase))
+                return context.SelectedActor?.ActorName;
+            return context.currentProject?.actors?.FirstOrDefault(actor =>
+                string.Equals(actor.ActorName, name, System.StringComparison.OrdinalIgnoreCase))?.ActorName;
+        }
+
+        private void AddConditionOfType(SentenceJson rule, int ruleIndex, string type, List<string> types)
+        {
+            if (!types.Contains(type)) return;
+            var element = new ConditionElement(context, types);
+            element.SetFromSource(type + "()");
+            string expression = rule.When != null && rule.When.Count > 0 ? rule.When[0] : null;
+            var terms = RuleConditionSequence.Parse(expression)
+                .Where(term => !string.IsNullOrWhiteSpace(term.Source)).ToList();
+            int index = terms.Count;
+            terms.Add(new RuleConditionTerm(index == 0 ? null : "AND", element.GetString()));
+            controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                new List<string> { RuleConditionSequence.Build(terms) });
+            context.SelectRuleElement(ruleIndex, RuleElementKind.Condition, index);
+            UpdateRulesList();
+        }
+
+        private void AddActionOfType(SentenceJson rule, int ruleIndex, string type, List<string> types)
+        {
+            if (!types.Contains(type)) return;
+            var element = new ActionElement(context, types);
+            element.SetFromSource(type + "()");
+            var actions = rule.Do != null
+                ? rule.Do.Where(action => !string.IsNullOrWhiteSpace(action)).ToList()
+                : new List<string>();
+            int index = actions.Count;
+            actions.Add(element.GetActionString());
+            controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            context.SelectRuleElement(ruleIndex, RuleElementKind.Action, index);
+            UpdateRulesList();
+        }
+
+        private void RemoveCondition(SentenceJson rule, int ruleIndex, int index)
+        {
+            var terms = RuleConditionSequence.Parse(rule.When[0]);
+            if (index >= terms.Count) return;
+            terms.RemoveAt(index);
+            context.ClearRuleElementSelection();
+            if (terms.Count == 0) controller.RemoveRuleCondition(context.selectedActorIndex, ruleIndex);
+            else
+            {
+                terms[0].JoinBefore = null;
+                controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                    new List<string> { RuleConditionSequence.Build(terms) });
+            }
+            UpdateRulesList();
+        }
+
+        private void RemoveAction(SentenceJson rule, int ruleIndex, int index)
+        {
+            var actions = rule.Do != null ? new List<string>(rule.Do) : new List<string>();
+            if (index >= actions.Count) return;
+            actions.RemoveAt(index);
+            context.ClearRuleElementSelection();
+            controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            UpdateRulesList();
+        }
+
         private void AddEmptyRule()
+        {
+            AddEmptyRule(groupId);
+        }
+
+        private void AddEmptyRule(string targetGroup)
         {
             if (context.selectedActorIndex < 0)
                 return;
 
             // Tagging happens inside the controller (before it notifies) so the Properties panel's
             // rule counts rebuild with the correct group instead of a momentary null.
-            controller.AddEmptyRule(context.selectedActorIndex, groupId);
+            collapsedGroups.Remove(targetGroup ?? string.Empty);
+            controller.AddEmptyRule(context.selectedActorIndex,
+                targetGroup == EditorContext.UngroupedRuleSetId ? null : targetGroup);
 
             var actor = context.SelectedActor;
             if (actor?.Script != null && actor.Script.Count > 0)
             {
-                var newRule = actor.Script[actor.Script.Count - 1];
-                collapsedRules.Add(newRule);
+                var newRule = context.SelectedScript;
+                // Keep the newly added rule open without changing any rule the user folded.
+                if (newRule != null) collapsedRules.Remove(newRule);
             }
 
             UpdateRulesList();
@@ -507,10 +970,221 @@ namespace GameRuleEditor.Panels
         //  DRAG AND DROP
         // ──────────────────────────────────
 
+        private VisualElement CreateDraggableElementItem()
+        {
+            var item = new VisualElement();
+            item.AddToClassList("rule-overview-item");
+            item.style.flexShrink = 0;
+            item.RegisterCallback<PointerMoveEvent>(evt => OnElementDragMove(evt, item));
+            item.RegisterCallback<PointerUpEvent>(evt => OnElementDragEnd(evt, item));
+            item.RegisterCallback<PointerCaptureOutEvent>(evt => OnElementDragEnd(evt, item));
+            return item;
+        }
+
+        private VisualElement CreateElementDragHandle(VisualElement item, int ruleIndex,
+            RuleElementKind kind, int index)
+        {
+            var handle = new Label("\u2261");
+            handle.AddToClassList("rule-element-drag-handle");
+            handle.tooltip = "Drag to reorder";
+            handle.pickingMode = PickingMode.Position;
+            handle.style.width = 16;
+            handle.style.flexShrink = 0;
+            handle.style.unityTextAlign = TextAnchor.MiddleCenter;
+            handle.style.color = GameRuleTheme.SubtleText;
+            handle.style.marginRight = 5;
+            handle.RegisterCallback<PointerDownEvent>(evt =>
+                OnElementDragStart(evt, item, ruleIndex, kind, index));
+            return handle;
+        }
+
+        private void OnElementDragStart(PointerDownEvent evt, VisualElement item,
+            int ruleIndex, RuleElementKind kind, int index)
+        {
+            bool movingSet = kind == RuleElementKind.None;
+            if (evt.button != 0 || item.parent == null || context.SelectedActor == null ||
+                (!movingSet && (context.SelectedActor.Script == null ||
+                    ruleIndex < 0 || ruleIndex >= context.SelectedActor.Script.Count)) ||
+                draggedElementItem != null)
+                return;
+
+            var column = item.parent;
+            string itemClass = movingSet ? "rules-set-overview" : "rule-overview-item";
+            if (column.Children().Count(child => child.ClassListContains(itemClass)) < 2)
+                return;
+
+            draggedElementItem = item;
+            elementDragColumn = column;
+            draggedElementRuleIndex = ruleIndex;
+            draggedElementKind = kind;
+            draggedElementIndex = index;
+            dragStartPosElement = evt.position;
+
+            elementDragSpacer = new VisualElement();
+            elementDragSpacer.style.height = Mathf.Max(30f, item.layout.height);
+            elementDragSpacer.style.marginTop = item.resolvedStyle.marginTop;
+            elementDragSpacer.style.marginBottom = item.resolvedStyle.marginBottom;
+            elementDragSpacer.style.backgroundColor = GameRuleTheme.Field;
+            elementDragSpacer.style.borderTopWidth = 2;
+            elementDragSpacer.style.borderBottomWidth = 2;
+            elementDragSpacer.style.borderTopColor = GameRuleTheme.AccentText;
+            elementDragSpacer.style.borderBottomColor = GameRuleTheme.AccentText;
+            column.Insert(column.IndexOf(item), elementDragSpacer);
+
+            item.style.position = Position.Absolute;
+            item.style.top = item.layout.y;
+            item.style.left = item.layout.x;
+            item.style.width = item.layout.width;
+            item.style.opacity = 0.85f;
+            item.BringToFront();
+            item.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnElementDragMove(PointerMoveEvent evt, VisualElement item)
+        {
+            if (item != draggedElementItem || elementDragColumn == null) return;
+
+            float diffY = evt.position.y - dragStartPosElement.y;
+            item.style.translate = new Translate(0f, diffY, 0f);
+            float centerY = item.layout.y + diffY + item.layout.height / 2f;
+            string itemClass = draggedElementKind == RuleElementKind.None ? "rules-set-overview" : "rule-overview-item";
+            var otherItems = elementDragColumn.Children()
+                .Where(child => child != item && child.ClassListContains(itemClass))
+                .ToList();
+            int target = otherItems.FindIndex(child =>
+                centerY < child.layout.y + child.layout.height / 2f);
+            if (target < 0) target = otherItems.Count;
+
+            int current = elementDragColumn.Children().TakeWhile(child => child != elementDragSpacer)
+                .Count(child => child != item && child.ClassListContains(itemClass));
+            if (target == current)
+            {
+                evt.StopPropagation();
+                return;
+            }
+
+            elementDragColumn.Remove(elementDragSpacer);
+            int insertAt = target < otherItems.Count
+                ? elementDragColumn.IndexOf(otherItems[target])
+                : otherItems.Count > 0
+                    ? elementDragColumn.IndexOf(otherItems[otherItems.Count - 1]) + 1
+                    : elementDragColumn.IndexOf(item);
+            elementDragColumn.Insert(insertAt, elementDragSpacer);
+            evt.StopPropagation();
+        }
+
+        private void OnElementDragEnd(EventBase evt, VisualElement item)
+        {
+            if (item != draggedElementItem) return;
+
+            int from = draggedElementIndex;
+            int ruleIndex = draggedElementRuleIndex;
+            RuleElementKind kind = draggedElementKind;
+            var column = elementDragColumn;
+            var spacer = elementDragSpacer;
+            string itemClass = kind == RuleElementKind.None ? "rules-set-overview" : "rule-overview-item";
+            draggedElementItem = null;
+            elementDragSpacer = null;
+            elementDragColumn = null;
+            draggedElementIndex = -1;
+            draggedElementRuleIndex = -1;
+            draggedElementKind = RuleElementKind.None;
+
+            if (evt is IPointerEvent pointerEvt)
+                item.ReleasePointer(pointerEvt.pointerId);
+
+            int to = -1;
+            if (spacer?.parent == column)
+            {
+                to = column.Children().TakeWhile(child => child != spacer)
+                    .Count(child => child != item && child.ClassListContains(itemClass));
+                column.Remove(spacer);
+            }
+
+            item.style.translate = new Translate(0f, 0f, 0f);
+            item.style.opacity = StyleKeyword.Null;
+            item.style.position = StyleKeyword.Null;
+            item.style.top = StyleKeyword.Null;
+            item.style.left = StyleKeyword.Null;
+            item.style.width = StyleKeyword.Null;
+
+            if (evt is PointerUpEvent && to >= 0 && from != to)
+            {
+                if (kind == RuleElementKind.None)
+                    controller.ReorderRuleSets(context.selectedActorIndex, (string)item.userData, to);
+                else MoveRuleElement(ruleIndex, kind, from, to);
+            }
+            else
+                UpdateRulesList();
+            evt.StopPropagation();
+        }
+
+        private void MoveRuleElement(int ruleIndex, RuleElementKind kind, int from, int to)
+        {
+            var actor = context.SelectedActor;
+            if (actor?.Script == null || ruleIndex < 0 || ruleIndex >= actor.Script.Count)
+            {
+                UpdateRulesList();
+                return;
+            }
+            var rule = actor.Script[ruleIndex];
+
+            if (kind == RuleElementKind.Condition)
+            {
+                var terms = RuleConditionSequence.Parse(rule.When?.FirstOrDefault())
+                    .Where(term => !string.IsNullOrWhiteSpace(term.Source)).ToList();
+                if (from < 0 || to < 0 || from >= terms.Count || to >= terms.Count)
+                {
+                    UpdateRulesList();
+                    return;
+                }
+                RuleConditionSequence.Move(terms, from, to);
+                controller.UpdateRuleCondition(context.selectedActorIndex, ruleIndex,
+                    new List<string> { RuleConditionSequence.Build(terms) });
+            }
+            else if (kind == RuleElementKind.Action)
+            {
+                var actions = rule.Do != null ? new List<string>(rule.Do) : new List<string>();
+                if (from < 0 || to < 0 || from >= actions.Count || to >= actions.Count)
+                {
+                    UpdateRulesList();
+                    return;
+                }
+                string moved = actions[from];
+                actions.RemoveAt(from);
+                actions.Insert(to, moved);
+                controller.UpdateRuleActions(context.selectedActorIndex, ruleIndex, actions);
+            }
+            else
+            {
+                UpdateRulesList();
+                return;
+            }
+
+            if (context.selectedScriptIndex == ruleIndex &&
+                context.SelectedRuleElementKind == kind)
+            {
+                int selected = context.SelectedRuleElementIndex;
+                int next = selected == from ? to
+                    : from < to && selected > from && selected <= to ? selected - 1
+                    : from > to && selected >= to && selected < from ? selected + 1
+                    : selected;
+                context.SelectRuleElement(ruleIndex, kind, next);
+            }
+            UpdateRulesList();
+        }
+
         private void OnRuleDragStart(PointerDownEvent evt, VisualElement ruleContainer, int index)
         {
             if (evt.button != 0 || context.SelectedActor?.Script == null)
                 return;
+
+            ruleDragList = ruleContainer.parent;
+            if (ruleDragList == null || ruleDragList.IndexOf(ruleContainer) < 0) return;
+            ruleDragAbsIndices = ruleDragList.Children().Where(child => child.userData is int)
+                .Select(child => (int)child.userData).ToList();
+            if (!ruleDragAbsIndices.Contains(index)) return;
 
             isDraggingRule = true;
             dragStartPosRule = evt.position;
@@ -521,24 +1195,24 @@ namespace GameRuleEditor.Panels
             ruleDragSpacer.style.height = Mathf.Max(30f, ruleContainer.layout.height);
             ruleDragSpacer.style.marginBottom = ruleContainer.resolvedStyle.marginBottom;
             ruleDragSpacer.style.marginTop = ruleContainer.resolvedStyle.marginTop;
-            ruleDragSpacer.style.backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.2f);
+            ruleDragSpacer.style.backgroundColor = GameRuleTheme.Field;
             ruleDragSpacer.style.borderTopWidth = 2;
             ruleDragSpacer.style.borderBottomWidth = 2;
             ruleDragSpacer.style.borderLeftWidth = 2;
             ruleDragSpacer.style.borderRightWidth = 2;
-            ruleDragSpacer.style.borderTopColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderBottomColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderLeftColor = new Color(0.3f, 0.6f, 1f, 0.8f);
-            ruleDragSpacer.style.borderRightColor = new Color(0.3f, 0.6f, 1f, 0.8f);
+            ruleDragSpacer.style.borderTopColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderBottomColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderLeftColor = GameRuleTheme.AccentText;
+            ruleDragSpacer.style.borderRightColor = GameRuleTheme.AccentText;
             ruleDragSpacer.style.borderTopLeftRadius = 5;
             ruleDragSpacer.style.borderTopRightRadius = 5;
             ruleDragSpacer.style.borderBottomLeftRadius = 5;
             ruleDragSpacer.style.borderBottomRightRadius = 5;
 
-            int insertIndex = rulesContainer.IndexOf(ruleContainer);
+            int insertIndex = ruleDragList.IndexOf(ruleContainer);
             if (insertIndex < 0) return;
 
-            rulesContainer.Insert(insertIndex, ruleDragSpacer);
+            ruleDragList.Insert(insertIndex, ruleDragSpacer);
 
             ruleContainer.style.position = Position.Absolute;
             ruleContainer.style.top = ruleContainer.layout.y;
@@ -563,7 +1237,7 @@ namespace GameRuleEditor.Panels
             float draggedCenterY = ruleContainer.layout.y + diffY + (ruleContainer.layout.height / 2f);
 
             int newTargetIndex = 0;
-            foreach (var child in rulesContainer.Children())
+            foreach (var child in ruleDragList.Children())
             {
                 if (child == draggedRuleItem || child == ruleDragSpacer) continue;
                 float childCenter = child.layout.y + (child.layout.height / 2f);
@@ -572,7 +1246,7 @@ namespace GameRuleEditor.Panels
             }
 
             int currentSpacerLogicIndex = 0;
-            foreach (var child in rulesContainer.Children())
+            foreach (var child in ruleDragList.Children())
             {
                 if (child == ruleDragSpacer) break;
                 if (child == draggedRuleItem) continue;
@@ -581,18 +1255,18 @@ namespace GameRuleEditor.Panels
 
             if (newTargetIndex != currentSpacerLogicIndex)
             {
-                rulesContainer.Remove(ruleDragSpacer);
+                ruleDragList.Remove(ruleDragSpacer);
 
                 int physicalInsertIndex = 0;
                 int logicalCount = 0;
-                foreach (var child in rulesContainer.Children())
+                foreach (var child in ruleDragList.Children())
                 {
                     if (logicalCount == newTargetIndex) break;
                     if (child != draggedRuleItem) logicalCount++;
                     physicalInsertIndex++;
                 }
 
-                rulesContainer.Insert(physicalInsertIndex, ruleDragSpacer);
+                ruleDragList.Insert(physicalInsertIndex, ruleDragSpacer);
             }
 
             evt.StopPropagation();
@@ -627,7 +1301,7 @@ namespace GameRuleEditor.Panels
             if (ruleDragSpacer != null && ruleDragSpacer.parent != null)
             {
                 newVisualIndex = 0;
-                foreach (var child in rulesContainer.Children())
+                foreach (var child in ruleDragList.Children())
                 {
                     if (child == ruleDragSpacer) break;
                     if (child == ruleContainer) continue;
@@ -652,45 +1326,7 @@ namespace GameRuleEditor.Panels
                 return;
             }
 
-            int toAbsIndex;
-            if (groupId == null)
-            {
-                // No filter — visual index == abs post-removal index
-                toAbsIndex = Mathf.Clamp(newVisualIndex, 0, actor.Script.Count - 1);
-            }
-            else
-            {
-                // Build visible abs indices excluding the dragged item (post-removal visible list)
-                var postRemovalVisible = new List<int>();
-                foreach (int absIdx in visibleAbsIndices)
-                {
-                    if (absIdx != originalIndex)
-                        postRemovalVisible.Add(absIdx);
-                }
-
-                if (postRemovalVisible.Count == 0)
-                {
-                    UpdateRulesList();
-                    evt.StopPropagation();
-                    return;
-                }
-
-                int clampedVisual = Mathf.Clamp(newVisualIndex, 0, postRemovalVisible.Count);
-                if (clampedVisual < postRemovalVisible.Count)
-                {
-                    // Insert before postRemovalVisible[clampedVisual] in the post-removal abs list
-                    int absRef = postRemovalVisible[clampedVisual];
-                    toAbsIndex = absRef > originalIndex ? absRef - 1 : absRef;
-                }
-                else
-                {
-                    // Insert after the last visible item in the group
-                    int absRef = postRemovalVisible[postRemovalVisible.Count - 1];
-                    int postRemovalAbsOfLast = absRef > originalIndex ? absRef - 1 : absRef;
-                    toAbsIndex = postRemovalAbsOfLast + 1;
-                }
-                toAbsIndex = Mathf.Clamp(toAbsIndex, 0, actor.Script.Count - 1);
-            }
+            int toAbsIndex = ruleDragAbsIndices[Mathf.Clamp(newVisualIndex, 0, ruleDragAbsIndices.Count - 1)];
 
             if (originalIndex >= 0 && originalIndex < actor.Script.Count &&
                 originalIndex != toAbsIndex)
@@ -699,7 +1335,7 @@ namespace GameRuleEditor.Panels
                 var focused = this.focusController?.focusedElement;
                 if (focused != null) focused.Blur();
 
-                controller.MoveRuleToIndex(context.selectedActorIndex, originalIndex, toAbsIndex);
+                controller.MoveRuleToIndex(context.selectedActorIndex, originalIndex, toAbsIndex, withinGroup: true);
 
                 // Manually force an update in case FocusGuard killed the controller's update
                 UpdateRulesList();

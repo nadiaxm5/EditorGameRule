@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System;
+using System.Linq;
+using System.Reflection;
 using GameRuleEditor.Core;
 using GameRuleEditor.Controllers;
 
@@ -14,6 +17,7 @@ namespace GameRuleEditor.Windows
     {
         private const string CONTEXT_FOLDER = "Assets/Editor/GameRuleEditor/Projects";
         private const string CONTEXT_PATH = CONTEXT_FOLDER + "/EditorContext.asset";
+        private const string STUDIO_LAYOUT_PATH = "Assets/Editor/GameRuleEditor/UI/Layouts/GameRuleStudio.wlt";
 
         /// <summary>
         /// The single shared ProjectController. Both windows must use this same instance.
@@ -47,10 +51,11 @@ namespace GameRuleEditor.Windows
         /// <summary>
         /// Main entry point: opens all GameRule windows and arranges them.
         /// </summary>
-        public static void OpenLayout()
+        public static void OpenLayout(bool promptForProject = true)
         {
             var context = EnsureEditorContext();
             var controller = GetOrCreateController(context);
+            bool restoredLayout = TryLoadStudioLayout();
 
            /* // 0. Open Toolbar window (docked top preferably)
             var toolbarWindow = EditorWindow.GetWindow<GameRuleToolbarWindow>("Tools", false);
@@ -61,7 +66,7 @@ namespace GameRuleEditor.Windows
             // 1. Open Hierarchy window (docked next to Unity's Hierarchy)
             var hierarchyWindow = EditorWindow.GetWindow<GameRuleHierarchyWindow>(
                 "Cast", false, typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow"));
-            hierarchyWindow.minSize = new Vector2(256, 300);
+            hierarchyWindow.minSize = new Vector2(176, 300);
             hierarchyWindow.Init(context, controller);
 
             // 2. Open Inspector window (docked next to Unity's Inspector), 
@@ -76,18 +81,150 @@ namespace GameRuleEditor.Windows
             var rulesWin = EditorWindow.GetWindow<GameRuleRulesWindow>("Rules", false, typeof(Editor).Assembly.GetType("UnityEditor.SceneView"));
             rulesWin.minSize = new Vector2(400, 300);
             rulesWin.Init(context, controller);
+
+            var detailsWin = Resources.FindObjectsOfTypeAll<GameRuleRuleDetailsWindow>()
+                .FirstOrDefault() ?? EditorWindow.GetWindow<GameRuleRuleDetailsWindow>(
+                    "Rule Details", false, typeof(GameRulePropertiesWindow));
+            detailsWin.minSize = new Vector2(320, 300);
+            detailsWin.Init(context, controller);
+
+            // Compatibility fallback if Unity cannot load the bundled layout template.
+            if (!restoredLayout)
+            {
+                TryArrangeStudioDocks(hierarchyWindow, rulesWin, detailsWin, propsWin);
+                // Newly created DockAreas may only be attached on a later editor frame.
+                EditorApplication.delayCall += () =>
+                {
+                    TryArrangeStudioDocks(hierarchyWindow, rulesWin, detailsWin, propsWin);
+                    EditorApplication.delayCall += () => TryArrangeStudioDocks(
+                        hierarchyWindow, rulesWin, detailsWin, propsWin);
+                };
+            }
             
             // If no project loaded, show modal dialog
-            if (context.currentProject == null)
+            if (promptForProject && context.currentProject == null)
             {
-                ShowStartDialog(context, controller, hierarchyWindow);
+                ShowStartDialog(controller);
+            }
+        }
+
+        private static bool TryLoadStudioLayout()
+        {
+            try
+            {
+                string path = Path.GetFullPath(STUDIO_LAYOUT_PATH);
+                if (!File.Exists(path)) return false;
+                Type layoutType = typeof(EditorWindow).Assembly.GetType("UnityEditor.WindowLayout");
+                MethodInfo load = layoutType?.GetMethod("LoadWindowLayout",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null,
+                    new[] { typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(bool) }, null);
+                // Keep Unity on the current monitor; restore the saved docks, tabs and proportions.
+                return load != null && (bool)load.Invoke(null, new object[] { path, false, false, true, true });
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("GameRule: could not restore the studio layout: " + error.Message);
+                return false;
+            }
+        }
+
+        private static void TryArrangeStudioDocks(EditorWindow cast, EditorWindow rules,
+                                                   EditorWindow details, EditorWindow properties)
+        {
+            if (cast == null || rules == null || details == null || properties == null) return;
+            try
+            {
+                const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                var editorAssembly = typeof(EditorWindow).Assembly;
+                Type viewType = editorAssembly.GetType("UnityEditor.View");
+                Type dockType = editorAssembly.GetType("UnityEditor.DockArea");
+                Type splitType = editorAssembly.GetType("UnityEditor.SplitView");
+                FieldInfo parentField = typeof(EditorWindow).GetField("m_Parent", flags);
+                if (viewType == null || dockType == null || splitType == null || parentField == null) return;
+
+                object castDock = parentField.GetValue(cast);
+                object rulesDock = parentField.GetValue(rules);
+                object detailsDock = parentField.GetValue(details);
+                object propertiesDock = parentField.GetValue(properties);
+                var viewParent = viewType.GetProperty("parent", flags);
+                var viewChildren = viewType.GetProperty("children", flags);
+                var viewPosition = viewType.GetProperty("position", flags);
+                var removeChild = splitType.GetMethod("RemoveChild", flags, null,
+                    new[] { viewType }, null);
+                var addChild = splitType.GetMethod("AddChild", flags, null,
+                    new[] { viewType, typeof(int) }, null);
+                object split = viewParent?.GetValue(rulesDock);
+                if (split == null || !splitType.IsInstanceOfType(split) ||
+                    !ReferenceEquals(viewParent.GetValue(castDock), split) ||
+                    !ReferenceEquals(viewParent.GetValue(propertiesDock), split))
+                {
+                    Debug.LogWarning("GameRule: the existing dock layout is not a horizontal studio group; Rule Details remains available as a tab.");
+                    return;
+                }
+
+                // Older layouts may contain a stale pane reference from a previous
+                // move. Drop only duplicate references to this window, never other tabs.
+                FieldInfo panesField = dockType.GetField("m_Panes", flags);
+                if (panesField != null && viewChildren != null && removeChild != null)
+                {
+                    foreach (object child in ((System.Collections.IEnumerable)viewChildren.GetValue(split))
+                        .Cast<object>().ToArray())
+                    {
+                        if (!dockType.IsInstanceOfType(child) || ReferenceEquals(child, detailsDock))
+                            continue;
+                        var panes = panesField.GetValue(child) as System.Collections.IList;
+                        if (panes == null || !panes.Contains(details)) continue;
+                        panes.Remove(details);
+                        if (panes.Count == 0) removeChild.Invoke(split, new[] { child });
+                    }
+                }
+
+                if (ReferenceEquals(detailsDock, propertiesDock))
+                {
+                    MethodInfo removeTab = dockType.GetMethod("RemoveTab", flags, null,
+                        new[] { typeof(EditorWindow), typeof(bool), typeof(bool) }, null);
+                    object newDock = ScriptableObject.CreateInstance(dockType);
+                    MethodInfo addTab = dockType.GetMethod("AddTab", flags, null,
+                        new[] { typeof(EditorWindow), typeof(bool) }, null);
+                    if (removeTab == null || addTab == null || addChild == null) return;
+                    removeTab.Invoke(propertiesDock, new object[] { details, false, true });
+                    addTab.Invoke(newDock, new object[] { details, true });
+                    if (!ReferenceEquals(parentField.GetValue(details), newDock)) return;
+                    detailsDock = newDock;
+                    addChild.Invoke(split, new object[] { detailsDock, 2 });
+                }
+
+                object[] desired = { castDock, rulesDock, detailsDock, propertiesDock };
+                if (removeChild == null || addChild == null || viewChildren == null || viewPosition == null) return;
+
+                for (int i = 0; i < desired.Length; i++)
+                {
+                    var children = ((Array)viewChildren.GetValue(split)).Cast<object>().ToArray();
+                    if (i < children.Length && ReferenceEquals(children[i], desired[i])) continue;
+                    removeChild.Invoke(split, new[] { desired[i] });
+                    addChild.Invoke(split, new object[] { desired[i], i });
+                }
+
+                Rect bounds = (Rect)viewPosition.GetValue(split);
+                float[] fractions = { 0.1015625f, 0.38203125f, 0.30390625f, 0.2125f };
+                float x = 0;
+                for (int i = 0; i < desired.Length; i++)
+                {
+                    float width = i == desired.Length - 1 ? bounds.width - x : bounds.width * fractions[i];
+                    viewPosition.SetValue(desired[i], new Rect(x, 0, width, bounds.height));
+                    x += width;
+                }
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("GameRule: could not arrange the four dock groups automatically: " + error.Message);
             }
         }
 
         /// <summary>
         /// Shows a modal start dialog to create or open a project.
         /// </summary>
-        private static void ShowStartDialog(EditorContext context, ProjectController controller, GameRuleHierarchyWindow hierarchyWindow)
+        private static void ShowStartDialog(ProjectController controller)
         {
             int choice = EditorUtility.DisplayDialogComplex(
                 "GameRule Editor",
@@ -97,47 +234,8 @@ namespace GameRuleEditor.Windows
                 "Open Existing Project"
             );
 
-            switch (choice)
-            {
-                case 0: // Create New
-                    string newPath = EditorUtility.SaveFilePanelInProject(
-                        "Create New GameRule Project", "NewProject", "asset",
-                        "Choose where to save the new project");
-                    if (!string.IsNullOrEmpty(newPath))
-                    {
-                        string projectName = Path.GetFileNameWithoutExtension(newPath);
-                        controller.CreateNewProject(projectName);
-                        AssetDatabase.CreateAsset(context.currentProject, newPath);
-                        AssetDatabase.SaveAssets();
-                        // Re-init hierarchy
-                        hierarchyWindow.Init(context, controller);
-                    }
-                    break;
-
-                case 2: // Open Existing
-                    string openPath = EditorUtility.OpenFilePanel("Open GameRule Project", "Assets", "asset");
-                    if (!string.IsNullOrEmpty(openPath))
-                    {
-                        if (openPath.StartsWith(Application.dataPath))
-                            openPath = "Assets" + openPath.Substring(Application.dataPath.Length);
-
-                        var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(openPath);
-                        if (project != null)
-                        {
-                            controller.LoadProject(project);
-                            hierarchyWindow.Init(context, controller);
-                        }
-                        else
-                        {
-                            EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
-                        }
-                    }
-                    break;
-
-                case 1: // Cancel
-                default:
-                    break;
-            }
+            if (choice == 0) GameRuleProjectDialog.ShowNew(controller);
+            else if (choice == 2) GameRuleProjectDialog.ShowOpen(controller);
         }
 
         /// <summary>

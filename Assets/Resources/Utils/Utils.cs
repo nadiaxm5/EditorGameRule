@@ -1,10 +1,287 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using System.Linq;
 
 public static class Utils
 {
+    // Runtime bridge: Unity access lives here; Action and Condition keep rule semantics.
+    // Calls stay synchronous and keep the scheduler's existing execution order.
+    public static float DeltaTime => Time.deltaTime;
+    public static float ElapsedTime => Time.time;
+
+    public static void SpawnActor(string prefabName, GameObject spawnerObj, Vector3 offsetPos, Vector3 offsetRot)
+    {
+        var prefab = Resources.Load<GameObject>($"Prefabs/{prefabName}");
+        if (!prefab)
+        {
+            Debug.LogWarning($"Prefab '{prefabName}' no encontrado en Resources/Prefabs.");
+            return;
+        }
+
+        var newObj = UnityEngine.Object.Instantiate(prefab);
+        newObj.name = prefab.name;
+        newObj.SetActive(true);
+
+        // Copy the tag from the original scene instance (including inactive objects set up by Loader)
+        string actorTag = FindTagForActor(prefabName);
+        if (!string.IsNullOrEmpty(actorTag))
+        {
+            try { newObj.tag = actorTag; }
+            catch (UnityException) { /* Tag not registered */ }
+        }
+
+        newObj.transform.position = spawnerObj.transform.TransformPoint(offsetPos);
+        newObj.transform.rotation = spawnerObj.transform.rotation * Quaternion.Euler(offsetRot);
+        newObj.transform.localScale = prefab.transform.localScale;
+
+        var scriptType = System.Type.GetType(prefabName);
+        if (scriptType?.IsSubclassOf(typeof(MonoBehaviour)) == true)
+        {
+            var script = newObj.AddComponent(scriptType);
+            scriptType.GetField("Active")?.SetValue(script, true);
+
+            if (scriptType.GetField("propertyList")?.GetValue(script) is System.Collections.IDictionary defaults)
+                foreach (System.Collections.DictionaryEntry entry in defaults)
+                    scriptType.GetField((string)entry.Key)?.SetValue(script, entry.Value);
+
+            // Runtime-spawned actors are appended to the deterministic order after
+            // the current scheduler pass, preserving spawn order.
+            if (script is IGameRuleActor spawnedActor)
+                ActorScheduler.RegisterSpawned(spawnedActor);
+        }
+
+        if (newObj.TryGetComponent(out LineRenderer lr))
+        {
+            Vector3 start = newObj.transform.position;
+            Vector3 dir = newObj.transform.forward;
+            Vector3 end = Physics.Raycast(start, dir, out RaycastHit hit, 100f)
+                ? hit.point
+                : start + dir * 100f;
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+    }
+
+    public static void PlayAnimation(string animationName, GameObject obj)
+    {
+        if (obj == null || string.IsNullOrWhiteSpace(animationName)) return;
+        Animator animator = obj.GetComponent<Animator>();
+        if (animator != null)
+        {
+            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
+            if (!currentState.IsName(animationName)) animator.Play(animationName);
+        }
+    }
+
+    public static void PlaySound(string audioClip, GameObject obj)
+    {
+        if (obj == null || string.IsNullOrWhiteSpace(audioClip)) return;
+
+        AudioSource[] audios = obj.GetComponents<AudioSource>();
+        foreach (AudioSource audio in audios)
+        {
+            if (audio.clip != null && audio.clip.name == audioClip)
+            {
+                if (!audio.isPlaying) audio.Play();
+                return;
+            }
+        }
+
+        AudioSource[] childAudios = obj.GetComponentsInChildren<AudioSource>();
+        foreach (AudioSource audio in childAudios)
+        {
+            if (audio.gameObject == obj) continue;
+            if (audio.clip != null && audio.clip.name == audioClip)
+            {
+                if (!audio.isPlaying) audio.Play();
+                return;
+            }
+        }
+
+        // Picker values are clip names; also accept a Resources-relative path.
+        AudioClip clip = Resources.Load<AudioClip>(audioClip)
+            ?? Resources.LoadAll<AudioClip>("Audio").FirstOrDefault(candidate => candidate.name == audioClip);
+        if (clip == null) return;
+
+        // Keep the actor's configured routing/volume when it already has an unused source.
+        AudioSource source = audios.FirstOrDefault(audio => audio.clip == clip)
+            ?? audios.FirstOrDefault(audio => audio.clip == null && audio.enabled && !audio.isPlaying);
+        if (source == null)
+        {
+            source = obj.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = false;
+        }
+        source.clip = clip;
+        if (!source.isPlaying) source.Play();
+    }
+
+    public static void PlayParticles(string particleSystemName, GameObject obj)
+    {
+        ParticleSystem ps = obj.GetComponent<ParticleSystem>();
+        if (ps != null && obj.name == particleSystemName && !ps.isPlaying)
+        {
+            ps.Play();
+            return;
+        }
+
+        ParticleSystem[] systems = obj.GetComponentsInChildren<ParticleSystem>();
+        foreach (ParticleSystem childPs in systems)
+        {
+            if (childPs.gameObject == obj) continue;
+            if (childPs.gameObject.name == particleSystemName && !childPs.isPlaying)
+            {
+                childPs.Play();
+            }
+        }
+    }
+
+    public static void DeleteActor(GameObject me)
+    {
+        RemoveFromCollisions(me);
+
+        // Keep the actor set fixed during the current scheduler pass. The entry
+        // is removed when the pass finishes; Unity destroys the object afterwards.
+        if (me.TryGetComponent(out IGameRuleActor actor))
+            ActorScheduler.Unregister(actor);
+
+        UnityEngine.Object.Destroy(me);
+    }
+
+    public static void LoadFirstScene()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public static void QuitApplication()
+    {
+        Application.Quit();
+    }
+
+    public static void SetNavigationTarget(GameObject obj, float speed, Vector3 target)
+    {
+        NavMeshAgent agent = obj.GetComponent<NavMeshAgent>();
+        if (agent == null) return;
+
+        agent.speed = speed;
+
+        if (agent.isOnNavMesh) agent.SetDestination(target);
+        else Debug.LogWarning($"'{obj.name}' is not on the NavMesh, it cannot be navigated");
+    }
+
+    public static void ApplyForce(GameObject obj, Vector3 forceVector)
+    {
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+
+        if (rb != null) rb.AddForce(forceVector, ForceMode.Force);
+        else obj.transform.position += forceVector * 0.02f;
+    }
+
+    public static void ApplyTorque(GameObject obj, Vector3 torqueVector)
+    {
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null) rb.AddTorque(torqueVector, ForceMode.Force);
+        else obj.transform.Rotate(torqueVector * Time.deltaTime, Space.Self);
+
+        SetProperty(obj.name + ".rx", obj.transform.eulerAngles.x, obj);
+        SetProperty(obj.name + ".ry", obj.transform.eulerAngles.y, obj);
+        SetProperty(obj.name + ".rz", obj.transform.eulerAngles.z, obj);
+    }
+
+    // Tags are inherited from scene actors, including inactive root objects.
+    private static string FindTagForActor(string actorName)
+    {
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+            if (!scene.isLoaded) continue;
+
+            foreach (var rootObj in scene.GetRootGameObjects())
+            {
+                if (rootObj.name == actorName && !rootObj.CompareTag("Untagged"))
+                    return rootObj.tag;
+            }
+        }
+        return null;
+    }
+
+    public static bool HasCollision(string tag, GameObject obj)
+    {
+        var script = obj.GetComponent(obj.name);
+        var tagCollisionsField = script.GetType().GetField("TagCollisions");
+        if (tagCollisionsField == null) return false;
+
+        var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
+        if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
+
+        tagCollisions[tag].RemoveWhere(o => o == null);
+
+        return tagCollisions[tag].Count > 0;
+    }
+
+    public static bool IsPointerOverActor(GameObject obj, Vector2 pointerPosition)
+    {
+        Camera camera = Camera.main;
+        if (camera == null) return false;
+
+        Ray ray = camera.ScreenPointToRay(pointerPosition);
+        return Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject == obj;
+    }
+
+    public static Dictionary<string, float> GetActorTimers(GameObject obj)
+    {
+        var script = obj.GetComponent(obj.name);
+        var field = script.GetType().GetField("timers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        return field?.GetValue(script) as Dictionary<string, float>;
+    }
+
+    public static Vector3 GetPosition(GameObject obj)
+    {
+        if (obj == null) return Vector3.zero;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        return body != null && !body.isKinematic ? body.position : obj.transform.position;
+    }
+
+    public static Quaternion GetRotation(GameObject obj)
+    {
+        if (obj == null) return Quaternion.identity;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        return body != null && !body.isKinematic ? body.rotation : obj.transform.rotation;
+    }
+
+    public static void SetPosition(GameObject obj, Vector3 position)
+    {
+        if (obj == null) return;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        if (body != null && !body.isKinematic)
+        {
+            if (body.interpolation == RigidbodyInterpolation.None)
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.MovePosition(position);
+            return;
+        }
+
+        obj.transform.position = position;
+    }
+
+    public static void SetRotation(GameObject obj, Quaternion rotation)
+    {
+        if (obj == null) return;
+        Rigidbody body = obj.GetComponent<Rigidbody>();
+        if (body != null && !body.isKinematic)
+        {
+            if (body.interpolation == RigidbodyInterpolation.None)
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.MoveRotation(rotation);
+            return;
+        }
+
+        obj.transform.rotation = rotation;
+    }
+
     public static float GetProperty(KeyValuePair<string, GameObject> s)
     {
         GameObject obj = s.Value;
@@ -20,12 +297,12 @@ public static class Utils
         {
             switch (elements[1])
             {
-                case "x": value = obj.transform.position.x; break;
-                case "y": value = obj.transform.position.y; break;
-                case "z": value = obj.transform.position.z; break;
-                case "rx": value = obj.transform.eulerAngles.x; break;
-                case "ry": value = obj.transform.eulerAngles.y; break;
-                case "rz": value = obj.transform.eulerAngles.z; break;
+                case "x": value = GetPosition(obj).x; break;
+                case "y": value = GetPosition(obj).y; break;
+                case "z": value = GetPosition(obj).z; break;
+                case "rx": value = GetRotation(obj).eulerAngles.x; break;
+                case "ry": value = GetRotation(obj).eulerAngles.y; break;
+                case "rz": value = GetRotation(obj).eulerAngles.z; break;
                 case "sx": value = obj.transform.localScale.x; break;
                 case "sy": value = obj.transform.localScale.y; break;
                 case "sz": value = obj.transform.localScale.z; break;
@@ -43,7 +320,7 @@ public static class Utils
                 default:
                     {
                         var script = obj.GetComponent(obj.name);
-                        value = (float)script.GetType().GetField(elements[1]).GetValue(script);
+                        value = ReadNumericMember(script, elements[1], elements.Length == 3 ? elements[2] : null);
                         break;
                     }
             }
@@ -53,97 +330,29 @@ public static class Utils
 
     private static float GetGameManagerProperty(string propertyPath, GameObject gameManagerObj)
     {
-        GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
-        if (gameManager == null)
+        var parts = propertyPath.Split('.');
+        return ReadNumericMember(gameManagerObj.GetComponent<GameManager>(), parts[0],
+            parts.Length == 2 ? parts[1] : null);
+    }
+
+    private static float ReadNumericMember(Component script, string name, string axis)
+    {
+        if (script == null) return float.NaN;
+        var type = script.GetType();
+        var field = type.GetField(name);
+        object value = field != null ? field.GetValue(script) : type.GetProperty(name)?.GetValue(script);
+        switch (value)
         {
-            Debug.Log("GameManager component not found");
-            return float.NaN;
+            case float number: return number;
+            case int integer: return integer;
+            case bool flag: return flag ? 1f : 0f;
+            case Vector2 vector2 when axis == "x": return vector2.x;
+            case Vector2 vector2 when axis == "y": return vector2.y;
+            case Vector3 vector3 when axis == "x": return vector3.x;
+            case Vector3 vector3 when axis == "y": return vector3.y;
+            case Vector3 vector3 when axis == "z": return vector3.z;
+            default: return float.NaN;
         }
-
-        string[] parts = propertyPath.Split('.');
-
-        // Simple property
-        if (parts.Length == 1)
-        {
-            string mainProperty = parts[0];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var property = typeof(GameManager).GetProperty(mainProperty);
-
-            object value = null;
-
-            if (field != null)
-                value = field.GetValue(gameManager);
-            else if (property != null)
-                value = property.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return float.NaN;
-            }
-
-            // Float
-            if (value is float f) return f;
-
-            // Int
-            if (value is int i) return i;
-
-            // Bool
-            if (value is bool b) return b ? 1f : 0f;
-
-            Debug.LogError($"Unsupported GameManager property type for '{mainProperty}': {value.GetType()}");
-            return float.NaN;
-        }
-
-        // Compound property
-        if (parts.Length == 2)
-        {
-            string mainProperty = parts[0];
-            string subProperty = parts[1];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var property = typeof(GameManager).GetProperty(mainProperty);
-
-            object value = null;
-            if (field != null)
-                value = field.GetValue(gameManager);
-            else if (property != null)
-                value = property.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return float.NaN;
-            }
-
-            // Vector3
-            if (value is Vector3 vector3)
-            {
-                if (subProperty == "x") return vector3.x;
-                if (subProperty == "y") return vector3.y;
-                if (subProperty == "z") return vector3.z;
-            }
-
-            // Vector2
-            if (value is Vector2 vector2)
-            {
-                if (subProperty == "x") return vector2.x;
-                if (subProperty == "y") return vector2.y;
-            }
-
-            // Float
-            if (value is float f) return f;
-
-            // Int
-            if (value is int i) return i;
-
-            // Bool
-            if (value is bool b) return b ? 1f : 0f;
-
-            Debug.LogError($"Unsupported GameManager property type: {value.GetType()}");
-            return float.NaN;
-        }
-
-        return float.NaN;
     }
 
     public static void SetProperty(string property, float value, GameObject obj)
@@ -159,12 +368,12 @@ public static class Utils
             var script = obj.GetComponent(obj.name);
             switch (elements[1])
             {
-                case "x": obj.transform.position = new Vector3(value, obj.transform.position.y, obj.transform.position.z); break;
-                case "y": obj.transform.position = new Vector3(obj.transform.position.x, value, obj.transform.position.z); break;
-                case "z": obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, value); break;
-                case "rx": obj.transform.eulerAngles = new Vector3(value, obj.transform.eulerAngles.y, obj.transform.eulerAngles.z); break;
-                case "ry": obj.transform.eulerAngles = new Vector3(obj.transform.eulerAngles.x, value, obj.transform.eulerAngles.z); break;
-                case "rz": obj.transform.eulerAngles = new Vector3(obj.transform.eulerAngles.x, obj.transform.eulerAngles.y, value); break;
+                case "x": { Vector3 p = GetPosition(obj); p.x = value; SetPosition(obj, p); break; }
+                case "y": { Vector3 p = GetPosition(obj); p.y = value; SetPosition(obj, p); break; }
+                case "z": { Vector3 p = GetPosition(obj); p.z = value; SetPosition(obj, p); break; }
+                case "rx": { Vector3 r = GetRotation(obj).eulerAngles; r.x = value; SetRotation(obj, Quaternion.Euler(r)); break; }
+                case "ry": { Vector3 r = GetRotation(obj).eulerAngles; r.y = value; SetRotation(obj, Quaternion.Euler(r)); break; }
+                case "rz": { Vector3 r = GetRotation(obj).eulerAngles; r.z = value; SetRotation(obj, Quaternion.Euler(r)); break; }
                 case "sx": obj.transform.localScale = new Vector3(value, obj.transform.localScale.y, obj.transform.localScale.z); break;
                 case "sy": obj.transform.localScale = new Vector3(obj.transform.localScale.x, value, obj.transform.localScale.z); break;
                 case "sz": obj.transform.localScale = new Vector3(obj.transform.localScale.x, obj.transform.localScale.y, value); break;
@@ -186,7 +395,8 @@ public static class Utils
 
                 default:
                     {
-                        script.GetType().GetField(elements[1]).SetValue(script, value); break;
+                        WriteNumericMember(script, elements[1], elements.Length == 3 ? elements[2] : null, value);
+                        break;
                     }
             }
         }
@@ -194,147 +404,38 @@ public static class Utils
 
     private static void SetGameManagerProperty(string propertyPath, float value, GameObject gameManagerObj)
     {
-        GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
-        if (gameManager == null)
+        var parts = propertyPath.Split('.');
+        WriteNumericMember(gameManagerObj.GetComponent<GameManager>(), parts[0],
+            parts.Length == 2 ? parts[1] : null, value);
+    }
+
+    private static void WriteNumericMember(Component script, string name, string axis, float value)
+    {
+        if (script == null) return;
+        var type = script.GetType();
+        var field = type.GetField(name);
+        var property = field == null ? type.GetProperty(name) : null;
+        if (field == null && (property == null || !property.CanWrite)) return;
+
+        object current = field != null ? field.GetValue(script) : property.GetValue(script);
+        object updated;
+        switch (current)
         {
-            Debug.LogError("GameManager component not found");
-            return;
+            case float _: updated = value; break;
+            case int _: updated = Mathf.RoundToInt(value); break;
+            case bool _: updated = value != 0f; break;
+            case Vector2 vector2 when axis == "x" || axis == "y":
+                vector2[axis == "x" ? 0 : 1] = value;
+                updated = vector2;
+                break;
+            case Vector3 vector3 when axis == "x" || axis == "y" || axis == "z":
+                vector3[axis == "x" ? 0 : axis == "y" ? 1 : 2] = value;
+                updated = vector3;
+                break;
+            default: return;
         }
-
-        string[] parts = propertyPath.Split('.');
-
-        // Simple property
-        if (parts.Length == 1)
-        {
-            string mainProperty = parts[0];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
-
-            // Float
-            if (field != null && field.FieldType == typeof(float))
-            {
-                field.SetValue(gameManager, value);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
-            {
-                propertyInfo.SetValue(gameManager, value);
-                return;
-            }
-
-            // Int
-            if (field != null && field.FieldType == typeof(int))
-            {
-                field.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
-            {
-                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-
-            // Bool
-            if (field != null && field.FieldType == typeof(bool))
-            {
-                field.SetValue(gameManager, value != 0f);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(gameManager, value != 0f);
-                return;
-            }
-
-            Debug.LogError($"Property '{mainProperty}' not found or unsupported type in GameManager.");
-            return;
-        }
-
-        // Compound property
-        if (parts.Length == 2)
-        {
-            string mainProperty = parts[0];
-            string subProperty = parts[1];
-
-            var field = typeof(GameManager).GetField(mainProperty);
-            var propertyInfo = typeof(GameManager).GetProperty(mainProperty);
-
-            object mainValue = null;
-
-            if (field != null)
-                mainValue = field.GetValue(gameManager);
-            else if (propertyInfo != null)
-                mainValue = propertyInfo.GetValue(gameManager);
-            else
-            {
-                Debug.LogError($"Property '{mainProperty}' not found in GameManager");
-                return;
-            }
-
-            // Vector3
-            if (mainValue is Vector3 v3)
-            {
-                if (subProperty == "x") v3.x = value;
-                else if (subProperty == "y") v3.y = value;
-                else if (subProperty == "z") v3.z = value;
-
-                if (field != null) field.SetValue(gameManager, v3);
-                else propertyInfo.SetValue(gameManager, v3);
-
-                return;
-            }
-
-            // Vector2
-            if (mainValue is Vector2 v2)
-            {
-                if (subProperty == "x") v2.x = value;
-                else if (subProperty == "y") v2.y = value;
-
-                if (field != null) field.SetValue(gameManager, v2);
-                else propertyInfo.SetValue(gameManager, v2);
-
-                return;
-            }
-
-            // Float
-            if (field != null && field.FieldType == typeof(float))
-            {
-                field.SetValue(gameManager, value);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(float))
-            {
-                propertyInfo.SetValue(gameManager, value);
-                return;
-            }
-
-            // Int
-            if (field != null && field.FieldType == typeof(int))
-            {
-                field.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(int))
-            {
-                propertyInfo.SetValue(gameManager, Mathf.RoundToInt(value));
-                return;
-            }
-
-            // Bool
-            if (field != null && field.FieldType == typeof(bool))
-            {
-                field.SetValue(gameManager, value != 0f);
-                return;
-            }
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(gameManager, value != 0f);
-                return;
-            }
-
-            Debug.LogError($"Unsupported property type for '{mainProperty}'");
-        }
+        if (field != null) field.SetValue(script, updated);
+        else property.SetValue(script, updated);
     }
 
     public static Dictionary<string, GameObject> CreateScope(int objID, string scope)
@@ -352,20 +453,21 @@ public static class Utils
                 var script = obj.GetComponent(obj.name);
                 List<string> properties = new List<string>(baseProperties);
 
-                if (script != null && script.GetType().GetField("propertyList") != null)
-                {
-                    var propertyList = (Dictionary<string, float>)script.GetType().GetField("propertyList").GetValue(script);
-                    properties.AddRange(propertyList.Keys);
-                }
-
-                // Also discover public float fields via reflection (handles inactive objects
-                // where Awake never ran and propertyList is still empty)
                 if (script != null)
                 {
                     foreach (var field in script.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
                     {
-                        if (field.FieldType == typeof(float) && !properties.Contains(field.Name))
+                        if (field.FieldType == typeof(Vector2) || field.FieldType == typeof(Vector3))
+                        {
+                            properties.Add(field.Name + ".x");
+                            properties.Add(field.Name + ".y");
+                            if (field.FieldType == typeof(Vector3)) properties.Add(field.Name + ".z");
+                        }
+                        else if (field.FieldType == typeof(float) || field.FieldType == typeof(int) ||
+                            field.FieldType == typeof(bool))
+                        {
                             properties.Add(field.Name);
+                        }
                     }
                 }
 

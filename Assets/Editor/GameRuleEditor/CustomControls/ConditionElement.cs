@@ -1,99 +1,142 @@
-using UnityEngine;
-using UnityEngine.UIElements;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using GameRuleEditor.Core;
 using UnityEditor;
 using UnityEditor.UIElements;
-using System.Collections.Generic;
-using GameRuleEditor.Core;
-using System.Text.RegularExpressions;
-using System.Linq; // Required for Sorting/ToList
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace GameRuleEditor.CustomControls
 {
     public class ConditionElement : VisualElement
     {
-        private EditorContext context;
-        private PopupField<string> typeDropdown;
-        private Label negationIcon;
+        private const string SelectConditionLabel = "Select condition";
+        private const string PickKeyLabel = "Pick a Key";
+
+        private readonly EditorContext context;
+        private readonly List<string> availableTypes;
+        private readonly bool detailsMode;
+        private readonly List<VisualElement> inputElements = new List<VisualElement>();
+        private readonly HashSet<VisualElement> selfReferenceFields = new HashSet<VisualElement>();
+        private TooltipPopupField typeDropdown;
+        private Button negationButton;
         private VisualElement parametersContainer;
-        private List<string> availableTypes;
-        private List<string> dropdownTypes;
-        private List<VisualElement> inputElements = new List<VisualElement>();
-        public System.Action OnChanged;
-        public System.Action OnRemove;
+        private ExpressionOperandControl compareLeftOperand;
+        private ExpressionOperandControl compareRightOperand;
+        private TooltipPopupField compareOperatorDropdown;
+        private Button keyboardKeyButton;
+        private VisualElement keyboardMenuOverlay;
+        private VisualElement keyboardMenu;
+        private Button checkPropertyButton;
+        private string selectedKeyboardKey;
+        private string checkPropertyValue;
         private bool isNegated;
         private string selectedConditionType;
         private string joinOperatorBefore;
 
+        public System.Action OnChanged;
+        public System.Action OnRemove;
+        public Func<string, string, bool> BeforeTypeChange;
+        public VisualElement TypeSelector => typeDropdown;
         public string JoinOperatorBefore => joinOperatorBefore;
 
-        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null)
+        public ConditionElement(EditorContext ctx, List<string> conditionTypes, string joinOperatorBefore = null,
+                                bool detailsMode = false)
         {
             context = ctx;
             availableTypes = conditionTypes;
-            dropdownTypes = new List<string> { "Negate" };
-            dropdownTypes.AddRange(conditionTypes);
-            style.flexDirection = FlexDirection.Row; style.marginBottom = 5;
+            this.detailsMode = detailsMode;
+            if (detailsMode) AddToClassList("rule-detail-condition");
+            style.flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row;
+            style.marginBottom = 5;
             style.flexShrink = 0;
-            style.borderTopLeftRadius = 3; style.borderTopRightRadius = 3;
-            style.borderBottomLeftRadius = 3; style.borderBottomRightRadius = 3;
-            style.paddingTop = 5; style.paddingBottom = 5; style.paddingLeft = 5; style.paddingRight = 5;
-            style.alignItems = Align.Center;
+            if (!detailsMode)
+            {
+                style.borderTopLeftRadius = 3;
+                style.borderTopRightRadius = 3;
+                style.borderBottomLeftRadius = 3;
+                style.borderBottomRightRadius = 3;
+                style.paddingTop = 5;
+                style.paddingBottom = 5;
+                style.paddingLeft = 5;
+                style.paddingRight = 5;
+            }
+            style.alignItems = detailsMode ? Align.Stretch : Align.Center;
             CreateUI(joinOperatorBefore);
+            RegisterCallback<DetachFromPanelEvent>(_ => CloseKeyboardMenu());
         }
 
-        private void CreateUI(string joinOperatorBefore)
+        private void CreateUI(string initialJoinOperator)
         {
-            style.backgroundColor = new Color(0.3f, 0.3f, 0.3f);
-            SetJoinOperator(joinOperatorBefore);
+            if (!detailsMode) style.backgroundColor = GameRuleTheme.BrightHeader;
+            SetJoinOperator(initialJoinOperator);
 
-            negationIcon = new Label("!");
-            negationIcon.style.width = 16;
-            negationIcon.style.marginRight = 4;
-            negationIcon.style.unityTextAlign = TextAnchor.MiddleCenter;
-            negationIcon.style.unityFontStyleAndWeight = FontStyle.Bold;
-            negationIcon.style.color = new Color(0.95f, 0.2f, 0.2f);
-            Add(negationIcon);
-
-            selectedConditionType = availableTypes.Count > 0 ? availableTypes[0] : "Compare";
-            typeDropdown = new PopupField<string>(dropdownTypes, selectedConditionType) { style = { width = 110 } };
-            typeDropdown.style.flexShrink = 0;
-            typeDropdown.RegisterValueChangedCallback(evt =>
+            negationButton = new Button(() =>
             {
-                if (evt.newValue == "Negate")
+                if (string.IsNullOrEmpty(selectedConditionType)) return;
+                isNegated = !isNegated;
+                UpdateNegationVisual();
+                OnChanged?.Invoke();
+            }) { text = "NOT", tooltip = "Invert this condition" };
+            negationButton.AddToClassList("button-negation");
+            if (detailsMode) negationButton.style.display = DisplayStyle.None;
+            Add(negationButton);
+
+            typeDropdown = new TooltipPopupField(
+                RuleTooltips.ConditionOptions(availableTypes),
+                SelectConditionLabel,
+                "Choose a condition that must be true.",
+                RuleDropdownPalette.Condition)
+            {
+                style = { width = 130 }
+            };
+            typeDropdown.AddToClassList("button-condition");
+            typeDropdown.AddToClassList("rule-selector-dropdown");
+            typeDropdown.style.flexShrink = 0;
+            typeDropdown.RegisterValueChangedCallback(newValue =>
+            {
+                if (!availableTypes.Contains(newValue)) return;
+                if (!string.IsNullOrEmpty(selectedConditionType) &&
+                    BeforeTypeChange != null && !BeforeTypeChange(selectedConditionType, newValue))
                 {
-                    isNegated = !isNegated;
-                    UpdateNegationIcon();
                     typeDropdown.SetValueWithoutNotify(selectedConditionType);
-                    OnChanged?.Invoke();
                     return;
                 }
-
-                selectedConditionType = evt.newValue;
-                UpdateParameterFields(true);
+                selectedConditionType = newValue;
+                UpdateNegationVisual();
+                UpdateParameterFields();
             });
             Add(typeDropdown);
 
-            parametersContainer = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, alignItems = Align.Center } };
-            parametersContainer.style.flexShrink = 0;
+            parametersContainer = new VisualElement
+            {
+                style = {
+                    flexDirection = detailsMode ? FlexDirection.Column : FlexDirection.Row,
+                    flexGrow = 1,
+                    alignItems = detailsMode ? Align.Stretch : Align.Center
+                }
+            };
+            parametersContainer.style.flexShrink = detailsMode ? 1 : 0;
+            if (detailsMode) parametersContainer.style.minWidth = 0;
             Add(parametersContainer);
+            Add(new VisualElement { style = { flexGrow = 1 } });
 
-            Add(new VisualElement() { style = { flexGrow = 1 } });
-            var removeBtn = new Button(() => OnRemove?.Invoke()) { text = string.Empty };
-            removeBtn.AddToClassList("button-danger");
-            removeBtn.style.width = 28;
-            removeBtn.style.height = 26;
+            var removeButton = new Button(() => OnRemove?.Invoke())
+            {
+                text = "×",
+                tooltip = "Remove Condition"
+            };
+            removeButton.AddToClassList("button-danger");
+            removeButton.AddToClassList("button-danger-icon");
+            if (detailsMode) removeButton.style.display = DisplayStyle.None;
+            Add(removeButton);
 
-            var trashImage = new Image();
-            trashImage.image = EditorGUIUtility.IconContent("TreeEditor.Trash").image;
-            trashImage.style.width = 16;
-            trashImage.style.height = 16;
-            trashImage.style.alignSelf = Align.Center;
-            trashImage.style.unityBackgroundImageTintColor = Color.white;
-            removeBtn.Add(trashImage);
-
-            Add(removeBtn);
-
-            UpdateNegationIcon();
+            UpdateNegationVisual();
             UpdateParameterFields(false);
         }
 
@@ -105,121 +148,444 @@ namespace GameRuleEditor.CustomControls
         public void SetNegated(bool negated)
         {
             isNegated = negated;
-            UpdateNegationIcon();
+            UpdateNegationVisual();
         }
 
-        private void UpdateNegationIcon()
+        private void UpdateNegationVisual()
         {
-            negationIcon.style.display = isNegated ? DisplayStyle.Flex : DisplayStyle.None;
+            bool hasCondition = !string.IsNullOrEmpty(selectedConditionType);
+            bool showAsNegated = hasCondition && isNegated;
+            negationButton.SetEnabled(hasCondition);
+            negationButton.EnableInClassList("button-negation--active", showAsNegated);
+            EnableInClassList("condition-negated", showAsNegated);
         }
 
         public void SetFromSource(string token)
         {
             var result = GameRuleParser.ParseFunction(token);
-            if (availableTypes.Contains(result.Name))
-            {
-                selectedConditionType = result.Name;
-                typeDropdown.SetValueWithoutNotify(result.Name);
-                UpdateParameterFields(false);
-                FillFieldsFromParams(result.Name, result.Params);
-            }
+            if (!availableTypes.Contains(result.Name)) return;
+            selectedConditionType = result.Name;
+            typeDropdown.SetValueWithoutNotify(result.Name);
+            UpdateNegationVisual();
+            UpdateParameterFields(false);
+            FillFieldsFromParams(result.Name, result.Params);
         }
 
         private void UpdateParameterFields(bool notifyChange = true)
         {
+            CloseKeyboardMenu();
             parametersContainer.Clear();
             inputElements.Clear();
-            string type = selectedConditionType;
+            selfReferenceFields.Clear();
+            compareLeftOperand = null;
+            compareRightOperand = null;
+            compareOperatorDropdown = null;
+            keyboardKeyButton = null;
+            checkPropertyButton = null;
+            selectedKeyboardKey = null;
+            checkPropertyValue = null;
 
-            switch (type)
+            switch (selectedConditionType)
             {
                 case "Compare":
-                    AddParameterField("Value 1", true, false);
-                    var operators = new List<string> { "<", "<=", "==", "!=", ">=", ">" };
-                    var opDropdown = new PopupField<string>(operators, 0) { style = { width = 45 } };
-                    opDropdown.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(opDropdown); inputElements.Add(opDropdown);
-                    AddParameterField("Value 2", true, false);
+                    AddCompareFields();
                     break;
-
-                case "Check": AddParameterField("Boolean Var", true, true); break;
-
+                case "Check":
+                    AddPropertyField("Boolean Property", true);
+                    break;
                 case "Collision":
-                    // Start with Unity tags
-                    HashSet<string> allTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
-
-                    // Add tags from current project actors
-                    if (context?.currentProject?.actors != null)
-                    {
-                        foreach (var actor in context.currentProject.actors)
-                        {
-                            if (!string.IsNullOrEmpty(actor.Tag)) allTags.Add(actor.Tag);
-                        }
-                    }
-
-                    var sortedTags = allTags.ToList();
-                    sortedTags.Sort();
-
-                    var tagDrop = new PopupField<string>(sortedTags, 0) { style = { flexGrow = 1 } };
-                    tagDrop.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(tagDrop); inputElements.Add(tagDrop);
+                    var projectTags = Loader.GetProjectTags(context?.currentProject?.actors);
+                    var tagContainer = CreateInlineParameter("Tag");
+                    var tagDropdown = new TooltipPopupField(
+                        projectTags.OrderBy(tag => tag, System.StringComparer.OrdinalIgnoreCase)
+                            .Select(tag => new TooltipDropdownOption(tag, tag,
+                            "Match actors with the " + tag + " tag.")),
+                        projectTags[0], RuleTooltips.Parameter("Collision", "Tag"),
+                        detailsMode ? RuleDropdownPalette.Property : RuleDropdownPalette.Condition);
+                    tagDropdown.AddToClassList("collision-tag-dropdown");
+                    tagDropdown.AddToClassList("parameter-selector");
+                    tagDropdown.AddToClassList("button-condition");
+                    tagDropdown.AddToClassList("rule-selector-dropdown");
+                    tagDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+                    AddParameterControl(tagContainer, tagDropdown);
+                    parametersContainer.Add(tagContainer);
+                    inputElements.Add(tagDropdown);
                     break;
-
-                case "Timer": AddParameterField("Seconds"); break;
-
+                case "Timer":
+                    AddNumericField("Seconds", 0f, true);
+                    break;
                 case "Touch":
                     var touchModes = new List<string> { "press", "down", "up", "tap", "isOver" };
-                    var tMode = new PopupField<string>(touchModes, 0) { style = { width = 70 } };
-                    tMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(tMode); inputElements.Add(tMode);
-
-                    var onActorToggle = new Toggle("On Actor");
+                    var touchEventContainer = CreateInlineParameter("Event");
+                    var touchMode = CreateEventDropdown("Touch", touchModes, 92);
+                    touchMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+                    AddParameterControl(touchEventContainer, touchMode);
+                    parametersContainer.Add(touchEventContainer);
+                    inputElements.Add(touchMode);
+                    var onActorToggle = detailsMode ? new Toggle() : new Toggle("On This Actor");
+                    onActorToggle.tooltip = RuleTooltips.Parameter("Touch", "On This Actor");
                     onActorToggle.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(onActorToggle); inputElements.Add(onActorToggle);
+                    if (detailsMode)
+                    {
+                        onActorToggle.AddToClassList("detail-parameter-toggle");
+                        var actorRow = CreateInlineParameter("On This Actor");
+                        AddParameterControl(actorRow, onActorToggle);
+                        parametersContainer.Add(actorRow);
+                    }
+                    else parametersContainer.Add(onActorToggle);
+                    inputElements.Add(onActorToggle);
                     break;
-
                 case "Keyboard":
-                    AddParameterField("Key (e.g. Space)");
-                    var keyModes = new List<string> { "press", "down", "up" };
-                    var kMode = new PopupField<string>(keyModes, 0) { style = { width = 70 } };
-                    kMode.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-                    parametersContainer.Add(kMode); inputElements.Add(kMode);
+                    AddKeyboardFields();
                     break;
             }
+
             if (notifyChange) OnChanged?.Invoke();
         }
 
-        private void AddParameterField(string placeholder, bool showPicker = false, bool boolOnly = false)
+        private void AddCompareFields()
         {
-            var container = new VisualElement() { style = { flexDirection = FlexDirection.Row, flexGrow = 1, marginRight = 3, minWidth = 140, alignItems = Align.Center } };
-            container.style.flexShrink = 0;
+            compareLeftOperand = new ExpressionOperandControl(context, "Property 1", detailsMode);
+            compareLeftOperand.Changed += () => OnChanged?.Invoke();
+            parametersContainer.Add(compareLeftOperand);
 
-            container.Add(CreateFieldTag(placeholder));
-
-            var field = new TextField() { style = { flexGrow = 1, minWidth = 110 } };
-            field.style.flexShrink = 0;
-            field.isReadOnly = false;
-            field.RegisterValueChangedCallback(evt => OnChanged?.Invoke());
-            container.Add(field);
-
-            if (showPicker)
+            compareOperatorDropdown = new TooltipPopupField(
+                RuleTooltips.ComparisonOptions(),
+                "<",
+                "Choose how Property 1 is compared with Property 2.",
+                RuleDropdownPalette.Number);
+            compareOperatorDropdown.AddToClassList("button-number-picker");
+            compareOperatorDropdown.AddToClassList("rule-selector-dropdown");
+            compareOperatorDropdown.AddToClassList("compare-operator-dropdown");
+            compareOperatorDropdown.AddToClassList("parameter-selector");
+            compareOperatorDropdown.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+            var operatorContainer = new VisualElement();
+            operatorContainer.AddToClassList("compare-operator-container");
+            if (detailsMode)
             {
-                var pickBtn = CreatePickerButton(() =>
-                {
-                    GameRuleEditor.Windows.PropertyPickerDialog.Show(context, (picked) => { field.value = picked; OnChanged?.Invoke(); }, boolOnly);
-                });
-                container.Add(pickBtn);
+                operatorContainer.AddToClassList("detail-comparison-operator");
+                operatorContainer.style.alignSelf = Align.FlexStart;
+                operatorContainer.style.justifyContent = Justify.Center;
+                operatorContainer.style.paddingBottom = 0;
+                operatorContainer.style.marginTop = 6;
+                operatorContainer.style.marginBottom = 6;
             }
-            parametersContainer.Add(container); inputElements.Add(field);
+            operatorContainer.Add(compareOperatorDropdown);
+            parametersContainer.Add(operatorContainer);
+
+            compareRightOperand = new ExpressionOperandControl(context, "Property 2", detailsMode);
+            compareRightOperand.Changed += () => OnChanged?.Invoke();
+            parametersContainer.Add(compareRightOperand);
+        }
+
+        private void AddKeyboardFields()
+        {
+            var keyContainer = CreateInlineParameter("Key");
+            keyboardKeyButton = new Button(ShowKeyboardMenu);
+            keyboardKeyButton.AddToClassList("keyboard-key-picker");
+            keyboardKeyButton.AddToClassList("parameter-selector");
+            keyboardKeyButton.AddToClassList("tooltip-popup-field");
+            keyboardKeyButton.AddToClassList("button-condition");
+            keyboardKeyButton.AddToClassList("rule-selector-dropdown");
+            UpdateKeyboardButton();
+            AddParameterControl(keyContainer, keyboardKeyButton);
+            parametersContainer.Add(keyContainer);
+
+            var eventContainer = CreateInlineParameter("Event");
+            var keyMode = CreateEventDropdown("Keyboard", new List<string> { "press", "down", "up" }, 130);
+            keyMode.RegisterValueChangedCallback(_ => OnChanged?.Invoke());
+            AddParameterControl(eventContainer, keyMode);
+            parametersContainer.Add(eventContainer);
+            inputElements.Add(keyMode);
+        }
+
+        private void ShowKeyboardMenu()
+        {
+            CloseKeyboardMenu();
+            VisualElement root = this;
+            VisualElement styledRoot = null;
+            for (VisualElement current = this; current != null; current = current.parent)
+            {
+                root = current;
+                if (current.styleSheets.count > 0) styledRoot = current;
+            }
+            if (styledRoot != null) root = styledRoot;
+
+            keyboardMenuOverlay = new VisualElement { focusable = true };
+            keyboardMenuOverlay.AddToClassList("tooltip-dropdown-overlay");
+            keyboardMenuOverlay.style.position = Position.Absolute;
+            keyboardMenuOverlay.style.left = 0;
+            keyboardMenuOverlay.style.top = 0;
+            keyboardMenuOverlay.style.right = 0;
+            keyboardMenuOverlay.style.bottom = 0;
+            keyboardMenuOverlay.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.target == keyboardMenuOverlay) CloseKeyboardMenu();
+            });
+            keyboardMenuOverlay.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Escape) CloseKeyboardMenu();
+            });
+
+            keyboardMenu = new VisualElement();
+            keyboardMenu.AddToClassList("tooltip-dropdown-menu");
+            keyboardMenu.style.position = Position.Absolute;
+            keyboardMenuOverlay.Add(keyboardMenu);
+            root.Add(keyboardMenuOverlay);
+            keyboardMenuOverlay.BringToFront();
+            ShowKeyboardGroup(null);
+            keyboardMenuOverlay.Focus();
+            TooltipPopupField.DismissWhenFocusLeaves(keyboardMenuOverlay, CloseKeyboardMenu);
+        }
+
+        private void ShowKeyboardGroup(string groupName)
+        {
+            if (keyboardMenu == null || keyboardKeyButton == null) return;
+            keyboardMenu.Clear();
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.style.flexGrow = 1;
+            var groups = GetKeyboardGroups();
+            string[] groupOrder = { "Letters", "Numbers", "Arrows", "Other" };
+            int itemCount = groupName == null ? groupOrder.Length : groups[groupName].Count + 1;
+
+            if (groupName == null)
+            {
+                foreach (string group in groupOrder)
+                {
+                    string selectedGroup = group;
+                    AddKeyboardMenuItem(scroll, group + "  ▸", () => ShowKeyboardGroup(selectedGroup));
+                }
+            }
+            else
+            {
+                AddKeyboardMenuItem(scroll, "‹  Groups", () => ShowKeyboardGroup(null));
+                foreach (string keyName in groups[groupName])
+                {
+                    string selectedKey = keyName;
+                    string label = FormatKeyName(keyName);
+                    if (string.Equals(selectedKeyboardKey, keyName, StringComparison.OrdinalIgnoreCase))
+                        label = "✓  " + label;
+                    AddKeyboardMenuItem(scroll, label, () =>
+                    {
+                        CloseKeyboardMenu();
+                        SetKeyboardKey(selectedKey);
+                    });
+                }
+            }
+
+            keyboardMenu.Add(scroll);
+            VisualElement root = keyboardMenuOverlay.parent;
+            Vector2 anchorPosition = root.WorldToLocal(keyboardKeyButton.worldBound.position);
+            Rect anchor = new Rect(anchorPosition, keyboardKeyButton.worldBound.size);
+            float rootWidth = root.resolvedStyle.width;
+            float rootHeight = root.resolvedStyle.height;
+            if (float.IsNaN(rootWidth) || rootWidth <= 0f) rootWidth = root.worldBound.width;
+            if (float.IsNaN(rootHeight) || rootHeight <= 0f) rootHeight = root.worldBound.height;
+            float menuWidth = Mathf.Min(190f, Mathf.Max(100f, rootWidth - 8f));
+            float menuHeight = Mathf.Min(itemCount * 29f + 8f, Mathf.Max(38f, rootHeight - 8f), 340f);
+            const float gap = 3f;
+            float x = Mathf.Clamp(anchor.xMin, 4f, Mathf.Max(4f, rootWidth - menuWidth - 4f));
+            float y = anchor.yMax + gap;
+            if (y + menuHeight > rootHeight - 4f) y = anchor.yMin - menuHeight - gap;
+            y = Mathf.Clamp(y, 4f, Mathf.Max(4f, rootHeight - menuHeight - 4f));
+            keyboardMenu.style.left = x;
+            keyboardMenu.style.top = y;
+            keyboardMenu.style.width = menuWidth;
+            keyboardMenu.style.height = menuHeight;
+        }
+
+        private void AddKeyboardMenuItem(VisualElement parent, string label, System.Action onClick)
+        {
+            var button = new Button(onClick) { text = label };
+            button.AddToClassList(detailsMode ? "button-property-picker" : "button-condition");
+            button.AddToClassList("tooltip-dropdown-option");
+            parent.Add(button);
+        }
+
+        private void CloseKeyboardMenu()
+        {
+            keyboardMenuOverlay?.RemoveFromHierarchy();
+            keyboardMenuOverlay = null;
+            keyboardMenu = null;
+        }
+
+        private void SetKeyboardKey(string keyName)
+        {
+            selectedKeyboardKey = keyName;
+            UpdateKeyboardButton();
+            OnChanged?.Invoke();
+        }
+
+        private void UpdateKeyboardButton()
+        {
+            if (keyboardKeyButton == null) return;
+            keyboardKeyButton.text = string.IsNullOrEmpty(selectedKeyboardKey)
+                ? PickKeyLabel + "  ▾"
+                : FormatKeyName(selectedKeyboardKey) + "  ▾";
+            keyboardKeyButton.tooltip = string.IsNullOrEmpty(selectedKeyboardKey)
+                ? "Choose a keyboard key"
+                : FormatKeyName(selectedKeyboardKey);
+        }
+
+        private static Dictionary<string, List<string>> GetKeyboardGroups()
+        {
+            var groups = new Dictionary<string, List<string>>
+            {
+                { "Letters", new List<string>() },
+                { "Numbers", new List<string>() },
+                { "Arrows", new List<string>() },
+                { "Other", new List<string>() }
+            };
+            var modifiers = new List<string>();
+
+            foreach (string keyName in Enum.GetNames(typeof(Key)))
+            {
+                if (keyName == nameof(Key.None) || keyName == "IMESelected") continue;
+                string groupName = GetKeyboardGroup(keyName);
+                if (groupName == "Modifiers") modifiers.Add(keyName);
+                else if (!string.IsNullOrEmpty(groupName)) groups[groupName].Add(keyName);
+            }
+            groups["Other"].AddRange(modifiers);
+
+            return groups;
+        }
+
+        private static string GetKeyboardGroup(string keyName)
+        {
+            if (Regex.IsMatch(keyName, @"^[A-Z]$")) return "Letters";
+            if (Regex.IsMatch(keyName, @"^Digit[0-9]$")) return "Numbers";
+            if (keyName == nameof(Key.LeftArrow) || keyName == nameof(Key.RightArrow) ||
+                keyName == nameof(Key.UpArrow) || keyName == nameof(Key.DownArrow)) return "Arrows";
+            if (keyName == "LeftShift" || keyName == "RightShift" ||
+                keyName == "LeftCtrl" || keyName == "RightCtrl" ||
+                keyName == "LeftAlt" || keyName == "RightAlt") return "Modifiers";
+            if (keyName == "Space" || keyName == "Enter" || keyName == "Escape" ||
+                keyName == "Tab" || keyName == "Backspace" || keyName == "Delete") return "Other";
+            return null;
+        }
+
+        internal static string FormatKeyName(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value == PickKeyLabel) return PickKeyLabel;
+            if (Regex.IsMatch(value, @"^Digit[0-9]$", RegexOptions.IgnoreCase))
+                return value.Substring(value.Length - 1);
+            string spaced = Regex.Replace(value, @"([a-z0-9])([A-Z])", "$1 $2");
+            return spaced;
+        }
+
+        private TooltipPopupField CreateEventDropdown(string conditionType, List<string> choices, float width)
+        {
+            var dropdown = new TooltipPopupField(
+                RuleTooltips.EventOptions(conditionType, choices),
+                choices[0],
+                RuleTooltips.Parameter(conditionType, "Event"),
+                detailsMode ? RuleDropdownPalette.Property : RuleDropdownPalette.Condition)
+            {
+                style = { width = width }
+            };
+            dropdown.AddToClassList("button-condition");
+            dropdown.AddToClassList("rule-selector-dropdown");
+            dropdown.AddToClassList("parameter-selector");
+            return dropdown;
+        }
+
+        private VisualElement CreateInlineParameter(string label)
+        {
+            var container = new VisualElement
+            {
+                style = { flexDirection = FlexDirection.Row, alignItems = Align.Center, marginRight = 3 }
+            };
+            container.style.alignSelf = Align.FlexStart;
+            container.style.flexShrink = 0;
+            if (detailsMode)
+            {
+                container.style.alignSelf = Align.Stretch;
+                container.AddToClassList("detail-parameter-row");
+            }
+            container.Add(CreateFieldTag(label));
+            return container;
+        }
+
+        private void AddParameterControl(VisualElement row, VisualElement control)
+        {
+            row.Add(detailsMode ? CompactRuleValue.WrapParameter(control) : control);
+        }
+
+        internal static string FormatEventName(string value)
+        {
+            return string.IsNullOrEmpty(value)
+                ? value
+                : char.ToUpperInvariant(value[0]) + value.Substring(1);
+        }
+
+        private void AddPropertyField(string label, bool boolOnly)
+        {
+            var container = new VisualElement
+            {
+                style = { flexDirection = FlexDirection.Row, marginRight = 3, alignItems = Align.Center }
+            };
+            container.style.flexShrink = 0;
+            if (detailsMode) container.AddToClassList("detail-parameter-row");
+            container.Add(CreateFieldTag(label));
+
+            checkPropertyButton = null;
+            checkPropertyButton = new Button(() =>
+            {
+                GameRuleEditor.Windows.PropertyPickerDialog.Show(context, picked =>
+                {
+                    checkPropertyValue = picked;
+                    UpdateCheckPropertyButton();
+                    OnChanged?.Invoke();
+                }, boolOnly, anchorScreenRect:
+                    GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(checkPropertyButton));
+            });
+            checkPropertyButton.AddToClassList("compare-property-term");
+            checkPropertyButton.AddToClassList("check-property-field");
+            UpdateCheckPropertyButton();
+            AddParameterControl(container, checkPropertyButton);
+            parametersContainer.Add(container);
+        }
+
+        private void UpdateCheckPropertyButton()
+        {
+            if (checkPropertyButton == null) return;
+            bool hasValue = !string.IsNullOrWhiteSpace(checkPropertyValue);
+            string displayValue = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, checkPropertyValue);
+            checkPropertyButton.text = detailsMode
+                ? (hasValue ? displayValue : "Select property") + "  ▾"
+                : hasValue ? displayValue : "Pick Property";
+            checkPropertyButton.tooltip = hasValue ? displayValue : "Choose a Boolean property";
+        }
+
+        private void AddNumericField(string label, float initialValue, bool clampToZero)
+        {
+            var container = new VisualElement
+            {
+                style = { flexDirection = FlexDirection.Row, marginRight = 3, minWidth = 190, alignItems = Align.Center }
+            };
+            container.style.flexShrink = 0;
+            if (detailsMode)
+            {
+                container.style.minWidth = 0;
+                container.AddToClassList("detail-parameter-row");
+            }
+            VisualElement fieldTag = CreateFieldTag(label);
+            container.Add(fieldTag);
+            var stepper = new NumericStepper(initialValue, clampToZero ? 0f : (float?)null);
+            stepper.Changed += () => OnChanged?.Invoke();
+            AddParameterControl(container, stepper);
+            parametersContainer.Add(container);
+            inputElements.Add(stepper);
         }
 
         private VisualElement CreateFieldTag(string text)
         {
             var tag = new Label(text);
+            tag.tooltip = RuleTooltips.Parameter(selectedConditionType, text);
             tag.style.fontSize = 9;
             tag.style.unityFontStyleAndWeight = FontStyle.Bold;
-            tag.style.color = new Color(0.85f, 0.85f, 0.85f);
-            tag.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+            tag.style.color = GameRuleTheme.Text;
+            tag.style.backgroundColor = GameRuleTheme.Surface;
             tag.style.borderTopLeftRadius = 3;
             tag.style.borderTopRightRadius = 3;
             tag.style.borderBottomLeftRadius = 3;
@@ -231,85 +597,698 @@ namespace GameRuleEditor.CustomControls
             tag.style.marginRight = 4;
             tag.style.minWidth = 62;
             tag.style.unityTextAlign = TextAnchor.MiddleCenter;
+            if (detailsMode) CompactRuleValue.AlignLabel(tag);
             return tag;
         }
 
-        private Button CreatePickerButton(System.Action onClick)
+        private Button CreatePickerButton(System.Action<Rect> onClick)
         {
-            var pickBtn = new Button(onClick) { text = "" };
-            pickBtn.AddToClassList(ObjectField.selectorUssClassName);
-            pickBtn.style.width = 20;
-            pickBtn.style.height = 20;
-            pickBtn.style.marginLeft = 2;
-            pickBtn.style.flexShrink = 0;
-
-            var selectorImage = new VisualElement();
-            selectorImage.AddToClassList("unity-object-field__selector-image");
-            pickBtn.Add(selectorImage);
-            pickBtn.tooltip = "Pick value";
-
-            return pickBtn;
+            Button button = null;
+            button = new Button(() => onClick?.Invoke(
+                GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(button))) { text = "Pick Property" };
+            button.AddToClassList("button-property-picker");
+            button.style.width = 100;
+            button.style.minWidth = 100;
+            button.style.height = 22;
+            button.style.marginLeft = 2;
+            button.style.flexShrink = 0;
+            button.tooltip = "Pick Property";
+            return button;
         }
 
-        /// <summary>
-        /// Drops comparison operators stuck to the edges of an operand. An operand never legitimately
-        /// starts or ends with one; they only appear in rules saved while the split was going wrong.
-        /// </summary>
         private static string StripOperators(string operand)
         {
             return operand.Trim().Trim('<', '>', '=', '!').Trim();
         }
 
-        private void FillFieldsFromParams(string type, List<string> p)
+        private void FillFieldsFromParams(string type, List<string> parameters)
         {
-            if (p == null || p.Count == 0) return;
+            if (parameters == null || parameters.Count == 0) return;
+
             if (type == "Compare")
             {
-                string fullExpr = p[0];
-
-                // Both operands are optional: a half-written rule reads "this.Health <" (or just "<"),
-                // and requiring text on either side made the whole string fall into Value 1, which
-                // then duplicated the operator on every rebuild.
-                var match = Regex.Match(fullExpr, @"^(.*?)\s*(<=|>=|==|!=|<|>)\s*(.*)$");
-                if (match.Success) { ((TextField)inputElements[0]).value = StripOperators(match.Groups[1].Value); ((PopupField<string>)inputElements[1]).value = match.Groups[2].Value.Trim(); ((TextField)inputElements[2]).value = StripOperators(match.Groups[3].Value); }
-                else { ((TextField)inputElements[0]).value = fullExpr; }
-            }
-            else if (type == "Touch")
-            {
-                if (inputElements.Count >= 2) { ((PopupField<string>)inputElements[0]).value = p.Count > 0 ? p[0] : "press"; if (p.Count > 1 && bool.TryParse(p[1], out bool b)) ((Toggle)inputElements[1]).value = b; }
-            }
-            else
-            {
-                int paramIdx = 0;
-                for (int i = 0; i < inputElements.Count && paramIdx < p.Count; i++)
+                string fullExpression = parameters[0];
+                var match = Regex.Match(fullExpression, @"^(.*?)\s*(<=|>=|==|!=|<|>)\s*(.*)$");
+                if (match.Success)
                 {
-                    if (inputElements[i] is TextField tf) tf.value = p[paramIdx++];
-                    else if (inputElements[i] is PopupField<string> pf && pf.choices.Contains(p[paramIdx])) pf.value = p[paramIdx++];
-                    else if (inputElements[i] is Toggle tg && bool.TryParse(p[paramIdx], out bool b)) { tg.value = b; paramIdx++; }
+                    compareLeftOperand.SetExpression(StripOperators(match.Groups[1].Value));
+                    compareOperatorDropdown.SetValueWithoutNotify(match.Groups[2].Value.Trim());
+                    compareRightOperand.SetExpression(StripOperators(match.Groups[3].Value));
                 }
+                else compareLeftOperand.SetExpression(fullExpression);
+                return;
+            }
+
+            if (type == "Touch")
+            {
+                if (inputElements.Count >= 2)
+                {
+                    var eventDropdown = (TooltipPopupField)inputElements[0];
+                    if (parameters.Count > 0 && eventDropdown.ContainsOption(parameters[0]))
+                        eventDropdown.SetValueWithoutNotify(parameters[0]);
+                    if (parameters.Count > 1 && bool.TryParse(parameters[1], out bool onActor))
+                        ((Toggle)inputElements[1]).SetValueWithoutNotify(onActor);
+                }
+                return;
+            }
+
+            if (type == "Check")
+            {
+                checkPropertyValue = parameters[0];
+                UpdateCheckPropertyButton();
+                return;
+            }
+
+            if (type == "Keyboard")
+            {
+                if (parameters.Count > 0)
+                {
+                    foreach (string keyName in Enum.GetNames(typeof(Key)))
+                    {
+                        if (!string.Equals(keyName, parameters[0], StringComparison.OrdinalIgnoreCase)) continue;
+                        selectedKeyboardKey = keyName;
+                        break;
+                    }
+                    UpdateKeyboardButton();
+                }
+                if (parameters.Count > 1)
+                {
+                    var eventDropdown = (TooltipPopupField)inputElements[0];
+                    if (eventDropdown.ContainsOption(parameters[1]))
+                        eventDropdown.SetValueWithoutNotify(parameters[1]);
+                }
+                return;
+            }
+
+            int parameterIndex = 0;
+            for (int i = 0; i < inputElements.Count && parameterIndex < parameters.Count; i++)
+            {
+                if (inputElements[i] is TextField textField)
+                {
+                    string value = parameters[parameterIndex++];
+                    textField.SetValueWithoutNotify(selfReferenceFields.Contains(textField)
+                        ? GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, value)
+                        : value);
+                }
+                else if (inputElements[i] is NumericStepper numberField)
+                    numberField.SetSerializedValue(parameters[parameterIndex++]);
+                else if (inputElements[i] is PopupField<string> popupField)
+                {
+                    string value = parameters[parameterIndex++];
+                    if (popupField.choices.Contains(value)) popupField.SetValueWithoutNotify(value);
+                }
+                else if (inputElements[i] is TooltipPopupField dropdown)
+                {
+                    string value = parameters[parameterIndex++];
+                    if (dropdown.ContainsOption(value)) dropdown.SetValueWithoutNotify(value);
+                }
+                else if (inputElements[i] is Toggle toggle &&
+                         bool.TryParse(parameters[parameterIndex++], out bool value))
+                    toggle.SetValueWithoutNotify(value);
             }
         }
 
         public string GetString()
         {
-            string type = selectedConditionType;
-            List<string> parts = new List<string>();
+            if (string.IsNullOrEmpty(selectedConditionType)) return string.Empty;
             string conditionText;
-
-            if (type == "Compare")
+            if (selectedConditionType == "Compare")
             {
-                string v1 = ((TextField)inputElements[0]).value; string op = ((PopupField<string>)inputElements[1]).value; string v2 = ((TextField)inputElements[2]).value;
-                conditionText = $"Compare({v1} {op} {v2})";
+                conditionText = GameRuleParser.FormatFunction("Compare", new[] {
+                    $"{compareLeftOperand.GetStoredExpression()} {compareOperatorDropdown.value} {compareRightOperand.GetStoredExpression()}" });
                 return isNegated ? $"NOT {conditionText}" : conditionText;
             }
-            foreach (var el in inputElements)
+
+            if (selectedConditionType == "Check")
             {
-                if (el is TextField tf) parts.Add(tf.value);
-                else if (el is PopupField<string> pf) parts.Add(pf.value);
-                else if (el is Toggle tg) parts.Add(tg.value.ToString().ToLower());
+                string storedValue = GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(
+                    context, checkPropertyValue ?? string.Empty);
+                conditionText = GameRuleParser.FormatFunction("Check", new[] { storedValue });
+                return isNegated ? $"NOT {conditionText}" : conditionText;
             }
-            conditionText = $"{type}({string.Join(",", parts)})";
+
+            if (selectedConditionType == "Keyboard")
+            {
+                string eventName = inputElements.Count > 0 && inputElements[0] is TooltipPopupField eventDropdown
+                    ? eventDropdown.value
+                    : string.Empty;
+                conditionText = GameRuleParser.FormatFunction("Keyboard", new[] { selectedKeyboardKey ?? string.Empty, eventName });
+                return isNegated ? $"NOT {conditionText}" : conditionText;
+            }
+
+            var parts = new List<string>();
+            foreach (VisualElement element in inputElements)
+            {
+                if (element is TextField textField)
+                    parts.Add(selfReferenceFields.Contains(textField)
+                        ? GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, textField.value)
+                        : textField.value);
+                else if (element is NumericStepper numberField)
+                    parts.Add(numberField.SerializedValue);
+                else if (element is PopupField<string> popupField)
+                    parts.Add(popupField.value);
+                else if (element is TooltipPopupField eventDropdown)
+                    parts.Add(eventDropdown.value);
+                else if (element is Toggle toggle)
+                    parts.Add(toggle.value.ToString().ToLowerInvariant());
+            }
+
+            conditionText = GameRuleParser.FormatFunction(selectedConditionType, parts);
             return isNegated ? $"NOT {conditionText}" : conditionText;
+        }
+
+        private sealed class NumericStepper : VisualElement
+        {
+            private readonly FloatField field;
+            private readonly float? minimum;
+            public System.Action Changed;
+            public string SerializedValue => FormatNumber(field.value);
+
+            public NumericStepper(float initialValue, float? minimum)
+            {
+                this.minimum = minimum;
+                AddToClassList("numeric-stepper");
+                style.flexDirection = FlexDirection.Row;
+                style.alignItems = Align.Center;
+                style.flexShrink = 0;
+
+
+                field = new FloatField();
+                field.AddToClassList("numeric-stepper-field");
+                CompactRuleValue.ConfigureNumberField(field);
+                field.SetValueWithoutNotify(Sanitize(initialValue));
+                field.RegisterValueChangedCallback(evt =>
+                {
+                    float sanitized = Sanitize(evt.newValue);
+                    if (sanitized != evt.newValue) field.SetValueWithoutNotify(sanitized);
+                    Changed?.Invoke();
+                });
+                Add(field);
+
+            }
+
+            public void SetSerializedValue(string serializedValue)
+            {
+                field.SetValueWithoutNotify(Sanitize(TryParseNumber(serializedValue, out float value) ? value : 0f));
+            }
+
+            private float Sanitize(float value)
+            {
+                if (float.IsNaN(value) || float.IsInfinity(value)) value = 0f;
+                if (minimum.HasValue) value = Mathf.Max(minimum.Value, value);
+                return (float)Math.Round(value, 2, MidpointRounding.AwayFromZero);
+            }
+
+            private static bool TryParseNumber(string text, out float value)
+            {
+                return float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) ||
+                       float.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out value);
+            }
+
+            private static string FormatNumber(float value)
+            {
+                return value.ToString("0.##", CultureInfo.InvariantCulture);
+            }
+        }
+
+        private sealed class ExpressionOperandControl : VisualElement
+        {
+            private const string PickValueLabel = "Pick Property / Number";
+            private const string PickPropertyChoice = "Pick Property";
+            private const string PickNumberChoice = "Pick Number";
+            private const string PickOperationLabel = "+ / −";
+
+            private enum TermKind { Property, Number, Legacy }
+            private sealed class ExpressionTerm
+            {
+                public string OperatorBefore;
+                public TermKind Kind;
+                public string Text;
+                public float Number;
+                public string NumberLiteral;
+            }
+
+            private readonly EditorContext context;
+            private readonly bool compactLayout;
+            private readonly List<ExpressionTerm> terms = new List<ExpressionTerm>();
+            private readonly VisualElement termsContainer;
+            private readonly TooltipPopupField valuePickerDropdown;
+            private readonly TooltipPopupField operationDropdown;
+            private string pendingOperator;
+            private bool lockedLegacyExpression;
+            private string originalExpression;
+            private bool suppressChanged;
+            public System.Action Changed;
+
+            public ExpressionOperandControl(EditorContext context, string label, bool compactLayout)
+            {
+                this.context = context;
+                this.compactLayout = compactLayout;
+                AddToClassList(compactLayout ? "compact-compare-operand" : "compare-operand");
+                style.flexGrow = compactLayout ? 0 : 1;
+                style.minWidth = compactLayout ? 0 : 300;
+                style.flexDirection = compactLayout ? FlexDirection.Row : FlexDirection.Column;
+                if (compactLayout) AddToClassList("detail-parameter-row");
+
+                var toolbar = new VisualElement();
+                toolbar.AddToClassList("compare-operand-toolbar");
+                if (compactLayout)
+                {
+                    toolbar.style.flexDirection = FlexDirection.Column;
+                    toolbar.style.alignItems = Align.Stretch;
+                    toolbar.style.height = StyleKeyword.Auto;
+                }
+                var fieldTag = new Label(label);
+                fieldTag.AddToClassList("compare-operand-label");
+                fieldTag.tooltip = RuleTooltips.Parameter("Compare", label);
+                if (compactLayout) CompactRuleValue.AlignLabel(fieldTag);
+                toolbar.Add(fieldTag);
+
+                var pickerRow = compactLayout ? new VisualElement() : toolbar;
+                if (compactLayout)
+                {
+                    pickerRow.AddToClassList("compare-compact-picker-row");
+                    toolbar.Add(pickerRow);
+                }
+
+                valuePickerDropdown = new TooltipPopupField(
+                    RuleTooltips.ValueSourceOptions(),
+                    PickValueLabel,
+                    "Choose a property or a number.",
+                    RuleDropdownPalette.Property);
+                valuePickerDropdown.AddToClassList("button-property-picker");
+                valuePickerDropdown.AddToClassList("rule-selector-dropdown");
+                valuePickerDropdown.AddToClassList("compare-value-picker");
+                valuePickerDropdown.AddToClassList("parameter-selector");
+                valuePickerDropdown.RegisterValueChangedCallback(choice =>
+                {
+                    valuePickerDropdown.SetValueWithoutNotify(PickValueLabel);
+                    if (choice == PickPropertyChoice)
+                    {
+                        PickProperty(GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(valuePickerDropdown));
+                    }
+                    else if (choice == PickNumberChoice)
+                    {
+                        ApplyPickedTerm(new ExpressionTerm { Kind = TermKind.Number, Number = 0f });
+                    }
+                });
+                pickerRow.Add(valuePickerDropdown);
+
+                operationDropdown = new TooltipPopupField(
+                    RuleTooltips.ArithmeticOptions(),
+                    PickOperationLabel,
+                    "Add or subtract one more property or number.",
+                    RuleDropdownPalette.Number);
+                operationDropdown.AddToClassList("button-number-picker");
+                operationDropdown.AddToClassList("rule-selector-dropdown");
+                operationDropdown.AddToClassList("compare-operation-dropdown");
+                operationDropdown.AddToClassList("parameter-selector");
+                operationDropdown.RegisterValueChangedCallback(newValue =>
+                {
+                    if (terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression)
+                    {
+                        pendingOperator = newValue;
+                        operationDropdown.SetValueWithoutNotify(PickOperationLabel);
+                        RebuildTerms();
+                    }
+                    else operationDropdown.SetValueWithoutNotify(PickOperationLabel);
+                });
+                pickerRow.Add(operationDropdown);
+                if (compactLayout) Add(fieldTag);
+                else Add(toolbar);
+
+                termsContainer = new VisualElement();
+                termsContainer.AddToClassList(compactLayout ? "compact-compare-values" : "compare-terms");
+                Add(compactLayout ? CompactRuleValue.WrapParameter(termsContainer) : termsContainer);
+                RebuildTerms();
+            }
+
+            public void SetExpression(string expression)
+            {
+                suppressChanged = true;
+                terms.Clear();
+                pendingOperator = null;
+                lockedLegacyExpression = false;
+                originalExpression = expression;
+                ParseExpression(expression);
+                RebuildTerms();
+                suppressChanged = false;
+            }
+
+            public string GetStoredExpression()
+            {
+                if (compactLayout && originalExpression != null) return originalExpression;
+                var result = new StringBuilder();
+                for (int i = 0; i < terms.Count; i++)
+                {
+                    ExpressionTerm term = terms[i];
+                    if (i > 0) result.Append(' ').Append(term.OperatorBefore).Append(' ');
+                    if (term.Kind == TermKind.Number)
+                        result.Append((compactLayout ? term.NumberLiteral : null) ?? term.Number.ToString("0.##", CultureInfo.InvariantCulture));
+                    else
+                        result.Append(GameRuleEditor.Windows.PropertyPickerDialog.ToStoredReference(context, term.Text));
+                }
+                return result.ToString();
+            }
+
+            private void PickProperty(Rect anchor)
+            {
+                GameRuleEditor.Windows.PropertyPickerDialog.Show(context, picked =>
+                {
+                    ApplyPickedTerm(new ExpressionTerm
+                    {
+                        Kind = TermKind.Property,
+                        Text = picked
+                    });
+                }, false, anchorScreenRect: anchor);
+            }
+
+            private void ReplaceProperty(int index, Rect anchor)
+            {
+                GameRuleEditor.Windows.PropertyPickerDialog.Show(context, picked =>
+                {
+                    if (index < 0 || index >= terms.Count) return;
+                    string operatorBefore = terms[index].OperatorBefore;
+                    terms[index] = new ExpressionTerm
+                    {
+                        OperatorBefore = operatorBefore,
+                        Kind = TermKind.Property,
+                        Text = picked
+                    };
+                    lockedLegacyExpression = false;
+                    RebuildTermsAndNotify();
+                }, false, anchorScreenRect: anchor);
+            }
+
+            private void ApplyPickedTerm(ExpressionTerm pickedTerm)
+            {
+                lockedLegacyExpression = false;
+                if (pendingOperator != null && terms.Count == 1)
+                {
+                    pickedTerm.OperatorBefore = pendingOperator;
+                    terms.Add(pickedTerm);
+                    pendingOperator = null;
+                }
+                else if (terms.Count >= 2)
+                {
+                    pickedTerm.OperatorBefore = terms[1].OperatorBefore;
+                    terms[1] = pickedTerm;
+                }
+                else
+                {
+                    terms.Clear();
+                    pendingOperator = null;
+                    pickedTerm.OperatorBefore = null;
+                    terms.Add(pickedTerm);
+                }
+                RebuildTermsAndNotify();
+            }
+
+            private void RebuildTerms()
+            {
+                if (compactLayout)
+                {
+                    RebuildCompactExpression();
+                    return;
+                }
+                termsContainer.Clear();
+                var expressionContainer = new VisualElement();
+                expressionContainer.AddToClassList("compare-terms-content");
+                if (compactLayout)
+                {
+                    termsContainer.style.height = StyleKeyword.Auto;
+                    expressionContainer.style.height = StyleKeyword.Auto;
+                    expressionContainer.style.flexDirection = FlexDirection.Column;
+                    expressionContainer.style.alignItems = Align.FlexStart;
+                }
+                termsContainer.Add(expressionContainer);
+                bool canAddOperation = terms.Count == 1 && pendingOperator == null && !lockedLegacyExpression;
+                operationDropdown.SetEnabled(canAddOperation);
+                operationDropdown.tooltip = canAddOperation
+                    ? "Choose + or −, then pick the second property or number"
+                    : "Only one + or − operation is allowed";
+                valuePickerDropdown.tooltip = pendingOperator != null || terms.Count >= 2
+                    ? "Choose the second property or number"
+                    : "Choose or replace the property or number";
+
+                if (terms.Count == 0)
+                {
+                    var empty = new Label("Choose a property or number");
+                    empty.AddToClassList("compare-empty-expression");
+                    expressionContainer.Add(empty);
+                    return;
+                }
+
+                for (int i = 0; i < terms.Count; i++)
+                {
+                    int index = i;
+                    ExpressionTerm term = terms[i];
+                    var row = new VisualElement();
+                    row.AddToClassList("compare-term");
+                    if (compactLayout && i > 0) row.style.marginTop = 3;
+
+                    if (i > 0)
+                    {
+                        var operatorDropdown = new TooltipPopupField(
+                            RuleTooltips.ArithmeticOptions(),
+                            term.OperatorBefore == "-" ? "-" : "+",
+                            "Change this arithmetic operation.",
+                            RuleDropdownPalette.Number);
+                        operatorDropdown.AddToClassList("button-number-picker");
+                        operatorDropdown.AddToClassList("compare-term-operator");
+                        operatorDropdown.AddToClassList("parameter-selector");
+                        operatorDropdown.RegisterValueChangedCallback(newValue =>
+                        {
+                            term.OperatorBefore = newValue;
+                            NotifyChanged();
+                        });
+                        row.Add(operatorDropdown);
+                    }
+
+                    if (term.Kind == TermKind.Number)
+                    {
+                        var number = new NumericStepper(term.Number, null);
+                        number.Changed += () =>
+                        {
+                            if (float.TryParse(number.SerializedValue, NumberStyles.Float,
+                                    CultureInfo.InvariantCulture, out float parsed)) term.Number = parsed;
+                            term.NumberLiteral = null;
+                            NotifyChanged();
+                        };
+                        row.Add(number);
+                    }
+                    else if (term.Kind == TermKind.Property)
+                    {
+                        Button termButton = null;
+                        termButton = new Button(() => ReplaceProperty(index,
+                            GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(termButton)))
+                        {
+                            text = GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, term.Text),
+                            tooltip = "Click to replace this property"
+                        };
+                        termButton.AddToClassList("compare-property-term");
+                        row.Add(termButton);
+                    }
+                    else
+                    {
+                        var legacy = new Label(GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, term.Text));
+                        legacy.tooltip = "Existing expression. Replace it to edit it visually.";
+                        legacy.AddToClassList("compare-legacy-term");
+                        row.Add(legacy);
+                    }
+
+                    expressionContainer.Add(row);
+                }
+
+                if (pendingOperator != null)
+                {
+                    var pending = new Label(pendingOperator);
+                    pending.AddToClassList("button-number-picker");
+                    pending.AddToClassList("compare-term-operator");
+                    pending.AddToClassList("compare-pending-operator");
+                    pending.tooltip = "Now choose the second property or number";
+                    expressionContainer.Add(pending);
+                }
+
+                var remove = new Button(ClearExpression) { text = "×", tooltip = "Clear this expression" };
+                remove.AddToClassList("button-danger");
+                remove.AddToClassList("compare-remove-term");
+                termsContainer.Add(remove);
+            }
+
+            private void ClearExpression()
+            {
+                terms.Clear();
+                pendingOperator = null;
+                lockedLegacyExpression = false;
+                RebuildTermsAndNotify();
+            }
+
+            private void RebuildCompactExpression(int focusIndex = -1)
+            {
+                CompactRuleValue.RebuildExpression(termsContainer, terms.Count,
+                    terms.Count == 1 && !lockedLegacyExpression, index =>
+                    {
+                        var term = index < terms.Count ? terms[index] : null;
+                        bool isNumber = term?.Kind == TermKind.Number;
+                        var menu = CompactRuleValue.CreateMenu(isNumber ? null : GameRuleEditor.Windows.PropertyPickerDialog.ToDisplayReference(context, term?.Text), (choice, anchor) =>
+                        {
+                            if (choice == "Pick Property")
+                            {
+                                Rect screenRect = GameRuleEditor.Windows.PropertyPickerDialog.GetScreenRect(anchor);
+                                if (term == null) PickProperty(screenRect);
+                                else ReplaceProperty(index, screenRect);
+                            }
+                            else if (!isNumber)
+                            {
+                                ReplaceCompactTerm(index, new ExpressionTerm { Kind = TermKind.Number });
+                            }
+                        }, isNumber);
+                        if (!isNumber) return menu;
+
+                        var value = CompactRuleValue.CreateRow("compact-numeric-operand");
+                        var number = new NumericStepper(term.Number, null);
+                        number.Changed += () =>
+                        {
+                            if (float.TryParse(number.SerializedValue, NumberStyles.Float,
+                                    CultureInfo.InvariantCulture, out float parsed)) term.Number = parsed;
+                            term.NumberLiteral = null;
+                            NotifyChanged();
+                        };
+                        value.Add(number);
+                        value.Add(menu);
+                        if (index == focusIndex) CompactRuleValue.FocusNumber(number);
+                        return value;
+                    }, index => terms[index].OperatorBefore,
+                    (index, operation) =>
+                    {
+                        terms[index].OperatorBefore = operation;
+                        NotifyChanged();
+                    }, operation => ReplaceCompactTerm(terms.Count,
+                        new ExpressionTerm { Kind = TermKind.Number, OperatorBefore = operation }),
+                    ClearExpression);
+            }
+
+            private void ReplaceCompactTerm(int index, ExpressionTerm term)
+            {
+                if (index < terms.Count)
+                {
+                    term.OperatorBefore = terms[index].OperatorBefore;
+                    terms[index] = term;
+                }
+                else terms.Add(term);
+                lockedLegacyExpression = false;
+                RebuildCompactExpression(index);
+                NotifyChanged();
+            }
+
+            private void ParseExpression(string expression)
+            {
+                string normalized = expression?.Trim();
+                if (string.IsNullOrEmpty(normalized)) return;
+                List<ExpressionPart> parts = SplitAddSubtract(normalized);
+                if (parts.Count > 2)
+                {
+                    lockedLegacyExpression = true;
+                    terms.Add(new ExpressionTerm { Kind = TermKind.Legacy, Text = normalized });
+                    return;
+                }
+
+                foreach (ExpressionPart part in parts)
+                {
+                    string value = part.Value.Trim();
+                    if (string.IsNullOrEmpty(value)) continue;
+                    if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float number))
+                    {
+                        if (terms.Count == 0 && part.Operator == "-") number = -number;
+                        terms.Add(new ExpressionTerm
+                        {
+                            OperatorBefore = terms.Count == 0 ? null : part.Operator,
+                            Kind = TermKind.Number,
+                            Number = number,
+                            NumberLiteral = terms.Count == 0 && part.Operator == "-" ? "-" + value : value
+                        });
+                    }
+                    else
+                    {
+                        bool property = Regex.IsMatch(value,
+                            @"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+$") ||
+                            GameRuleEditor.Windows.PropertyPickerDialog.IsGlobalReference(context, value);
+                        string text = terms.Count == 0 && part.Operator == "-" ? "-" + value : value;
+                        terms.Add(new ExpressionTerm
+                        {
+                            OperatorBefore = terms.Count == 0 ? null : part.Operator,
+                            Kind = property && !text.StartsWith("-") ? TermKind.Property : TermKind.Legacy,
+                            Text = text
+                        });
+                    }
+                }
+            }
+
+            private static List<ExpressionPart> SplitAddSubtract(string expression)
+            {
+                var result = new List<ExpressionPart>();
+                int depth = 0;
+                int start = 0;
+                string pendingOperator = null;
+                for (int i = 0; i < expression.Length; i++)
+                {
+                    char character = expression[i];
+                    if (character == '(') depth++;
+                    else if (character == ')') depth = Math.Max(0, depth - 1);
+                    if (depth != 0 || (character != '+' && character != '-')) continue;
+                    if (i > start && (expression[i - 1] == 'e' || expression[i - 1] == 'E') &&
+                        Regex.IsMatch(expression.Substring(start, i - start).Trim(), @"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE]$"))
+                        continue;
+                    if (i == start)
+                    {
+                        if (pendingOperator != null) continue;
+                        pendingOperator = character.ToString();
+                        start = i + 1;
+                        continue;
+                    }
+
+                    // A sign immediately after the binary operator belongs to the next number.
+                    // For example, "Health - -0.1" is one subtraction whose second term is -0.1,
+                    // not two separate arithmetic operations.
+                    if (pendingOperator != null &&
+                        string.IsNullOrWhiteSpace(expression.Substring(start, i - start)))
+                    {
+                        start = i;
+                        continue;
+                    }
+
+                    result.Add(new ExpressionPart(pendingOperator, expression.Substring(start, i - start)));
+                    pendingOperator = character.ToString();
+                    start = i + 1;
+                }
+                result.Add(new ExpressionPart(pendingOperator, expression.Substring(start)));
+                return result;
+            }
+
+            private void RebuildTermsAndNotify()
+            {
+                RebuildTerms();
+                NotifyChanged();
+            }
+
+            private void NotifyChanged()
+            {
+                if (suppressChanged) return;
+                originalExpression = null;
+                Changed?.Invoke();
+            }
+
+            private readonly struct ExpressionPart
+            {
+                public readonly string Operator;
+                public readonly string Value;
+                public ExpressionPart(string operation, string value)
+                {
+                    Operator = operation;
+                    Value = value;
+                }
+            }
         }
     }
 }

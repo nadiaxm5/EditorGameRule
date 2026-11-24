@@ -9,6 +9,7 @@
     "SunAmbientColor": [180, 180, 180],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
+    "SoundTrack": "Assets/Resources/Audio/Originals/BackgroundMusic.wav",
     "CustomVariables": [],
     "Cast": [
         {
@@ -26,22 +27,59 @@
             "IconColorHex": "",
             "Position": [-3.0, 0.0, 30.0],
             "Rotation": [0.0, 180.0, 0.0],
-            "Velocity": [10.0, 0.0, 10.0],
-            "AngularVelocity": [0.0, 90.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Velocity": [0.0, 0.0, 0.0],
+            "AngularVelocity": [0.0, 0.0, 0.0],
             "Friction": 0.6000000238418579,
             "Drag": 0.20000000298023225,
-            "Properties": [
-                "speed=10",
-                "angularSpeed=90",
-                "health=100",
-                "offsetY=1.7",
-                "offsetZ=1.35",
-                "maxAim=200",
-                "currentAim=0"
+            "OverrideFriction": true,
+            "OverrideDrag": true,
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "angularSpeed",
+                    "type": "float",
+                    "floatValue": 90.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 1.7000000476837159,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 1.350000023841858,
+                    "boolValue": false
+                },
+                {
+                    "name": "maxAim",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "currentAim",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Keyboard(D,press)"
                     ],
@@ -49,10 +87,10 @@
                         "Rotate(this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(A,press)"
                     ],
@@ -60,30 +98,30 @@
                         "Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(W,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(S,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry+180,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Collision(Shell)"
                     ],
@@ -91,20 +129,20 @@
                         "Edit(this.health,this.health-Shell.damage)",
                         "PushTo(-300,RedTank.x,RedTank.y,RedTank.z)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
                     "Do": [
                         "Edit(RedWin.Active,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Keyboard(Space,press)"
                     ],
@@ -112,20 +150,20 @@
                         "Edit(this.currentAim,this.currentAim+1)",
                         "PlaySound(ShotCharging)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Compare(this.currentAim>=this.maxAim)"
                     ],
                     "Do": [
                         "Edit(this.currentAim,this.maxAim)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "Keyboard(Space,up)"
                     ],
@@ -134,7 +172,19 @@
                         "Edit(this.currentAim,0)",
                         "PlaySound(ShotFiring)"
                     ],
-                    "groupId": ""
+                    "groupId": "g172b8118"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g172b8118"
                 }
             ]
         },
@@ -146,20 +196,57 @@
             "IconColorHex": "",
             "Position": [13.0, 0.0, -5.0],
             "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Friction": 0.6000000238418579,
             "Drag": 0.20000000298023225,
-            "Properties": [
-                "speed=10",
-                "angularSpeed=90",
-                "health=100",
-                "offsetY=1.7",
-                "offsetZ=1.35",
-                "maxAim=200",
-                "currentAim=0"
+            "OverrideFriction": true,
+            "OverrideDrag": true,
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "angularSpeed",
+                    "type": "float",
+                    "floatValue": 90.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 1.7000000476837159,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 1.350000023841858,
+                    "boolValue": false
+                },
+                {
+                    "name": "maxAim",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "currentAim",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Keyboard(RightArrow,press)"
                     ],
@@ -167,10 +254,10 @@
                         "Rotate(this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(LeftArrow,press)"
                     ],
@@ -178,30 +265,30 @@
                         "Rotate(-this.angularSpeed,this.rx,this.ry,this.rz)",
                         "PlayParticles(DustTrail)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(UpArrow,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(DownArrow,press)"
                     ],
                     "Do": [
                         "Move(this.speed,0,this.ry+180,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Collision(Shell)"
                     ],
@@ -209,20 +296,20 @@
                         "Edit(this.health,this.health-Shell.damage)",
                         "PushTo(-300,BlueTank.x,BlueTank.y,BlueTank.z)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
                     "Do": [
                         "Edit(BlueWin.Active,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Keyboard(Enter,press)"
                     ],
@@ -230,20 +317,20 @@
                         "Edit(this.currentAim,this.currentAim+1)",
                         "PlaySound(ShotCharging)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Compare(this.currentAim>=this.maxAim)"
                     ],
                     "Do": [
                         "Edit(this.currentAim,this.maxAim)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "Keyboard(Enter,up)"
                     ],
@@ -252,7 +339,19 @@
                         "Edit(this.currentAim,0)",
                         "PlaySound(ShotFiring)"
                     ],
-                    "groupId": ""
+                    "groupId": "g17218b5c"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g17218b5c"
                 }
             ]
         },
@@ -262,9 +361,19 @@
             "PrefabName": "Shell",
             "Tag": "Shell",
             "IconColorHex": "",
-            "Properties": [
-                "speed=15",
-                "damage=50"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 50.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -382,8 +491,13 @@
             "PrefabName": "RedHealth",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "offsetY=0.05"
+            "CustomProperties": [
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.05000000074505806,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -405,8 +519,13 @@
             "PrefabName": "BlueHealth",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "offsetY=0.05"
+            "CustomProperties": [
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.05000000074505806,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -466,10 +585,25 @@
             "PrefabName": "CameraManager",
             "Tag": "",
             "IconColorHex": "",
-            "Properties": [
-                "despX=15",
-                "offsetY=15",
-                "offsetZ=10"
+            "CustomProperties": [
+                {
+                    "name": "despX",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 15.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 10.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {

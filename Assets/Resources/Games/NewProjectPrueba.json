@@ -1,0 +1,173 @@
+{
+    "GameName": "NewProjectPrueba",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [0, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "SoundTrack": "",
+    "CustomVariables": [],
+    "Cast": [
+        {
+            "ActorName": "NewActor",
+            "Active": true,
+            "PrefabName": "BlueTank",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0000025044780613825425, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Compare( < ) AND Check(this.Active) AND Collision(Untagged) AND Keyboard(A,down) AND Touch(press,false) AND Timer(0)"
+                    ],
+                    "Do": [
+                        "Edit(this.x,)",
+                        "Spawn(,this,0,0,0,0,0,0)",
+                        "Animate()",
+                        "Move(0,0,0,0)",
+                        "MoveTo(0,0,0,0)",
+                        "NavigateTo(0,0,0,0)",
+                        "LoadScene()",
+                        "QuitGame()",
+                        "PlayParticles()",
+                        "Delete()",
+                        "Rotate(0,0,0,0)",
+                        "RotateTo(0,0,0,0,this.x,this.y,this.z)",
+                        "Push(0,0,0,0)",
+                        "PushTo(0,0,0,0)",
+                        "Torque(0,0,0)"
+                    ],
+                    "groupId": "gb8cf3a3b"
+                },
+                {
+                    "Name": "Rule 2",
+                    "Do": [
+                        "Delete()"
+                    ],
+                    "groupId": "gb8cf3a3b"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "gb8cf3a3b"
+                }
+            ]
+        },
+        {
+            "ActorName": "NewActor_1",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Custom",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "CustomProperties": [
+                {
+                    "name": "NewProp",
+                    "type": "float",
+                    "floatValue": 0.5,
+                    "boolValue": false
+                },
+                {
+                    "name": "NewProp2",
+                    "type": "vector2",
+                    "boolValue": false,
+                    "arrayValue": [
+                        0.0,
+                        0.0
+                    ]
+                }
+            ],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Collision(Untagged) AND Compare(this.z < )"
+                    ],
+                    "Do": [
+                        "Spawn(,this,0,0,0,0,0,0)",
+                        "Edit(,)"
+                    ],
+                    "groupId": "g416cb4ae"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g416cb4ae"
+                }
+            ]
+        },
+        {
+            "ActorName": "NewActor_2",
+            "Active": true,
+            "PrefabName": "Empty",
+            "Tag": "Untagged",
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "CustomProperties": [
+                {
+                    "name": "NewProp",
+                    "type": "bool",
+                    "boolValue": true,
+                    "arrayValue": [
+                        0.0,
+                        0.0
+                    ]
+                },
+                {
+                    "name": "NewProp2",
+                    "type": "float",
+                    "boolValue": false
+                }
+            ],
+            "Script": [
+                {
+                    "Name": "Rule 1",
+                    "When": [
+                        "Check(this.Active)"
+                    ],
+                    "Do": [
+                        "Edit(this.Active,5)"
+                    ],
+                    "groupId": "g3ed0f708"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rule Set",
+                    "id": "g3ed0f708"
+                }
+            ]
+        }
+    ]
+}

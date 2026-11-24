@@ -3,6 +3,8 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using GameRuleEditor.Core;
 
 namespace GameRuleEditor.Controllers
 {
@@ -12,11 +14,15 @@ namespace GameRuleEditor.Controllers
     /// </summary>
     public class ProjectController
     {
+        public const string ProjectsAssetFolder = "Assets/Projects";
+        public static string ProjectsAbsoluteFolder => Path.Combine(Application.dataPath, "Projects");
+
         private GameRuleEditor.Core.EditorContext context;
 
         public ProjectController(GameRuleEditor.Core.EditorContext editorContext)
         {
             context = editorContext;
+            EnsureSavePoint();
         }
 
         // Enable update loop listener
@@ -36,19 +42,21 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Basicamente se llama cada vez que el usuario hace Ctrl+Z o Ctrl+Y, para asegurarnos de que la UI se actualice con los datos restaurados por Unity. Sin esto, la UI podría quedar desincronizada después de un undo/redo.
         /// </summary>
-        private void OnUndoRedoPerformed() 
+        private void OnUndoRedoPerformed()
         {
             if (context == null) return;
+            int previousActorIndex = context.selectedActorIndex;
 
             // After undo/redo, the project data may have changed (e.g. actor removed),
             // but selectedActorIndex/selectedScriptIndex on EditorContext are NOT part of
-            // the undo record. Clamp them to valid ranges to avoid null references.
+            // the undo record. Clear invalid selections instead of selecting a different
+            // actor/rule just because it now occupies the last available index.
             if (context.currentProject != null)
             {
                 int actorCount = context.currentProject.actors.Count;
                 if (context.selectedActorIndex >= actorCount)
                 {
-                    context.selectedActorIndex = actorCount - 1;
+                    context.selectedActorIndex = -1;
                     context.selectedScriptIndex = -1;
                 }
 
@@ -57,22 +65,54 @@ namespace GameRuleEditor.Controllers
                     var actor = context.currentProject.actors[context.selectedActorIndex];
                     int scriptCount = actor.Script?.Count ?? 0;
                     if (context.selectedScriptIndex >= scriptCount)
-                        context.selectedScriptIndex = scriptCount - 1;
+                        context.selectedScriptIndex = -1;
                 }
                 else
                 {
                     context.selectedScriptIndex = -1;
                 }
             }
+            else
+            {
+                context.selectedActorIndex = -1;
+                context.selectedScriptIndex = -1;
+            }
 
+            var selectedRule = context.SelectedScript;
+            int selectedElement = context.SelectedRuleElementIndex;
+            bool validElement = selectedRule != null && selectedElement >= 0 && !context.PendingRuleElement;
+            if (validElement && context.SelectedRuleElementKind == RuleElementKind.Action)
+                validElement = selectedRule.Do != null && selectedElement < selectedRule.Do.Count &&
+                    !string.IsNullOrWhiteSpace(selectedRule.Do[selectedElement]);
+            else if (validElement && context.SelectedRuleElementKind == RuleElementKind.Condition)
+            {
+                var terms = selectedRule.When != null && selectedRule.When.Count > 0
+                    ? RuleConditionSequence.Parse(selectedRule.When[0]) : null;
+                validElement = terms != null && selectedElement < terms.Count &&
+                    !string.IsNullOrWhiteSpace(terms[selectedElement].Source);
+            }
+            else validElement = false;
+            if (!validElement) context.ClearRuleElementSelection(false);
+
+            SyncGravityToScene();
+            SyncCameraToScene(false);
+            SyncSunToScene(false);
+            if (context.SelectedActor != null)
+                SyncDataToScene(context.SelectedActor);
+
+            bool wasRefreshing = context.isUndoRedoRefresh;
             context.isUndoRedoRefresh = true;
-            context.NotifyAll();
-            context.isUndoRedoRefresh = false;
+            try
+            {
+                context.NotifyAll(actorSelectionChanged: previousActorIndex != context.selectedActorIndex);
+            }
+            finally { context.isUndoRedoRefresh = wasRefreshing; }
         }
 
         // Check for scene changes every frame (efficiently)
         private void OnEditorUpdate()
         {
+            if (EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode) return;
             if (context.currentProject == null || context.selectedActorIndex < 0) return;
             var actor = context.SelectedActor;
             if (actor == null) return;
@@ -81,13 +121,84 @@ namespace GameRuleEditor.Controllers
 
         #region Project Operations
 
+        public static void EnsureProjectsFolder()
+        {
+            if (!AssetDatabase.IsValidFolder(ProjectsAssetFolder))
+                AssetDatabase.CreateFolder("Assets", "Projects");
+        }
+
         /// <summary>
         /// Creates a new empty project
         /// </summary>
         public void CreateNewProject(string projectName)
         {
+            context.CloseInspector();
             context.CreateNewProject(projectName);
+            SyncGravityToScene();
             EditorUtility.SetDirty(context);
+        }
+
+        /// <summary>
+        /// Creates and saves a new project, then generates its scene and scripts without entering Play mode.
+        /// Keeping the whole operation here ensures every New Project entry point behaves like Open Project.
+        /// </summary>
+        public bool CreateAndGenerateProject(string projectName)
+        {
+            if (string.IsNullOrWhiteSpace(projectName) || !ConfirmLeaveProject()) return false;
+            EnsureProjectsFolder();
+            projectName = UniqueProjectName(projectName);
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath(
+                $"{ProjectsAssetFolder}/{SanitizeFileName(projectName)}.asset");
+
+            CreateNewProject(projectName);
+            AssetDatabase.CreateAsset(context.currentProject, assetPath);
+            SaveProject();
+
+            // A New Project operation must never inherit a pending auto-play request.
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            GenerateScene();
+            return true;
+        }
+
+        /// <summary>Copies current editable data, then opens and generates the new project.</summary>
+        public bool DuplicateProject(GameRuleProject source, string projectName)
+        {
+            if (source == null || string.IsNullOrWhiteSpace(projectName)) return false;
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new System.InvalidOperationException("Stop Play mode before duplicating projects.");
+
+            EnsureProjectsFolder();
+            projectName = UniqueProjectName(projectName);
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath(
+                $"{ProjectsAssetFolder}/{SanitizeFileName(projectName)}.asset");
+            var duplicate = Object.Instantiate(source);
+            duplicate.name = duplicate.projectName = projectName;
+            duplicate.sceneData.GameName = projectName;
+            // The copy must never adopt, rename or overwrite the source project's JSON.
+            duplicate.jsonFileName = null;
+            try
+            {
+                // Snapshot first so Discard on the original cannot remove edits from the copy.
+                if (!ConfirmLeaveProject())
+                {
+                    Object.DestroyImmediate(duplicate);
+                    return false;
+                }
+                AssetDatabase.CreateAsset(duplicate, assetPath);
+                WriteProjectJson(duplicate);
+                AssetDatabase.Refresh();
+            }
+            catch
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+                if (duplicate != null && !AssetDatabase.Contains(duplicate)) Object.DestroyImmediate(duplicate);
+                throw;
+            }
+
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            LoadProject(duplicate);
+            GenerateScene();
+            return true;
         }
 
         /// <summary>
@@ -95,9 +206,35 @@ namespace GameRuleEditor.Controllers
         /// </summary>
         public void LoadProject(GameRuleEditor.Core.GameRuleProject project)
         {
-            Undo.RecordObject(context, "Load Project");
+            context.CloseInspector();
             context.LoadProject(project);
+            CaptureSavePoint();
+            SyncGravityToScene();
+            SyncSoundTrackToScene();
             EditorUtility.SetDirty(context);
+        }
+
+        /// <summary>
+        /// Loads a project and generates its scene and scripts without entering Play mode.
+        /// Script attachment still happens after Unity finishes compiling them.
+        /// </summary>
+        public bool OpenAndGenerateProject(GameRuleEditor.Core.GameRuleProject project)
+        {
+            if (project == null || !ConfirmLeaveProject()) return false;
+
+            // An Open Project operation must never inherit a pending auto-play request.
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            LoadProject(project);
+            GenerateScene();
+            return true;
+        }
+
+        public void SyncGravityToScene()
+        {
+            float[] gravity = context?.currentProject?.sceneData?.Gravity;
+            if (gravity == null || gravity.Length < 3) return;
+
+            Physics.gravity = new Vector3(gravity[0], gravity[1], gravity[2]);
         }
 
         /// <summary>
@@ -121,15 +258,197 @@ namespace GameRuleEditor.Controllers
         {
             var project = GameRuleEditor.Core.GameRuleProject.ImportFromJson(jsonPath);
             if (project == null) return;
-
-            string safeName = SanitizeFileName(project.projectName);
-            string savePath = $"Assets/{safeName}.asset";
-            savePath = AssetDatabase.GenerateUniqueAssetPath(savePath);
-
-            AssetDatabase.CreateAsset(project, savePath);
-            AssetDatabase.SaveAssets();
-            LoadProject(project);
+            try
+            {
+                if (!ConfirmLeaveProject()) return;
+                EnsureProjectsFolder();
+                project.projectName = UniqueProjectName(project.projectName);
+                project.sceneData.GameName = project.projectName;
+                string savePath = AssetDatabase.GenerateUniqueAssetPath(
+                    $"{ProjectsAssetFolder}/{SanitizeFileName(project.projectName)}.asset");
+                AssetDatabase.CreateAsset(project, savePath);
+                LoadProject(project);
+                SaveProject();
+                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+                GenerateScene();
+            }
+            finally
+            {
+                if (!AssetDatabase.Contains(project)) Object.DestroyImmediate(project);
+            }
         }
+
+        public List<GameRuleProject> GetProjects()
+        {
+            return AssetDatabase.FindAssets("t:GameRuleProject", new[] { "Assets" })
+                .Select(guid => AssetDatabase.LoadAssetAtPath<GameRuleProject>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(project => project != null)
+                .OrderBy(project => project.projectName, System.StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        private string UniqueProjectName(string requested)
+        {
+            string baseName = SanitizeFileName(requested.Trim()).TrimEnd('.', ' ');
+            if (string.IsNullOrWhiteSpace(baseName)) baseName = "New Project";
+            var names = new HashSet<string>(GetProjects().Select(project => project.projectName),
+                System.StringComparer.OrdinalIgnoreCase);
+            string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
+            if (Directory.Exists(gamesFolder))
+                foreach (string json in Directory.GetFiles(gamesFolder, "*.json"))
+                    names.Add(Path.GetFileNameWithoutExtension(json));
+            string name = baseName;
+            for (int suffix = 2; names.Contains(name); suffix++) name = baseName + " (" + suffix + ")";
+            return name;
+        }
+
+        private void EnsureSavePoint()
+        {
+            if (context.currentProject != null && (context.savedProject != context.currentProject ||
+                string.IsNullOrEmpty(context.savedProjectState))) CaptureSavePoint();
+        }
+
+        private void CaptureSavePoint()
+        {
+            context.savedProject = context.currentProject;
+            context.savedProjectState = context.currentProject == null ? null : context.currentProject.SerializeEditableState();
+            EditorUtility.SetDirty(context);
+            AssetDatabase.SaveAssetIfDirty(context);
+        }
+
+        public bool HasUnsavedChanges
+        {
+            get
+            {
+                EnsureSavePoint();
+                return context.currentProject != null &&
+                    context.currentProject.SerializeEditableState() != context.savedProjectState;
+            }
+        }
+
+        public void SaveProject()
+        {
+            if (context.currentProject == null) return;
+            context.currentProject.sceneData.GameName = context.currentProject.projectName;
+            WriteProjectJson();
+            EditorUtility.SetDirty(context.currentProject);
+            AssetDatabase.SaveAssetIfDirty(context.currentProject);
+            CaptureSavePoint();
+            AssetDatabase.Refresh();
+        }
+
+        private bool ConfirmLeaveProject()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new System.InvalidOperationException("Stop Play mode before changing projects.");
+            if (!HasUnsavedChanges) return true;
+            int choice = EditorUtility.DisplayDialogComplex("Unsaved changes",
+                $"Save changes to '{context.currentProject.projectName}'?", "Save", "Cancel", "Discard");
+            if (choice == 1) return false;
+            if (choice == 0) SaveProject();
+            else
+            {
+                JsonUtility.FromJsonOverwrite(context.savedProjectState, context.currentProject);
+                Undo.ClearUndo(context.currentProject);
+                // Other Unity operations may already have flushed the edited asset to disk.
+                EditorUtility.SetDirty(context.currentProject);
+                AssetDatabase.SaveAssetIfDirty(context.currentProject);
+                WriteProjectJson();
+                AssetDatabase.Refresh();
+            }
+            return true;
+        }
+
+        public bool CloseProject()
+        {
+            if (!ConfirmLeaveProject()) return false;
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            context.Clear();
+            EditorUtility.SetDirty(context);
+            AssetDatabase.SaveAssetIfDirty(context);
+            return true;
+        }
+
+        private string WriteProjectJson(GameRuleProject project = null)
+        {
+            const string gamesFolder = "Assets/Resources/Games";
+            project = project ?? context.currentProject;
+            string assetPath = AssetDatabase.GetAssetPath(project);
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            if (string.IsNullOrEmpty(guid))
+                throw new System.InvalidOperationException("Save the project locally before generating its JSON.");
+            string name = project.projectName;
+            if (string.IsNullOrWhiteSpace(name) || name != SanitizeFileName(name) ||
+                name.EndsWith(".") || name.EndsWith(" "))
+                throw new System.InvalidOperationException("Choose a Game Name that is a valid file name before saving.");
+            string fileName = name + ".json";
+            var projects = GetProjects();
+            if (projects.Any(other => other != project &&
+                (SameJsonName(other.jsonFileName, fileName) || SameJsonName(other.projectName + ".json", fileName))))
+                throw new System.InvalidOperationException($"Another project uses '{name}'. Choose a different Game Name.");
+
+            string folder = Path.Combine(Application.dataPath, "Resources/Games");
+            Directory.CreateDirectory(folder);
+            string previous = project.jsonFileName;
+            if (!string.IsNullOrEmpty(previous) && previous != Path.GetFileName(previous))
+                throw new System.InvalidOperationException("The project's saved JSON file name is invalid.");
+
+            // Migrate the named JSON used before file ownership was recorded. Only claim
+            // a file matching this asset's original name and the GameName inside the JSON.
+            if (string.IsNullOrEmpty(previous))
+            {
+                string legacyName = Path.GetFileNameWithoutExtension(assetPath);
+                string legacyFile = legacyName + ".json";
+                string legacyPath = Path.Combine(folder, legacyFile);
+                bool claimed = projects.Any(other => other != project &&
+                    (SameJsonName(other.jsonFileName, legacyFile) ||
+                     SameJsonName(Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(other)) + ".json", legacyFile)));
+                if (!claimed && File.Exists(legacyPath))
+                {
+                    try
+                    {
+                        var legacyScene = JsonUtility.FromJson<SceneJson>(File.ReadAllText(legacyPath));
+                        if (legacyScene != null && legacyScene.GameName == legacyName) previous = legacyFile;
+                    }
+                    catch (System.ArgumentException) { /* An unrelated/invalid JSON is never adopted. */ }
+                }
+            }
+
+            string destination = gamesFolder + "/" + fileName;
+            string fullPath = Path.Combine(folder, fileName);
+            if (File.Exists(fullPath) && !SameJsonName(previous, fileName))
+                throw new System.InvalidOperationException($"'{fileName}' already exists in Resources/Games. Choose a different Game Name to avoid replacing it.");
+
+            string generated = gamesFolder + "/Generated/" + guid + ".json";
+            string source = !string.IsNullOrEmpty(previous) && File.Exists(Path.Combine(folder, previous))
+                ? gamesFolder + "/" + previous : File.Exists(Path.Combine(Application.dataPath, "Resources/Games/Generated", guid + ".json"))
+                    ? generated : null;
+            bool moved = source != null && !SameJsonName(source, destination);
+            if (moved)
+            {
+                string error = AssetDatabase.MoveAsset(source, destination);
+                if (!string.IsNullOrEmpty(error)) throw new System.IO.IOException(error);
+            }
+            try { project.SaveToJsonFile(fullPath); }
+            catch
+            {
+                if (moved) AssetDatabase.MoveAsset(destination, source);
+                throw;
+            }
+            project.jsonFileName = fileName;
+            EditorUtility.SetDirty(project);
+            AssetDatabase.SaveAssetIfDirty(project);
+
+            // Remove only this project's obsolete generated copy, after the named file is saved.
+            if (File.Exists(Path.Combine(folder, "Generated", guid + ".json")))
+                AssetDatabase.DeleteAsset(generated);
+            string generatedFolder = Path.Combine(folder, "Generated");
+            if (Directory.Exists(generatedFolder) && !Directory.EnumerateFileSystemEntries(generatedFolder).Any())
+                AssetDatabase.DeleteAsset(gamesFolder + "/Generated");
+            return fileName;
+        }
+
+        private static bool SameJsonName(string first, string second) =>
+            string.Equals(first, second, System.StringComparison.OrdinalIgnoreCase);
 
         private static string SanitizeFileName(string name)
         {
@@ -143,9 +462,68 @@ namespace GameRuleEditor.Controllers
 
         #region Scene Generation
 
+        private const string GeneratedProjectKey = "GameRule.GeneratedProject";
+        private const string GeneratedStateKey = "GameRule.GeneratedState";
+        private const string GeneratedSceneKey = "GameRule.GeneratedScene";
+
+        // SessionState survives compilation and Play/Stop without changing the project JSON.
+        public bool MatchesGeneratedScene()
+        {
+            var project = context.currentProject;
+            if (project == null || EditorPrefs.GetBool("GameRule_PendingScriptAttach", false)) return false;
+            string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(project));
+            return !string.IsNullOrEmpty(guid)
+                && SessionState.GetString(GeneratedProjectKey, "") == guid
+                && SessionState.GetInt(GeneratedSceneKey, int.MinValue) == EditorSceneManager.GetActiveScene().handle
+                && SessionState.GetString(GeneratedStateKey, "") == GenerationSignature(project);
+        }
+
+        private static string GenerationSignature(GameRuleProject project)
+        {
+            // Use one canonical Cast, rather than the stale import copy in sceneData.Cast.
+            var scene = JsonUtility.FromJson<SceneJson>(JsonUtility.ToJson(project.sceneData));
+            scene.Cast = new List<ActorJson>();
+            foreach (var original in project.actors)
+            {
+                var actor = JsonUtility.FromJson<ActorJson>(JsonUtility.ToJson(original));
+                var prefab = ActorPhysicsUtility.LoadPrefab(actor);
+                actor.Position = GenerationVector(actor.Position, prefab != null ? prefab.transform.position : Vector3.zero);
+                actor.Rotation = GenerationVector(actor.Rotation, prefab != null ? prefab.transform.eulerAngles : Vector3.zero, rotation: true);
+                actor.Scale = GenerationVector(actor.Scale, prefab != null ? prefab.transform.localScale : Vector3.one);
+                actor.Tag = string.IsNullOrEmpty(actor.Tag) ? prefab != null ? prefab.tag : "Untagged" : actor.Tag;
+                actor.GetCustomProperties();
+                ActorPhysicsUtility.NormalizeLegacyOverrides(actor);
+                if (!actor.OverrideDensity) actor.Density = 0;
+                if (!actor.OverrideDrag) actor.Drag = 0;
+                if (!actor.OverrideFriction) actor.Friction = 0;
+                if (!actor.OverrideBounciness) actor.Bounciness = 0;
+                // Set names, grouping and icon tint do not change the flattened runtime script.
+                actor.Components = null;
+                actor.IconColorHex = null;
+                if (actor.Script != null)
+                    foreach (var rule in actor.Script)
+                    {
+                        rule.Name = null;
+                        rule.groupId = null;
+                    }
+                scene.Cast.Add(actor);
+            }
+            return Hash128.Compute(project.projectName + "\n" + JsonUtility.ToJson(scene)).ToString();
+        }
+
+        private static float[] GenerationVector(float[] value, Vector3 fallback, bool rotation = false)
+        {
+            var result = value != null && value.Length >= 3
+                ? new[] { value[0], value[1], value[2] }
+                : new[] { fallback.x, fallback.y, fallback.z };
+            if (rotation)
+                for (int i = 0; i < result.Length; i++) result[i] = Mathf.Repeat(result[i], 360f);
+            return result;
+        }
+
         /// <summary>
         /// Generates the Unity scene from the current project data.
-        /// Exports a temporary JSON to Resources/Games and calls Loader.LoadJson.
+        /// Saves the named JSON to Resources/Games and calls Loader.LoadJson.
         /// </summary>
         public void GenerateScene()
         {
@@ -155,16 +533,20 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            string gamesFolder = Application.dataPath + "/Resources/Games";
-            if (!Directory.Exists(gamesFolder))
-                Directory.CreateDirectory(gamesFolder);
-
-            string fileName = context.currentProject.projectName + ".json";
-            string fullPath = gamesFolder + "/" + fileName;
-            context.currentProject.SaveToJsonFile(fullPath);
+            string fileName = WriteProjectJson();
             AssetDatabase.Refresh();
 
+            string signature = GenerationSignature(context.currentProject);
+            SessionState.EraseString(GeneratedStateKey);
             Loader.LoadJson(fileName);
+            SyncCameraToScene(false);
+            SyncSunToScene(false);
+            if (GameObject.Find("GameManager") == null)
+                throw new System.InvalidOperationException("Scene generation did not create GameManager.");
+            SessionState.SetString(GeneratedProjectKey,
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(context.currentProject)));
+            SessionState.SetString(GeneratedStateKey, signature);
+            SessionState.SetInt(GeneratedSceneKey, EditorSceneManager.GetActiveScene().handle);
             Debug.Log($"Scene generated from project '{context.currentProject.projectName}'");
         }
 
@@ -243,7 +625,7 @@ namespace GameRuleEditor.Controllers
         /// Without this the GameManager script only applies them on Play, so edits made in
         /// Scene Settings are invisible while working in the editor.
         /// </summary>
-        public void SyncCameraToScene()
+        public void SyncCameraToScene(bool recordUndo = true)
         {
             if (context.currentProject == null) return;
 
@@ -251,7 +633,8 @@ namespace GameRuleEditor.Controllers
             if (camera == null) return;
 
             var scene = context.currentProject.sceneData;
-            Undo.RecordObject(camera.transform, "Change Camera Transform");
+            if (recordUndo)
+                Undo.RecordObjects(new Object[] { camera.transform, camera }, "Change Camera Settings");
 
             if (scene.CameraPosition != null && scene.CameraPosition.Length >= 3)
                 camera.transform.position = new Vector3(scene.CameraPosition[0], scene.CameraPosition[1], scene.CameraPosition[2]);
@@ -259,7 +642,91 @@ namespace GameRuleEditor.Controllers
             if (scene.CameraRotation != null && scene.CameraRotation.Length >= 3)
                 camera.transform.eulerAngles = new Vector3(scene.CameraRotation[0], scene.CameraRotation[1], scene.CameraRotation[2]);
 
+            if (TrySceneColor(scene.BackgroundColor, out Color background))
+            {
+                camera.backgroundColor = background;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+            }
+
             EditorSceneManager.MarkSceneDirty(camera.gameObject.scene);
+            SceneView.RepaintAll();
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        /// <summary>Applies Sun and ambient settings using the same objects as generated GameManager.</summary>
+        public void SyncSunToScene(bool recordUndo = true)
+        {
+            var scene = context.currentProject?.sceneData;
+            if (scene == null) return;
+
+            var manager = FindSceneObjectByName("GameManager");
+            Light sun = manager != null ? manager.GetComponentInChildren<Light>(true) : null;
+            if (sun != null)
+            {
+                if (recordUndo) Undo.RecordObjects(new Object[] { sun.transform, sun }, "Change Sun Settings");
+                if (scene.SunPosition != null && scene.SunPosition.Length >= 3)
+                    sun.transform.position = new Vector3(scene.SunPosition[0], scene.SunPosition[1], scene.SunPosition[2]);
+                if (scene.SunRotation != null && scene.SunRotation.Length >= 3)
+                    sun.transform.eulerAngles = new Vector3(scene.SunRotation[0], scene.SunRotation[1], scene.SunRotation[2]);
+                if (TrySceneColor(scene.SunColor, out Color color)) sun.color = color;
+                EditorSceneManager.MarkSceneDirty(sun.gameObject.scene);
+            }
+
+            if (TrySceneColor(scene.SunAmbientColor, out Color ambient))
+            {
+                if (recordUndo) Undo.RecordObject(Unsupported.GetRenderSettings(), "Change Ambient Lighting");
+                RenderSettings.ambientLight = ambient;
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                var activeScene = EditorSceneManager.GetActiveScene();
+                if (activeScene.IsValid()) EditorSceneManager.MarkSceneDirty(activeScene);
+            }
+            SceneView.RepaintAll();
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        private static bool TrySceneColor(byte[] bytes, out Color color)
+        {
+            color = Color.white;
+            if (bytes == null || bytes.Length < 3) return false;
+            color = new Color32(bytes[0], bytes[1], bytes[2], 255);
+            return true;
+        }
+
+        /// <summary>
+        /// Applies the selected soundtrack to the generated GameManager immediately.
+        /// The GameManager prefab itself deliberately contains no fixed AudioSource.
+        /// </summary>
+        public void SyncSoundTrackToScene(bool recordUndo = true)
+        {
+            if (context.currentProject == null) return;
+
+            GameObject gameManager = FindSceneObjectByName("GameManager");
+            if (gameManager == null) return;
+
+            SoundTrackUtility.ApplyToGameManager(
+                gameManager,
+                context.currentProject.sceneData.SoundTrack,
+                recordUndo);
+
+            // Keep an already-generated GameManager component in sync when the scene
+            // does not need to be regenerated before Play.
+            foreach (MonoBehaviour behaviour in gameManager.GetComponents<MonoBehaviour>())
+            {
+                if (behaviour == null || behaviour.GetType().Name != "GameManager") continue;
+
+                var field = behaviour.GetType().GetField("SoundTrack");
+                if (field == null || field.FieldType != typeof(string)) continue;
+
+                string value = context.currentProject.sceneData.SoundTrack ?? "";
+                if (Equals(field.GetValue(behaviour), value)) continue;
+
+                if (recordUndo)
+                    Undo.RecordObject(behaviour, "Change Soundtrack");
+                field.SetValue(behaviour, value);
+                EditorUtility.SetDirty(behaviour);
+            }
+
+            EditorSceneManager.MarkSceneDirty(gameManager.scene);
         }
 
         /// <summary>
@@ -278,6 +745,144 @@ namespace GameRuleEditor.Controllers
 
         #region Actor Operations
 
+        public ActorComponentMeta AddRuleSet(int actorIndex)
+        {
+            var project = context.currentProject;
+            if (project == null || actorIndex < 0 || actorIndex >= project.actors.Count) return null;
+            var actor = project.actors[actorIndex];
+            Undo.RecordObject(project, "Add Rule Set");
+            MaterializeRuleSets(actor);
+            int number = actor.Components.Count(component => component.type == "Rules") + 1;
+            var group = new ActorComponentMeta
+            {
+                type = "Rules",
+                name = NextRuleSetName(actor, number),
+                id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
+            };
+            actor.Components.Add(group);
+            EditorUtility.SetDirty(project);
+            context.NotifyProjectChanged();
+            return group;
+        }
+
+        // Materialize the existing legacy view without changing which set owns any rule.
+        private static void MaterializeRuleSets(ActorJson actor)
+        {
+            var groups = EditorContext.GetRuleSets(actor);
+            var assignments = actor.Script?.Select(rule => new { Rule = rule, Id = EditorContext.GetRuleSetId(actor, rule) }).ToList();
+            actor.Components ??= new List<ActorComponentMeta>();
+            foreach (var group in groups)
+            {
+                var component = actor.Components.Find(item => item.type == "Rules" &&
+                    (string.IsNullOrEmpty(item.id) ? EditorContext.UngroupedRuleSetId : item.id) == group.id);
+                if (component == null)
+                    actor.Components.Add(new ActorComponentMeta { type = "Rules", id = group.id, name = group.name });
+                else
+                {
+                    component.id = group.id;
+                    if (string.IsNullOrWhiteSpace(component.name)) component.name = group.name;
+                }
+            }
+            if (assignments != null)
+                foreach (var entry in assignments)
+                    if (string.IsNullOrEmpty(entry.Rule.groupId)) entry.Rule.groupId = entry.Id;
+        }
+
+        private ActorJson RuleSetActor(int actorIndex) => context.currentProject != null &&
+            actorIndex >= 0 && actorIndex < context.currentProject.actors.Count
+                ? context.currentProject.actors[actorIndex] : null;
+
+        public bool RenameRuleSet(int actorIndex, string id, string name)
+        {
+            var actor = RuleSetActor(actorIndex);
+            name = name?.Trim();
+            var group = EditorContext.GetRuleSets(actor).Find(item => item.id == id);
+            if (actor == null || group == null || string.IsNullOrEmpty(name) || group.name == name) return false;
+            Undo.RecordObject(context.currentProject, "Rename Rule Set");
+            MaterializeRuleSets(actor);
+            actor.Components.Find(item => item.type == "Rules" && item.id == id).name = name;
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            return true;
+        }
+
+        public void ReorderRuleSets(int actorIndex, string id, int targetIndex)
+        {
+            var actor = RuleSetActor(actorIndex);
+            var groups = EditorContext.GetRuleSets(actor);
+            int from = groups.FindIndex(item => item.id == id);
+            if (actor == null || from < 0 || targetIndex < 0 || targetIndex >= groups.Count || from == targetIndex) return;
+            var selected = context.selectedActorIndex == actorIndex ? context.SelectedScript : null;
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Reorder Rule Sets");
+            MaterializeRuleSets(actor);
+            var slots = Enumerable.Range(0, actor.Components.Count).Where(i => actor.Components[i].type == "Rules").ToList();
+            var ordered = slots.Select(i => actor.Components[i]).ToList();
+            var moved = ordered[from];
+            ordered.RemoveAt(from);
+            ordered.Insert(targetIndex, moved);
+            for (int i = 0; i < slots.Count; i++) actor.Components[slots[i]] = ordered[i];
+            if (actor.Script != null)
+            {
+                OrderRulesBySet(actor);
+                if (context.selectedActorIndex == actorIndex)
+                    context.selectedScriptIndex = selected == null ? -1 : actor.Script.IndexOf(selected);
+            }
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+        }
+
+        private static void OrderRulesBySet(ActorJson actor)
+        {
+            // Script is also the execution order. Preserve the order within each set.
+            var rulesBySet = actor.Script.ToLookup(rule => EditorContext.GetRuleSetId(actor, rule));
+            var rules = EditorContext.GetRuleSets(actor).SelectMany(group => rulesBySet[group.id]).ToList();
+            actor.Script.Clear();
+            actor.Script.AddRange(rules);
+        }
+
+        public bool ConfirmRemoveRuleSet(int actorIndex, string id)
+        {
+            var actor = RuleSetActor(actorIndex);
+            var group = EditorContext.GetRuleSets(actor).Find(item => item.id == id);
+            if (actor == null || group == null) return false;
+            bool hasRules = actor.Script?.Any(rule => EditorContext.GetRuleSetId(actor, rule) == id) == true;
+            if (hasRules && !EditorUtility.DisplayDialog("Remove Rule Set",
+                $"Remove '{group.name}' and all its rules?", "Remove", "Cancel")) return false;
+            return RemoveRuleSet(actorIndex, id);
+        }
+
+        public bool RemoveRuleSet(int actorIndex, string id)
+        {
+            var actor = RuleSetActor(actorIndex);
+            if (actor == null || !EditorContext.GetRuleSets(actor).Exists(item => item.id == id)) return false;
+            var selected = context.selectedActorIndex == actorIndex ? context.SelectedScript : null;
+            Undo.RecordObject(context.currentProject, "Remove Rule Set");
+            MaterializeRuleSets(actor);
+            actor.Script?.RemoveAll(rule => EditorContext.GetRuleSetId(actor, rule) == id);
+            actor.Components.RemoveAll(item => item.type == "Rules" && item.id == id);
+            if (context.selectedActorIndex == actorIndex)
+            {
+                context.selectedScriptIndex = selected == null ? -1 : actor.Script.IndexOf(selected);
+                if (context.selectedScriptIndex < 0) context.ClearRuleElementSelection(false);
+            }
+            EditorUtility.SetDirty(context.currentProject);
+            context.NotifyProjectChanged();
+            return true;
+        }
+
+        internal static string NextRuleSetName(ActorJson actor, int number)
+        {
+            string name;
+            do
+            {
+                name = number == 1 ? "Rule Set" : $"Rule Set {number}";
+                number++;
+            }
+            while (actor.Components != null && actor.Components.Exists(component => component.type == "Rules" &&
+                string.Equals(component.name, name, System.StringComparison.OrdinalIgnoreCase)));
+            return name;
+        }
+
         /// <summary>
         /// Adds a new actor to the project with a default "Empty" prefab.
         /// Automatically creates the Empty prefab if it doesn't exist.
@@ -285,6 +890,8 @@ namespace GameRuleEditor.Controllers
         public void AddActor(string actorName)
         {
             if (context.currentProject == null) return;
+            string error = GameRuleProject.ActorNameError(actorName, context.currentProject.actors);
+            if (error != null) throw new System.ArgumentException(error, nameof(actorName));
 
             Undo.RecordObject(context.currentProject, "Add Actor");
 
@@ -302,9 +909,22 @@ namespace GameRuleEditor.Controllers
                 Scale = null,
                 Velocity = null,
                 AngularVelocity = null,
-                Size = null,
                 Properties = new List<string>(),
-                Script = new List<SentenceJson>()
+                Script = new List<SentenceJson>(),
+                Components = new List<ActorComponentMeta>
+                {
+                    new ActorComponentMeta
+                    {
+                        type = "Properties",
+                        name = "Custom Properties"
+                    },
+                    new ActorComponentMeta
+                    {
+                        type = "Rules",
+                        name = "Rule Set",
+                        id = "g" + System.Guid.NewGuid().ToString("N").Substring(0, 8)
+                    }
+                }
             };
 
             context.currentProject.actors.Add(newActor);
@@ -328,14 +948,10 @@ namespace GameRuleEditor.Controllers
                 case "Position": actor.Position = null; break;
                 case "Rotation": actor.Rotation = null; break;
                 case "Scale": actor.Scale = null; break;
-                case "Size": actor.Size = null; break;
                 case "Velocity": actor.Velocity = null; break;
                 case "AngularVelocity": actor.AngularVelocity = null; break;
                 case "Physics":
-                    actor.Density = 0;
-                    actor.Friction = 0;
-                    actor.Bounciness = 0;
-                    actor.Drag = 0;
+                    ActorPhysicsUtility.ClearOverrides(actor);
                     break;
             }
 
@@ -422,8 +1038,40 @@ namespace GameRuleEditor.Controllers
         }
 
         /// <summary>
-        /// Updates an actor's property with undo support
+        /// Renames the actor, scene object and all rule references in one undo operation.
         /// </summary>
+        public bool RenameActor(int actorIndex, string newName)
+        {
+            var project = context.currentProject;
+            if (project == null || actorIndex < 0 || actorIndex >= project.actors.Count ||
+                string.IsNullOrWhiteSpace(newName)) return false;
+            newName = newName.Trim();
+            var actor = project.actors[actorIndex];
+            if (actor.ActorName == newName || GameRuleProject.ActorNameError(newName, project.actors, actor) != null)
+                return false;
+            Undo.IncrementCurrentGroup();
+            int group = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Rename Actor");
+            try
+            {
+                Undo.RegisterCompleteObjectUndo(project, "Rename Actor");
+                var obj = FindSceneObjectByName(actor.ActorName);
+                if (obj != null) Undo.RecordObject(obj, "Rename Actor");
+                project.RenameActor(actor, newName);
+                if (obj != null)
+                {
+                    obj.name = newName;
+                    EditorSceneManager.MarkSceneDirty(obj.scene);
+                }
+                EditorUtility.SetDirty(project);
+                context.NotifyActorListChanged();
+                context.NotifyProjectChanged();
+                return true;
+            }
+            finally { Undo.CollapseUndoOperations(group); }
+        }
+
+        /// <summary>Updates an actor's property with undo support.</summary>
         public void UpdateActorProperty(int actorIndex, System.Action modifyAction, string undoName = "Modify Actor")
         {
             if (context.currentProject == null ||
@@ -458,12 +1106,7 @@ namespace GameRuleEditor.Controllers
             Undo.RecordObject(context.currentProject, "Add Actor Property");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
-            if (actor.Properties == null)
-            {
-                actor.Properties = new List<string>();
-            }
-
-            actor.Properties.Add(propertyDefinition);
+            actor.GetCustomProperties().Add(CustomVariable.FromLegacyActorProperty(propertyDefinition));
 
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
@@ -482,15 +1125,14 @@ namespace GameRuleEditor.Controllers
             }
 
             ActorJson actor = context.currentProject.actors[actorIndex];
-            if (actor.Properties == null ||
-                propertyIndex < 0 ||
-                propertyIndex >= actor.Properties.Count)
+            var properties = actor.GetCustomProperties();
+            if (propertyIndex < 0 || propertyIndex >= properties.Count)
             {
                 return;
             }
 
             Undo.RecordObject(context.currentProject, "Remove Actor Property");
-            actor.Properties.RemoveAt(propertyIndex);
+            properties.RemoveAt(propertyIndex);
             EditorUtility.SetDirty(context.currentProject);
             context.NotifyProjectChanged();
         }
@@ -500,22 +1142,18 @@ namespace GameRuleEditor.Controllers
         {
             if (actor == null) return;
             GameObject obj = FindSceneObjectByName(actor.ActorName);
-            if (obj == null) return;
+            if (obj == null)
+            {
+                Loader.EnsureTagExists(actor.Tag);
+                return;
+            }
 
             if (obj.activeSelf != actor.Active)
                 obj.SetActive(actor.Active);
 
             if (!string.IsNullOrEmpty(actor.Tag) && obj.tag != actor.Tag)
             {
-                EnsureTagExists(actor.Tag);
-                try
-                {
-                    obj.tag = actor.Tag;
-                }
-                catch (UnityException)
-                {
-                    // Ignore invalid/missing tags in TagManager to avoid breaking editor sync.
-                }
+                Loader.TryApplyTag(obj, actor.Tag);
             }
 
             if (actor.Position != null && actor.Position.Length >= 3)
@@ -526,12 +1164,19 @@ namespace GameRuleEditor.Controllers
 
             if (actor.Scale != null && actor.Scale.Length >= 3)
                 obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
+
+            GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
+            if (ActorPhysicsUtility.ApplyTo(obj, actor, prefab, true) && obj.scene.IsValid())
+                EditorSceneManager.MarkSceneDirty(obj.scene);
         }
 
         // Pull data from GameObject to JSON if changed
         public bool SyncSceneToData(ActorJson actor)
         {
-            if (actor == null) return false;
+            // Scene inspection during Play must never become authored initial state.
+            // Guard the shared entry point as well as the update loop, including transitions.
+            if (actor == null || EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
+                return false;
             GameObject obj = FindSceneObjectByName(actor.ActorName);
             if (obj == null) return false;
 
@@ -551,45 +1196,42 @@ namespace GameRuleEditor.Controllers
                 changed = true;
             }
 
-            if (!obj.transform.hasChanged)
+            // In Edit mode, root Rigidbody/Collider Inspector changes remain bidirectional.
+            GameObject prefab = ActorPhysicsUtility.LoadPrefab(actor);
+            if (ActorPhysicsUtility.CaptureFrom(obj, actor, prefab))
+                changed = true;
+
+            if (obj.transform.hasChanged)
             {
-                if (changed)
+                // Position Check
+                Vector3 pos = obj.transform.position;
+                if (actor.Position == null || actor.Position.Length < 3 || Diff(actor.Position[0], pos.x) || Diff(actor.Position[1], pos.y) || Diff(actor.Position[2], pos.z))
                 {
-                    EditorUtility.SetDirty(context.currentProject);
-                    context.NotifyProjectChanged();
+                    if (actor.Position == null || actor.Position.Length < 3) actor.Position = new float[3];
+                    actor.Position[0] = pos.x; actor.Position[1] = pos.y; actor.Position[2] = pos.z;
+                    changed = true;
                 }
 
-                return changed;
-            }
+                // Rotation Check
+                Vector3 rot = obj.transform.eulerAngles;
+                if (actor.Rotation == null || actor.Rotation.Length < 3 || Diff(actor.Rotation[0], rot.x) || Diff(actor.Rotation[1], rot.y) || Diff(actor.Rotation[2], rot.z))
+                {
+                    if (actor.Rotation == null || actor.Rotation.Length < 3) actor.Rotation = new float[3];
+                    actor.Rotation[0] = rot.x; actor.Rotation[1] = rot.y; actor.Rotation[2] = rot.z;
+                    changed = true;
+                }
 
-            // Position Check
-            Vector3 pos = obj.transform.position;
-            if (actor.Position == null || actor.Position.Length < 3 || Diff(actor.Position[0], pos.x) || Diff(actor.Position[1], pos.y) || Diff(actor.Position[2], pos.z))
-            {
-                if (actor.Position == null || actor.Position.Length < 3) actor.Position = new float[3];
-                actor.Position[0] = pos.x; actor.Position[1] = pos.y; actor.Position[2] = pos.z;
-                changed = true;
-            }
+                // Scale Check
+                Vector3 scl = obj.transform.localScale;
+                if (actor.Scale == null || actor.Scale.Length < 3 || Diff(actor.Scale[0], scl.x) || Diff(actor.Scale[1], scl.y) || Diff(actor.Scale[2], scl.z))
+                {
+                    if (actor.Scale == null || actor.Scale.Length < 3) actor.Scale = new float[] { 1, 1, 1 };
+                    actor.Scale[0] = scl.x; actor.Scale[1] = scl.y; actor.Scale[2] = scl.z;
+                    changed = true;
+                }
 
-            // Rotation Check
-            Vector3 rot = obj.transform.eulerAngles;
-            if (actor.Rotation == null || actor.Rotation.Length < 3 || Diff(actor.Rotation[0], rot.x) || Diff(actor.Rotation[1], rot.y) || Diff(actor.Rotation[2], rot.z))
-            {
-                if (actor.Rotation == null || actor.Rotation.Length < 3) actor.Rotation = new float[3];
-                actor.Rotation[0] = rot.x; actor.Rotation[1] = rot.y; actor.Rotation[2] = rot.z;
-                changed = true;
+                obj.transform.hasChanged = false;
             }
-
-            // Scale Check
-            Vector3 scl = obj.transform.localScale;
-            if (actor.Scale == null || actor.Scale.Length < 3 || Diff(actor.Scale[0], scl.x) || Diff(actor.Scale[1], scl.y) || Diff(actor.Scale[2], scl.z))
-            {
-                if (actor.Scale == null || actor.Scale.Length < 3) actor.Scale = new float[] { 1, 1, 1 };
-                actor.Scale[0] = scl.x; actor.Scale[1] = scl.y; actor.Scale[2] = scl.z;
-                changed = true;
-            }
-
-            obj.transform.hasChanged = false;
 
             if (changed)
             {
@@ -598,25 +1240,6 @@ namespace GameRuleEditor.Controllers
             }
 
             return changed;
-        }
-
-        private static void EnsureTagExists(string tag)
-        {
-            if (string.IsNullOrWhiteSpace(tag)) return;
-
-            foreach (string existing in UnityEditorInternal.InternalEditorUtility.tags)
-            {
-                if (existing == tag)
-                    return;
-            }
-
-            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-            SerializedProperty tagsProp = tagManager.FindProperty("tags");
-            tagsProp.InsertArrayElementAtIndex(tagsProp.arraySize);
-            tagsProp.GetArrayElementAtIndex(tagsProp.arraySize - 1).stringValue = tag;
-            tagManager.ApplyModifiedProperties();
-            tagManager.Update();
-            AssetDatabase.SaveAssets();
         }
 
         private static GameObject FindSceneObjectByName(string objectName)
@@ -660,7 +1283,7 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Add Rule");
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Add Rule");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
             if (actor.Script == null)
@@ -676,11 +1299,11 @@ namespace GameRuleEditor.Controllers
             };
 
             actor.Script.Add(newRule);
+            OrderRulesBySet(actor);
 
             EditorUtility.SetDirty(context.currentProject);
+            context.SelectScript(actor.Script.IndexOf(newRule));
             context.NotifyProjectChanged();
-
-            context.SelectScript(actor.Script.Count - 1);
         }
 
         /// <summary>
@@ -697,7 +1320,7 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Add Empty Rule");
+            Undo.RecordObjects(new Object[] { context.currentProject, context }, "Add Empty Rule");
 
             ActorJson actor = context.currentProject.actors[actorIndex];
             if (actor.Script == null)
@@ -714,11 +1337,11 @@ namespace GameRuleEditor.Controllers
             };
 
             actor.Script.Add(newRule);
+            OrderRulesBySet(actor);
 
             EditorUtility.SetDirty(context.currentProject);
+            context.SelectScript(actor.Script.IndexOf(newRule));
             context.NotifyProjectChanged();
-
-            context.SelectScript(actor.Script.Count - 1);
         }
 
         /// <summary>
@@ -821,7 +1444,7 @@ namespace GameRuleEditor.Controllers
         /// <summary>
         /// Moves a rule to a target index
         /// </summary>
-        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex)
+        public void MoveRuleToIndex(int actorIndex, int fromIndex, int toIndex, bool withinGroup = false)
         {
             if (context.currentProject == null ||
                 actorIndex < 0 ||
@@ -841,14 +1464,31 @@ namespace GameRuleEditor.Controllers
                 return;
             }
 
-            Undo.RecordObject(context.currentProject, "Move Rule");
-
             SentenceJson moved = actor.Script[fromIndex];
-            actor.Script.RemoveAt(fromIndex);
-            toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
-            actor.Script.Insert(toIndex, moved);
+            if (withinGroup)
+            {
+                string group = EditorContext.GetRuleSetId(actor, moved);
+                if (group != EditorContext.GetRuleSetId(actor, actor.Script[toIndex])) return;
+                var slots = Enumerable.Range(0, actor.Script.Count)
+                    .Where(i => EditorContext.GetRuleSetId(actor, actor.Script[i]) == group).ToList();
+                var rules = slots.Select(i => actor.Script[i]).ToList();
+                int from = slots.IndexOf(fromIndex), to = slots.IndexOf(toIndex);
+                Undo.RecordObject(context.currentProject, "Move Rule Within Set");
+                rules.RemoveAt(from);
+                rules.Insert(to, moved);
+                for (int i = 0; i < slots.Count; i++) actor.Script[slots[i]] = rules[i];
+            }
+            else
+            {
+                Undo.RecordObject(context.currentProject, "Move Rule");
+                actor.Script.RemoveAt(fromIndex);
+                toIndex = Mathf.Clamp(toIndex, 0, actor.Script.Count);
+                actor.Script.Insert(toIndex, moved);
+            }
 
             EditorUtility.SetDirty(context.currentProject);
+            context.ClearRuleElementSelection(false);
+            context.selectedScriptIndex = toIndex;
             context.NotifyProjectChanged();
             context.SelectScript(toIndex);
         }
@@ -879,8 +1519,9 @@ namespace GameRuleEditor.Controllers
             SentenceJson duplicate = new SentenceJson
             {
                 Name = string.IsNullOrEmpty(original.Name) ? "Rule (Copy)" : $"{original.Name} (Copy)",
-                When = new List<string>(original.When),
-                Do = new List<string>(original.Do)
+                When = original.When != null ? new List<string>(original.When) : new List<string>(),
+                Do = original.Do != null ? new List<string>(original.Do) : new List<string>(),
+                groupId = original.groupId
             };
 
             actor.Script.Insert(ruleIndex + 1, duplicate);

@@ -1,0 +1,427 @@
+using System;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+using GameRuleEditor.Core;
+using GameRuleEditor.CustomControls;
+
+namespace GameRuleEditor.Panels
+{
+    internal sealed class CustomPropertyList : VisualElement
+    {
+        private static readonly List<string> Types = new List<string> { "Int", "Float", "Bool", "Vector2", "Vector3" };
+        private readonly Func<GameRuleProject> getProject;
+        private readonly Func<List<CustomVariable>> getProperties;
+        private readonly System.Action onChanged;
+        private readonly string addButtonText;
+        private readonly Func<ActorJson> getOwner;
+        private readonly System.Action onRenamed;
+        private List<CustomVariable> displayedProperties;
+        private int displayedCount;
+
+        // ── Property drag (spacer-based) ──
+        private bool isDraggingProp;
+        private Vector2 dragStartPosProp;
+        private VisualElement draggedPropItem;
+        private int draggedPropIndex = -1;
+        private VisualElement propDragSpacer;
+
+        public CustomPropertyList(Func<GameRuleProject> getProject, Func<List<CustomVariable>> getProperties,
+            System.Action onChanged = null, string addButtonText = "+ Add Property",
+            Func<ActorJson> getOwner = null, System.Action onRenamed = null)
+        {
+            this.getProject = getProject;
+            this.getProperties = getProperties;
+            this.onChanged = onChanged;
+            this.addButtonText = addButtonText;
+            this.getOwner = getOwner;
+            this.onRenamed = onRenamed;
+            AddToClassList("settings-section-content");
+            style.paddingLeft = 15;
+            style.marginTop = 5;
+            style.marginBottom = 8;
+
+            RegisterCallback<AttachToPanelEvent>(_ => Undo.undoRedoPerformed += Rebuild);
+            RegisterCallback<DetachFromPanelEvent>(_ => Undo.undoRedoPerformed -= Rebuild);
+            Rebuild();
+        }
+
+        public void Refresh()
+        {
+            var properties = getProperties();
+            if (!ReferenceEquals(properties, displayedProperties) || (properties?.Count ?? 0) != displayedCount)
+                Rebuild();
+        }
+
+        private void Rebuild()
+        {
+            Clear();
+            var properties = getProperties();
+            displayedProperties = properties;
+            displayedCount = properties?.Count ?? 0;
+            if (properties == null) return;
+            var content = this;
+            if (properties.Count > 0)
+            {
+                for (int i = 0; i < properties.Count; i++)
+                {
+                    int idx = i;
+                    var property = properties[i];
+
+                    var row = new VisualElement();
+                    row.AddToClassList("custom-property-row");
+                    var header = new VisualElement();
+                    header.AddToClassList("custom-property-header");
+                    var nameGroup = new VisualElement();
+                    nameGroup.AddToClassList("custom-property-name-group");
+
+                    // Drag handle
+                    var handle = new Label("\u2261");
+                    handle.tooltip = "Drag to reorder";
+                    handle.pickingMode = PickingMode.Position;
+                    handle.style.fontSize = 16;
+                    handle.style.width = 16;
+                    handle.style.flexShrink = 0;
+                    handle.style.marginLeft = 0;
+                    handle.style.unityTextAlign = TextAnchor.MiddleCenter;
+                    handle.style.color = GameRuleTheme.SubtleText;
+                    handle.style.marginRight = 4;
+                    nameGroup.Add(handle);
+                    var nameField = new TextField { value = property.name, isDelayed = true };
+                    nameField.AddToClassList("custom-property-name");
+                    HideTextFieldLabel(nameField);
+                    var nameError = GameRuleTheme.CreateNameError();
+                    GameRuleTheme.ShowNameError(nameError,
+                        GameRuleProject.PropertyNameError(property.name, getOwner?.Invoke(), properties, property));
+                    nameField.RegisterValueChangedCallback(evt =>
+                    {
+                        string name = evt.newValue.Trim();
+                        string error = GameRuleProject.PropertyNameError(name, getOwner?.Invoke(), properties, property);
+                        GameRuleTheme.ShowNameError(nameError, error);
+                        if (error != null)
+                        {
+                            nameField.SetValueWithoutNotify(property.name);
+                            return;
+                        }
+                        if (name == property.name) return;
+                        Undo.IncrementCurrentGroup();
+                        int group = Undo.GetCurrentGroup();
+                        Undo.SetCurrentGroupName("Rename Custom Property");
+                        try
+                        {
+                            UpdateProperty(() => getProject().RenameCustomProperty(getOwner?.Invoke(), property, name));
+                            onRenamed?.Invoke();
+                        }
+                        finally { Undo.CollapseUndoOperations(group); }
+                    });
+                    nameGroup.Add(nameField);
+                    header.Add(nameGroup);
+
+                    int typeIndex = Types.FindIndex(type => string.Equals(type, property.type, System.StringComparison.OrdinalIgnoreCase));
+                    var typeOptions = new List<TooltipDropdownOption>();
+                    foreach (var type in Types)
+                        typeOptions.Add(new TooltipDropdownOption(type, type, "Use the " + type + " data type."));
+                    var typeField = new TooltipPopupField(typeOptions, Types[typeIndex >= 0 ? typeIndex : 1],
+                        "Choose the property's data type.", RuleDropdownPalette.Property);
+                    typeField.AddToClassList("parameter-selector");
+                    typeField.AddToClassList("custom-property-type");
+                    typeField.AddToClassList("button-property-picker");
+                    typeField.AddToClassList("studio-compact-selector");
+                    var controls = new VisualElement();
+                    controls.AddToClassList("custom-property-controls");
+                    var valueContainer = new VisualElement();
+                    void RefreshValueLayout()
+                    {
+                        bool vector = property.type == "vector2" || property.type == "vector3";
+                        header.EnableInClassList("custom-property-vector-header", vector);
+                        valueContainer.RemoveFromHierarchy();
+                        valueContainer.EnableInClassList("custom-property-vector", vector);
+                        valueContainer.EnableInClassList("custom-property-scalar", !vector);
+                        valueContainer.EnableInClassList("custom-property-bool", property.type == "bool");
+                        if (vector) row.Add(valueContainer);
+                        else controls.Insert(0, valueContainer);
+                        AddValueField(valueContainer, property);
+                    }
+                    typeField.RegisterValueChangedCallback(value =>
+                    {
+                        UpdateProperty(() =>
+                        {
+                            property.type = value.ToLowerInvariant();
+                            if (property.type == "vector2" && (property.arrayValue == null || property.arrayValue.Length != 2))
+                                property.arrayValue = new float[2];
+                            if (property.type == "vector3" && (property.arrayValue == null || property.arrayValue.Length != 3))
+                                property.arrayValue = new float[3];
+                        });
+                        RefreshValueLayout();
+                    });
+                    controls.Add(typeField);
+
+                    // Delete button
+                    var delBtn = new Button(() =>
+                    {
+                        UpdateProperty(() => properties.RemoveAt(idx));
+                        Refresh();
+                    }) { text = "×", tooltip = "Remove Property" };
+                    delBtn.AddToClassList("button-danger");
+                    delBtn.AddToClassList("button-danger-icon");
+                    controls.Add(delBtn);
+                    header.Add(controls);
+                    row.Add(header);
+                    row.Add(nameError);
+                    RefreshValueLayout();
+
+                    // Spacer-based drag registration
+                    handle.RegisterCallback<PointerDownEvent>(evt => OnPropDragStart(evt, row, idx, content));
+                    row.RegisterCallback<PointerMoveEvent>(evt => OnPropDragMove(evt, row));
+                    row.RegisterCallback<PointerUpEvent>(evt => OnPropDragEnd(evt, row, content));
+                    row.RegisterCallback<PointerCaptureOutEvent>(evt => OnPropDragEnd(evt, row, content));
+
+                    content.Add(row);
+                }
+            }
+
+            var addBtn = new Button(() =>
+            {
+                string name = "NewProp";
+                int suffix = 2;
+                while (GameRuleProject.PropertyNameError(name, getOwner?.Invoke(), properties) != null)
+                    name = "NewProp" + suffix++;
+                UpdateProperty(() => properties.Add(new CustomVariable { name = name, type = "float" }));
+                Refresh();
+            }) { text = addButtonText };
+            addBtn.AddToClassList("button-property-picker");
+            addBtn.style.marginTop = 10;
+            addBtn.style.paddingTop = 4;
+            addBtn.style.paddingBottom = 4;
+            addBtn.style.alignSelf = Align.Center;
+            content.Add(addBtn);
+        }
+
+        private void OnPropDragStart(PointerDownEvent evt, VisualElement row, int index, VisualElement content)
+        {
+            if (evt.button != 0) return;
+
+            isDraggingProp = true;
+            dragStartPosProp = evt.position;
+            draggedPropItem = row;
+            draggedPropIndex = index;
+
+            propDragSpacer = new VisualElement();
+            propDragSpacer.style.height = Mathf.Max(24f, row.layout.height);
+            propDragSpacer.style.marginBottom = row.resolvedStyle.marginBottom;
+            propDragSpacer.style.marginTop = row.resolvedStyle.marginTop;
+            propDragSpacer.style.backgroundColor = GameRuleTheme.Field;
+            propDragSpacer.style.borderTopWidth = 2;
+            propDragSpacer.style.borderBottomWidth = 2;
+            propDragSpacer.style.borderLeftWidth = 2;
+            propDragSpacer.style.borderRightWidth = 2;
+            propDragSpacer.style.borderTopColor = GameRuleTheme.PropertyAccent;
+            propDragSpacer.style.borderBottomColor = GameRuleTheme.PropertyAccent;
+            propDragSpacer.style.borderLeftColor = GameRuleTheme.PropertyAccent;
+            propDragSpacer.style.borderRightColor = GameRuleTheme.PropertyAccent;
+            propDragSpacer.style.borderTopLeftRadius = 3;
+            propDragSpacer.style.borderTopRightRadius = 3;
+            propDragSpacer.style.borderBottomLeftRadius = 3;
+            propDragSpacer.style.borderBottomRightRadius = 3;
+
+            int insertAt = content.IndexOf(row);
+            if (insertAt < 0) return;
+            content.Insert(insertAt, propDragSpacer);
+
+            row.style.position = Position.Absolute;
+            row.style.top = row.layout.y;
+            row.style.left = row.layout.x;
+            row.style.width = row.layout.width;
+            row.style.opacity = 0.8f;
+            row.BringToFront();
+
+            row.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnPropDragMove(PointerMoveEvent evt, VisualElement row)
+        {
+            if (!isDraggingProp || row != draggedPropItem) return;
+
+            float diffY = evt.position.y - dragStartPosProp.y;
+            row.style.translate = new Translate(0f, diffY, 0f);
+
+            var content = propDragSpacer?.parent;
+            if (content == null) return;
+
+            float draggedCenterY = row.layout.y + diffY + row.layout.height / 2f;
+
+            // Determine target logical index (skip row, spacer, and the Add button)
+            int newTargetIndex = 0;
+            foreach (var child in content.Children())
+            {
+                if (child == row || child == propDragSpacer || child is Button) continue;
+                if (draggedCenterY < child.layout.y + child.layout.height / 2f) break;
+                newTargetIndex++;
+            }
+
+            int currentSpacerIndex = 0;
+            foreach (var child in content.Children())
+            {
+                if (child == propDragSpacer) break;
+                if (child == row || child is Button) continue;
+                currentSpacerIndex++;
+            }
+
+            if (newTargetIndex != currentSpacerIndex)
+            {
+                content.Remove(propDragSpacer);
+                int physicalInsert = 0;
+                int logical = 0;
+                foreach (var child in content.Children())
+                {
+                    if (logical == newTargetIndex) break;
+                    if (child != row && !(child is Button)) logical++;
+                    physicalInsert++;
+                }
+                content.Insert(physicalInsert, propDragSpacer);
+            }
+
+            evt.StopPropagation();
+        }
+
+        private void OnPropDragEnd(EventBase evt, VisualElement row, VisualElement content)
+        {
+            if (!isDraggingProp || row != draggedPropItem) return;
+
+            int originalIndex = draggedPropIndex;
+            isDraggingProp = false;
+            draggedPropItem = null;
+            draggedPropIndex = -1;
+
+            IPointerEvent pointerEvt = evt as IPointerEvent;
+            if (pointerEvt != null) row.ReleasePointer(pointerEvt.pointerId);
+
+            row.style.translate = new Translate(0f, 0f, 0f);
+            row.style.opacity = StyleKeyword.Null;
+            row.style.position = StyleKeyword.Null;
+            row.style.top = StyleKeyword.Null;
+            row.style.left = StyleKeyword.Null;
+            row.style.width = StyleKeyword.Null;
+
+            // Read new index from spacer position before removing it
+            int newIndex = originalIndex;
+            if (propDragSpacer != null && propDragSpacer.parent != null)
+            {
+                newIndex = 0;
+                foreach (var child in content.Children())
+                {
+                    if (child == propDragSpacer) break;
+                    if (child == row || child is Button) continue;
+                    newIndex++;
+                }
+                propDragSpacer.parent.Remove(propDragSpacer);
+                propDragSpacer = null;
+            }
+
+            if (!(evt is PointerUpEvent))
+            {
+                Rebuild();
+                return;
+            }
+
+            var properties = getProperties();
+            int clamped = Mathf.Clamp(newIndex, 0, (properties?.Count ?? 1) - 1);
+            if (properties != null && properties.Count > 1 &&
+                originalIndex >= 0 && originalIndex < properties.Count &&
+                originalIndex != clamped)
+            {
+                var focused = this.focusController?.focusedElement;
+                if (focused != null) focused.Blur();
+
+                UpdateProperty(() =>
+                {
+                    var property = properties[originalIndex];
+                    properties.RemoveAt(originalIndex);
+                    properties.Insert(clamped, property);
+                });
+            }
+
+            Rebuild();
+            evt.StopPropagation();
+        }
+
+        /// <summary>Hides the label element of a TextField so it doesn't push the input area left.</summary>
+        private static void HideTextFieldLabel(TextField field)
+        {
+            if (field.labelElement == null) return;
+            var s = field.labelElement.style;
+            s.display = DisplayStyle.None;
+            s.width = 0;
+            s.minWidth = 0;
+            s.marginLeft = 0; s.marginRight = 0; s.marginTop = 0; s.marginBottom = 0;
+            s.paddingLeft = 0; s.paddingRight = 0; s.paddingTop = 0; s.paddingBottom = 0;
+        }
+
+        private void UpdateProperty(System.Action update)
+        {
+            var project = getProject();
+            if (project == null) return;
+            Undo.RecordObject(project, "Edit Custom Property");
+            update();
+            EditorUtility.SetDirty(project);
+            onChanged?.Invoke();
+        }
+
+        private void AddValueField(VisualElement container, CustomVariable property)
+        {
+            container.Clear();
+            switch (property.type)
+            {
+                case "int":
+                    var integer = new IntegerField { value = property.intValue, style = { marginLeft = 0, marginRight = 0 } };
+                    integer.RegisterValueChangedCallback(evt => UpdateProperty(() => property.intValue = evt.newValue));
+                    container.Add(integer);
+                    break;
+                case "bool":
+                    var toggle = new Toggle { value = property.boolValue };
+                    toggle.RegisterValueChangedCallback(evt => UpdateProperty(() => property.boolValue = evt.newValue));
+                    container.Add(toggle);
+                    break;
+                case "vector2":
+                case "vector3":
+                    AddVectorComponents(container, property, property.type == "vector2" ? 2 : 3);
+                    break;
+                default:
+                    var number = new FloatField { style = { marginLeft = 0, marginRight = 0 } };
+                    number.RegisterRoundedChange(valueFromField => UpdateProperty(() => property.floatValue = valueFromField));
+                    number.SetValueWithoutNotify(property.floatValue);
+                    container.Add(number);
+                    break;
+            }
+        }
+
+        private void AddVectorComponents(VisualElement container, CustomVariable property, int count)
+        {
+            var axes = new[] { "X", "Y", "Z" };
+            for (int i = 0; i < count; i++)
+            {
+                int axis = i;
+                var component = new VisualElement();
+                component.AddToClassList("custom-property-axis");
+                if (axis == count - 1) component.AddToClassList("custom-property-axis-last");
+                component.Add(new Label(axes[axis]));
+                var field = new FloatField();
+                field.RegisterRoundedChange(value => UpdateProperty(() =>
+                {
+                    var values = new float[count];
+                    if (property.arrayValue != null)
+                        Array.Copy(property.arrayValue, values, Math.Min(count, property.arrayValue.Length));
+                    values[axis] = value;
+                    property.arrayValue = values;
+                }));
+                if (property.arrayValue != null && axis < property.arrayValue.Length)
+                    field.SetValueWithoutNotify(property.arrayValue[axis]);
+                component.Add(field);
+                container.Add(component);
+            }
+        }
+
+    }
+}

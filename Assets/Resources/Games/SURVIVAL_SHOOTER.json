@@ -1,7 +1,7 @@
 {
     "GameName": "SURVIVAL_SHOOTER",
     "ScreenResolution": [1920, 1080],
-    "CameraPosition": [0, 6, -7],
+    "CameraPosition": [0, 5.49, -7],
     "CameraRotation": [30, 0, 0],
     "SunPosition": [3.3899, 10.902, -5.8255],
     "SunRotation": [22.704, 65.875, -175.012],
@@ -9,6 +9,7 @@
     "SunAmbientColor": [170, 180, 200],
     "BackgroundColor": [0, 0, 0],
     "Gravity": [0, -9.81, 0],
+    "SoundTrack": "Assets/Resources/Audio/Originals/Music/BackgroundMusic.mp3",
     "CustomVariables": [
         {"name": "Score", "type": "float", "floatValue": 0}
     ],
@@ -25,7 +26,17 @@
             "Active": true,
             "PrefabName": "Environment",
             "Tag": "Obstacle",
-            "IconColorHex": ""
+            "IconColorHex": "",
+            "Position": [0.0, 0.0, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                }
+            ]
         },
         {
             "ActorName": "Player",
@@ -34,29 +45,76 @@
             "Tag": "Player",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 0.0],
-            "Properties": [
-                "speed=5",
-                "rotSpeed=360",
-                "lastHealth=100.0",
-                "health=100.0",
-                "offsetCam=7",
-                "offsetX=0.28",
-                "offsetY=0.3",
-                "offsetZ=0.7",
-                "moving=0"
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "AngularVelocity": [0.0, 0.0, 0.0],
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 5.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "rotSpeed",
+                    "type": "float",
+                    "floatValue": 360.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "lastHealth",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetCam",
+                    "type": "float",
+                    "floatValue": 7.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetX",
+                    "type": "float",
+                    "floatValue": 0.2800000011920929,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetY",
+                    "type": "float",
+                    "floatValue": 0.30000001192092898,
+                    "boolValue": false
+                },
+                {
+                    "name": "offsetZ",
+                    "type": "float",
+                    "floatValue": 0.699999988079071,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "RotateTo(this.rotSpeed,#MouseWorld.x,#MouseWorld.y,#MouseWorld.z,this.x,this.y,this.z)",
                         "Edit(#CameraPosition.x,this.x)",
                         "Edit(#CameraPosition.z,this.z-this.offsetCam)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Keyboard(RightArrow,press)"
                     ],
@@ -64,10 +122,10 @@
                         "Move(this.speed, 0, 90, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Keyboard(LeftArrow,press)"
                     ],
@@ -75,10 +133,10 @@
                         "Move(this.speed, 0, -90, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Keyboard(UpArrow,press)"
                     ],
@@ -86,10 +144,10 @@
                         "Move(this.speed, 0, 0, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "Keyboard(DownArrow,press)"
                     ],
@@ -97,20 +155,20 @@
                         "Move(this.speed, 0, 180, 0)",
                         "Edit(this.moving,1)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Keyboard(RightArrow,up) OR Keyboard(LeftArrow,up) OR Keyboard(UpArrow,up) OR Keyboard(DownArrow,up)"
                     ],
                     "Do": [
                         "Edit(this.moving,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 7",
                     "When": [
                         "Collision(Hellephant)"
                     ],
@@ -118,10 +176,10 @@
                         "Edit(this.health,this.health-Hellephant.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 8",
                     "When": [
                         "Collision(ZomBear)"
                     ],
@@ -129,10 +187,10 @@
                         "Edit(this.health,this.health-ZomBear.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 9",
                     "When": [
                         "Collision(ZomBunny)"
                     ],
@@ -140,10 +198,10 @@
                         "Edit(this.health,this.health-ZomBunny.damage)",
                         "PlaySound(PlayerHurt)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 10",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -153,20 +211,20 @@
                         "Edit(this.moving,0)",
                         "Edit(this.speed,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 11",
                     "When": [
                         "Compare(this.health==this.lastHealth)"
                     ],
                     "Do": [
                         "Edit(DamageCanvas.Active,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 12",
                     "When": [
                         "Compare(this.health<this.lastHealth)"
                     ],
@@ -174,10 +232,10 @@
                         "Edit(DamageCanvas.Active,1)",
                         "Edit(this.lastHealth,this.health)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 13",
                     "When": [
                         "Touch(press,false)"
                     ],
@@ -188,65 +246,99 @@
                         "PlaySound(PlayerGunShot)",
                         "PlayParticles(GunBarrelEnd)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 14",
                     "When": [
                         "Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Move)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 15",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health>0)"
                     ],
                     "Do": [
                         "Animate(Idle)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 16",
                     "When": [
                         "NOT Check(this.moving) AND Compare(this.health<=0)"
                     ],
                     "Do": [
                         "Animate(Death)"
                     ],
-                    "groupId": ""
+                    "groupId": "g754e79de"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "g754e79de"
                 }
             ]
         },
         {
             "ActorName": "Hellephant",
-            "Active": false,
+            "Active": true,
             "PrefabName": "Hellephant",
             "Tag": "Hellephant",
             "IconColorHex": "",
             "Position": [0.0, 0.0, 32.0],
-            "Rotation": [0.0, -130.0, 0.0],
-            "Properties": [
-                "speed=2",
-                "health=300",
-                "damage=0.3",
-                "moving=0"
+            "Rotation": [0.0, 230.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
+            "Drag": 3.4028234663852887e38,
+            "OverrideDrag": true,
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 2.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 300.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.30000001192092898,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "Do": [
                         "Edit(this.moving,1)",
                         "NavigateTo(this.speed,Player.x,Player.y,Player.z)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 2",
                     "When": [
                         "Compare(Player.health<0)"
                     ],
@@ -254,10 +346,10 @@
                         "Edit(this.moving,0)",
                         "Edit(this.speed,0)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 3",
                     "When": [
                         "Collision(Bullet)"
                     ],
@@ -266,10 +358,10 @@
                         "PlaySound(HellephantHurt)",
                         "PlayParticles(HitParticles)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 4",
                     "When": [
                         "Compare(this.health<=0)"
                     ],
@@ -278,27 +370,39 @@
                         "Spawn(HellephantDead,this)",
                         "Delete(this)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 5",
                     "When": [
                         "NOT Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Idle)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
                 },
                 {
-                    "Name": "",
+                    "Name": "Rule 6",
                     "When": [
                         "Check(this.moving)"
                     ],
                     "Do": [
                         "Animate(Move)"
                     ],
-                    "groupId": ""
+                    "groupId": "g3a9190cf"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Properties",
+                    "name": "Custom Properties",
+                    "id": ""
+                },
+                {
+                    "type": "Rules",
+                    "name": "Rules Set",
+                    "id": "g3a9190cf"
                 }
             ]
         },
@@ -308,11 +412,30 @@
             "PrefabName": "ZomBear",
             "Tag": "ZomBear",
             "IconColorHex": "",
-            "Properties": [
-                "speed=3",
-                "health=200",
-                "damage=0.2",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 3.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 200.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.20000000298023225,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -386,11 +509,30 @@
             "PrefabName": "ZomBunny",
             "Tag": "ZomBunny",
             "IconColorHex": "",
-            "Properties": [
-                "speed=4",
-                "health=100",
-                "damage=0.15",
-                "moving=0"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 4.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "health",
+                    "type": "float",
+                    "floatValue": 100.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 0.15000000596046449,
+                    "boolValue": false
+                },
+                {
+                    "name": "moving",
+                    "type": "float",
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {
@@ -483,13 +625,14 @@
             "ActorName": "ZomBearSpawner",
             "Active": true,
             "PrefabName": "ZomBearSpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [22.5, 0.0, 15.0],
-            "Rotation": [0.0, -120.0, 0.0],
+            "Rotation": [0.0, 240.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Timer(2)"
                     ],
@@ -504,20 +647,28 @@
             "ActorName": "ZomBunnySpawner",
             "Active": true,
             "PrefabName": "ZomBunnySpawner",
-            "Tag": "",
+            "Tag": "Untagged",
             "IconColorHex": "",
             "Position": [-20.5, 0.0, 12.5],
             "Rotation": [0.0, 130.0, 0.0],
+            "Scale": [1.0, 1.0, 1.0],
             "Script": [
                 {
-                    "Name": "",
+                    "Name": "Rule 1",
                     "When": [
                         "Timer(3)"
                     ],
                     "Do": [
                         "Spawn(ZomBunny,this)"
                     ],
-                    "groupId": ""
+                    "groupId": "g799734ee"
+                }
+            ],
+            "Components": [
+                {
+                    "type": "Rules",
+                    "name": "Rules",
+                    "id": "g799734ee"
                 }
             ]
         },
@@ -612,9 +763,19 @@
             "Tag": "Bullet",
             "IconColorHex": "",
             "Scale": [0.05000000074505806, 0.05000000074505806, 0.05000000074505806],
-            "Properties": [
-                "speed=50",
-                "damage=5"
+            "CustomProperties": [
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "floatValue": 50.0,
+                    "boolValue": false
+                },
+                {
+                    "name": "damage",
+                    "type": "float",
+                    "floatValue": 5.0,
+                    "boolValue": false
+                }
             ],
             "Script": [
                 {

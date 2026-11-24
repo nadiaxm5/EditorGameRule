@@ -20,10 +20,41 @@ namespace GameRuleEditor.Windows
         private ProjectController controller;
 
         private VisualElement actorListContainer;
+        private ScrollView actorScrollView;
         private List<VisualElement> actorItems = new List<VisualElement>();
         private Label actorCountLabel;
+        private const string PendingPlayProjectKey = "GameRule.PendingPlayGenerationProject";
 
-        [MenuItem("GameRule/Editor")]
+        [InitializeOnLoadMethod]
+        private static void InitializePendingPlayGeneration()
+        {
+            EditorApplication.update -= ContinuePendingPlayGeneration;
+            EditorApplication.update += ContinuePendingPlayGeneration;
+        }
+
+        private static void ContinuePendingPlayGeneration()
+        {
+            string projectGuid = SessionState.GetString(PendingPlayProjectKey, "");
+            if (string.IsNullOrEmpty(projectGuid) || EditorApplication.isPlayingOrWillChangePlaymode ||
+                EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            SessionState.EraseString(PendingPlayProjectKey);
+            var ctx = AssetDatabase.LoadAssetAtPath<EditorContext>(GameRuleLayoutManager.ContextPath);
+            if (ctx?.currentProject == null ||
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(ctx.currentProject)) != projectGuid) return;
+            try
+            {
+                // Persist the request across any domain reload caused by cancelling Play.
+                EditorPrefs.SetBool("GameRule_AutoPlayAfterGenerate", true);
+                GameRuleLayoutManager.GetOrCreateController(ctx).GenerateScene();
+            }
+            catch (System.Exception ex)
+            {
+                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+                Debug.LogError($"Failed to generate scene before Play: {ex.Message}");
+            }
+        }
+
+        [MenuItem("GameRule/GameRule Studio Setup", priority = 50)]
         public static void OpenEditor()
         {
             GameRuleLayoutManager.OpenLayout();
@@ -77,15 +108,22 @@ namespace GameRuleEditor.Windows
             {
                 if (context?.currentProject != null && controller != null)
                 {
-                    // Check if the scene is already generated (same name + GameManager exists).
-                    // Also require every actor to have a GameObject in the scene: adding an actor only
-                    // touches project data, so without this an actor added after generation would be
-                    // missing on Play (the scene is not regenerated).
+                    // Apply the project soundtrack even when the existing scene can be
+                    // reused and no regeneration is necessary.
+                    controller.SyncSoundTrackToScene(false);
+
+                    // Object presence alone cannot detect edited rules or initial values.
+                    // Reuse only the scene generated from this exact runtime descriptor.
                     var currentScene = EditorSceneManager.GetActiveScene();
-                    bool sceneAlreadyGenerated =
-                        currentScene.name == context.currentProject.projectName
-                        && GameObject.Find("GameManager") != null
-                        && AllActorsPresentInScene();
+                    // Unity can clear the name of an unsaved scene when scripts reload.
+                    var managerObject = GameObject.Find("GameManager");
+                    var generatedManager = managerObject != null ? managerObject.GetComponent<GameManager>() : null;
+                    string projectName = context.currentProject.projectName;
+                    bool sceneAlreadyGenerated = generatedManager != null
+                        && (currentScene.name == projectName ||
+                            (string.IsNullOrEmpty(currentScene.name) && generatedManager.GameName == projectName))
+                        && AllActorsPresentInScene()
+                        && controller.MatchesGeneratedScene();
 
                     if (sceneAlreadyGenerated)
                     {
@@ -94,22 +132,9 @@ namespace GameRuleEditor.Windows
                     }
 
                     // Cancel Play mode — we need to generate + compile first
+                    SessionState.SetString(PendingPlayProjectKey,
+                        AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(context.currentProject)));
                     EditorApplication.isPlaying = false;
-
-                    // Delay generation to next editor frame so Play mode cancellation takes effect
-                    EditorApplication.delayCall += () =>
-                    {
-                        try
-                        {
-                            controller.GenerateScene();
-                            // Flag: after scripts compile and attach, auto-enter Play mode
-                            EditorPrefs.SetBool("GameRule_AutoPlayAfterGenerate", true);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            Debug.LogError($"Failed to generate scene before Play: {ex.Message}");
-                        }
-                    };
                 }
             }
             // Rebuild UI when returning to edit mode
@@ -151,6 +176,7 @@ namespace GameRuleEditor.Windows
         {
             var root = rootVisualElement;
             root.Clear();
+            GameRuleTheme.Configure(root, BuildUI);
             root.AddToClassList("hierarchy-root");
 
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
@@ -165,7 +191,7 @@ namespace GameRuleEditor.Windows
             }
 
             root.style.flexGrow = 1;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // #252526
+            root.style.backgroundColor = GameRuleTheme.Background;
 
             //BuildHeader(root);
             BuildContent(root);
@@ -175,30 +201,28 @@ namespace GameRuleEditor.Windows
         private void BuildHeader(VisualElement root)
         {
             var header = new VisualElement();
-            header.style.height = 30;
-            header.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+            header.style.minHeight = 30;
+            header.style.flexShrink = 0;
+            header.style.backgroundColor = GameRuleTheme.InsetSurface;
             header.style.borderBottomWidth = 1;
-            header.style.borderBottomColor = new Color(0.102f, 0.102f, 0.102f);
+            header.style.borderBottomColor = GameRuleTheme.Border;
             header.style.justifyContent = Justify.Center;
             header.style.paddingLeft = 8;
             header.style.flexDirection = FlexDirection.Row;
+            header.style.flexWrap = Wrap.Wrap;
             header.style.alignItems = Align.Center;
 
             var projectMenu = new ToolbarMenu();
-            projectMenu.text = "Project";
-            projectMenu.menu.AppendAction("New Project", a => OnNewProject());
-            projectMenu.menu.AppendAction("Open Project", a => OnOpenProject());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Import JSON", a => OnImportJson());
-            projectMenu.menu.AppendAction("Export to JSON", a => OnExportJson());
-            projectMenu.menu.AppendSeparator();
-            projectMenu.menu.AppendAction("Close Project", a => OnCloseProject());
+            projectMenu.text = "Project Actions";
+            GameRuleTopMenuActions.PopulateProjectMenu(projectMenu.menu);
+            var jsonMenu = new ToolbarMenu { text = "JSON Actions" };
+            GameRuleTopMenuActions.PopulateJsonMenu(jsonMenu.menu);
 
             projectMenu.style.unityTextAlign = TextAnchor.MiddleLeft;
             projectMenu.style.overflow = Overflow.Hidden;
             projectMenu.style.textOverflow = TextOverflow.Ellipsis;
             projectMenu.style.fontSize = 11;
-            projectMenu.style.color = new Color(0.61f, 0.64f, 0.69f); // #9ca3af
+            projectMenu.style.color = GameRuleTheme.MutedText;
             projectMenu.style.maxWidth = 220;
             projectMenu.style.marginRight = 8;
             projectMenu.style.backgroundColor = Color.clear;
@@ -211,7 +235,7 @@ namespace GameRuleEditor.Windows
             var label = new Label("Cast");
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
             label.style.fontSize = 12;
-            label.style.color = new Color(0.898f, 0.906f, 0.922f);
+            label.style.color = GameRuleTheme.Text;
             header.Add(label);
             */
 /*            
@@ -222,110 +246,30 @@ namespace GameRuleEditor.Windows
             saveBtn.style.backgroundImage = iconoGuardar;
 */
             header.Add(projectMenu);
+            header.Add(jsonMenu);
 //            header.Add(saveBtn);
             root.Add(header);
         }
 
-         private void OnNewProject()
-        {
-            string newPath = EditorUtility.SaveFilePanelInProject("Create New GameRule Project", "NewProject", "asset", "Choose where to save the new project");
-            if (!string.IsNullOrEmpty(newPath))
-            {
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-                
-                string projectName = Path.GetFileNameWithoutExtension(newPath);
-                controller.CreateNewProject(projectName);
-                AssetDatabase.CreateAsset(context.currentProject, newPath);
-                AssetDatabase.SaveAssets();
-            }
-        }
-
-        private void OnOpenProject()
-        {
-            string path = EditorUtility.OpenFilePanel("Open Project", Application.dataPath, "asset");
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (path.StartsWith(Application.dataPath))
-                {
-                    path = "Assets" + path.Substring(Application.dataPath.Length);
-                }
-                var project = AssetDatabase.LoadAssetAtPath<GameRuleProject>(path);
-                if (project != null)
-                {
-                    if (controller == null)
-                        controller = GameRuleLayoutManager.GetOrCreateController(context);
-                    controller.LoadProject(project);
-                }
-                else
-                {
-                    EditorUtility.DisplayDialog("Error", "Selected file is not a GameRule Project.", "OK");
-                }
-            }
-        }
-
-        private void OnImportJson()
-        {
-            if (controller == null)
-                controller = GameRuleLayoutManager.GetOrCreateController(context);
-
-            string jsonPath = EditorUtility.OpenFilePanel("Import JSON", Application.dataPath + "/Resources/Games", "json");
-            if (string.IsNullOrEmpty(jsonPath)) return;
-
-            controller.ImportJsonAsProject(jsonPath);
-            Rebuild();
-        }
-
-        private void OnExportJson()
-        {
-            if (context?.currentProject == null) return;
-            string path = EditorUtility.SaveFilePanel("Export to JSON", Application.dataPath + "/Resources/Games", context.currentProject.projectName + ".json", "json");
-            if (!string.IsNullOrEmpty(path))
-            {
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-                controller.SaveProjectToJson(path);
-                EditorUtility.DisplayDialog("Success", "Project exported successfully", "OK");
-            }
-        }
-
-        private void OnCloseProject()
-        {
-            if (context == null) return;
-            context.currentProject = null;
-            context.CloseInspector();
-            Rebuild();
-        }
-
-        private void OnSaveProject()
-        {
-            if (context?.currentProject != null)
-            {
-                EditorUtility.SetDirty(context.currentProject);
-                AssetDatabase.SaveAssets();
-
-                string gamesFolder = Path.Combine(Application.dataPath, "Resources/Games");
-                if (!Directory.Exists(gamesFolder))
-                    Directory.CreateDirectory(gamesFolder);
-
-                string jsonPath = Path.Combine(gamesFolder, context.currentProject.projectName + ".json");
-                if (controller == null)
-                    controller = GameRuleLayoutManager.GetOrCreateController(context);
-
-                controller.SaveProjectToJson(jsonPath);
-                AssetDatabase.Refresh();
-                Debug.Log($"Project saved and JSON exported: {jsonPath}");
-            }
-        }
+        private void OnNewProject() => GameRuleTopMenuActions.NewProject();
+        private void OnOpenProject() => GameRuleTopMenuActions.OpenProject();
+        private void OnImportJson() => GameRuleTopMenuActions.ImportJson();
+        private void OnExportJson() => GameRuleTopMenuActions.ExportJson();
+        private void OnCloseProject() => GameRuleTopMenuActions.CloseProject();
+        private void OnSaveProject() => GameRuleTopMenuActions.SaveProject();
 
         // ── Content (actor list) ────────
         private void BuildContent(VisualElement root)
         {
-            var scrollView = new ScrollView();
+            var scrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+            actorScrollView = scrollView;
             scrollView.style.flexGrow = 1;
-            scrollView.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f); // panelBackground
+            scrollView.style.backgroundColor = GameRuleTheme.Background;
+            scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            scrollView.contentContainer.style.flexGrow = 1;
 
             actorListContainer = new VisualElement();
+            actorListContainer.style.flexShrink = 0;
             actorListContainer.style.paddingTop = 4;
             actorListContainer.style.paddingBottom = 4;
             actorListContainer.style.paddingLeft = 4;
@@ -333,6 +277,7 @@ namespace GameRuleEditor.Windows
             scrollView.Add(actorListContainer);
 
             root.Add(scrollView);
+            scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => UpdateActorListWidth());
 
             RefreshList();
         }
@@ -378,26 +323,43 @@ namespace GameRuleEditor.Windows
             
             var addActorBtn = new Button(OnAddActor);
             addActorBtn.text = "+ Add Actor";
+            addActorBtn.AddToClassList("button-primary");
             addActorBtn.style.marginTop = 10;
             addActorBtn.style.marginBottom = 10;
-            addActorBtn.style.paddingTop = 6;
-            addActorBtn.style.paddingBottom = 6;
-            addActorBtn.style.backgroundColor = new Color(0.18f, 0.18f, 0.18f);
-            addActorBtn.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary
-            addActorBtn.style.borderTopWidth = 1;
-            addActorBtn.style.borderBottomWidth = 1;
-            addActorBtn.style.borderLeftWidth = 1;
-            addActorBtn.style.borderRightWidth = 1;
-            addActorBtn.style.borderTopColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderBottomColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderLeftColor = new Color(0.1f, 0.1f, 0.1f);
-            addActorBtn.style.borderRightColor = new Color(0.1f, 0.1f, 0.1f);
             addActorBtn.style.marginLeft = 20;
             actorListContainer.Add(addActorBtn);
 
             if (context.selectedActorIndex >= 0 && context.selectedActorIndex < actorItems.Count)
                 HighlightItem(context.selectedActorIndex);
 
+            actorListContainer.schedule.Execute(UpdateActorListWidth);
+
+        }
+
+        private void UpdateActorListWidth()
+        {
+            if (actorListContainer?.panel == null || actorScrollView == null) return;
+
+            float width = actorScrollView.contentViewport.layout.width;
+            foreach (var row in actorListContainer.Children())
+            {
+                var label = row.Q<Label>(className: "cast-item-name");
+                if (label == null) continue;
+                float textWidth = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined,
+                    0, VisualElement.MeasureMode.Undefined).x;
+                var rowStyle = row.resolvedStyle;
+                var labelStyle = label.resolvedStyle;
+                float rowWidth = textWidth + labelStyle.paddingLeft + labelStyle.paddingRight
+                    + labelStyle.marginLeft + labelStyle.marginRight
+                    + rowStyle.paddingLeft + rowStyle.paddingRight
+                    + rowStyle.marginLeft + rowStyle.marginRight;
+                foreach (var child in row.Children())
+                    if (child != label)
+                        rowWidth += child.layout.width + child.resolvedStyle.marginLeft + child.resolvedStyle.marginRight;
+                width = Mathf.Max(width, Mathf.Ceil(rowWidth
+                    + actorListContainer.resolvedStyle.paddingLeft + actorListContainer.resolvedStyle.paddingRight));
+            }
+            actorListContainer.style.minWidth = width;
         }
 
         private VisualElement CreateProjectRootItem()
@@ -430,18 +392,20 @@ namespace GameRuleEditor.Windows
             icon.image = EditorGUIUtility.IconContent("SceneAsset Icon").image;
             icon.style.width = 16;
             icon.style.height = 16;
+            icon.style.flexShrink = 0;
             icon.style.marginRight = 4;
-            icon.tintColor = new Color(0.72f, 0.82f, 1f);
+            icon.tintColor = GameRuleTheme.IconTint;
             item.Add(icon);
 
             var nameLabel = new Label(context?.currentProject?.projectName ?? "No Project");
+            nameLabel.AddToClassList("cast-item-name");
             nameLabel.style.flexGrow = 1;
+            nameLabel.style.flexShrink = 0;
             nameLabel.style.fontSize = 11;
             nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             nameLabel.style.overflow = Overflow.Hidden;
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;
             nameLabel.style.whiteSpace = WhiteSpace.NoWrap;
-            nameLabel.style.color = new Color(0.898f, 0.906f, 0.922f);
             item.Add(nameLabel);
 
             return item;
@@ -453,7 +417,7 @@ namespace GameRuleEditor.Windows
             item.AddToClassList("actor-list-item");
             item.style.flexDirection = FlexDirection.Row;
             item.style.alignItems = Align.Center;
-            item.style.height = 15;
+            item.style.height = 18;
             item.style.paddingLeft = 24;
             item.style.paddingRight = 4;
             item.style.marginLeft = 2;
@@ -478,23 +442,25 @@ namespace GameRuleEditor.Windows
             icon.image = EditorGUIUtility.IconContent("Prefab Icon").image;
             icon.style.width = 16;
             icon.style.height = 16;
+            icon.style.flexShrink = 0;
             icon.style.marginRight = 4;
               
-            Color iconColor = new Color(0.8f, 0.8f, 0.8f);
+            Color iconColor = GameRuleTheme.PrefabIconTint;
             if (!string.IsNullOrEmpty(actor.IconColorHex) && UnityEngine.ColorUtility.TryParseHtmlString(actor.IconColorHex, out iconColor)) {
             icon.tintColor = iconColor;
             } else {
-            icon.tintColor = new Color(0.8f, 0.8f, 0.8f);
+            icon.tintColor = GameRuleTheme.PrefabIconTint;
             }
             item.Add(icon);
             
             var nameLabel = new Label(actor.ActorName ?? "Unnamed");
+            nameLabel.AddToClassList("cast-item-name");
             nameLabel.style.flexGrow = 1;
+            nameLabel.style.flexShrink = 0;
             nameLabel.style.fontSize = 11;
             nameLabel.style.overflow = Overflow.Hidden;
             nameLabel.style.textOverflow = TextOverflow.Ellipsis;
             nameLabel.style.whiteSpace = WhiteSpace.NoWrap;
-            nameLabel.style.color = new Color(0.898f, 0.906f, 0.922f); // textPrimary #e5e7eb
             item.Add(nameLabel);
 
             // Click → select actor
@@ -554,22 +520,30 @@ namespace GameRuleEditor.Windows
             int labelIndex = item.IndexOf(nameLabel);
             if (labelIndex < 0) return;
 
+            var renameGroup = new VisualElement();
+            renameGroup.style.flexGrow = 1;
+            renameGroup.style.flexShrink = 1;
+            var nameError = GameRuleTheme.CreateNameError();
+            renameGroup.Add(renameField);
+            renameGroup.Add(nameError);
+            item.style.height = StyleKeyword.Auto;
+            item.style.minHeight = 18;
             item.Remove(nameLabel);
-            item.Insert(labelIndex, renameField);
+            item.Insert(labelIndex, renameGroup);
 
             var textInput = renameField.Q(TextField.textInputUssName);
             if (textInput != null)
             {
-                textInput.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f);
-                textInput.style.color = new Color(0.898f, 0.906f, 0.922f);
+                textInput.style.backgroundColor = GameRuleTheme.Background;
+                textInput.style.color = GameRuleTheme.Text;
                 textInput.style.borderTopWidth = 1;
                 textInput.style.borderBottomWidth = 1;
                 textInput.style.borderLeftWidth = 1;
                 textInput.style.borderRightWidth = 1;
-                textInput.style.borderTopColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderBottomColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderLeftColor = new Color(0.28f, 0.56f, 0.95f);
-                textInput.style.borderRightColor = new Color(0.28f, 0.56f, 0.95f);
+                textInput.style.borderTopColor = GameRuleTheme.AccentText;
+                textInput.style.borderBottomColor = GameRuleTheme.AccentText;
+                textInput.style.borderLeftColor = GameRuleTheme.AccentText;
+                textInput.style.borderRightColor = GameRuleTheme.AccentText;
                 textInput.style.borderTopLeftRadius = 3;
                 textInput.style.borderTopRightRadius = 3;
                 textInput.style.borderBottomLeftRadius = 3;
@@ -595,25 +569,26 @@ namespace GameRuleEditor.Windows
             void FinishRename(bool commit)
             {
                 if (isCommitted) return;
-                isCommitted = true;
 
                 if (commit)
                 {
                     string requestedName = renameField.value?.Trim();
-                    if (string.IsNullOrEmpty(requestedName))
+                    string error = GameRuleProject.ActorNameError(requestedName, context.currentProject.actors, actor);
+                    GameRuleTheme.ShowNameError(nameError, error);
+                    if (error != null)
                     {
-                        requestedName = oldName;
+                        return;
                     }
 
-                    string uniqueName = GetUniqueActorName(requestedName, actorIndex);
-                    if (uniqueName != oldName)
+                    if (requestedName != oldName)
                     {
-                        controller.UpdateActorProperty(actorIndex,
-                            () => context.currentProject.actors[actorIndex].ActorName = uniqueName,
-                            "Rename Actor");
+                        // Refresh callbacks can dispatch FocusOut while this finishes.
+                        isCommitted = true;
+                        controller.RenameActor(actorIndex, requestedName);
                     }
                 }
 
+                isCommitted = true;
                 RefreshList();
                 context.SelectActor(actorIndex);
             }
@@ -664,22 +639,6 @@ namespace GameRuleEditor.Windows
             }
         }
 
-        private string GetUniqueActorName(string baseName, int currentActorIndex)
-        {
-            string candidate = baseName;
-            int suffix = 1;
-
-            while (context.currentProject.actors
-                .Where((_, i) => i != currentActorIndex)
-                .Any(a => a.ActorName == candidate))
-            {
-                candidate = $"{baseName}_{suffix}";
-                suffix++;
-            }
-
-            return candidate;
-        }
-
         private void FrameActorInScene(int actorIndex)
         {
             var go = FindActorGameObject(actorIndex);
@@ -701,7 +660,9 @@ namespace GameRuleEditor.Windows
 
             for (int i = 0; i < actors.Count; i++)
             {
-                if (FindActorGameObject(i) == null)
+                var obj = FindActorGameObject(i);
+                if (obj == null || !obj.GetComponents<MonoBehaviour>().Any(component =>
+                    component != null && component is IGameRuleActor && component.GetType().Name == actors[i].ActorName))
                     return false;
             }
             return true;
@@ -922,18 +883,18 @@ namespace GameRuleEditor.Windows
             root.style.flexGrow = 1;
             root.style.justifyContent = Justify.Center;
             root.style.alignItems = Align.Center;
-            root.style.backgroundColor = new Color(0.145f, 0.145f, 0.153f);
+            root.style.backgroundColor = GameRuleTheme.Background;
 
             var title = new Label("GameRule Editor");
             title.style.fontSize = 18;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.color = new Color(0.816f, 0.867f, 1f); // primaryFixed #D0BCFF close
+            title.style.color = GameRuleTheme.AccentText;
             title.style.marginBottom = 8;
             root.Add(title);
 
             var subtitle = new Label("No project loaded");
             subtitle.style.fontSize = 12;
-            subtitle.style.color = new Color(0.61f, 0.64f, 0.69f);
+            subtitle.style.color = GameRuleTheme.MutedText;
             subtitle.style.marginBottom = 20;
             root.Add(subtitle);
 

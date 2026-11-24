@@ -1,0 +1,314 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7ce709b4183fc45a69f027e5cd242a, type: 3}
+  m_Name: NewProject2
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::GameRuleEditor.Core.GameRuleProject
+  projectName: NewProjectPrueba
+  jsonFileName: NewProjectPrueba.json
+  sceneData:
+    GameName: NewProjectPrueba
+    ScreenResolution:
+    - 1920
+    - 1080
+    CameraPosition:
+    - 0
+    - 1
+    - -10
+    CameraRotation:
+    - 0
+    - 0
+    - 0
+    SunPosition:
+    - 0
+    - 3
+    - 0
+    SunRotation:
+    - 50
+    - -30
+    - 0
+    SunColor: ffffff
+    SunAmbientColor: 808080
+    BackgroundColor: 000000
+    Gravity:
+    - 0
+    - -9.81
+    - 0
+    SoundTrack: 
+    Mouse: []
+    MouseWorld: []
+    Cast:
+    - ActorName: NewActor
+      Active: 1
+      PrefabName: BlueTank
+      Tag: Untagged
+      IconColorHex: 
+      Position:
+      - -0
+      - 0
+      - 0
+      Rotation:
+      - 0.000002504478
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
+      Properties: []
+      CustomProperties: []
+      Script:
+      - Name: Rule 1
+        When:
+        - Timer(0)
+        Do:
+        - 
+        groupId: gb8cf3a3b
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
+      - type: Rules
+        name: Rules Set
+        id: gb8cf3a3b
+    - ActorName: NewActor_1
+      Active: 1
+      PrefabName: Empty
+      Tag: Custom
+      IconColorHex: 
+      Position:
+      - 0
+      - 0
+      - 0
+      Rotation:
+      - -0
+      - 0
+      - 0
+      Scale:
+      - 1
+      - 1
+      - 1
+      Velocity: []
+      AngularVelocity: []
+      Density: 0
+      Friction: 0
+      Bounciness: 0
+      Drag: 0
+      OverrideDensity: 0
+      OverrideFriction: 0
+      OverrideBounciness: 0
+      OverrideDrag: 0
+      Properties:
+      - NewProp=0
+      CustomProperties: []
+      Script:
+      - Name: Rule 1
+        When:
+        - NOT Compare(0 + 0 == )
+        Do: []
+        groupId: g416cb4ae
+      Components:
+      - type: Properties
+        name: Custom Properties
+        id: 
+      - type: Rules
+        name: Rules Set
+        id: g416cb4ae
+    CustomVariables: []
+  actors:
+  - ActorName: NewActor
+    Active: 1
+    PrefabName: BlueTank
+    Tag: Untagged
+    IconColorHex: 
+    Position:
+    - -0
+    - 0
+    - 0
+    Rotation:
+    - 0.000002504478
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
+    Properties: []
+    CustomProperties: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Compare( < ) AND Check(this.Active) AND Collision(Untagged) AND Keyboard(A,down)
+        AND Touch(press,false) AND Timer(0)
+      Do:
+      - Edit(this.x,)
+      - Spawn(,this,0,0,0,0,0,0)
+      - Animate()
+      - Move(0,0,0,0)
+      - MoveTo(0,0,0,0)
+      - NavigateTo(0,0,0,0)
+      - LoadScene()
+      - QuitGame()
+      - PlayParticles()
+      - Delete()
+      - Rotate(0,0,0,0)
+      - RotateTo(0,0,0,0,this.x,this.y,this.z)
+      - Push(0,0,0,0)
+      - PushTo(0,0,0,0)
+      - Torque(0,0,0)
+      groupId: gb8cf3a3b
+    - Name: Rule 2
+      When: []
+      Do:
+      - Delete()
+      groupId: gb8cf3a3b
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: gb8cf3a3b
+  - ActorName: NewActor_1
+    Active: 1
+    PrefabName: Empty
+    Tag: Custom
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
+    Properties: []
+    CustomProperties:
+    - name: NewProp
+      type: float
+      intValue: 0
+      floatValue: 0.5
+      boolValue: 0
+      arrayValue: []
+    - name: NewProp2
+      type: vector2
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue:
+      - 0
+      - 0
+    Script:
+    - Name: Rule 1
+      When:
+      - Collision(Untagged) AND Compare(this.z < )
+      Do:
+      - Spawn(,this,0,0,0,0,0,0)
+      - Edit(,)
+      groupId: g416cb4ae
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g416cb4ae
+  - ActorName: NewActor_2
+    Active: 1
+    PrefabName: Empty
+    Tag: Untagged
+    IconColorHex: 
+    Position:
+    - 0
+    - 0
+    - 0
+    Rotation:
+    - -0
+    - 0
+    - 0
+    Scale:
+    - 1
+    - 1
+    - 1
+    Velocity: []
+    AngularVelocity: []
+    Density: 0
+    Friction: 0
+    Bounciness: 0
+    Drag: 0
+    OverrideDensity: 0
+    OverrideFriction: 0
+    OverrideBounciness: 0
+    OverrideDrag: 0
+    Properties: []
+    CustomProperties:
+    - name: NewProp
+      type: bool
+      intValue: 0
+      floatValue: 0
+      boolValue: 1
+      arrayValue:
+      - 0
+      - 0
+    - name: NewProp2
+      type: float
+      intValue: 0
+      floatValue: 0
+      boolValue: 0
+      arrayValue: []
+    Script:
+    - Name: Rule 1
+      When:
+      - Check(this.Active)
+      Do:
+      - Edit(this.Active,5)
+      groupId: g3ed0f708
+    Components:
+    - type: Properties
+      name: Custom Properties
+      id: 
+    - type: Rules
+      name: Rule Set
+      id: g3ed0f708

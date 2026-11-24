@@ -1,0 +1,15 @@
+{
+    "GameName": "NewProject",
+    "ScreenResolution": [1920, 1080],
+    "CameraPosition": [0, 1, -10],
+    "CameraRotation": [0, 0, 0],
+    "SunPosition": [0, 3, 0],
+    "SunRotation": [50, -30, 0],
+    "SunColor": [255, 255, 255],
+    "SunAmbientColor": [128, 128, 128],
+    "BackgroundColor": [0, 0, 0],
+    "Gravity": [0, -9.81, 0],
+    "SoundTrack": "",
+    "CustomVariables": [],
+    "Cast": []
+}

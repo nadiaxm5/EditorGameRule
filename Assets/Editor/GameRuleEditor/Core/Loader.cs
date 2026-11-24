@@ -5,10 +5,46 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using GameRuleEditor.Core;
 using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 public static class Loader
 {
+    [InitializeOnLoadMethod]
+    private static void InitializeAutomaticPlay()
+    {
+        EditorApplication.update -= ContinueAutomaticPlay;
+        EditorApplication.update += ContinueAutomaticPlay;
+    }
+
+    private static void ContinueAutomaticPlay()
+    {
+        if (!EditorPrefs.GetBool("GameRule_AutoPlayAfterGenerate", false)) return;
+        if (EditorApplication.isPlaying)
+        {
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            return;
+        }
+        if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling ||
+            EditorApplication.isUpdating || EditorPrefs.GetBool("GameRule_PendingScriptAttach", false) ||
+            !string.IsNullOrEmpty(SessionState.GetString("GameRule.PendingPlayGenerationProject", ""))) return;
+        if (EditorUtility.scriptCompilationFailed)
+        {
+            EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
+            return;
+        }
+        // Keep the request until Play really starts; a delayCall can be lost on reload.
+        EditorApplication.isPlaying = true;
+    }
+
+    private static readonly string[] DefaultGameRuleTags =
+    {
+        "Untagged",
+        "Player",
+        "Enemy",
+        "Obstacle"
+    };
+
     public static void LoadJson(string fileName)
     {
         string jsonPath = Application.dataPath + "/Resources/Games/" + fileName;
@@ -20,8 +56,9 @@ public static class Loader
         {
             foreach (var actor in scene.Cast)
             {
+                ActorPhysicsUtility.NormalizeLegacyOverrides(actor);
                 if (actor.Script == null) actor.Script = new List<SentenceJson>();
-                if (actor.Properties == null) actor.Properties = new List<string>();
+                actor.GetCustomProperties();
                 foreach (var sentence in actor.Script)
                 {
                     if (sentence.When == null) sentence.When = new List<string>();
@@ -33,6 +70,12 @@ public static class Loader
         {
             scene.Cast = new List<ActorJson>();
         }
+
+        // Reject invalid imported names before replacing the scene or generated scripts.
+        GameRuleProject.ValidateSceneNames(scene);
+
+        if (scene.Gravity != null && scene.Gravity.Length >= 3)
+            Physics.gravity = new Vector3(scene.Gravity[0], scene.Gravity[1], scene.Gravity[2]);
 
         // Preserve the descriptor order as the canonical actor evaluation order.
         // Scene instantiation reverses Cast below, but scheduler order must not be reversed.
@@ -58,6 +101,7 @@ public static class Loader
 
         GameObject gmInstance = Object.Instantiate(gameManagerPrefab);
         gmInstance.name = "GameManager";
+        SoundTrackUtility.ApplyToGameManager(gmInstance, scene.SoundTrack, false);
 
         // Load
         CreateTags(scene.Cast);
@@ -67,35 +111,97 @@ public static class Loader
 
     public static void CreateTags(List<ActorJson> actorList)
     {
-        // Load TagManager asset
-        SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-        SerializedProperty tagsProperty = tagManager.FindProperty("tags");
+        EnsureProjectTags(actorList);
+    }
 
-        // Get existing tags to avoid duplicates
-        HashSet<string> existingTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+    /// <summary>
+    /// Returns the single tag list used by actor Properties, Collision and generated scripts.
+    /// Empty actor tags are intentionally ignored so they keep their existing "inherit prefab" meaning.
+    /// </summary>
+    public static List<string> GetProjectTags(IEnumerable<ActorJson> actors)
+    {
+        var result = new List<string>(DefaultGameRuleTags);
+        if (actors == null) return result;
 
-        foreach (ActorJson actor in actorList)
+        foreach (ActorJson actor in actors)
         {
-            string tagToCheck = actor.Tag;
-
-            // Skip if invalid or already exists
-            if (string.IsNullOrEmpty(tagToCheck) || existingTags.Contains(tagToCheck))
-            {
-                continue;
-            }
-
-            // Add new tag
-            int index = tagsProperty.arraySize;
-            tagsProperty.InsertArrayElementAtIndex(index);
-            SerializedProperty newTag = tagsProperty.GetArrayElementAtIndex(index);
-            newTag.stringValue = tagToCheck;
-
-            existingTags.Add(tagToCheck);
+            if (actor != null && !string.IsNullOrEmpty(actor.Tag) && !result.Contains(actor.Tag))
+                result.Add(actor.Tag);
         }
 
-        // Save changes
+        return result;
+    }
+
+    public static void EnsureTagExists(string tag)
+    {
+        EnsureTags(new[] { tag });
+    }
+
+    public static void EnsureProjectTags(IEnumerable<ActorJson> actors)
+    {
+        if (actors == null) return;
+        EnsureTags(actors.Where(actor => actor != null).Select(actor => actor.Tag));
+    }
+
+    /// <summary>
+    /// Registers and applies a non-empty actor tag. An empty tag deliberately leaves the prefab tag unchanged.
+    /// </summary>
+    public static bool TryApplyTag(GameObject obj, string tag)
+    {
+        if (obj == null) return false;
+        if (string.IsNullOrEmpty(tag)) return true;
+
+        EnsureTagExists(tag);
+        try
+        {
+            obj.tag = tag;
+            return true;
+        }
+        catch (UnityException exception)
+        {
+            Debug.LogWarning($"Could not assign tag '{tag}' to '{obj.name}': {exception.Message}");
+            return false;
+        }
+    }
+
+    private static void EnsureTags(IEnumerable<string> tags)
+    {
+        if (tags == null) return;
+
+        Object[] tagManagerAssets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
+        if (tagManagerAssets == null || tagManagerAssets.Length == 0)
+        {
+            Debug.LogError("TagManager.asset could not be loaded.");
+            return;
+        }
+
+        SerializedObject tagManager = new SerializedObject(tagManagerAssets[0]);
+        SerializedProperty tagsProperty = tagManager.FindProperty("tags");
+        if (tagsProperty == null)
+        {
+            Debug.LogError("The tags property could not be found in TagManager.asset.");
+            return;
+        }
+
+        HashSet<string> existingTags = new HashSet<string>(UnityEditorInternal.InternalEditorUtility.tags);
+        bool changed = false;
+
+        foreach (string tag in tags)
+        {
+            if (string.IsNullOrEmpty(tag) || existingTags.Contains(tag)) continue;
+
+            int index = tagsProperty.arraySize;
+            tagsProperty.InsertArrayElementAtIndex(index);
+            tagsProperty.GetArrayElementAtIndex(index).stringValue = tag;
+            existingTags.Add(tag);
+            changed = true;
+        }
+
+        if (!changed) return;
+
         tagManager.ApplyModifiedProperties();
         tagManager.Update();
+        AssetDatabase.SaveAssets();
     }
 
     private static void LoadPrefabs(List<ActorJson> actorList)
@@ -104,48 +210,13 @@ public static class Loader
         {
             Object prefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/" + actor.PrefabName + ".prefab", typeof(GameObject));
             GameObject obj = (GameObject)PrefabUtility.InstantiatePrefab((GameObject)prefab);
-            Rigidbody rb = obj.GetComponent<Rigidbody>();
-            Collider col = obj.GetComponent<Collider>();
-
             obj.name = actor.ActorName;
 
-            if (!string.IsNullOrEmpty(actor.Tag)) obj.tag = actor.Tag;
+            TryApplyTag(obj, actor.Tag);
             if (actor.Position != null) obj.transform.position = new Vector3(actor.Position[0], actor.Position[1], actor.Position[2]);
             if (actor.Rotation != null) obj.transform.eulerAngles = new Vector3(actor.Rotation[0], actor.Rotation[1], actor.Rotation[2]);
             if (actor.Scale != null) obj.transform.localScale = new Vector3(actor.Scale[0], actor.Scale[1], actor.Scale[2]);
-            if (rb != null)
-            {
-                if (actor.Velocity != null) rb.linearVelocity = new Vector3(actor.Velocity[0], actor.Velocity[1], actor.Velocity[2]);
-                if (actor.AngularVelocity != null) rb.angularVelocity = new Vector3(actor.AngularVelocity[0], actor.AngularVelocity[1], actor.AngularVelocity[2]);
-                if (actor.Density != 0) rb.mass = actor.Density;
-                if (actor.Drag != 0) rb.linearDamping = actor.Drag;
-            }
-            if (col != null)
-            {
-                if (col.material == null) col.material = new PhysicsMaterial();
-                if (actor.Friction != 0)
-                {
-                    col.material.dynamicFriction = actor.Friction;
-                    col.material.staticFriction = actor.Friction;
-                }
-                if (actor.Bounciness != 0) col.material.bounciness = actor.Bounciness;
-            }
-
-            if (actor.Size != null)
-            {
-                Renderer rend = obj.GetComponentInChildren<Renderer>();
-                if (rend != null)
-                {
-                    Vector3 originalSize = rend.bounds.size;
-                    originalSize.x = originalSize.x == 0 ? 1 : originalSize.x;
-                    originalSize.y = originalSize.y == 0 ? 1 : originalSize.y;
-                    originalSize.z = originalSize.z == 0 ? 1 : originalSize.z;
-
-                    Vector3 desired = new Vector3(actor.Size[0], actor.Size[1], actor.Size[2]);
-                    Vector3 newScale = new Vector3(desired.x / originalSize.x, desired.y / originalSize.y, desired.z / originalSize.z);
-                    obj.transform.localScale = newScale;
-                }
-            }
+            ActorPhysicsUtility.ApplyTo(obj, actor, (GameObject)prefab);
 
             // Do not deactivate actors here. Generated actor scripts apply Active in Start.
             // This lets every actor run Awake and lets GameManager register the complete
@@ -167,6 +238,9 @@ public static class Loader
         EditorPrefs.SetBool("GameRule_PendingScriptAttach", true);
         EditorPrefs.SetInt("GameRule_ScriptAttachRetries", 0);
 
+        // A prefab/scene-only edit may leave identical C# source. Still run the reload
+        // callback that attaches scripts to the freshly instantiated scene and resumes Play.
+        UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
         // Force synchronous import so scripts compile before Play mode domain reload
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
     }
@@ -208,15 +282,7 @@ public static class Loader
             EditorPrefs.DeleteKey("GameRule_PendingScriptAttach");
             EditorPrefs.DeleteKey("GameRule_ScriptAttachRetries");
 
-            // If there's a pending auto-play request, enter Play mode now
-            if (EditorPrefs.GetBool("GameRule_AutoPlayAfterGenerate", false))
-            {
-                EditorPrefs.DeleteKey("GameRule_AutoPlayAfterGenerate");
-                EditorApplication.delayCall += () =>
-                {
-                    EditorApplication.isPlaying = true;
-                };
-            }
+            // ContinueAutomaticPlay resumes the persisted request once import/reload is idle.
         }
         else
         {

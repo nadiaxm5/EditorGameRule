@@ -1,12 +1,12 @@
 /* Common.uss - Shared styles for GameRule Editor */
-/* Design System: Material Design 3 + Unity Dark Theme */
+/* Neutral surfaces and semantic accents for GameRule Studio. */
 
 /* ═══════════════════════════════════════════
    ROOT & WINDOW BACKGROUNDS
    ═══════════════════════════════════════════ */
 
 #unity-content-container {
-    background-color: rgb(30, 30, 30); /* backgroundBase #1e1e1e */
+    background-color: rgb(30, 30, 30);
 }
 
 /* ═══════════════════════════════════════════
@@ -14,7 +14,7 @@
    ═══════════════════════════════════════════ */
 
 ScrollView {
-    background-color: rgb(37, 37, 38); /* panelBackground #252526 */
+    background-color: rgb(30, 30, 30);
 }
 
 /* ═══════════════════════════════════════════
@@ -22,7 +22,7 @@ ScrollView {
    ═══════════════════════════════════════════ */
 
 Label {
-    color: rgb(229, 231, 235); /* textPrimary #e5e7eb */
+    color: rgb(230, 230, 230);
     font-size: 12px;
 }
 
@@ -31,12 +31,12 @@ Label {
    ═══════════════════════════════════════════ */
 
 TextField {
-    background-color: rgb(30, 30, 30);  /* inputBackground #1e1e1e */
-    color: rgb(255, 255, 255);
-    border-left-color: rgb(68, 68, 68); /* borderLight #444444 */
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -54,15 +54,15 @@ TextField {
 }
 
 TextField:focus {
-    border-left-color: rgb(208, 188, 255); /* primaryFixedDim #D0BCFF */
-    border-right-color: rgb(208, 188, 255);
-    border-top-color: rgb(208, 188, 255);
-    border-bottom-color: rgb(208, 188, 255);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
 TextField > TextInput {
-    background-color: rgb(30, 30, 30);
-    color: rgb(255, 255, 255);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
 }
 
 /* ═══════════════════════════════════════════
@@ -70,12 +70,12 @@ TextField > TextInput {
    ═══════════════════════════════════════════ */
 
 Button {
-    background-color: rgb(56, 56, 56);  /* hoverBackground #383838 */
-    color: rgb(229, 231, 235);          /* textPrimary */
-    border-left-color: rgb(26, 26, 26); /* borderDark #1a1a1a */
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(51, 51, 51);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -92,70 +92,880 @@ Button {
 }
 
 Button:hover {
-    background-color: rgb(68, 68, 68); /* hoverBackgroundLighter #444444 */
+    background-color: rgb(56, 56, 56);
 }
 
 Button:active {
-    background-color: rgb(85, 85, 85); /* hoverBackgroundDarker #555555 */
+    background-color: rgb(37, 37, 37);
 }
 
 Button:disabled {
+    background-color: rgb(51, 51, 51);
+    color: rgb(181, 181, 181);
+}
+
+/* ── Shared purple palette ── */
+.button-primary,
+.button-success,
+.list-item.list-item-selected,
+.actor-list-item.actor-list-item--selected,
+.fab-create {
+    background-color: rgb(51, 51, 51);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.button-primary:hover,
+.button-success:hover,
+.list-item.list-item-selected:hover,
+.actor-list-item.actor-list-item--selected:hover,
+.fab-create:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.button-primary:active,
+.button-success:active,
+.fab-create:active {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-primary > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.button-primary:hover > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+}
+
+.button-primary:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-primary .unity-base-popup-field__text {
+    color: rgb(161, 138, 224);
+}
+
+.button-secondary {
+    background-color: rgb(51, 51, 51);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+}
+
+.button-secondary:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.button-secondary:active {
+    background-color: rgb(37, 37, 37);
+}
+
+/* ── Logical negation ── */
+.button-negation {
+    width: 38px;
+    min-width: 38px;
+    height: 22px;
+    margin-right: 4px;
+    flex-shrink: 0;
+    background-color: rgb(52, 52, 52);
+    color: rgb(185, 185, 185);
+    border-left-color: rgb(75, 75, 75);
+    border-right-color: rgb(75, 75, 75);
+    border-top-color: rgb(75, 75, 75);
+    border-bottom-color: rgb(75, 75, 75);
+    font-size: 9px;
+    -unity-font-style: bold;
+}
+
+.button-negation:hover {
+    background-color: rgb(68, 68, 68);
+    color: rgb(255, 255, 255);
+}
+
+.button-negation:active {
+    background-color: rgb(85, 85, 85);
+}
+
+.button-negation:disabled {
     background-color: rgb(45, 45, 45);
-    color: rgb(107, 114, 128); /* textMuted #6b7280 */
+    color: rgb(100, 100, 100);
+    border-left-color: rgb(60, 60, 60);
+    border-right-color: rgb(60, 60, 60);
+    border-top-color: rgb(60, 60, 60);
+    border-bottom-color: rgb(60, 60, 60);
 }
 
-/* ── Primary (Material Design 3 purple) ── */
-.button-primary {
-    background-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant #4F378B */
-    color: rgb(234, 221, 255);           /* primaryFixed #EADDFF */
-    border-left-color: rgb(59, 39, 107); /* borderPrimary #3b276b */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+.button-negation.button-negation--active {
+    background-color: rgb(222, 112, 120);
+    color: rgb(30, 30, 30);
+    border-left-color: rgb(194, 87, 97);
+    border-right-color: rgb(194, 87, 97);
+    border-top-color: rgb(194, 87, 97);
+    border-bottom-color: rgb(194, 87, 97);
 }
 
-.button-primary:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover #6044A5 */
+.button-negation.button-negation--active:hover {
+    background-color: rgb(232, 132, 139);
 }
 
-.button-primary:active {
-    background-color: rgb(65, 45, 115);
+.button-negation.button-negation--active:active {
+    background-color: rgb(194, 87, 97);
 }
 
-/* ── Danger (dark purple) ── */
+.condition-negated {
+    border-left-width: 3px;
+    border-left-color: rgb(222, 112, 120);
+}
+
+/* ── Destructive controls ── */
 .button-danger {
-    background-color: rgb(59, 39, 107);   /* borderPrimary #3b276b */
-    color: rgb(208, 188, 255);            /* primaryFixedDim #D0BCFF */
-    border-left-color: rgb(45, 28, 85);
-    border-right-color: rgb(45, 28, 85);
-    border-top-color: rgb(45, 28, 85);
-    border-bottom-color: rgb(45, 28, 85);
+    background-color: transparent;
+    color: rgb(181, 181, 181);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
 }
 
-.button-danger:hover {
-    background-color: rgb(72, 50, 125);
+.gamerule-light .button-danger {
+    background-color: transparent;
+    color: rgb(92, 92, 92);
 }
 
-.button-danger:active {
-    background-color: rgb(50, 33, 95);
+.button-danger:focus,
+.gamerule-light .button-danger:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
-/* ── Success (light purple) ── */
-.button-success {
-    background-color: rgb(96, 68, 165);   /* onPrimaryFixedVariantHover #6044A5 */
-    color: rgb(234, 221, 255);            /* primaryFixed #EADDFF */
-    border-left-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant #4F378B */
-    border-right-color: rgb(79, 55, 139);
-    border-top-color: rgb(79, 55, 139);
-    border-bottom-color: rgb(79, 55, 139);
+.button-danger:hover,
+.gamerule-light .button-danger:hover {
+    background-color: rgb(222, 112, 120);
+    color: rgb(30, 30, 30);
 }
 
-.button-success:hover {
-    background-color: rgb(115, 85, 185);  /* lighter purple */
+.button-danger:active,
+.gamerule-light .button-danger:active {
+    background-color: rgb(194, 87, 97);
+    color: rgb(30, 30, 30);
 }
 
-.button-success:active {
-    background-color: rgb(79, 55, 139);
+.button-danger:disabled,
+.gamerule-light .button-danger:disabled {
+    background-color: transparent;
+    color: rgb(107, 114, 128);
+}
+
+.button-danger-icon,
+.action-clear-value,
+.compare-remove-term,
+.rules-square-command.button-danger-icon {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    min-height: 22px;
+    flex-shrink: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ── Rule conditions ── */
+.button-condition,
+.button-condition > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+    color: rgb(56, 185, 207);
+    border-left-color: rgb(56, 185, 207);
+    border-right-color: rgb(56, 185, 207);
+    border-top-color: rgb(56, 185, 207);
+    border-bottom-color: rgb(56, 185, 207);
+}
+
+.button-condition:hover,
+.button-condition:hover > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+}
+
+.button-condition:active,
+.button-condition:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-condition .unity-base-popup-field__text {
+    color: rgb(56, 185, 207);
+}
+
+/* ── Rule actions ── */
+.button-action,
+.button-action > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+    color: rgb(240, 153, 89);
+    border-left-color: rgb(240, 153, 89);
+    border-right-color: rgb(240, 153, 89);
+    border-top-color: rgb(240, 153, 89);
+    border-bottom-color: rgb(240, 153, 89);
+}
+
+.button-action:hover,
+.button-action:hover > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+}
+
+.button-action:active,
+.button-action:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-action .unity-base-popup-field__text {
+    color: rgb(240, 153, 89);
+}
+
+/* Dropdowns that visually match the spacing of the standard + Add Rule button. */
+.rule-selector-dropdown {
+    min-height: 27px;
+}
+
+.rule-selector-dropdown > .unity-base-field__input {
+    min-height: 25px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* Button-backed rule dropdowns allow every open menu item to have a tooltip. */
+.tooltip-popup-field {
+    min-height: 27px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    -unity-text-align: middle-center;
+}
+
+.tooltip-dropdown-menu {
+    padding: 4px;
+    background-color: rgb(51, 51, 51);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.tooltip-dropdown-option {
+    min-height: 24px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
+    -unity-text-align: middle-left;
+}
+
+/* ── Property picker ── */
+.button-property-picker,
+.button-property-picker > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+    color: rgb(217, 182, 92);
+    border-left-color: rgb(217, 182, 92);
+    border-right-color: rgb(217, 182, 92);
+    border-top-color: rgb(217, 182, 92);
+    border-bottom-color: rgb(217, 182, 92);
+    -unity-font-style: bold;
+}
+
+.button-property-picker:hover,
+.button-property-picker:hover > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+    color: rgb(217, 182, 92);
+}
+
+.button-property-picker:active,
+.button-property-picker:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-property-picker .unity-base-popup-field__text {
+    color: rgb(217, 182, 92);
+}
+
+.button-property-picker .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(217, 182, 92);
+}
+
+/* ── Numeric values ── */
+.button-number-picker,
+.button-number-picker > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+    color: rgb(101, 185, 155);
+    border-left-color: rgb(101, 185, 155);
+    border-right-color: rgb(101, 185, 155);
+    border-top-color: rgb(101, 185, 155);
+    border-bottom-color: rgb(101, 185, 155);
+    -unity-font-style: bold;
+}
+
+.button-number-picker:hover,
+.button-number-picker:hover > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+    color: rgb(101, 185, 155);
+}
+
+.button-number-picker:active,
+.button-number-picker:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.button-number-picker .unity-base-popup-field__text {
+    color: rgb(101, 185, 155);
+}
+
+.button-number-picker .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(101, 185, 155);
+}
+
+.numeric-stepper {
+    min-height: 20px;
+}
+
+.numeric-stepper-field {
+    width: 66px;
+    min-width: 66px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+/* ── Action parameter builders ── */
+.action-parameter-row {
+    min-height: 28px;
+    min-width: 140px;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 3px;
+    margin-bottom: 4px;
+}
+
+.action-single-picker,
+.action-scalar-control,
+.action-expression-control,
+.action-value-selection,
+.action-expression-selection,
+.action-expression-term {
+    flex-direction: row;
+    align-items: center;
+}
+
+.action-resource-picker {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+    height: 24px;
+    margin: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    -unity-text-align: middle-left;
+}
+
+.action-picker-value-display {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    margin-left: 0;
+    margin-right: 6px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.action-picker-value-display.action-empty-value {
+    color: rgb(181, 181, 181);
+    -unity-font-style: italic;
+}
+
+.action-scalar-control,
+.action-expression-control {
+    flex-grow: 1;
+}
+
+.action-value-picker {
+    width: 184px;
+    min-width: 184px;
+    height: 28px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.action-value-picker > .unity-base-field__input {
+    min-width: 180px;
+}
+
+.action-value-selection,
+.action-expression-selection {
+    min-height: 24px;
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+.action-value-selection {
+    flex-shrink: 0;
+}
+
+.action-expression-selection {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: 30px;
+    min-height: 30px;
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: rgb(37, 37, 37);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    flex-shrink: 0;
+}
+
+.action-empty-expression {
+    color: rgb(181, 181, 181);
+    font-size: 10px;
+    -unity-font-style: italic;
+    margin-left: 5px;
+}
+
+.action-selected-value,
+.action-legacy-value {
+    min-width: 92px;
+    max-width: 160px;
+    margin: 0;
+}
+
+.action-number-degree-suffix {
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    bottom: 2px;
+    width: 9px;
+    min-width: 9px;
+    margin: 0;
+    padding: 0;
+    color: rgb(230, 230, 230);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+.action-number-value .numeric-stepper-field > .unity-base-field__input {
+    padding-right: 15px;
+}
+
+.action-clear-value {
+    margin-left: 4px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.action-operation-picker {
+    width: 66px;
+    min-width: 66px;
+    height: 28px;
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.action-operation-picker > .unity-base-field__input {
+    min-width: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.action-expression-toolbar {
+    flex-direction: row;
+    align-items: center;
+}
+
+.action-expression-term {
+    margin-right: 4px;
+}
+
+.action-term-operator {
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.action-term-operator > .unity-base-field__input {
+    min-width: 42px;
+    min-height: 24px;
+}
+
+.action-pending-operator {
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-right: 4px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -unity-text-align: middle-center;
+}
+
+.action-number-value {
+    flex-shrink: 0;
+}
+
+/* Rule Details has a narrow column: keep each parameter and its controls stacked. */
+.rule-detail-action .action-parameter-row {
+    min-width: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.rule-detail-action .action-single-picker,
+.rule-detail-action .action-scalar-control {
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rule-detail-action .action-picker-value-display,
+.rule-detail-action .action-value-selection {
+    margin-right: 0;
+    margin-bottom: 5px;
+}
+
+.rule-detail-action .action-expression-control {
+    flex-direction: column;
+    align-items: stretch;
+    flex-basis: 184px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rule-detail-action .action-expression-toolbar {
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.rule-detail-action .action-expression-toolbar .action-value-picker {
+    max-width: 100%;
+    min-width: 0;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.rule-detail-action .action-expression-toolbar .action-value-picker > .unity-base-field__input {
+    min-width: 0;
+}
+
+.rule-detail-action .action-expression-toolbar .action-operation-picker {
+    margin-left: 0;
+    margin-bottom: 4px;
+}
+
+.rule-detail-action .action-expression-control .action-expression-selection {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: 30px;
+    flex-wrap: wrap;
+    margin-right: 0;
+    margin-bottom: 5px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.rule-detail-action .action-expression-term {
+    min-width: 0;
+    max-width: 100%;
+    margin-bottom: 3px;
+}
+
+/* ── Compare expression builder ── */
+.compare-operand {
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgb(51, 51, 51);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.compare-operand-toolbar {
+    height: 28px;
+    min-height: 28px;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.compare-operand-label {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    height: 28px;
+    min-height: 28px;
+    margin-right: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: rgb(51, 51, 51);
+    color: rgb(230, 230, 230);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    font-size: 9px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.compare-value-picker {
+    min-width: 0;
+    height: 28px;
+    margin: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.compare-value-picker > .unity-base-field__input {
+    min-width: 0;
+}
+
+.compare-operation-dropdown {
+    width: 54px;
+    min-width: 54px;
+    height: 28px;
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.compare-operation-dropdown.tooltip-popup-field,
+.compare-operator-dropdown.tooltip-popup-field,
+.compare-term-operator.tooltip-popup-field {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.compare-operation-dropdown > .unity-base-field__input {
+    min-width: 50px;
+    padding-left: 7px;
+    padding-right: 5px;
+}
+
+.compare-operator-container {
+    width: 56px;
+    min-width: 56px;
+    flex-shrink: 0;
+    align-self: stretch;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 7px;
+    margin-bottom: 0;
+}
+
+.compare-operator-dropdown {
+    width: 48px;
+    min-width: 48px;
+    height: 28px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.compare-operator-dropdown > .unity-base-field__input {
+    min-width: 44px;
+    padding-left: 6px;
+    padding-right: 4px;
+}
+
+.keyboard-key-picker {
+    width: 130px;
+    min-width: 130px;
+    height: 27px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.check-property-field {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    flex-shrink: 0;
+}
+
+.collision-tag-dropdown {
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+    flex-shrink: 0;
+}
+
+.compare-terms {
+    height: 34px;
+    min-height: 34px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.compare-terms-content {
+    min-width: 0;
+    height: 28px;
+    min-height: 28px;
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.compare-empty-expression {
+    color: rgb(181, 181, 181);
+    font-size: 10px;
+    -unity-font-style: italic;
+    margin-left: 5px;
+}
+
+.compare-term {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 4px;
+    margin-bottom: 0;
+    max-width: 100%;
+}
+
+.compare-term-operator {
+    width: 46px;
+    min-width: 46px;
+    height: 24px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.compare-term-operator > .unity-base-field__input {
+    min-width: 42px;
+    min-height: 24px;
+    padding-left: 7px;
+    padding-right: 5px;
+}
+
+.compare-pending-operator {
+    min-height: 24px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -unity-text-align: middle-center;
+}
+
+.compare-property-term {
+    min-width: 92px;
+    max-width: 180px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.compare-legacy-term {
+    min-width: 92px;
+    max-width: 180px;
+}
+
+.compare-remove-term {
+    margin-left: 6px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* ═══════════════════════════════════════════
@@ -184,7 +994,7 @@ Foldout {
 }
 
 Foldout > Toggle {
-    background-color: rgb(56, 56, 56);
+    background-color: rgb(51, 51, 51);
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 5px;
@@ -196,7 +1006,7 @@ Foldout > Toggle {
 }
 
 Foldout > Toggle:hover {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(56, 56, 56);
 }
 
 /* ═══════════════════════════════════════════
@@ -204,11 +1014,11 @@ Foldout > Toggle:hover {
    ═══════════════════════════════════════════ */
 
 PopupField {
-    background-color: rgb(30, 30, 30);
-    border-left-color: rgb(68, 68, 68);
-    border-right-color: rgb(68, 68, 68);
-    border-top-color: rgb(68, 68, 68);
-    border-bottom-color: rgb(68, 68, 68);
+    background-color: rgb(56, 56, 56);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -225,7 +1035,7 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .panel-container {
-    background-color: rgb(37, 37, 38); /* panelBackground */
+    background-color: rgb(30, 30, 30);
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
@@ -234,11 +1044,11 @@ PopupField {
 }
 
 .panel-section {
-    background-color: rgb(45, 45, 45); /* footerBackground #2d2d2d */
-    border-left-color: rgb(26, 26, 26);
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -258,8 +1068,220 @@ PopupField {
 .panel-header {
     font-size: 14px;
     -unity-font-style: bold;
-    color: rgb(229, 231, 235);
+    color: rgb(230, 230, 230);
     margin-bottom: 10px;
+}
+
+.studio-panel-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 12px;
+}
+
+/* Compact parameter editors are scoped to Rule Details. */
+.rule-detail-card .rule-detail-type {
+    margin-bottom: 4px;
+}
+
+.rule-detail-card .rule-detail-action .action-parameter-row {
+    margin-bottom: 4px;
+}
+
+.rule-detail-card .rule-detail-action .action-value-selection,
+.rule-detail-card .rule-detail-action .action-picker-value-display {
+    margin-bottom: 0;
+}
+
+.rule-detail-card .rule-detail-action .action-expression-control {
+    flex-basis: 158px;
+}
+
+.compact-expression-line,
+.compact-expression-term,
+.compact-numeric-operand {
+    flex-direction: row;
+    align-items: center;
+}
+
+.compact-expression-line {
+    flex-wrap: wrap;
+}
+
+.compact-expression-term {
+    min-width: 0;
+    max-width: 100%;
+    margin-bottom: 2px;
+    margin-right: 2px;
+}
+
+.compact-expression-term > .compact-value-menu {
+    max-width: none;
+}
+
+.compact-expression-term > .compact-numeric-operand,
+.compact-numeric-operand > .numeric-stepper {
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.compact-numeric-operand .numeric-stepper-field {
+    min-width: 40px;
+    flex-shrink: 1;
+}
+
+.rule-detail-action .action-single-picker.compact-expression-term {
+    flex-direction: row;
+    align-items: center;
+}
+
+.compact-expression-operator,
+.compact-number-menu {
+    flex-shrink: 0;
+}
+
+.rule-detail-card .compact-picker-field,
+.compact-value-menu {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 1;
+    -unity-text-align: middle-center;
+}
+
+.compact-value-menu {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-number-menu {
+    min-width: 24px;
+    -unity-text-align: middle-center;
+}
+
+.compact-compare-operand {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.compact-compare-operand .compact-expression-term {
+    margin-bottom: 0;
+}
+
+.compact-compare-operand > .compare-operand-label {
+    height: 20px;
+    min-height: 20px;
+    margin-bottom: 2px;
+}
+
+.rule-detail-card .detail-parameter-row {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.rule-detail-card .detail-parameter-row > .detail-parameter-label {
+    align-self: center;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.detail-parameter-caption {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgb(230, 230, 230);
+    -unity-text-align: middle-left;
+}
+
+.gamerule-light .detail-parameter-caption {
+    color: rgb(35, 35, 35);
+}
+
+.detail-parameter-label {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    flex-shrink: 0;
+    margin-left: 0;
+    margin-right: 8px;
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.detail-parameter-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    align-items: flex-start;
+}
+
+.detail-parameter-value > .action-expression-control,
+.detail-parameter-value > .action-scalar-control,
+.detail-parameter-value > .action-single-picker,
+.detail-parameter-value > .vector-parameter-group,
+.detail-parameter-value > .compact-compare-values {
+    align-self: stretch;
+}
+
+.vector-parameter-group {
+    min-width: 0;
+}
+
+.vector-parameter-axis {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    margin-right: 4px;
+}
+
+.vector-parameter-axis > Label {
+    flex-shrink: 0;
+    margin-right: 3px;
+}
+
+.vector-parameter-axis > .action-scalar-control,
+.vector-parameter-axis .numeric-stepper {
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.vector-parameter-axis .numeric-stepper-field {
+    width: 46px;
+    min-width: 40px;
+    flex-shrink: 1;
+}
+
+.rule-detail-card .rule-detail-action .detail-parameter-value > .action-expression-control {
+    flex-basis: auto;
+}
+
+.detail-parameter-value > .parameter-selector,
+.detail-parameter-value > .check-property-field,
+.detail-parameter-value > .detail-parameter-toggle,
+.detail-parameter-value .compact-picker-field,
+.detail-parameter-value .compact-value-menu {
+    margin-left: 0;
+}
+
+.detail-parameter-value .compact-expression-operator {
+    margin-left: 3px;
+}
+
+.detail-parameter-value > .parameter-selector,
+.detail-parameter-value > .check-property-field {
+    min-width: 0;
+    max-width: 100%;
+    align-self: flex-start;
+}
+
+.detail-parameter-value > .detail-parameter-toggle > .unity-base-field__input {
+    margin-left: 0;
+}
+
+.detail-comparison-operator {
+    margin-left: 88px;
+    align-items: flex-start;
 }
 
 /* ═══════════════════════════════════════════
@@ -267,11 +1289,11 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 .list-item {
-    background-color: rgb(56, 56, 56);
-    border-left-color: rgb(26, 26, 26);
-    border-right-color: rgb(26, 26, 26);
-    border-top-color: rgb(26, 26, 26);
-    border-bottom-color: rgb(26, 26, 26);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -291,21 +1313,22 @@ PopupField {
 }
 
 .list-item:hover {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(56, 56, 56);
 }
 
 .list-item-selected {
-    background-color: rgb(79, 55, 139); /* onPrimaryFixedVariant */
-    color: rgb(234, 221, 255);          /* primaryFixed */
-    border-left-color: rgb(59, 39, 107);
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
 }
 
-.list-item-selected:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
-}
+.actor-prefab-label { color: rgb(181, 181, 181); }
+.actor-rule-count { color: rgb(161, 138, 224); }
+.list-item-selected Label,
+.list-item-selected .actor-prefab-label,
+.list-item-selected .actor-rule-count { color: rgb(161, 138, 224); }
 
 /* ═══════════════════════════════════════════
    ACTOR LIST ITEM  (Hierarchy window)
@@ -313,23 +1336,17 @@ PopupField {
 
 .actor-list-item {
     background-color: transparent;
+    border-width: 1px;
+    border-color: transparent;
     transition-duration: 0.08s;
 }
 
 .actor-list-item:hover {
-    background-color: rgb(56, 56, 56); /* hoverBackground #383838 */
-}
-
-.actor-list-item--selected {
-    background-color: rgb(79, 55, 139); /* onPrimaryFixedVariant #4F378B */
-}
-
-.actor-list-item--selected:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
+    background-color: rgb(51, 51, 51);
 }
 
 .actor-list-item--selected > Label {
-    color: rgb(234, 221, 255); /* primaryFixed */
+    color: rgb(161, 138, 224);
 }
 
 /* 3-dot menu button */
@@ -342,7 +1359,7 @@ PopupField {
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
-    color: rgb(107, 114, 128); /* textMuted */
+    color: rgb(181, 181, 181);
     padding: 0;
     margin: 0;
     -unity-text-align: middle-center;
@@ -355,8 +1372,8 @@ PopupField {
 }
 
 .actor-menu-btn:hover {
-    background-color: rgb(68, 68, 68);
-    color: rgb(229, 231, 235);
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
@@ -374,12 +1391,11 @@ PopupField {
     border-top-right-radius: 20px;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    background-color: rgb(79, 55, 139);  /* onPrimaryFixedVariant */
-    color: rgb(234, 221, 255);           /* primaryFixed */
-    border-left-color: rgb(59, 39, 107); /* borderPrimary */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    color: rgb(161, 138, 224);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -390,24 +1406,16 @@ PopupField {
     margin: 0;
 }
 
-.fab-create:hover {
-    background-color: rgb(96, 68, 165); /* onPrimaryFixedVariantHover */
-}
-
-.fab-create:active {
-    background-color: rgb(65, 45, 115);
-}
-
 /* ═══════════════════════════════════════════
    HELP BOXES
    ═══════════════════════════════════════════ */
 
 .help-box {
-    background-color: rgb(45, 40, 60);    /* dark purple tint */
-    border-left-color: rgb(96, 68, 165);  /* light purple */
-    border-right-color: rgb(96, 68, 165);
-    border-top-color: rgb(96, 68, 165);
-    border-bottom-color: rgb(96, 68, 165);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -427,11 +1435,11 @@ PopupField {
 }
 
 .help-box-warning {
-    background-color: rgb(55, 48, 40);
-    border-left-color: rgb(220, 160, 58);
-    border-right-color: rgb(220, 160, 58);
-    border-top-color: rgb(220, 160, 58);
-    border-bottom-color: rgb(220, 160, 58);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(217, 182, 92);
+    border-right-color: rgb(217, 182, 92);
+    border-top-color: rgb(217, 182, 92);
+    border-bottom-color: rgb(217, 182, 92);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -439,11 +1447,11 @@ PopupField {
 }
 
 .help-box-error {
-    background-color: rgb(40, 35, 55);    /* dark purple tint */
-    border-left-color: rgb(59, 39, 107);  /* dark purple */
-    border-right-color: rgb(59, 39, 107);
-    border-top-color: rgb(59, 39, 107);
-    border-bottom-color: rgb(59, 39, 107);
+    background-color: rgb(51, 51, 51);
+    border-left-color: rgb(222, 112, 120);
+    border-right-color: rgb(222, 112, 120);
+    border-top-color: rgb(222, 112, 120);
+    border-bottom-color: rgb(222, 112, 120);
     border-left-width: 4px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -455,14 +1463,14 @@ PopupField {
    ═══════════════════════════════════════════ */
 
 Toolbar {
-    background-color: rgb(51, 51, 51); /* toolbarBackground #333333 */
+    background-color: rgb(51, 51, 51);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(26, 26, 26);
+    border-bottom-color: rgb(66, 66, 66);
 }
 
 ToolbarButton {
     background-color: transparent;
-    color: rgb(229, 231, 235);
+    color: rgb(230, 230, 230);
     border-width: 0;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -471,11 +1479,11 @@ ToolbarButton {
 }
 
 ToolbarButton:hover {
-    background-color: rgb(56, 56, 56);
+    background-color: rgb(51, 51, 51);
 }
 
 ToolbarButton:active {
-    background-color: rgb(68, 68, 68);
+    background-color: rgb(66, 66, 66);
 }
 
 /* ═══════════════════════════════════════════
@@ -484,13 +1492,13 @@ ToolbarButton:active {
 
 .separator {
     height: 1px;
-    background-color: rgb(26, 26, 26);
+    background-color: rgb(66, 66, 66);
     margin: 10px 0;
 }
 
 .separator-vertical {
     width: 1px;
-    background-color: rgb(26, 26, 26);
+    background-color: rgb(66, 66, 66);
     margin: 0 10px;
 }
 
@@ -577,5 +1585,1311 @@ ToolbarButton:active {
 }
 
 .text-muted {
-    color: rgb(107, 114, 128); /* textMuted #6b7280 */
+    color: rgb(181, 181, 181);
 }
+
+/* Light Unity skin. Keep action/condition/selection colours, but use light neutral
+   surfaces and dark text. The root class is updated when Unity changes skin. */
+#unity-content-container.gamerule-light,
+.gamerule-light #unity-content-container,
+.gamerule-light,
+.gamerule-light ScrollView,
+.gamerule-light .panel-container {
+    background-color: rgb(242, 242, 242);
+}
+
+.gamerule-light Label,
+.gamerule-light .panel-header,
+.gamerule-light ToolbarButton {
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .text-muted,
+.gamerule-light .actor-menu-btn,
+.gamerule-light Button:disabled {
+    color: rgb(92, 92, 92);
+}
+
+.gamerule-light TextField,
+.gamerule-light TextField > TextInput,
+.gamerule-light PopupField {
+    background-color: rgb(255, 255, 255);
+    color: rgb(35, 35, 35);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .unity-base-field__input,
+.gamerule-light .unity-base-popup-field__text {
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(35, 35, 35);
+}
+
+.gamerule-light TextField:focus {
+    border-left-color: rgb(88, 64, 150);
+    border-right-color: rgb(88, 64, 150);
+    border-top-color: rgb(88, 64, 150);
+    border-bottom-color: rgb(88, 64, 150);
+}
+
+.gamerule-light Button,
+.gamerule-light Foldout > Toggle,
+.gamerule-light .list-item {
+    background-color: rgb(226, 226, 226);
+    color: rgb(35, 35, 35);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light Button:hover,
+.gamerule-light Foldout > Toggle:hover,
+.gamerule-light .list-item:hover,
+.gamerule-light .actor-list-item:hover,
+.gamerule-light ToolbarButton:hover,
+.gamerule-light .actor-menu-btn:hover {
+    background-color: rgb(211, 211, 211);
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light Button:active,
+.gamerule-light ToolbarButton:active {
+    background-color: rgb(197, 197, 197);
+}
+
+.gamerule-light Button:disabled {
+    background-color: rgb(234, 234, 234);
+}
+
+.gamerule-light .panel-section,
+.gamerule-light .action-expression-selection,
+.gamerule-light .compare-terms,
+.gamerule-light .compare-operand,
+.gamerule-light .compare-operand-label {
+    background-color: rgb(250, 250, 250);
+    color: rgb(35, 35, 35);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .action-picker-value-display:hover,
+.gamerule-light .action-selected-value:hover,
+.gamerule-light .action-legacy-value:hover,
+.gamerule-light .compare-property-term:hover {
+    background-color: rgb(231, 231, 231);
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .action-empty-expression,
+.gamerule-light .compare-empty-expression,
+.gamerule-light .action-empty-value,
+.gamerule-light .action-number-degree-suffix {
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .tooltip-dropdown-menu {
+    background-color: rgb(248, 248, 248);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .help-box {
+    background-color: rgb(237, 231, 250);
+}
+.gamerule-light .help-box-warning {
+    background-color: rgb(255, 246, 223);
+}
+.gamerule-light .help-box-error {
+    background-color: rgb(251, 231, 235);
+}
+
+.gamerule-light Toolbar {
+    background-color: rgb(226, 226, 226);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .separator,
+.gamerule-light .separator-vertical {
+    background-color: rgb(182, 182, 182);
+}
+
+/* Explicit accent rules take precedence over the neutral Button/field rules above. */
+.gamerule-light .fab-create,
+.gamerule-light .button-primary,
+.gamerule-light .button-success,
+.gamerule-light .list-item.list-item-selected,
+.gamerule-light .actor-list-item.actor-list-item--selected {
+    background-color: rgb(238, 238, 238);
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .fab-create:hover,
+.gamerule-light .button-primary:hover,
+.gamerule-light .button-success:hover,
+.gamerule-light .list-item.list-item-selected:hover,
+.gamerule-light .actor-list-item.actor-list-item--selected:hover {
+    background-color: rgb(226, 226, 226);
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .button-secondary {
+    background-color: rgb(238, 238, 238);
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .button-secondary:hover {
+    background-color: rgb(226, 226, 226);
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .button-negation.button-negation--active {
+    background-color: rgb(222, 112, 120);
+    color: rgb(30, 30, 30);
+}
+.gamerule-light .button-negation.button-negation--active:hover {
+    background-color: rgb(232, 132, 139);
+    color: rgb(30, 30, 30);
+}
+.gamerule-light .button-condition,
+.gamerule-light .button-condition > .unity-base-field__input {
+    background-color: rgb(238, 238, 238);
+    color: rgb(15, 103, 120);
+}
+.gamerule-light .button-condition:hover,
+.gamerule-light .button-condition:hover > .unity-base-field__input {
+    background-color: rgb(226, 226, 226);
+}
+.gamerule-light .button-condition:active,
+.gamerule-light .button-condition:active > .unity-base-field__input {
+    background-color: rgb(213, 213, 213);
+}
+.gamerule-light .button-action,
+.gamerule-light .button-action > .unity-base-field__input {
+    background-color: rgb(238, 238, 238);
+    color: rgb(145, 68, 23);
+}
+.gamerule-light .button-action:hover,
+.gamerule-light .button-action:hover > .unity-base-field__input {
+    background-color: rgb(226, 226, 226);
+}
+.gamerule-light .button-action:active,
+.gamerule-light .button-action:active > .unity-base-field__input {
+    background-color: rgb(213, 213, 213);
+}
+.gamerule-light .button-property-picker,
+.gamerule-light .button-property-picker > .unity-base-field__input {
+    background-color: rgb(238, 238, 238);
+    color: rgb(121, 88, 18);
+}
+.gamerule-light .button-property-picker:hover,
+.gamerule-light .button-property-picker:hover > .unity-base-field__input {
+    background-color: rgb(226, 226, 226);
+}
+.gamerule-light .button-property-picker:active,
+.gamerule-light .button-property-picker:active > .unity-base-field__input {
+    background-color: rgb(213, 213, 213);
+}
+.gamerule-light .button-number-picker,
+.gamerule-light .button-number-picker > .unity-base-field__input {
+    background-color: rgb(238, 238, 238);
+    color: rgb(29, 109, 81);
+}
+.gamerule-light .button-number-picker:hover,
+.gamerule-light .button-number-picker:hover > .unity-base-field__input {
+    background-color: rgb(226, 226, 226);
+}
+.gamerule-light .button-number-picker:active,
+.gamerule-light .button-number-picker:active > .unity-base-field__input {
+    background-color: rgb(213, 213, 213);
+}
+.gamerule-light .button-condition .unity-base-popup-field__text {
+    color: rgb(15, 103, 120);
+}
+.gamerule-light .button-condition .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(15, 103, 120);
+}
+.gamerule-light .button-action .unity-base-popup-field__text {
+    color: rgb(145, 68, 23);
+}
+.gamerule-light .button-action .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(145, 68, 23);
+}
+.gamerule-light .button-primary .unity-base-popup-field__text {
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .button-primary > .unity-base-field__input {
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .button-primary .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(88, 64, 150);
+}
+
+.gamerule-light .actor-list-item--selected > Label,
+.gamerule-light .list-item-selected {
+    color: rgb(88, 64, 150);
+}
+.gamerule-light .actor-prefab-label { color: rgb(92, 92, 92); }
+.gamerule-light .actor-rule-count { color: rgb(88, 64, 150); }
+.gamerule-light .list-item-selected Label,
+.gamerule-light .list-item-selected .actor-prefab-label,
+.gamerule-light .list-item-selected .actor-rule-count { color: rgb(88, 64, 150); }
+
+.gamerule-light .button-negation.button-negation--active:active {
+    background-color: rgb(194, 87, 97);
+    color: rgb(30, 30, 30);
+}
+
+.gamerule-light .button-secondary:active,
+.gamerule-light .fab-create:active,
+.gamerule-light .button-primary:active {
+    background-color: rgb(213, 213, 213);
+    color: rgb(88, 64, 150);
+}
+
+/* Shared sections and cards for Rules and Rule Details. */
+.rule-overview {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    min-width: 0;
+    margin-left: -4px;
+    margin-right: -4px;
+}
+
+.rule-overview-responsive-column {
+    flex-grow: 1;
+    flex-basis: 340px;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-bottom: 8px;
+}
+
+.rule-overview-column,
+.rule-editor-card {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.rule-overview-column {
+    background-color: rgb(41, 41, 41);
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.rule-block-heading {
+    color: rgb(230, 230, 230);
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.rule-overview-column.rule-sets-body {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.rule-set-entry {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    padding: 4px;
+    background-color: rgb(51, 51, 51);
+    border-width: 1px;
+    border-color: transparent;
+    border-radius: 4px;
+}
+
+.rule-set-entry:hover { background-color: rgb(56, 56, 56); }
+.rule-set-entry.rule-set-selected { border-color: rgb(161, 138, 224); }
+.rule-set-handle {
+    width: 16px;
+    flex-shrink: 0;
+    margin-right: 4px;
+    -unity-text-align: middle-center;
+    color: rgb(181, 181, 181);
+}
+.rules-set-header {
+    background-color: rgb(65, 53, 86);
+}
+
+.rules-set-header:hover {
+    background-color: rgb(76, 62, 100);
+}
+
+.gamerule-light .rules-set-header {
+    background-color: rgb(222, 213, 242);
+}
+
+.gamerule-light .rules-set-header:hover {
+    background-color: rgb(210, 198, 235);
+}
+
+.panel-container TextField.studio-rule-name > .unity-base-field__input,
+.gamerule-light .panel-container TextField.studio-rule-name > .unity-base-field__input {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.rules-set-header Button.button-danger,
+.gamerule-light .rules-set-header Button.button-danger {
+    background-color: transparent;
+}
+
+.rules-set-header Button.button-danger:hover,
+.gamerule-light .rules-set-header Button.button-danger:hover {
+    background-color: rgb(222, 112, 120);
+}
+
+.rules-set-header Button.button-danger:active,
+.gamerule-light .rules-set-header Button.button-danger:active {
+    background-color: rgb(194, 87, 97);
+}
+
+.rule-set-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 45px;
+    margin: 0 4px 0 0;
+    padding: 0;
+    background-color: transparent;
+    border-width: 0;
+}
+.rule-set-count {
+    flex-shrink: 0;
+    margin-right: 6px;
+    font-size: 11px;
+    color: rgb(181, 181, 181);
+}
+.gamerule-light .rule-set-entry { background-color: rgb(250, 250, 250); }
+.gamerule-light .rule-set-entry:hover { background-color: rgb(226, 226, 226); }
+.gamerule-light .rule-set-entry.rule-set-selected { border-color: rgb(88, 64, 150); }
+.gamerule-light .rule-set-handle,
+.gamerule-light .rule-set-count { color: rgb(92, 92, 92); }
+
+.rule-set-entry.rule-set-property-row,
+.gamerule-light .rule-set-entry.rule-set-property-row {
+    background-color: transparent;
+    padding: 0;
+}
+
+.rule-set-property-row .rule-set-handle {
+    font-size: 16px;
+}
+
+.rule-set-property-row .rule-set-count {
+    color: rgb(161, 138, 224);
+    font-size: 12px;
+}
+
+.gamerule-light .rule-set-property-row .rule-set-count {
+    color: rgb(88, 64, 150);
+}
+
+.rule-editor-card {
+    background-color: rgb(51, 51, 51);
+}
+
+.rule-summary-row.rule-editor-card,
+.rule-set-card {
+    margin-bottom: 5px;
+}
+
+.rule-summary-row.rule-editor-card {
+    border-width: 1px;
+    border-color: transparent;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.rule-summary-row.rule-editor-card.condition-negated {
+    border-left-width: 3px;
+    border-left-color: rgb(222, 112, 120);
+    padding-left: 2px;
+}
+
+.rule-summary-card.button-condition,
+.rule-summary-card.button-action {
+    background-color: transparent;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.rule-summary-card {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: 32px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.rule-summary-name,
+.rule-detail-type {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.rule-summary-name {
+    width: 94px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-right: 5px;
+}
+
+.rule-detail-card {
+    padding-top: 6px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    min-width: 0;
+}
+
+.rule-detail-type {
+    align-self: flex-start;
+    max-width: 100%;
+    margin-bottom: 7px;
+}
+
+.button-condition .rule-summary-name,
+.rule-detail-type.button-condition {
+    color: rgb(56, 185, 207);
+    background-color: rgb(37, 62, 72);
+}
+
+.button-action .rule-summary-name,
+.rule-detail-type.button-action {
+    color: rgb(240, 153, 89);
+    background-color: rgb(67, 53, 48);
+}
+
+.rule-summary-detail {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    color: rgb(230, 230, 230);
+}
+
+.rule-summary-row.rule-editor-card:hover,
+.rule-detail-type:hover,
+.rule-join-selector:hover,
+.rule-add-element:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.rule-summary-row.rule-editor-card.rule-summary-selected.condition-negated {
+    border-left-color: rgb(222, 112, 120);
+}
+
+.rule-summary-row.rule-editor-card.rule-summary-selected,
+.rule-detail-type:focus,
+.rule-join-selector:focus,
+.rule-add-element:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.rule-join-selector,
+.rule-add-element {
+    align-self: center;
+}
+
+.rule-join-selector {
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    padding-left: 7px;
+    padding-right: 7px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.rule-add-element {
+    margin-top: 7px;
+    max-width: 100%;
+}
+
+.gamerule-light .rule-overview-column { background-color: rgb(226, 226, 226); }
+.gamerule-light .rule-editor-card { background-color: rgb(250, 250, 250); }
+.gamerule-light .rule-summary-row.rule-editor-card:hover { background-color: rgb(226, 226, 226); }
+.gamerule-light .rule-block-heading { color: rgb(35, 35, 35); }
+.gamerule-light .button-condition .rule-summary-name,
+.gamerule-light .rule-detail-type.button-condition {
+    background-color: rgb(226, 241, 244);
+    color: rgb(15, 103, 120);
+}
+.gamerule-light .button-action .rule-summary-name,
+.gamerule-light .rule-detail-type.button-action {
+    background-color: rgb(250, 237, 225);
+    color: rgb(145, 68, 23);
+}
+.gamerule-light .rule-summary-detail {
+    color: rgb(35, 35, 35);
+}
+
+.rule-summary-detail,
+.rule-add-element,
+.rule-join-selector,
+.rules-command {
+    -unity-font-style: bold;
+}
+
+.rule-add-element,
+.rule-join-selector,
+.rules-command,
+.rules-square-command {
+    height: 22px;
+    min-height: 22px;
+    font-size: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.rules-square-command {
+    width: 38px;
+    min-width: 38px;
+    padding-left: 0;
+    padding-right: 0;
+    -unity-text-align: middle-center;
+}
+
+.rule-add-element,
+.rules-command,
+.rule-summary-name,
+.rule-summary-detail {
+    font-size: 12px;
+}
+
+.rule-add-element,
+.rules-command {
+    padding-left: 10px;
+    padding-right: 10px;
+    -unity-text-align: middle-center;
+}
+
+.rule-summary-card.button-condition .rule-summary-detail { color: rgb(56, 185, 207); }
+.rule-summary-card.button-action .rule-summary-detail { color: rgb(240, 153, 89); }
+.gamerule-light .rule-summary-card.button-condition .rule-summary-detail { color: rgb(15, 103, 120); }
+.gamerule-light .rule-summary-card.button-action .rule-summary-detail { color: rgb(145, 68, 23); }
+
+.button-condition .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(56, 185, 207); }
+.button-action .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(240, 153, 89); }
+.button-primary .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(161, 138, 224); }
+.gamerule-light .button-property-picker .unity-base-popup-field__text { color: rgb(121, 88, 18); }
+.gamerule-light .button-property-picker .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(121, 88, 18); }
+.gamerule-light .button-number-picker .unity-base-popup-field__text { color: rgb(29, 109, 81); }
+.gamerule-light .button-number-picker .unity-base-popup-field__arrow { -unity-background-image-tint-color: rgb(29, 109, 81); }
+
+/* Native field inputs, in windows that load this stylesheet. */
+TextField.actor-properties-name > .unity-base-field__input,
+TextField.studio-rule-name > .unity-base-field__input,
+TextField.custom-property-name > .unity-base-field__input,
+TextField.rule-set-name > .unity-base-field__input,
+TextField.settings-parameter-value > .unity-base-field__input,
+.unity-integer-field > .unity-base-field__input,
+.unity-float-field > .unity-base-field__input,
+.unity-object-field > .unity-base-field__input,
+PopupField > .unity-base-field__input,
+.unity-dropdown-field > .unity-base-field__input {
+    background-color: rgb(56, 56, 56);
+    color: rgb(230, 230, 230);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+}
+
+.gamerule-light TextField.actor-properties-name > .unity-base-field__input,
+.gamerule-light TextField.studio-rule-name > .unity-base-field__input,
+.gamerule-light TextField.custom-property-name > .unity-base-field__input,
+.gamerule-light TextField.rule-set-name > .unity-base-field__input,
+.gamerule-light TextField.settings-parameter-value > .unity-base-field__input,
+.gamerule-light .unity-integer-field > .unity-base-field__input,
+.gamerule-light .unity-float-field > .unity-base-field__input,
+.gamerule-light .unity-object-field > .unity-base-field__input,
+.gamerule-light PopupField > .unity-base-field__input,
+.gamerule-light .unity-dropdown-field > .unity-base-field__input {
+    background-color: rgb(255, 255, 255);
+    color: rgb(35, 35, 35);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+
+/* Shared treatment for editable inputs, parameter selectors and displayed values. */
+.numeric-stepper-field > .unity-base-field__input,
+.action-picker-value-display,
+.action-selected-value,
+.action-legacy-value,
+.compare-property-term,
+.compare-legacy-term,
+.parameter-selector,
+.parameter-selector > .unity-base-field__input {
+    min-height: 28px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(56, 56, 56);
+    border-left-color: rgb(66, 66, 66);
+    border-right-color: rgb(66, 66, 66);
+    border-top-color: rgb(66, 66, 66);
+    border-bottom-color: rgb(66, 66, 66);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.numeric-stepper-field > .unity-base-field__input {
+    color: rgb(230, 230, 230);
+}
+
+.action-picker-value-display,
+.action-selected-value,
+.action-legacy-value,
+.compare-property-term,
+.compare-legacy-term {
+    color: rgb(230, 230, 230);
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
+
+.action-legacy-value,
+.compare-legacy-term,
+.action-picker-value-display.action-empty-value {
+    color: rgb(181, 181, 181);
+    -unity-font-style: italic;
+}
+
+.action-picker-value-display:hover,
+.action-selected-value:hover,
+.action-legacy-value:hover,
+.compare-property-term:hover,
+.numeric-stepper-field > .unity-base-field__input:hover,
+.parameter-selector:hover,
+.parameter-selector:hover > .unity-base-field__input {
+    background-color: rgb(51, 51, 51);
+}
+
+.parameter-selector:active,
+.parameter-selector:active > .unity-base-field__input {
+    background-color: rgb(37, 37, 37);
+}
+
+.numeric-stepper-field:focus > .unity-base-field__input,
+.numeric-stepper-field > .unity-base-field__input:focus,
+TextField.actor-properties-name > .unity-base-field__input:focus,
+TextField.studio-rule-name > .unity-base-field__input:focus,
+TextField.custom-property-name > .unity-base-field__input:focus,
+TextField.rule-set-name > .unity-base-field__input:focus,
+TextField.settings-parameter-value > .unity-base-field__input:focus,
+.unity-integer-field > .unity-base-field__input:focus,
+.unity-float-field > .unity-base-field__input:focus,
+.unity-object-field:focus > .unity-base-field__input,
+.unity-dropdown-field:focus > .unity-base-field__input,
+.action-picker-value-display:focus,
+.action-selected-value:focus,
+.action-legacy-value:focus,
+.compare-property-term:focus,
+.parameter-selector:focus,
+.parameter-selector:focus > .unity-base-field__input {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+.action-picker-value-display:disabled,
+.action-selected-value:disabled,
+.action-legacy-value:disabled,
+.compare-property-term:disabled,
+.numeric-stepper-field:disabled > .unity-base-field__input,
+.parameter-selector:disabled,
+.parameter-selector:disabled > .unity-base-field__input,
+.parameter-selector:disabled .unity-base-popup-field__text {
+    background-color: rgb(51, 51, 51);
+    color: rgb(181, 181, 181);
+}
+
+.parameter-selector:disabled .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(181, 181, 181);
+}
+
+/* Native arithmetic dropdowns draw the frame on the inner input only. */
+PopupField.parameter-selector {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.action-term-operator.parameter-selector > .unity-base-field__input {
+    min-width: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.action-operation-picker.parameter-selector > .unity-base-field__input {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.compare-operation-dropdown.parameter-selector,
+.compare-operator-dropdown.parameter-selector,
+.compare-term-operator.parameter-selector {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.compare-compact-picker-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.compare-compact-picker-row .compare-value-picker {
+    flex-basis: 172px;
+    max-width: 100%;
+}
+
+.compare-compact-picker-row .compare-operation-dropdown {
+    margin-left: 0;
+}
+
+.compare-compact-picker-row .parameter-selector {
+    margin-right: 4px;
+    margin-bottom: 3px;
+}
+
+.gamerule-light .numeric-stepper-field > .unity-base-field__input,
+.gamerule-light .action-picker-value-display,
+.gamerule-light .action-selected-value,
+.gamerule-light .action-legacy-value,
+.gamerule-light .compare-property-term,
+.gamerule-light .compare-legacy-term,
+.gamerule-light .parameter-selector,
+.gamerule-light .parameter-selector > .unity-base-field__input {
+    background-color: rgb(250, 250, 250);
+    border-left-color: rgb(182, 182, 182);
+    border-right-color: rgb(182, 182, 182);
+    border-top-color: rgb(182, 182, 182);
+    border-bottom-color: rgb(182, 182, 182);
+}
+
+.gamerule-light .numeric-stepper-field > .unity-base-field__input,
+.gamerule-light .action-picker-value-display,
+.gamerule-light .action-selected-value,
+.gamerule-light .compare-property-term {
+    color: rgb(35, 35, 35);
+}
+
+.gamerule-light .action-legacy-value,
+.gamerule-light .compare-legacy-term,
+.gamerule-light .action-picker-value-display.action-empty-value {
+    color: rgb(92, 92, 92);
+}
+
+.gamerule-light PopupField.parameter-selector {
+    background-color: transparent;
+}
+
+.gamerule-light .parameter-selector:hover,
+.gamerule-light .parameter-selector:hover > .unity-base-field__input,
+.gamerule-light .action-picker-value-display:hover,
+.gamerule-light .action-selected-value:hover,
+.gamerule-light .action-legacy-value:hover,
+.gamerule-light .compare-property-term:hover,
+.gamerule-light .numeric-stepper-field > .unity-base-field__input:hover {
+    background-color: rgb(231, 231, 231);
+}
+
+.gamerule-light .parameter-selector:active,
+.gamerule-light .parameter-selector:active > .unity-base-field__input {
+    background-color: rgb(226, 226, 226);
+}
+
+.gamerule-light .action-picker-value-display:disabled,
+.gamerule-light .action-selected-value:disabled,
+.gamerule-light .action-legacy-value:disabled,
+.gamerule-light .compare-property-term:disabled,
+.gamerule-light .numeric-stepper-field:disabled > .unity-base-field__input,
+.gamerule-light .parameter-selector:disabled,
+.gamerule-light .parameter-selector:disabled > .unity-base-field__input,
+.gamerule-light .parameter-selector:disabled .unity-base-popup-field__text {
+    background-color: rgb(234, 234, 234);
+    color: rgb(92, 92, 92);
+}
+
+.gamerule-light .parameter-selector:disabled .unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(92, 92, 92);
+}
+
+.gamerule-light .numeric-stepper-field:focus > .unity-base-field__input,
+.gamerule-light .numeric-stepper-field > .unity-base-field__input:focus,
+.gamerule-light TextField.actor-properties-name > .unity-base-field__input:focus,
+.gamerule-light TextField.studio-rule-name > .unity-base-field__input:focus,
+.gamerule-light TextField.custom-property-name > .unity-base-field__input:focus,
+.gamerule-light TextField.rule-set-name > .unity-base-field__input:focus,
+.gamerule-light TextField.settings-parameter-value > .unity-base-field__input:focus,
+.gamerule-light .unity-integer-field > .unity-base-field__input:focus,
+.gamerule-light .unity-float-field > .unity-base-field__input:focus,
+.gamerule-light .unity-object-field:focus > .unity-base-field__input,
+.gamerule-light .unity-dropdown-field:focus > .unity-base-field__input,
+.gamerule-light .action-picker-value-display:focus,
+.gamerule-light .action-selected-value:focus,
+.gamerule-light .action-legacy-value:focus,
+.gamerule-light .compare-property-term:focus,
+.gamerule-light .parameter-selector:focus,
+.gamerule-light .parameter-selector:focus > .unity-base-field__input {
+    border-left-color: rgb(88, 64, 150);
+    border-right-color: rgb(88, 64, 150);
+    border-top-color: rgb(88, 64, 150);
+    border-bottom-color: rgb(88, 64, 150);
+}
+
+/* The actor name draws its frame only on the editable input. */
+TextField.actor-properties-name,
+.gamerule-light TextField.actor-properties-name,
+TextField.custom-property-name,
+.gamerule-light TextField.custom-property-name {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.actor-properties-name > .unity-base-field__input:focus,
+.gamerule-light .actor-properties-name > .unity-base-field__input:focus,
+.custom-property-name > .unity-base-field__input:focus,
+.gamerule-light .custom-property-name > .unity-base-field__input:focus {
+    border-left-color: rgb(161, 138, 224);
+    border-right-color: rgb(161, 138, 224);
+    border-top-color: rgb(161, 138, 224);
+    border-bottom-color: rgb(161, 138, 224);
+}
+
+/* Shared by Custom Properties and Custom Global Variables. */
+.custom-property-row {
+    margin-bottom: 5px;
+}
+
+.custom-property-header,
+.custom-property-name-group,
+.custom-property-controls {
+    flex-direction: row;
+    align-items: center;
+}
+
+.custom-property-header {
+    flex-wrap: wrap;
+}
+
+.custom-property-name-group {
+    flex-grow: 1;
+    flex-basis: 85px;
+    min-width: 0;
+}
+
+.custom-property-name {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 4px;
+}
+
+.custom-property-controls {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.custom-property-scalar {
+    width: 55px;
+    margin-right: 4px;
+}
+
+.custom-property-bool {
+    width: 24px;
+    align-items: center;
+}
+
+.custom-property-type {
+    width: 82px;
+    height: 22px;
+    min-height: 22px;
+    padding: 0;
+    border-width: 0;
+    margin-left: 0;
+    margin-right: 2px;
+}
+
+.custom-property-type > .unity-base-field__input {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+Button.custom-property-type {
+    border-width: 1px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.custom-property-type .unity-base-popup-field__text {
+    color: rgb(217, 182, 92);
+}
+
+.gamerule-light .custom-property-type .unity-base-popup-field__text {
+    color: rgb(121, 88, 18);
+}
+
+.custom-property-vector {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 20px;
+    /* Reserve the delete button's 22px, its margins, and the type field's right margin. */
+    margin-right: 28px;
+    margin-top: 2px;
+}
+
+.custom-property-vector-header {
+    flex-wrap: nowrap;
+}
+
+.custom-property-vector-header .custom-property-controls {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+.custom-property-axis {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    flex-basis: 52px;
+    min-width: 52px;
+    margin-right: 3px;
+}
+
+.custom-property-axis > .unity-float-field {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 2px;
+    margin-right: 0;
+}
+
+.custom-property-axis-last {
+    margin-right: 0;
+}
+
+.custom-property-row .unity-base-text-field__input {
+    min-height: 24px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.compact-picker-field.button-property-picker {
+    color: rgb(217, 182, 92);
+}
+
+.detail-parameter-value .parameter-selector,
+.detail-parameter-value .parameter-selector .unity-base-popup-field__text,
+.detail-parameter-value .compare-property-term {
+    -unity-text-align: middle-center;
+}
+
+.gamerule-light .compact-picker-field.button-property-picker {
+    color: rgb(121, 88, 18);
+}
+
+/* Values share the same emphasis regardless of the parameter's condition or action. */
+.detail-parameter-value .parameter-selector,
+.detail-parameter-value .compare-property-term,
+.detail-parameter-value .action-number-degree-suffix,
+.detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    -unity-font-style: bold;
+}
+
+.detail-parameter-value .button-condition.parameter-selector,
+.detail-parameter-value .compare-property-term,
+.detail-parameter-value .action-number-degree-suffix,
+.detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    color: rgb(217, 182, 92);
+}
+
+.gamerule-light .detail-parameter-value .button-condition.parameter-selector,
+.gamerule-light .detail-parameter-value .compare-property-term,
+.gamerule-light .detail-parameter-value .action-number-degree-suffix,
+.gamerule-light .detail-parameter-value .numeric-stepper-field > .unity-base-field__input {
+    color: rgb(121, 88, 18);
+}
+
+
+
+
+/* Common spacing for actor and scene settings. */
+.settings-panel-content {
+    padding-right: 8px;
+}
+
+.settings-section-content {
+    padding-right: 10px;
+}
+
+.cast-item-name,
+.custom-property-name > .unity-base-field__input,
+.settings-parameter-label {
+    -unity-font-style: bold;
+}
+
+.settings-parameter-label {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    flex-shrink: 0;
+    margin-left: 0;
+    margin-right: 4px;
+    -unity-text-align: middle-left;
+}
+
+.settings-parameter-value {
+    min-width: 0;
+    flex-shrink: 1;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.settings-parameter-value > .unity-base-field__input,
+.settings-parameter-value .unity-composite-field__field-group {
+    margin-right: 0;
+}
+
+/* Adapt settings and detail editors to the space available in their own window. */
+.gamerule-compact .settings-parameter-label {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    white-space: normal;
+}
+
+.settings-parameter-value .unity-composite-field__field-group,
+.settings-parameter-value .unity-composite-field__input {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.settings-parameter-value .unity-composite-field__field {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-basis: 52px;
+    min-width: 52px;
+}
+
+.gamerule-narrow .settings-parameter-label {
+    width: 78px;
+    min-width: 78px;
+    max-width: 78px;
+}
+
+.gamerule-narrow .detail-parameter-label {
+    width: 62px;
+    min-width: 62px;
+    max-width: 62px;
+}
+
+.gamerule-narrow .detail-comparison-operator {
+    margin-left: 70px;
+}
+
+.gamerule-narrow .custom-property-vector-header {
+    flex-wrap: wrap;
+}
+
+.gamerule-narrow .custom-property-name-group {
+    flex-basis: 100%;
+}
+
+.gamerule-narrow .custom-property-controls {
+    margin-left: 20px;
+}
+
+.gamerule-narrow .custom-property-type {
+    width: 76px;
+}
+
+.detail-parameter-value > .compact-expression-line,
+.detail-parameter-value .compact-numeric-operand,
+.detail-parameter-value .compact-expression-term,
+.detail-parameter-value .vector-parameter-axis {
+    flex-wrap: wrap;
+}
+
+.detail-parameter-value .compact-expression-term,
+.detail-parameter-value .vector-parameter-axis {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.gamerule-narrow .rule-summary-name {
+    width: 82px;
+}
+
+.gamerule-narrow .rule-summary-detail {
+    flex-basis: 100%;
+    margin-top: 2px;
+}
+
+.settings-section-content,
+.settings-panel-content,
+.custom-property-row {
+    min-width: 0;
+}
+
+.panel-container,
+.panel-container .unity-scroll-view__content-viewport {
+    min-width: 0;
+}
+
+.gamerule-narrow .panel-section {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* Shared command density; dropdowns and NOT retain their own treatment. */
+Button.button-primary {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+/* Compact inspector inputs. Rule Details keeps the shared 28px input variant. */
+.settings-parameter-value .unity-base-text-field__input,
+.settings-parameter-value > .unity-base-text-field__input,
+.actor-properties-name > .unity-base-field__input,
+.rule-set-name > .unity-base-field__input,
+.custom-property-row .unity-base-text-field__input {
+    min-height: 22px;
+    height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.studio-compact-selector.parameter-selector {
+    height: 22px;
+    min-height: 22px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 12px;
+}
+
+/* Visible checkbox frames, without affecting foldout arrows or NOT buttons. */
+.rule-detail-action .unity-toggle__checkmark,
+.rule-detail-condition .unity-toggle__checkmark,
+.custom-property-bool .unity-toggle__checkmark {
+    background-color: rgb(56, 56, 56);
+    border-width: 1px;
+    border-color: rgb(110, 110, 110);
+    border-radius: 3px;
+}
+.rule-detail-action Toggle:hover .unity-toggle__checkmark,
+.rule-detail-action Toggle:focus .unity-toggle__checkmark,
+.rule-detail-condition Toggle:hover .unity-toggle__checkmark,
+.rule-detail-condition Toggle:focus .unity-toggle__checkmark,
+.custom-property-bool Toggle:focus .unity-toggle__checkmark,
+.custom-property-bool Toggle:hover .unity-toggle__checkmark {
+    border-color: rgb(161, 138, 224);
+}
+.gamerule-light .rule-detail-action .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool .unity-toggle__checkmark {
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(145, 145, 145);
+}
+.gamerule-light .rule-detail-action Toggle:hover .unity-toggle__checkmark,
+.gamerule-light .rule-detail-action Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition Toggle:hover .unity-toggle__checkmark,
+.gamerule-light .rule-detail-condition Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool Toggle:focus .unity-toggle__checkmark,
+.gamerule-light .custom-property-bool Toggle:hover .unity-toggle__checkmark {
+    border-color: rgb(88, 64, 150);
+}
+.gamerule-light .actor-list-item.actor-list-item--selected {
+    border-color: rgb(88, 64, 150);
+}
+.button-primary:focus { border-color: rgb(161, 138, 224); }
+.gamerule-light .button-primary:focus { border-color: rgb(88, 64, 150); }
+
+

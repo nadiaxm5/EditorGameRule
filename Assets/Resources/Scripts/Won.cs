@@ -9,8 +9,6 @@ public class Won : MonoBehaviour, IGameRuleActor {
             Action.QuitGame();
         }
     }
-    public void EvalUpdate(){
-    }
     public Dictionary<string, GameObject> scopeList = new Dictionary<string, GameObject>();
     void Start() {
         scopeList = Utils.CreateScope(gameObject.GetInstanceID(),"Timer(1);QuitGame()");

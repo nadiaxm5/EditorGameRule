@@ -1,9 +1,6 @@
 ﻿using B83.LogicExpressionParser;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
 public static class Condition
 {
@@ -27,67 +24,27 @@ public static class Condition
 
     public static bool Collision(string tag, GameObject obj)
     {
-        var script = obj.GetComponent(obj.name);
-        var tagCollisionsField = script.GetType().GetField("TagCollisions");
-        if (tagCollisionsField == null) return false;
-
-        var tagCollisions = tagCollisionsField.GetValue(script) as Dictionary<string, HashSet<GameObject>>;
-        if (tagCollisions == null || !tagCollisions.ContainsKey(tag)) return false;
-
-        tagCollisions[tag].RemoveWhere(o => o == null);
-
-        return tagCollisions[tag].Count > 0;
+        return Utils.HasCollision(tag, obj);
     }
 
     public static bool Keyboard(string key, string keyMode)
     {
-        // Case-insensitive so "d" and "D" both resolve to Key.D (the Key enum members are PascalCase).
-        // TryParse also avoids throwing every frame when the key name is invalid.
-        if (!Enum.TryParse(key?.Trim(), ignoreCase: true, out Key k))
-            return false;
-
-        switch (keyMode)
-        {
-            case "press": return UnityEngine.InputSystem.Keyboard.current[k].isPressed;
-            case "down": return UnityEngine.InputSystem.Keyboard.current[k].wasPressedThisFrame;
-            case "up": return UnityEngine.InputSystem.Keyboard.current[k].wasReleasedThisFrame;
-        }
-        return false;
+        return GameRuleInput.KeyboardState(key, keyMode);
     }
 
     public static bool Touch(string type, string onActor, GameObject obj)
     {
-        var mouse = Mouse.current;
-        if (mouse == null) return false;
-        ButtonControl btn = mouse.leftButton;
+        bool inputMatches = GameRuleInput.TouchState(type);
+        bool isOverMode = string.Equals(type?.Trim(), "isOver", System.StringComparison.OrdinalIgnoreCase);
 
         if (onActor.Contains("false"))
-        {
-            switch (type)
-            {
-                case "press": return btn.isPressed;
-                case "down": return btn.wasPressedThisFrame;
-                case "up": return btn.wasReleasedThisFrame;
-                case "tap": return btn.wasReleasedThisFrame && !btn.isPressed;
-                case "isOver": return false;
-            }
-        }
+            return isOverMode ? false : inputMatches;
 
         if (onActor.Contains("true"))
         {
-            bool isOverActor = false;
-            Ray ray = Camera.main.ScreenPointToRay(mouse.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit))
-                isOverActor = hit.collider.gameObject == obj;
+            bool isOverActor = Utils.IsPointerOverActor(obj, GameRuleInput.PointerPosition(type));
 
-            switch (type)
-            {
-                case "press": return isOverActor && btn.isPressed;
-                case "down": return isOverActor && btn.wasPressedThisFrame;
-                case "up": return isOverActor && btn.wasReleasedThisFrame;
-                case "tap": return isOverActor && btn.wasReleasedThisFrame && !btn.isPressed;
-                case "isOver": return isOverActor;
-            }
+            return isOverMode ? isOverActor : isOverActor && inputMatches;
         }
 
         return false;
@@ -97,26 +54,22 @@ public static class Condition
     {
         float seconds = float.Parse(secondsString, System.Globalization.CultureInfo.InvariantCulture);
 
-        var script = obj.GetComponent(obj.name);
-        var field = script.GetType().GetField("timers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (field == null) return false;
-
-        var timers = field.GetValue(script) as Dictionary<string, float>;
+        var timers = Utils.GetActorTimers(obj);
         if (timers == null) return false;
 
         string key = "timer_" + secondsString;
 
         if (!timers.ContainsKey(key))
         {
-            timers[key] = Time.time;
+            timers[key] = Utils.ElapsedTime;
             return false;
         }
 
         float lastTime = timers[key];
 
-        if (Time.time - lastTime >= seconds)
+        if (Utils.ElapsedTime - lastTime >= seconds)
         {
-            timers[key] = Time.time;
+            timers[key] = Utils.ElapsedTime;
             return true;
         }
 

@@ -15,6 +15,13 @@ namespace GameRuleEditor.Core
         ActorRules
     }
 
+    public enum RuleElementKind
+    {
+        None,
+        Condition,
+        Action
+    }
+
     /// <summary>
     /// ScriptableObject that maintains the global state of the GameRule Editor.
     /// This allows different panels to communicate and stay synchronized.
@@ -25,9 +32,25 @@ namespace GameRuleEditor.Core
         [Header("Current Project")]
         public GameRuleProject currentProject;
 
+        // Persist the explicit save point across script/domain reloads. Unity may save
+        // dirty assets elsewhere, so its dirty flag alone cannot implement Discard.
+        [SerializeField, HideInInspector] internal GameRuleProject savedProject;
+        [SerializeField, HideInInspector] internal string savedProjectState;
+
         [Header("Selection State")]
         public int selectedActorIndex = -1;
         public int selectedScriptIndex = -1;
+        [SerializeField] private RuleElementKind selectedRuleElementKind = RuleElementKind.None;
+        [SerializeField] private int selectedRuleElementIndex = -1;
+        [NonSerialized] private bool pendingRuleElement;
+        [NonSerialized] private string pendingConditionJoin;
+        [NonSerialized] private bool rulesTabVisible = true;
+
+        public RuleElementKind SelectedRuleElementKind => selectedRuleElementKind;
+        public int SelectedRuleElementIndex => selectedRuleElementIndex;
+        public bool PendingRuleElement => pendingRuleElement;
+        public string PendingConditionJoin => pendingConditionJoin ?? "AND";
+        public bool RulesTabVisible => rulesTabVisible;
 
         [Header("Inspector State")]
         [SerializeField]
@@ -52,6 +75,8 @@ namespace GameRuleEditor.Core
         public event System.Action<int> OnActorSelected;
         public event System.Action OnActorListChanged;
         public event System.Action<int> OnScriptSelected;
+        public event System.Action OnRuleElementSelected;
+        public event System.Action OnRulesTabVisibilityChanged;
         public event System.Action<GRInspectorMode> OnInspectorModeChanged;
 
         /// <summary>
@@ -101,8 +126,12 @@ namespace GameRuleEditor.Core
             currentProject = project;
             selectedActorIndex = -1;
             selectedScriptIndex = -1;
+            ClearRuleElementSelection(false);
 
             OnProjectLoaded?.Invoke();
+            OnActorSelected?.Invoke(selectedActorIndex);
+            OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -113,11 +142,51 @@ namespace GameRuleEditor.Core
             OnProjectChanged?.Invoke();
         }
 
+        internal const string UngroupedRuleSetId = "__ungrouped_rules__";
+
+        internal static string GetRuleSetId(ActorJson actor, SentenceJson rule)
+        {
+            if (!string.IsNullOrEmpty(rule?.groupId)) return rule.groupId;
+            var first = actor?.Components?.Find(component => component.type == "Rules");
+            return string.IsNullOrEmpty(first?.id) ? UngroupedRuleSetId : first.id;
+        }
+
+        // A view of the existing groups, including legacy rules awaiting Properties migration.
+        // Building the overview must not regroup or reorder the serialized script.
+        internal List<ActorComponentMeta> GetRuleSets() => GetRuleSets(SelectedActor);
+
+        internal static List<ActorComponentMeta> GetRuleSets(ActorJson actor)
+        {
+            var result = new List<ActorComponentMeta>();
+            if (actor?.Components != null)
+                foreach (var component in actor.Components)
+                {
+                    if (component.type != "Rules") continue;
+                    string id = string.IsNullOrEmpty(component.id) ? UngroupedRuleSetId : component.id;
+                    if (result.Exists(group => group.id == id)) continue;
+                    result.Add(new ActorComponentMeta { type = "Rules", id = id,
+                        name = string.IsNullOrWhiteSpace(component.name) ? "Rule Set" : component.name });
+                }
+            if (actor?.Script != null)
+                foreach (var rule in actor.Script)
+                {
+                    string id = GetRuleSetId(actor, rule);
+                    if (result.Exists(group => group.id == id)) continue;
+                    result.Add(new ActorComponentMeta { type = "Rules", id = id,
+                        name = result.Count == 0 ? "Rule Set" : $"Rule Set {result.Count + 1}" });
+                }
+            return result;
+        }
+
+        internal string GetRuleSetName(SentenceJson rule) =>
+            GetRuleSets().Find(group => group.id == GetRuleSetId(SelectedActor, rule))?.name ?? "Rule Set";
+
         /// <summary>
         /// Selects an actor by index
         /// </summary>
         public void SelectActor(int index)
         {
+            ClearRuleElementSelection(false);
             if (currentProject == null || index < 0 || index >= currentProject.actors.Count)
             {
                 selectedActorIndex = -1;
@@ -130,6 +199,7 @@ namespace GameRuleEditor.Core
             }
 
             OnActorSelected?.Invoke(selectedActorIndex);
+            OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -137,6 +207,7 @@ namespace GameRuleEditor.Core
         /// </summary>
         public void SelectScript(int index)
         {
+            ClearRuleElementSelection(false);
             if (SelectedActor == null || index < 0 || index >= SelectedActor.Script.Count)
             {
                 selectedScriptIndex = -1;
@@ -147,6 +218,53 @@ namespace GameRuleEditor.Core
             }
 
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void SelectRuleElement(int ruleIndex, RuleElementKind kind, int elementIndex,
+                                      bool pending = false, string conditionJoin = "AND")
+        {
+            if (SelectedActor?.Script == null || ruleIndex < 0 ||
+                ruleIndex >= SelectedActor.Script.Count || elementIndex < 0 ||
+                kind == RuleElementKind.None)
+            {
+                ClearRuleElementSelection();
+                return;
+            }
+
+            selectedScriptIndex = ruleIndex;
+            selectedRuleElementKind = kind;
+            selectedRuleElementIndex = elementIndex;
+            pendingRuleElement = pending;
+            pendingConditionJoin = conditionJoin == "OR" ? "OR" : "AND";
+            OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void SetPendingConditionJoin(string join)
+        {
+            pendingConditionJoin = join == "OR" ? "OR" : "AND";
+            OnRuleElementSelected?.Invoke();
+        }
+
+        public void CommitPendingRuleElementSelection()
+        {
+            pendingRuleElement = false;
+        }
+
+        public void SetRulesTabVisible(bool visible)
+        {
+            rulesTabVisible = visible;
+            OnRulesTabVisibilityChanged?.Invoke();
+        }
+
+        public void ClearRuleElementSelection(bool notify = true)
+        {
+            selectedRuleElementKind = RuleElementKind.None;
+            selectedRuleElementIndex = -1;
+            pendingRuleElement = false;
+            pendingConditionJoin = null;
+            if (notify) OnRuleElementSelected?.Invoke();
         }
 
         /// <summary>
@@ -160,12 +278,15 @@ namespace GameRuleEditor.Core
         /// <summary>
         /// Lo llama todo para forzar que toda la UI se actualice después de un undo/redo, asegurándonos de que todos los paneles vuelvan a leer el estado actual del proyecto y la selección. Sin esto, algunos paneles podrían quedar desincronizados con el estado real después de un undo/redo.
         /// </summary>
-        public void NotifyAll()
+        public void NotifyAll(bool actorSelectionChanged = true)
         {
             OnActorListChanged?.Invoke();
             OnProjectChanged?.Invoke();
-            OnActorSelected?.Invoke(selectedActorIndex);
+            // Data refreshes must not look like a Cast click: Rules resets its filter
+            // and expansion state on a real actor selection.
+            if (actorSelectionChanged) OnActorSelected?.Invoke(selectedActorIndex);
             OnScriptSelected?.Invoke(selectedScriptIndex);
+            OnRuleElementSelected?.Invoke();
             OnInspectorModeChanged?.Invoke(_activeInspectorMode);
         }
 
@@ -228,6 +349,7 @@ namespace GameRuleEditor.Core
                 SunAmbientColor = new byte[] { 128, 128, 128 },
                 BackgroundColor = new byte[] { 0, 0, 0 },
                 Gravity = new float[] { 0, -9.81f, 0 },
+                SoundTrack = "",
                 CustomVariables = new List<CustomVariable>(),
                 Cast = new List<ActorJson>()
             };
@@ -240,9 +362,11 @@ namespace GameRuleEditor.Core
         /// </summary>
         public void Clear()
         {
-            currentProject = null;
-            selectedActorIndex = -1;
-            selectedScriptIndex = -1;
+            savedProject = null;
+            savedProjectState = null;
+            CloseInspector();
+            LoadProject(null);
+            NotifyAll();
         }
     }
 }

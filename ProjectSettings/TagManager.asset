@@ -11,6 +11,11 @@ TagManager:
   - Bullet
   - ZomBear
   - End
+  - Shell
+  - RedTank
+  - BlueTank
+  - Canvas
+  - Custom
   layers:
   - Default
   - TransparentFX
